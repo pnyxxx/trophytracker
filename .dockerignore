@@ -1,0 +1,12 @@
+# Contexte de build Docker : uniquement le nécessaire
+**/node_modules
+**/dist
+**/.env
+.env
+.git
+.github
+infra
+supabase
+docs
+scripts
+*.md

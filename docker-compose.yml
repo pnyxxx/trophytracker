@@ -1,0 +1,99 @@
+# ═════════════════════════════════════════════════════════════════════════════
+#  TrophysTracker — orchestration complète
+#
+#   docker compose up -d                  → production
+#   docker compose --profile dev up -d    → + Mailpit (boîte mail de test)
+#
+#  Voir README.md et docs/ pour les explications détaillées.
+# ═════════════════════════════════════════════════════════════════════════════
+name: trophystracker
+
+include:
+  # Stack Supabase officielle + nos adaptations (fusionnées dans cet ordre)
+  - path:
+      - infra/supabase/docker-compose.yml
+      - infra/supabase.override.yml
+    env_file: .env
+
+services:
+  # ── Migrations de la base (s'exécute une fois puis s'arrête) ───────────────
+  migrate:
+    image: postgres:17-alpine
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+      # Les schémas `auth` et `storage` sont créés par ces services au démarrage.
+      auth:
+        condition: service_healthy
+      storage:
+        condition: service_healthy
+    environment:
+      PGHOST: db
+      PGPORT: 5432
+      PGUSER: postgres
+      PGDATABASE: ${POSTGRES_DB}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      TRACKER_DB_PASSWORD: ${TRACKER_DB_PASSWORD}
+    volumes:
+      - ./supabase/migrations:/migrations:ro
+      - ./scripts/db-migrate.sh:/db-migrate.sh:ro
+    entrypoint: ["sh", "/db-migrate.sh"]
+
+  # ── Service de suivi GPS : synchro Traccar + réception directe des téléphones
+  tracker:
+    build:
+      context: .
+      dockerfile: apps/tracker/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgres://tracker:${TRACKER_DB_PASSWORD}@db:5432/${POSTGRES_DB}
+      TRACCAR_URL: ${TRACCAR_URL:-}
+      TRACCAR_EMAIL: ${TRACCAR_EMAIL:-}
+      TRACCAR_PASSWORD: ${TRACCAR_PASSWORD:-}
+      TRACCAR_POLL_SECONDS: ${TRACCAR_POLL_SECONDS:-10}
+      TRUST_PROXY: "true"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ── Site web + reverse proxy HTTPS (Caddy) — seul point d'entrée public ────
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      api-gw:
+        condition: service_healthy
+      tracker:
+        condition: service_started
+    environment:
+      # ":80" en local ; votre domaine en production (HTTPS automatique).
+      SITE_ADDRESS: ${SITE_ADDRESS:-:80}
+      ANON_KEY: ${ANON_KEY}
+      GOOGLE_ENABLED: ${GOOGLE_ENABLED:-false}
+    ports:
+      - "${WEB_HTTP_PORT:-80}:80"
+      - "${WEB_HTTPS_PORT:-443}:443"
+    volumes:
+      - caddy-data:/data
+      - caddy-config:/config
+
+  # ── Boîte mail de test (profil dev uniquement) : http://localhost:8025 ─────
+  #    (port modifiable avec MAILPIT_UI_PORT)
+  mailpit:
+    image: axllent/mailpit:v1.27
+    profiles: ["dev"]
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${MAILPIT_UI_PORT:-8025}:8025"
+
+volumes:
+  caddy-data:
+  caddy-config:

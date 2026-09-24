@@ -1,0 +1,29 @@
+{
+  "name": "trophystracker",
+  "private": true,
+  "version": "2.0.0",
+  "description": "Plateforme de suivi en direct des équipages du 4L Trophy",
+  "type": "module",
+  "workspaces": [
+    "apps/tracker",
+    "apps/web"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev:web": "npm run dev -w apps/web",
+    "dev:tracker": "npm run dev -w apps/tracker",
+    "build": "npm run build -w apps/tracker && npm run build -w apps/web",
+    "typecheck": "npm run typecheck -w apps/tracker && npm run typecheck -w apps/web",
+    "lint": "npm run lint -w apps/web",
+    "test": "npm run test -w apps/tracker",
+    "test:db": "sh scripts/test-db.sh",
+    "test:e2e": "node scripts/e2e/smoke.mjs",
+    "db:types": "sh scripts/gen-types.sh"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "supabase": "^2.117.0"
+  }
+}

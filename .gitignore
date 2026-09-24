@@ -1,0 +1,32 @@
+# Dépendances
+node_modules/
+
+# Builds
+dist/
+dist-ssr/
+*.tsbuildinfo
+
+# Environnement (ne JAMAIS commiter de secrets)
+.env
+.env.*
+!.env.example
+
+# Données locales (uploads, dumps)
+data/
+uploads/
+*.sql.gz
+
+# Logs
+*.log
+npm-debug.log*
+
+# Éditeurs / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.sw?
+
+# Sauvegardes locales
+backups/
+supabase/.temp/

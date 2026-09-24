@@ -1,0 +1,76 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Nos adaptations de la stack Supabase officielle (infra/supabase/).
+# Ce fichier est fusionné PAR-DESSUS infra/supabase/docker-compose.yml.
+# ─────────────────────────────────────────────────────────────────────────────
+services:
+  # SÉCURITÉ : par défaut Docker publie les ports sur 0.0.0.0 (Internet) en
+  # contournant le pare-feu (ufw). On les limite à la machine elle-même :
+  # le public passe uniquement par le conteneur `web` (Caddy).
+  # Pour ouvrir Studio depuis votre PC :  ssh -L 8000:localhost:8000 serveur
+  api-gw:
+    ports: !override
+      - "127.0.0.1:${API_GW_HTTP_PORT:-8000}:8000"
+
+  supavisor:
+    ports: !override
+      - "127.0.0.1:${POOLER_HOST_PORT:-5432}:5432"
+      - "127.0.0.1:${POOLER_PROXY_PORT_TRANSACTION}:6543"
+
+  auth:
+    environment:
+      # Mots de passe : 10 caractères minimum.
+      GOTRUE_PASSWORD_MIN_LENGTH: "10"
+      # Emails en français, servis par notre conteneur `web` (apps/web/email-templates).
+      GOTRUE_MAILER_SUBJECTS_CONFIRMATION: "Confirmez votre inscription sur TrophysTracker"
+      GOTRUE_MAILER_SUBJECTS_RECOVERY: "Réinitialisation de votre mot de passe TrophysTracker"
+      GOTRUE_MAILER_SUBJECTS_MAGIC_LINK: "Votre lien de connexion TrophysTracker"
+      GOTRUE_MAILER_SUBJECTS_EMAIL_CHANGE: "Confirmez votre nouvelle adresse email"
+      GOTRUE_MAILER_SUBJECTS_INVITE: "Vous êtes invité sur TrophysTracker"
+      GOTRUE_MAILER_TEMPLATES_CONFIRMATION: http://web/email-templates/confirmation.html
+      GOTRUE_MAILER_TEMPLATES_RECOVERY: http://web/email-templates/recovery.html
+      GOTRUE_MAILER_TEMPLATES_MAGIC_LINK: http://web/email-templates/magic-link.html
+      GOTRUE_MAILER_TEMPLATES_EMAIL_CHANGE: http://web/email-templates/email-change.html
+      GOTRUE_MAILER_TEMPLATES_INVITE: http://web/email-templates/invite.html
+      GOTRUE_MAILER_TEMPLATES_REAUTHENTICATION: http://web/email-templates/reauthentication.html
+      GOTRUE_MAILER_SUBJECTS_REAUTHENTICATION: "Votre code de confirmation TrophysTracker"
+      # Changement d'email : confirmation demandée sur l'ancienne ET la nouvelle adresse.
+      GOTRUE_MAILER_SECURE_EMAIL_CHANGE_ENABLED: "true"
+      # Changer de mot de passe exige un code reçu par email (sauf juste après connexion).
+      GOTRUE_SECURITY_UPDATE_PASSWORD_REQUIRE_REAUTHENTICATION: "true"
+
+      # Emails d'alerte de sécurité envoyés automatiquement à l'utilisateur.
+      GOTRUE_MAILER_NOTIFICATIONS_PASSWORD_CHANGED_ENABLED: "true"
+      GOTRUE_MAILER_NOTIFICATIONS_EMAIL_CHANGED_ENABLED: "true"
+      GOTRUE_MAILER_NOTIFICATIONS_PHONE_CHANGED_ENABLED: "true"
+      GOTRUE_MAILER_NOTIFICATIONS_IDENTITY_LINKED_ENABLED: "true"
+      GOTRUE_MAILER_NOTIFICATIONS_IDENTITY_UNLINKED_ENABLED: "true"
+      GOTRUE_MAILER_NOTIFICATIONS_MFA_FACTOR_ENROLLED_ENABLED: "true"
+      GOTRUE_MAILER_NOTIFICATIONS_MFA_FACTOR_UNENROLLED_ENABLED: "true"
+      GOTRUE_MAILER_SUBJECTS_PASSWORD_CHANGED_NOTIFICATION: "Votre mot de passe a été modifié"
+      GOTRUE_MAILER_SUBJECTS_EMAIL_CHANGED_NOTIFICATION: "L'adresse email de votre compte a été modifiée"
+      GOTRUE_MAILER_SUBJECTS_PHONE_CHANGED_NOTIFICATION: "Le téléphone de votre compte a été modifié"
+      GOTRUE_MAILER_SUBJECTS_IDENTITY_LINKED_NOTIFICATION: "Nouvelle méthode de connexion ajoutée"
+      GOTRUE_MAILER_SUBJECTS_IDENTITY_UNLINKED_NOTIFICATION: "Méthode de connexion retirée"
+      GOTRUE_MAILER_SUBJECTS_MFA_FACTOR_ENROLLED_NOTIFICATION: "Double authentification activée"
+      GOTRUE_MAILER_SUBJECTS_MFA_FACTOR_UNENROLLED_NOTIFICATION: "Double authentification désactivée"
+      GOTRUE_MAILER_TEMPLATES_PASSWORD_CHANGED_NOTIFICATION: http://web/email-templates/password-changed.html
+      GOTRUE_MAILER_TEMPLATES_EMAIL_CHANGED_NOTIFICATION: http://web/email-templates/email-changed.html
+      GOTRUE_MAILER_TEMPLATES_PHONE_CHANGED_NOTIFICATION: http://web/email-templates/phone-changed.html
+      GOTRUE_MAILER_TEMPLATES_IDENTITY_LINKED_NOTIFICATION: http://web/email-templates/identity-linked.html
+      GOTRUE_MAILER_TEMPLATES_IDENTITY_UNLINKED_NOTIFICATION: http://web/email-templates/identity-unlinked.html
+      GOTRUE_MAILER_TEMPLATES_MFA_FACTOR_ENROLLED_NOTIFICATION: http://web/email-templates/mfa-enrolled.html
+      GOTRUE_MAILER_TEMPLATES_MFA_FACTOR_UNENROLLED_NOTIFICATION: http://web/email-templates/mfa-unenrolled.html
+      # Double authentification (appli TOTP type Google Authenticator), activée par défaut.
+      GOTRUE_MFA_TOTP_ENROLL_ENABLED: "true"
+      GOTRUE_MFA_TOTP_VERIFY_ENABLED: "true"
+      # Connexion avec Google (optionnelle) — voir docs/CONFIGURATION.md
+      GOTRUE_EXTERNAL_GOOGLE_ENABLED: ${GOOGLE_ENABLED:-false}
+      GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOTRUE_EXTERNAL_GOOGLE_SECRET: ${GOOGLE_SECRET:-}
+      GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI: ${API_EXTERNAL_URL}/callback
+
+  # Nos Edge Functions (supabase/functions) remplacent les exemples officiels.
+  functions:
+    volumes: !override
+      - ../../supabase/functions:/home/deno/functions:ro,z
+      - deno-cache:/root/.cache/deno
