@@ -12,6 +12,12 @@ services:
       - "127.0.0.1:${API_GW_HTTP_PORT:-8000}:8000"
 
   supavisor:
+    # Supavisor exige 100 000 fichiers ouverts ; certains hôtes (CI GitHub, VPS)
+    # refusent qu'il relève la limite lui-même → on la fixe côté Docker.
+    ulimits:
+      nofile:
+        soft: 100000
+        hard: 100000
     ports: !override
       - "127.0.0.1:${POOLER_HOST_PORT:-5432}:5432"
       - "127.0.0.1:${POOLER_PROXY_PORT_TRANSACTION}:6543"
