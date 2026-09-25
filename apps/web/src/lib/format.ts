@@ -30,3 +30,6 @@ export function initials(name: string) {
   const picked = (words.length ? words : [name]).slice(0, 2);
   return picked.map((w) => w[0]!.toUpperCase()).join('') || '?';
 }
+
+/** Heure du départ officiel (8 h, heure locale) pour une date « AAAA-MM-JJ ». */
+export const departureTime = (date: string) => new Date(`${date}T08:00:00`).getTime();

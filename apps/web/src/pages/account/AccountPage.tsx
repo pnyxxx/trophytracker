@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Plus, Settings } from 'lucide-react';
+import { Container, PageHero } from '@/components/common/Brand';
+import { Panel } from '@/components/manage/shared';
 import { PageShell } from '@/components/layout/PageShell';
 import { Seo } from '@/components/common/Seo';
 import { Spinner } from '@/components/common/Spinner';
@@ -21,18 +23,6 @@ import { useFollowedCrews, useMyCrews } from '@/hooks/queries';
 import { supabase } from '@/lib/supabase';
 import { toastError, unwrap } from '@/lib/errors';
 import { formatRelative } from '@/lib/format';
-
-function Card({ title, children, action }: { title: string; children: React.ReactNode; action?: React.ReactNode }) {
-  return (
-    <section className="rounded-3xl border border-white/10 bg-card p-6 md:p-8">
-      <div className="mb-6 flex items-center justify-between gap-4">
-        <h2 className="text-xl font-bold text-white md:text-2xl">{title}</h2>
-        {action}
-      </div>
-      {children}
-    </section>
-  );
-}
 
 function CreateCrewDialog() {
   const [open, setOpen] = useState(false);
@@ -55,10 +45,10 @@ function CreateCrewDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm"><Plus className="mr-1.5 h-4 w-4" />Créer un équipage</Button>
+        <Button><Plus />Créer mon équipage</Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>Nouvel équipage</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>Mon équipage</DialogTitle></DialogHeader>
         <form
           onSubmit={(e: FormEvent) => { e.preventDefault(); create.mutate(); }}
           className="space-y-4"
@@ -88,6 +78,7 @@ export default function AccountPage() {
   const navigate = useNavigate();
   const { data: followed, isLoading: loadingFollowed } = useFollowedCrews();
   const { data: myCrews, isLoading: loadingMine } = useMyCrews();
+  const myCrew = myCrews?.[0];
   const [name, setName] = useState<string | null>(null);
 
   const saveName = useMutation({
@@ -115,48 +106,56 @@ export default function AccountPage() {
   });
 
   return (
-    <PageShell>
+    <PageShell padTop={false}>
       <Seo title="Mon compte" />
-      <div className="container mx-auto max-w-4xl space-y-8 px-4 py-12">
-        <div>
-          <h1 className="text-4xl font-bold text-white">Bonjour {profile?.display_name ?? ''} 👋</h1>
-          <p className="text-white/60">{user?.email}</p>
-        </div>
+      <PageHero kicker={<>Mon compte · <span className="normal-case tracking-normal text-dust-300">{user?.email}</span></>} title={<>Bonjour<br />{profile?.display_name ?? ''}</>} />
+      <Container className="max-w-5xl space-y-6 border-t border-cream/[0.12] py-12 md:py-16">
 
-        <Card title="Équipages suivis">
+        {/* Un compte = un seul équipage (règle garantie par la base) */}
+        <Panel title="Mon équipage">
+          {loadingMine ? <Spinner /> : !myCrew ? (
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <p className="m-0 max-w-[520px] text-dust-300">
+                Vous participez au raid ? Créez la page de votre équipage pour la partager à vos proches et sponsors.
+                Vos coéquipiers la rejoindront ensuite par invitation.
+              </p>
+              <CreateCrewDialog />
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-center gap-5">
+              <CrewAvatar name={myCrew.crew.name} path={myCrew.crew.avatar_path} className="h-16 w-16 text-2xl" />
+              <div className="min-w-0 flex-1">
+                <Link to={`/equipages/${myCrew.crew.slug}`} className="font-display text-3xl font-black uppercase leading-none text-cream hover:text-primary">
+                  {myCrew.crew.name}
+                </Link>
+                <p className="mb-0 mt-2 font-mono text-[11px] uppercase tracking-[0.1em] text-dust-400">
+                  {myCrew.role === 'owner' ? 'Propriétaire' : 'Membre'} · {myCrew.crew.is_public ? 'Public' : 'Privé'} · GPS {myCrew.crew.last_fix_at ? formatRelative(myCrew.crew.last_fix_at) : 'jamais reçu'}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button asChild variant="outline">
+                  <Link to={`/equipages/${myCrew.crew.slug}`}>Voir la page</Link>
+                </Button>
+                <Button asChild>
+                  <Link to={`/mon-compte/equipages/${myCrew.crew.slug}`}><Settings />Gérer</Link>
+                </Button>
+              </div>
+            </div>
+          )}
+        </Panel>
+
+        <Panel title="Équipages suivis">
           {loadingFollowed ? <Spinner /> : !followed?.length ? (
-            <p className="text-white/60">
+            <p className="text-dust-300">
               Vous ne suivez aucun équipage. <Link to="/equipages" className="text-primary hover:underline">Trouver un équipage →</Link>
             </p>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2">{followed.map((c) => <CrewCard key={c.id} crew={c} />)}</div>
+            <div className="grid gap-2 md:grid-cols-2">{followed.map((c) => <CrewCard key={c.id} crew={c} />)}</div>
           )}
-        </Card>
+        </Panel>
 
-        <Card title="Mes équipages" action={<CreateCrewDialog />}>
-          {loadingMine ? <Spinner /> : !myCrews?.length ? (
-            <p className="text-white/60">Vous participez au raid ? Créez la page de votre équipage pour la partager à vos proches et sponsors.</p>
-          ) : (
-            <ul className="divide-y divide-white/10">
-              {myCrews.map(({ crew, role }) => (
-                <li key={crew.id} className="flex items-center gap-4 py-4">
-                  <CrewAvatar name={crew.name} path={crew.avatar_path} className="h-12 w-12" />
-                  <div className="min-w-0 flex-1">
-                    <Link to={`/equipages/${crew.slug}`} className="font-semibold text-white hover:text-primary">{crew.name}</Link>
-                    <p className="text-xs text-white/50">
-                      {role === 'owner' ? 'Propriétaire' : 'Membre'} · {crew.is_public ? 'Public' : 'Privé'} · GPS {crew.last_fix_at ? formatRelative(crew.last_fix_at) : 'jamais reçu'}
-                    </p>
-                  </div>
-                  <Button asChild size="sm" variant="secondary">
-                    <Link to={`/mon-compte/equipages/${crew.slug}`}><Settings className="mr-1.5 h-4 w-4" />Gérer</Link>
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Card>
 
-        <Card title="Profil">
+        <Panel title="Profil">
           <form
             onSubmit={(e) => { e.preventDefault(); if (name) saveName.mutate(name.trim()); }}
             className="flex flex-col gap-3 sm:flex-row sm:items-end"
@@ -167,14 +166,14 @@ export default function AccountPage() {
             </div>
             <Button type="submit" disabled={!name || saveName.isPending}>Enregistrer</Button>
           </form>
-        </Card>
+        </Panel>
 
-        <Card title="Sécurité">
+        <Panel title="Sécurité">
           <SecuritySection />
-        </Card>
+        </Panel>
 
-        <Card title="Zone sensible">
-          <p className="mb-4 text-sm text-white/60">
+        <Panel title="Zone sensible">
+          <p className="mb-4 text-sm text-dust-300">
             La suppression de votre compte efface définitivement vos données personnelles et vos abonnements.
           </p>
           <AlertDialog>
@@ -186,14 +185,14 @@ export default function AccountPage() {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Annuler</AlertDialogCancel>
-                <AlertDialogAction onClick={() => deleteAccount.mutate()} className="bg-destructive hover:bg-destructive/90">
+                <AlertDialogAction onClick={() => deleteAccount.mutate()} className="bg-destructive hover:bg-destructive/85">
                   Supprimer
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-        </Card>
-      </div>
+        </Panel>
+      </Container>
     </PageShell>
   );
 }

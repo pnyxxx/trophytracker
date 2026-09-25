@@ -38,9 +38,9 @@ export function MfaChallenge() {
         <Input id="otp" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required autoFocus
           value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} className="text-center font-mono text-2xl tracking-[0.5em]" />
       </div>
-      {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
+      {error && <p role="alert" className="text-sm text-primary-light">{error}</p>}
       <Button type="submit" className="w-full" disabled={busy || code.length !== 6}>{busy ? 'Vérification…' : 'Valider'}</Button>
-      <Button type="button" variant="ghost" className="w-full text-white/60" onClick={() => signOut()}>Annuler</Button>
+      <Button type="button" variant="ghost" className="w-full text-dust-300" onClick={() => signOut()}>Annuler</Button>
     </form>
   );
 }

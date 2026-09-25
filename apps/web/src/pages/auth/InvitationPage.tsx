@@ -72,14 +72,14 @@ export default function InvitationPage() {
           <Input id="name" required minLength={2} maxLength={60} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password">Mot de passe <span className="text-white/40">(10 caractères min.)</span></Label>
+          <Label htmlFor="password">Mot de passe <span className="text-dust-500">(10 caractères min.)</span></Label>
           <Input id="password" type="password" autoComplete="new-password" required minLength={10} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="confirm">Confirmer</Label>
           <Input id="confirm" type="password" autoComplete="new-password" required value={form.confirm} onChange={(e) => setForm({ ...form, confirm: e.target.value })} />
         </div>
-        {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
+        {error && <p role="alert" className="text-sm text-primary-light">{error}</p>}
         <Button type="submit" className="w-full" disabled={busy}>{busy ? 'Activation…' : 'Activer mon compte'}</Button>
       </form>
     </AuthLayout>

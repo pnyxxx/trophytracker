@@ -24,7 +24,7 @@ La stack Supabase est la **copie officielle** (`infra/supabase/`), jamais modifi
 
 ## Une seule origine
 
-Le navigateur ne parle qu'à une adresse (ex. `https://trophystracker.fr`). Caddy aiguille :
+Le navigateur ne parle qu'à une adresse (ex. `https://trophytracker.fr`). Caddy aiguille :
 
 | Chemin | Destination |
 |---|---|

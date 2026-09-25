@@ -1,5 +1,5 @@
 -- ═════════════════════════════════════════════════════════════════════════════
---  TrophysTracker — 2/5 : fonctions
+--  TrophyTracker — 2/5 : fonctions
 --
 --  Toutes les fonctions SECURITY DEFINER :
 --   - fixent `search_path = ''` et qualifient chaque objet (anti-détournement) ;

@@ -5,7 +5,7 @@
  * Deux formats sont acceptés :
  *   1. OsmAnd (paramètres d'URL ou formulaire) :
  *        ?id=<clé>&lat=…&lon=…&timestamp=…&speed=…(NŒUDS)&bearing=…&altitude=…&accuracy=…&batt=…
- *   2. JSON (Traccar Client ≥ 9) :
+ *   2. JSON (anciennes versions 9.x de Traccar Client ; la version 10 envoie un formulaire POST au format 1) :
  *        { device_id, location: { timestamp, coords: { latitude, longitude, speed (m/s), … }, battery: { level } } }
  */
 import { z } from 'zod';
@@ -88,7 +88,11 @@ export function parseDeviceRequest(query: unknown, body: unknown): ParsedRequest
     ...(body && typeof body === 'object' ? body : {}),
   };
   const r = osmand.safeParse(params);
-  if (!r.success) return { error: 'Position invalide' };
+  if (!r.success) {
+    // Noms des champs en cause (jamais leurs valeurs) : aide au dépannage.
+    const fields = [...new Set(r.error.issues.map((i) => i.path.join('.') || '?'))].join(', ');
+    return { error: `Position invalide (${fields})` };
+  }
   const q = r.data;
   const speed = nonNegative(q.speed);
   return {

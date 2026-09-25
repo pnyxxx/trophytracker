@@ -83,27 +83,27 @@ export function PhotosTab({ crew }: { crew: Crew }) {
           <Field id="desc" label="Description"><Input id="desc" maxLength={1000} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></Field>
           <div className="md:col-span-2">
             <Button type="submit" disabled={upload.isPending}>
-              <Upload className="mr-2 h-4 w-4" />{upload.isPending ? 'Envoi en cours…' : 'Publier la photo'}
+              <Upload />{upload.isPending ? 'Envoi en cours…' : 'Publier la photo'}
             </Button>
           </div>
         </form>
       </Panel>
 
       <Panel title={`Photos publiées (${photos.length})`}>
-        {isLoading ? <Spinner /> : photos.length === 0 ? <p className="text-white/50">Aucune photo pour l’instant.</p> : (
+        {isLoading ? <Spinner /> : photos.length === 0 ? <p className="text-dust-400">Aucune photo pour l’instant.</p> : (
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
             {photos.map((p) => (
-              <div key={p.id} className="overflow-hidden rounded-xl border border-white/10">
+              <div key={p.id} className="overflow-hidden rounded-[4px] border border-cream/10">
                 <img src={thumbUrl(p.storage_path, 480) ?? ''} alt={p.title} className="aspect-[4/3] w-full object-cover" loading="lazy" />
                 <div className="flex items-center gap-2 p-3">
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-white">{p.title}</p>
-                    <p className="text-xs text-white/40">{p.kind === 'panorama' ? '360°' : 'Photo'}{p.created_by === user?.id ? ' · par vous' : ''}</p>
+                    <p className="truncate text-sm font-semibold text-cream">{p.title}</p>
+                    <p className="text-xs text-dust-500">{p.kind === 'panorama' ? '360°' : 'Photo'}{p.created_by === user?.id ? ' · par vous' : ''}</p>
                   </div>
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="text-white/60 hover:text-red-400"
+                    className="text-dust-300 hover:text-primary-light"
                     aria-label={`Supprimer ${p.title}`}
                     disabled={remove.isPending}
                     onClick={() => { if (confirm(`Supprimer « ${p.title} » ?`)) remove.mutate(p); }}

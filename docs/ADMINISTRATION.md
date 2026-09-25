@@ -53,5 +53,5 @@ where slug = 'nom-equipage';
 
 ## Données de démonstration
 
-`make seed` crée un compte `demo@trophystracker.local` et trois équipages d'exemple (dont « J4L Club »).
+`make seed` crée trois équipages d'exemple, chacun avec son compte (un compte ne peut faire partie que d'un seul équipage) : `demo@trophytracker.local` pour « J4L Club », `demo-<slug>@trophytracker.local` pour les autres.
 **À ne pas lancer en production.**

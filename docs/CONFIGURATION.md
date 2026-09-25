@@ -7,11 +7,11 @@ Après une modification : `docker compose up -d` (les conteneurs concernés red�
 
 | Variable | Exemple production | Rôle |
 |---|---|---|
-| `SITE_URL` | `https://trophystracker.fr` | adresse du site (liens des emails) |
+| `SITE_URL` | `https://trophytracker.fr` | adresse du site (liens des emails) |
 | `SUPABASE_PUBLIC_URL` | idem | Supabase est servi sur la même adresse |
-| `API_EXTERNAL_URL` | `https://trophystracker.fr/auth/v1` | base des liens de vérification |
-| `ADDITIONAL_REDIRECT_URLS` | `https://trophystracker.fr/**` | redirections autorisées après un clic dans un email |
-| `SITE_ADDRESS` | `trophystracker.fr` | adresse écoutée par Caddy (`:80` = HTTP local) |
+| `API_EXTERNAL_URL` | `https://trophytracker.fr/auth/v1` | base des liens de vérification |
+| `ADDITIONAL_REDIRECT_URLS` | `https://trophytracker.fr/**` | redirections autorisées après un clic dans un email |
+| `SITE_ADDRESS` | `trophytracker.fr` | adresse écoutée par Caddy (`:80` = HTTP local) |
 
 ## Emails (SMTP)
 
@@ -37,8 +37,8 @@ SMTP_HOST=smtp-relay.brevo.com
 SMTP_PORT=587
 SMTP_USER=votre-identifiant@smtp-brevo.com
 SMTP_PASS=votre-cle-smtp
-SMTP_ADMIN_EMAIL=noreply@trophystracker.fr
-SMTP_SENDER_NAME=TrophysTracker
+SMTP_ADMIN_EMAIL=noreply@trophytracker.fr
+SMTP_SENDER_NAME=TrophyTracker
 ```
 
 Pour ne pas finir en spam, configurez **SPF, DKIM et DMARC** sur votre domaine (le fournisseur SMTP donne les enregistrements DNS à ajouter).

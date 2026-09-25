@@ -112,20 +112,20 @@ export function SponsorsTab({ crew }: { crew: Crew }) {
       title={`Sponsors (${sponsors.length})`}
       description="Vos sponsors apparaissent sur votre page et, s’ils ont une position, sur votre carte."
     >
-      <Button onClick={() => setEditing('new')} className="mb-6"><Plus className="mr-2 h-4 w-4" />Ajouter un sponsor</Button>
-      {isLoading ? <Spinner /> : sponsors.length === 0 ? <p className="text-white/50">Aucun sponsor pour l’instant.</p> : (
-        <ul className="divide-y divide-white/10">
+      <Button onClick={() => setEditing('new')} className="mb-6"><Plus />Ajouter un sponsor</Button>
+      {isLoading ? <Spinner /> : sponsors.length === 0 ? <p className="text-dust-400">Aucun sponsor pour l’instant.</p> : (
+        <ul className="divide-y divide-cream/10">
           {sponsors.map((s) => (
             <li key={s.id} className="flex items-center gap-4 py-3">
-              <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg bg-white">
+              <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-[4px] bg-white">
                 {s.logo_path ? <img src={mediaUrl(s.logo_path)!} alt="" className="max-h-full max-w-full object-contain" /> : <span className="text-xs font-bold text-black">{s.name.slice(0, 2)}</span>}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate font-semibold text-white">{s.name}</p>
-                <p className="text-xs text-white/40">{[s.city, s.lat != null ? '📍 sur la carte' : null].filter(Boolean).join(' · ')}</p>
+                <p className="truncate font-display text-xl font-extrabold uppercase leading-tight text-cream">{s.name}</p>
+                <p className="text-xs text-dust-500">{[s.city, s.lat != null ? '📍 sur la carte' : null].filter(Boolean).join(' · ')}</p>
               </div>
               <Button size="icon" variant="ghost" onClick={() => setEditing(s)} aria-label={`Modifier ${s.name}`}><Pencil className="h-4 w-4" /></Button>
-              <Button size="icon" variant="ghost" className="hover:text-red-400" aria-label={`Supprimer ${s.name}`}
+              <Button size="icon" variant="ghost" className="hover:text-primary-light" aria-label={`Supprimer ${s.name}`}
                 onClick={() => { if (confirm(`Supprimer ${s.name} ?`)) remove.mutate(s); }}>
                 <Trash2 className="h-4 w-4" />
               </Button>

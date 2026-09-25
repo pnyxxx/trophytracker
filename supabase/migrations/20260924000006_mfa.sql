@@ -1,5 +1,5 @@
 -- ═════════════════════════════════════════════════════════════════════════════
---  TrophysTracker — 6 : double authentification (MFA) appliquée par la base
+--  TrophyTracker — 6 : double authentification (MFA) appliquée par la base
 --
 --  Un compte qui a activé la double authentification n'obtient ses droits
 --  d'écriture (équipages, admin, abonnements, profil) qu'après avoir saisi son

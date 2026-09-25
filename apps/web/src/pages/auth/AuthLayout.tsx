@@ -1,25 +1,46 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { LogoMark } from '@/components/common/Logo';
+import { LogoMark, Wordmark } from '@/components/common/Logo';
+import { Kicker } from '@/components/common/Brand';
 import { Seo } from '@/components/common/Seo';
 
 export function AuthLayout({ title, subtitle, children, footer }: {
   title: string; subtitle?: string; children: ReactNode; footer?: ReactNode;
 }) {
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black px-4 py-12">
+    <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(120%_80%_at_80%_0%,#3A2215_0%,#1B1310_45%,#120F0C_75%)]">
       <Seo title={title} />
-      <div className="absolute -left-40 top-1/4 h-[500px] w-[500px] rounded-full bg-primary/20 blur-[120px]" />
-      <div className="relative w-full max-w-md">
-        <Link to="/" className="mb-8 flex items-center justify-center gap-2.5 text-xl font-bold text-white">
-          <LogoMark /> Trophys<span className="-ml-2.5 text-primary">Tracker</span>
-        </Link>
-        <div className="glass rounded-3xl p-8">
-          <h1 className="mb-1 text-2xl font-bold text-white md:text-3xl">{title}</h1>
-          {subtitle && <p className="mb-6 text-sm text-white/60">{subtitle}</p>}
-          {children}
+      <div className="mx-auto grid min-h-screen max-w-[1400px] items-center gap-12 px-4 py-10 sm:px-7 lg:grid-cols-[1fr_minmax(0,480px)] lg:gap-20">
+        {/* Colonne d'accroche (grand écran) */}
+        <div className="hidden flex-col gap-8 lg:flex">
+          <Link to="/" className="flex items-center gap-2.5 text-cream hover:text-cream" aria-label="Accueil TrophyTracker">
+            <LogoMark /> <Wordmark />
+          </Link>
+          <p className="m-0 font-display text-[clamp(64px,7vw,120px)] font-black uppercase leading-[0.95] text-cream">
+            Suivez
+            <br />
+            votre équipage
+            <br />
+            jusqu’au <span className="font-stencil text-primary">désert.</span>
+          </p>
+          <div className="flex flex-wrap gap-x-10 gap-y-2 font-mono text-[11px] uppercase tracking-[0.16em] text-dust-400">
+            <span>Biarritz · 43°27′N 1°32′O</span>
+            <span>Marrakech · 31°35′N 7°59′O</span>
+          </div>
         </div>
-        {footer && <div className="mt-6 text-center text-sm text-white/60">{footer}</div>}
+
+        <div className="relative w-full">
+          <Link to="/" className="mb-8 flex items-center justify-center gap-2.5 text-cream hover:text-cream lg:hidden" aria-label="Accueil TrophyTracker">
+            <LogoMark /> <Wordmark />
+          </Link>
+          <div className="border border-cream/[0.14] border-t-[3px] border-t-primary bg-ink-800/95 p-7 shadow-[0_20px_50px_rgba(0,0,0,.45)] md:p-9">
+            <Kicker className="mb-4">Espace membre</Kicker>
+            <h1 className="m-0 font-display text-[44px] font-black uppercase leading-[0.95] text-cream md:text-[52px]">{title}</h1>
+            {subtitle && <p className="mb-0 mt-3 text-sm leading-relaxed text-dust-300">{subtitle}</p>}
+            <div className="mt-7">{children}</div>
+          </div>
+          {footer && <div className="mt-6 text-center text-sm text-dust-300">{footer}</div>}
+        </div>
       </div>
     </div>
   );

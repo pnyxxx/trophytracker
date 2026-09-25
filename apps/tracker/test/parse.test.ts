@@ -34,6 +34,24 @@ describe('parseDeviceRequest — protocole OsmAnd', () => {
   });
 });
 
+describe('parseDeviceRequest — formulaire POST (Traccar Client 10)', () => {
+  // Champs exacts envoyés par le SDK Traccar (HttpUploader.kt) : formulaire, aucun paramètre dans l'URL.
+  it('décode le formulaire, y compris avec les champs « charge » et « alarm »', () => {
+    const r = parseDeviceRequest(
+      {},
+      {
+        id: KEY, lat: '31.08505', lon: '-4.02298', timestamp: '1760000000', accuracy: '4.5', altitude: '712.0',
+        speed: '27.0', bearing: '181.5', batt: '64', charge: 'true', alarm: 'sos',
+      },
+    );
+    if ('error' in r) throw new Error(r.error);
+    expect(r.key).toBe(KEY);
+    expect(r.point).toMatchObject({ lat: 31.08505, lon: -4.02298, course: 181.5, battery: 64, altitude: 712, accuracy: 4.5 });
+    expect(r.point.recordedAt.getTime()).toBe(1760000000_000);
+    expect(r.point.speedKmh).toBeCloseTo(50.0, 0);
+  });
+});
+
 describe('parseDeviceRequest — JSON (Traccar Client ≥ 9)', () => {
   it('décode une position et convertit la vitesse des m/s en km/h', () => {
     const r = parseDeviceRequest(undefined, {

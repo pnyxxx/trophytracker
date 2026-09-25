@@ -1,5 +1,5 @@
 -- ═════════════════════════════════════════════════════════════════════════════
---  TrophysTracker — 5/5 : données initiales de l'événement
+--  TrophyTracker — 5/5 : données initiales de l'événement
 --
 --  Parcours de l'édition 2026 à titre d'exemple : à mettre à jour depuis
 --  l'administration du site (ou Supabase Studio) dès que le parcours officiel

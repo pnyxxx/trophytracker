@@ -1,5 +1,5 @@
 # ═════════════════════════════════════════════════════════════════════════════
-#  Caddy : unique point d'entrée public de TrophysTracker.
+#  Caddy : unique point d'entrée public de TrophyTracker.
 #   - sert le site (fichiers statiques de Vite) ;
 #   - relaie /auth, /rest, /storage, /realtime vers Supabase (même origine = pas de CORS) ;
 #   - relaie /ingest vers le service GPS ;
@@ -7,6 +7,12 @@
 # ═════════════════════════════════════════════════════════════════════════════
 {
 	admin off
+	# Derrière un tunnel (Tailscale Funnel, Cloudflare Tunnel…), les requêtes arrivent d'une adresse privée :
+	# on lit alors la vraie IP du visiteur dans X-Forwarded-For. Sans ça, tous les téléphones partageraient
+	# la même IP et la limite du service GPS (120 requêtes/min par IP) s'appliquerait à tous ensemble.
+	servers {
+		trusted_proxies static private_ranges
+	}
 }
 
 # Réseau interne Docker uniquement : Supabase Auth vient y chercher les modèles d'emails.
@@ -30,7 +36,8 @@ http://web {
 		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		# Seules nos ressources + les tuiles de carte sont autorisées : bloque les injections de scripts.
-		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://tiles.openfreemap.org; connect-src 'self' https://tiles.openfreemap.org; font-src 'self' data:; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+		# (OpenFreeMap : fond de carte ; Esri : imagerie satellite ; s3.amazonaws.com : relief de l'accueil)
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://tiles.openfreemap.org https://server.arcgisonline.com https://s3.amazonaws.com; connect-src 'self' https://tiles.openfreemap.org https://server.arcgisonline.com https://s3.amazonaws.com; font-src 'self' data:; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
 		-Server
 	}
 
@@ -38,7 +45,7 @@ http://web {
 	handle /config.js {
 		header Content-Type "application/javascript; charset=utf-8"
 		header Cache-Control "no-cache"
-		respond `window.__TT_CONFIG__ = { anonKey: "{$ANON_KEY}", googleEnabled: {$GOOGLE_ENABLED:false} };`
+		respond `window.__TT_CONFIG__ = { anonKey: "{$ANON_KEY}", googleEnabled: {$GOOGLE_ENABLED:false}, lanIp: "{$HOST_LAN_IP}", lanPort: "{$WEB_HTTP_PORT:80}" };`
 	}
 
 	# API Supabase

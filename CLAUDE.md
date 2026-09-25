@@ -1,4 +1,4 @@
-# TrophysTracker — notes pour les sessions de développement
+# TrophyTracker — notes pour les sessions de développement
 
 Plateforme de suivi en direct des équipages du 4L Trophy. Tout en français (UI, commentaires, docs).
 

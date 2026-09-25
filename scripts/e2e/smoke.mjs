@@ -64,7 +64,7 @@ async function signUpConfirmed(name) {
   const { error } = await c.auth.signUp({ email, password, options: { data: { display_name: name } } });
   check(!error, `inscription de ${name}${error ? ' : ' + error.message : ''}`);
   const mail = await latestEmailLink(email);
-  check(mail.subject === 'Confirmez votre inscription sur TrophysTracker', `email de confirmation reçu en français (« ${mail.subject} »)`);
+  check(mail.subject === 'Confirmez votre inscription sur TrophyTracker', `email de confirmation reçu en français (« ${mail.subject} »)`);
   const res = await fetch(mail.link, { redirect: 'manual' });
   check(res.status === 303 || res.status === 302, 'lien de confirmation valide');
   const { error: e2 } = await c.auth.signInWithPassword({ email, password });

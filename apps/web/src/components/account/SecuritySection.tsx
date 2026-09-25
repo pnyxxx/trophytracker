@@ -36,7 +36,7 @@ function EmailForm() {
   return (
     <form onSubmit={(e: FormEvent) => { e.preventDefault(); change.mutate(); }} className="flex flex-col gap-3 sm:flex-row sm:items-end">
       <div className="flex-1 space-y-2">
-        <Label htmlFor="new-email">Adresse email <span className="text-white/40">(actuelle : {user?.email})</span></Label>
+        <Label htmlFor="new-email">Adresse email <span className="text-dust-500">(actuelle : {user?.email})</span></Label>
         <Input id="new-email" type="email" required placeholder="nouvelle@adresse.fr" value={email} onChange={(e) => setEmail(e.target.value)} />
       </div>
       <Button type="submit" disabled={change.isPending}>Changer</Button>
@@ -152,17 +152,17 @@ function MfaForm() {
   if (factor?.status === 'verified') {
     return (
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="flex items-center gap-2 text-green-400"><ShieldCheck className="h-5 w-5" />Double authentification active</p>
-        <Button variant="ghost" className="hover:text-red-400" onClick={() => { if (confirm('Désactiver la double authentification ?')) disable.mutate(); }}>Désactiver</Button>
+        <p className="flex items-center gap-2 text-live"><ShieldCheck className="h-5 w-5" />Double authentification active</p>
+        <Button variant="ghost" className="hover:text-primary-light" onClick={() => { if (confirm('Désactiver la double authentification ?')) disable.mutate(); }}>Désactiver</Button>
       </div>
     );
   }
   if (enrolling) {
     return (
       <form onSubmit={(e: FormEvent) => { e.preventDefault(); verify.mutate(); }} className="space-y-4">
-        <p className="text-sm text-white/70">Scannez ce QR code avec votre application (Google Authenticator, 1Password, Bitwarden…), puis saisissez le code affiché.</p>
-        <img src={enrolling.qr} alt="QR code de double authentification" className="h-48 w-48 rounded-xl bg-white p-2" />
-        <p className="text-xs text-white/40">Ou saisissez cette clé : <code className="break-all">{enrolling.secret}</code></p>
+        <p className="text-sm text-dust-200">Scannez ce QR code avec votre application (Google Authenticator, 1Password, Bitwarden…), puis saisissez le code affiché.</p>
+        <img src={enrolling.qr} alt="QR code de double authentification" className="h-48 w-48 rounded-[4px] bg-white p-2" />
+        <p className="text-xs text-dust-500">Ou saisissez cette clé : <code className="break-all">{enrolling.secret}</code></p>
         <div className="flex gap-3">
           <Input inputMode="numeric" maxLength={6} required value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} aria-label="Code à 6 chiffres" className="max-w-[160px] text-center font-mono tracking-widest" />
           <Button type="submit" disabled={code.length !== 6 || verify.isPending}>Activer</Button>
@@ -173,7 +173,7 @@ function MfaForm() {
   }
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <p className="text-sm text-white/60">Protégez votre compte avec un code à usage unique en plus du mot de passe. Recommandé pour les équipages.</p>
+      <p className="text-sm text-dust-300">Protégez votre compte avec un code à usage unique en plus du mot de passe. Recommandé pour les équipages.</p>
       <Button variant="secondary" onClick={() => start.mutate()} disabled={start.isPending}>Activer</Button>
     </div>
   );
@@ -183,9 +183,9 @@ export function SecuritySection() {
   return (
     <div className="space-y-8">
       <EmailForm />
-      <div className="border-t border-white/10 pt-8"><PasswordForm /></div>
-      <div className="border-t border-white/10 pt-8">
-        <p className="mb-3 font-semibold text-white">Double authentification</p>
+      <div className="border-t border-cream/10 pt-8"><PasswordForm /></div>
+      <div className="border-t border-cream/10 pt-8">
+        <p className="tt-kicker mb-4 font-semibold text-dust-300">Double authentification</p>
         <MfaForm />
       </div>
     </div>

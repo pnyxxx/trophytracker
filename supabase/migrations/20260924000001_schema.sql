@@ -1,5 +1,5 @@
 -- ═════════════════════════════════════════════════════════════════════════════
---  TrophysTracker — 1/5 : tables
+--  TrophyTracker — 1/5 : tables
 --
 --  Organisation des schémas :
 --    public   → tables et fonctions exposées à l'API (protégées par RLS, cf. 3_security)

@@ -2,7 +2,7 @@ import { Toaster as Sonner } from 'sonner';
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
-/** Notifications (toasts). Le site est en thème sombre. */
+/** Notifications (toasts), au style du site : fond brun nuit, liseré rouge. */
 export function Toaster(props: ToasterProps) {
   return (
     <Sonner
@@ -10,8 +10,8 @@ export function Toaster(props: ToasterProps) {
       className="toaster group"
       toastOptions={{
         classNames: {
-          toast: 'group toast group-[.toaster]:border-border group-[.toaster]:shadow-lg',
-          description: 'group-[.toast]:text-muted-foreground',
+          toast: 'group toast !rounded-[4px] !font-sans group-[.toaster]:shadow-2xl',
+          description: 'group-[.toast]:text-dust-300',
         },
       }}
       {...props}

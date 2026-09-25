@@ -2,8 +2,9 @@
  * Données de DÉMONSTRATION (développement uniquement) :
  *   node scripts/seed-demo.mjs
  *
- * Crée un compte démo, 3 équipages d'exemple (dont « J4L Club » avec ses vrais
- * sponsors) et une trace GPS réaliste de Biarritz jusqu'au Maroc.
+ * Crée 3 équipages d'exemple, chacun avec son propre compte (un seul équipage par
+ * compte), dont « J4L Club » avec ses vrais sponsors, et une trace GPS réaliste
+ * de Biarritz jusqu'au Maroc.
  * Relancer le script remplace les équipages de démo existants.
  */
 import { execFileSync } from 'node:child_process';
@@ -14,7 +15,7 @@ import { loadEnv } from './lib-env.mjs';
 
 const env = loadEnv();
 const admin = createClient(env.SITE_URL, env.SERVICE_ROLE_KEY, { auth: { persistSession: false } });
-const DEMO_EMAIL = 'demo@trophystracker.local';
+const DEMO_EMAIL = 'demo@trophytracker.local';
 const DEMO_PASSWORD = `demo-${randomBytes(6).toString('hex')}`;
 
 const sql = (query) =>
@@ -23,21 +24,24 @@ const sql = (query) =>
     encoding: 'utf8',
   });
 
-// ── Compte démo ──────────────────────────────────────────────────────────────
+// ── Comptes démo (un compte = un seul équipage) ──────────────────────────────
 const { data: list } = await admin.auth.admin.listUsers({ perPage: 1000 });
-let demo = list.users.find((u) => u.email === DEMO_EMAIL);
-if (demo) {
-  await admin.auth.admin.updateUserById(demo.id, { password: DEMO_PASSWORD });
-} else {
+async function demoAccount(email, displayName, password) {
+  const existing = list.users.find((u) => u.email === email);
+  if (existing) {
+    await admin.auth.admin.updateUserById(existing.id, { password });
+    return existing;
+  }
   const { data, error } = await admin.auth.admin.createUser({
-    email: DEMO_EMAIL,
-    password: DEMO_PASSWORD,
+    email,
+    password,
     email_confirm: true,
-    user_metadata: { display_name: 'Julien' },
+    user_metadata: { display_name: displayName },
   });
   if (error) throw error;
-  demo = data.user;
+  return data.user;
 }
+const demo = await demoAccount(DEMO_EMAIL, 'Julien', DEMO_PASSWORD);
 
 // ── Équipages ────────────────────────────────────────────────────────────────
 const crews = [
@@ -86,7 +90,12 @@ for (const c of crews) {
   const { data: crew, error } = await admin.from('crews').insert(row).select().single();
   if (error) throw error;
   ids[c.slug] = crew.id;
-  await admin.from('crew_members').insert({ crew_id: crew.id, user_id: demo.id, role: 'owner' });
+  // J4L Club appartient au compte démo principal ; les autres ont chacun leur compte.
+  const owner = c.slug === 'j4l-club'
+    ? demo
+    : await demoAccount(`demo-${c.slug}@trophytracker.local`, c.name, `demo-${randomBytes(9).toString('hex')}`);
+  const { error: memberError } = await admin.from('crew_members').insert({ crew_id: crew.id, user_id: owner.id, role: 'owner' });
+  if (memberError) throw memberError;
   await admin.from('crew_devices').insert({ crew_id: crew.id });
   if (logo) await admin.from('crews').update({ avatar_path: await upload(crew.id, 'avatar', logo) }).eq('id', crew.id);
 }

@@ -1,50 +1,42 @@
 import { DivIcon } from 'leaflet';
 import type { Waypoint } from '@/lib/supabase';
-import { initials } from '@/lib/format';
 
 const escapeHtml = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
-const circle = (emoji: string, color: string) =>
-  new DivIcon({
-    className: 'tt-marker',
-    html: `<div class="tt-pin" style="border-color:${color}">${emoji}</div>`,
-    iconSize: [36, 36],
-    iconAnchor: [18, 18],
-    popupAnchor: [0, -18],
-  });
-
 export type WaypointKind = 'start' | 'stage' | 'night' | 'boat' | 'bivouac' | 'finish';
 
 export const WAYPOINT_STYLE: Record<WaypointKind, { emoji: string; color: string; label: string }> = {
-  start: { emoji: '🏁', color: '#ef4444', label: 'Départ' },
-  stage: { emoji: '📍', color: '#f59e0b', label: 'Étape' },
-  night: { emoji: '🛏️', color: '#3b82f6', label: 'Étape de nuit' },
-  boat: { emoji: '🚢', color: '#10b981', label: 'Traversée' },
-  bivouac: { emoji: '⛺', color: '#8b5cf6', label: 'Bivouac' },
-  finish: { emoji: '🏆', color: '#ef4444', label: 'Arrivée' },
+  start: { emoji: '🏁', color: '#DB4740', label: 'Départ' },
+  stage: { emoji: '📍', color: '#D98A3D', label: 'Étape' },
+  night: { emoji: '🛏️', color: '#1A1612', label: 'Étape de nuit' },
+  boat: { emoji: '🚢', color: '#3E7C8C', label: 'Traversée' },
+  bivouac: { emoji: '⛺', color: '#F2B45A', label: 'Bivouac' },
+  finish: { emoji: '🏆', color: '#DB4740', label: 'Arrivée' },
 };
 
 /** Style d'un type de point (repli sur « étape » si le type est inconnu). */
 export const waypointStyle = (kind: Waypoint['kind']) => WAYPOINT_STYLE[kind as WaypointKind] ?? WAYPOINT_STYLE.stage;
 
-const waypointIcons = new Map<string, DivIcon>();
-export function waypointIcon(kind: Waypoint['kind']) {
-  if (!waypointIcons.has(kind)) {
-    const s = waypointStyle(kind);
-    waypointIcons.set(kind, circle(s.emoji, s.color));
-  }
-  return waypointIcons.get(kind)!;
+/** Point du parcours : pastille de couleur + nom de l'étape en étiquette mono. */
+export function waypointIcon(w: Pick<Waypoint, 'kind' | 'name'>) {
+  return new DivIcon({
+    className: 'tt-marker',
+    html: `<div class="tt-wp"><span class="tt-wp-dot" style="background:${waypointStyle(w.kind).color}"></span><span class="tt-wp-label">${escapeHtml(w.name)}</span></div>`,
+    iconSize: [12, 12],
+    iconAnchor: [6, 6],
+    popupAnchor: [0, -8],
+  });
 }
 
-/** La 4L : pastille rouge qui pulse quand l'équipage est en direct. */
+/** La 4L : point rouge cerclé de blanc, qui pulse quand l'équipage est en direct. */
 export function carIcon(live: boolean) {
   return new DivIcon({
     className: 'tt-marker',
-    html: `<div class="tt-car ${live ? 'tt-car--live' : ''}"><span>🚗</span></div>`,
-    iconSize: [44, 44],
-    iconAnchor: [22, 22],
-    popupAnchor: [0, -22],
+    html: `<div class="tt-car ${live ? 'tt-car--live' : ''}"></div>`,
+    iconSize: [22, 22],
+    iconAnchor: [11, 11],
+    popupAnchor: [0, -14],
   });
 }
 
@@ -58,19 +50,5 @@ export function sponsorIcon(logoUrl: string | null, name: string) {
     iconSize: [38, 38],
     iconAnchor: [19, 19],
     popupAnchor: [0, -19],
-  });
-}
-
-/** Marqueur d'équipage sur la carte d'ensemble (initiales ou avatar). */
-export function crewIcon(name: string, avatarUrl: string | null, live: boolean) {
-  const inner = avatarUrl
-    ? `<img src="${escapeHtml(avatarUrl)}" alt="" loading="lazy" />`
-    : `<span>${escapeHtml(initials(name))}</span>`;
-  return new DivIcon({
-    className: 'tt-marker',
-    html: `<div class="tt-crew ${live ? 'tt-crew--live' : ''}">${inner}</div>`,
-    iconSize: [36, 36],
-    iconAnchor: [18, 18],
-    popupAnchor: [0, -18],
   });
 }

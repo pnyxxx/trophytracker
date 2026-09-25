@@ -51,7 +51,7 @@ export default function ResetPasswordPage() {
           <Label htmlFor="confirm">Confirmer</Label>
           <Input id="confirm" type="password" autoComplete="new-password" required value={confirm} onChange={(e) => setConfirm(e.target.value)} />
         </div>
-        {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
+        {error && <p role="alert" className="text-sm text-primary-light">{error}</p>}
         <Button type="submit" className="w-full" disabled={busy}>{busy ? 'Enregistrement…' : 'Enregistrer'}</Button>
       </form>
     </AuthLayout>

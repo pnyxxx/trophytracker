@@ -1,9 +1,10 @@
 /** Petits composants réutilisés pour afficher un équipage. */
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Heart, MapPin, Share2 } from 'lucide-react';
+import { Heart, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { LiveDot } from '@/components/common/Brand';
 import { useAuth } from '@/hooks/auth';
 import { keys, useFollowedIds, type CrewSummary } from '@/hooks/queries';
 import { supabase } from '@/lib/supabase';
@@ -15,11 +16,8 @@ import { cn } from '@/lib/utils';
 export function LiveBadge({ lastFixAt, className }: { lastFixAt: string | null; className?: string }) {
   if (!isLive(lastFixAt)) return null;
   return (
-    <span className={cn('inline-flex items-center gap-1.5 rounded-full bg-green-500/15 px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-green-500', className)}>
-      <span className="relative flex h-2 w-2">
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-75" />
-        <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
-      </span>
+    <span className={cn('inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-live', className)}>
+      <LiveDot />
       En direct
     </span>
   );
@@ -28,8 +26,8 @@ export function LiveBadge({ lastFixAt, className }: { lastFixAt: string | null; 
 export function CrewAvatar({ name, path, className }: { name: string; path: string | null; className?: string }) {
   const url = thumbUrl(path, 256);
   return (
-    <div className={cn('flex shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary/15 font-bold text-primary', className ?? 'h-14 w-14 text-lg')}>
-      {url ? <img src={url} alt={`Logo de ${name}`} className="h-full w-full object-cover" loading="lazy" /> : initials(name)}
+    <div className={cn('flex shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-ink-700 font-display font-black text-primary', className ?? 'h-[52px] w-[52px] text-xl')}>
+      {url ? <img src={url} alt={`Logo de ${name}`} className="h-full w-full bg-white object-cover" loading="lazy" /> : initials(name)}
     </div>
   );
 }
@@ -80,9 +78,9 @@ export function FollowButton({ crewId, slug, count, className }: { crewId: strin
 
   return (
     <Button onClick={onClick} disabled={mutation.isPending} variant={isFollowed ? 'secondary' : 'default'} className={className}>
-      <Heart className={cn('mr-2 h-4 w-4', isFollowed && 'fill-current')} />
+      <Heart className={cn(isFollowed && 'fill-current')} />
       {isFollowed ? 'Suivi' : 'Suivre'}
-      {count != null && <span className="ml-2 opacity-70">{count}</span>}
+      {count != null && <span className="opacity-70">{count}</span>}
     </Button>
   );
 }
@@ -102,41 +100,35 @@ export function ShareButton({ title, className }: { title: string; className?: s
   };
   return (
     <Button variant="outline" onClick={share} className={className}>
-      <Share2 className="mr-2 h-4 w-4" /> Partager
+      <Share2 /> Partager
     </Button>
   );
 }
 
+/** Ligne d'équipage façon roadbook : logo, numéro, nom, kilométrage et statut GPS. */
 export function CrewCard({ crew }: { crew: CrewSummary }) {
+  const live = isLive(crew.last_fix_at);
+  const place = [crew.school, crew.city].filter(Boolean).join(' · ') || crew.tagline;
   return (
     <Link
       to={`/equipages/${crew.slug}`}
-      className="group flex flex-col gap-4 rounded-2xl border border-white/10 bg-card p-5 transition hover:-translate-y-1 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10"
+      className="group grid grid-cols-[auto_1fr_auto] items-center gap-4 border border-cream/[0.08] bg-ink-800 px-4 py-3.5 text-cream transition duration-200 hover:translate-x-1 hover:border-primary hover:text-cream"
     >
-      <div className="flex items-start gap-4">
-        <CrewAvatar name={crew.name} path={crew.avatar_path} />
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="truncate text-lg font-bold text-white group-hover:text-primary">{crew.name}</h3>
-            {crew.car_number && <span className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-xs text-white/70">#{crew.car_number}</span>}
-          </div>
-          {crew.tagline && <p className="line-clamp-2 text-sm text-white/60">{crew.tagline}</p>}
-          {(crew.school || crew.city) && (
-            <p className="mt-1 flex items-center gap-1 text-xs text-white/40">
-              <MapPin className="h-3 w-3" /> {[crew.school, crew.city].filter(Boolean).join(' · ')}
-            </p>
+      <CrewAvatar name={crew.name} path={crew.avatar_path} />
+      <div className="flex min-w-0 flex-col gap-[3px]">
+        <div className="flex min-w-0 items-center gap-2">
+          {crew.car_number && (
+            <span className="shrink-0 rounded-[3px] bg-primary px-1.5 py-0.5 font-mono text-[11px] font-bold text-white">#{crew.car_number}</span>
           )}
+          <h3 className="m-0 truncate font-display text-[22px] font-extrabold uppercase leading-tight">{crew.name}</h3>
         </div>
+        {place && <p className="m-0 truncate text-[13px] text-dust-400">{place}</p>}
       </div>
-      <div className="mt-auto flex items-center justify-between border-t border-white/10 pt-3 text-sm">
-        <span className="font-mono text-white/80">{formatKm(crew.total_distance_m / 1000)}</span>
-        {isLive(crew.last_fix_at) ? (
-          <LiveBadge lastFixAt={crew.last_fix_at} />
-        ) : (
-          <span className="text-xs text-white/40">
-            {crew.last_fix_at ? `Vu ${formatRelative(crew.last_fix_at)}` : 'Pas encore parti'}
-          </span>
-        )}
+      <div className="flex flex-col items-end gap-1 text-right">
+        <span className="whitespace-nowrap font-mono text-sm font-semibold">{formatKm(crew.total_distance_m / 1000)}</span>
+        <span className={cn('whitespace-nowrap font-mono text-[10px] uppercase tracking-[0.12em]', live ? 'text-live' : 'text-dust-400')}>
+          {live ? '● En direct' : crew.last_fix_at ? `Vu ${formatRelative(crew.last_fix_at)}` : 'Pas encore parti'}
+        </span>
       </div>
     </Link>
   );

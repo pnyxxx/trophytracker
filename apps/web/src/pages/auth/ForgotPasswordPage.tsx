@@ -28,18 +28,18 @@ export default function ForgotPasswordPage() {
     <AuthLayout
       title="Mot de passe oublié"
       subtitle={sent ? undefined : 'Entrez votre email : vous recevrez un lien pour choisir un nouveau mot de passe.'}
-      footer={<Link to="/connexion" className="hover:text-white">← Retour à la connexion</Link>}
+      footer={<Link to="/connexion" className="hover:text-cream">← Retour à la connexion</Link>}
     >
       {sent ? (
         // Même message que l'email existe ou non : on ne révèle pas qui est inscrit.
-        <p className="text-white/80">Si un compte existe pour <strong>{email}</strong>, un email vient d'être envoyé. Pensez à vérifier vos spams.</p>
+        <p className="text-dust-100">Si un compte existe pour <strong>{email}</strong>, un email vient d'être envoyé. Pensez à vérifier vos spams.</p>
       ) : (
         <form onSubmit={submit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
-          {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
+          {error && <p role="alert" className="text-sm text-primary-light">{error}</p>}
           <Button type="submit" className="w-full" disabled={busy}>{busy ? 'Envoi…' : 'Envoyer le lien'}</Button>
         </form>
       )}

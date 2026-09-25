@@ -2,73 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
-/* TrophysTracker - Design System 
-   Inspiration: Apple, Linear.app, SpaceX
-   Palette: Noir profond avec accents sable et rouge
+/* TrophyTracker — charte « roadbook de rallye »
+   Fond brun nuit #120F0C, crème #F4ECDF, rouge 4L #DB4740, ocre #D98A3D.
+   Titres : Big Shoulders Display · Texte : Archivo · Données : JetBrains Mono.
 */
 
 @layer base {
   :root {
-    /* Palette - Mode sombre */
-    --background: 0 0% 7%; /* Noir profond riche #121212 */
-    --foreground: 0 0% 98%; /* Blanc cassé pour le texte */
+    --background: 30 20% 6%; /* #120F0C */
+    --foreground: 37 49% 92%; /* #F4ECDF */
 
-    --card: 0 0% 10%; /* Cartes légèrement plus claires */
-    --card-foreground: 0 0% 98%;
+    --card: 30 17% 9%; /* #1B1713 */
+    --card-foreground: 37 49% 92%;
 
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 30 17% 9%;
+    --popover-foreground: 37 49% 92%;
 
-    --primary: 3 75% 55%; /* Rouge signature #DB4740 */
+    --primary: 3 68% 55%; /* #DB4740 */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 36 30% 65%; /* Sable doux pour contraste #B5A08F */
-    --secondary-foreground: 0 0% 10%;
+    --secondary: 36 43% 85%; /* #E9DCC8 */
+    --secondary-foreground: 30 18% 9%; /* #1A1612 */
 
-    --muted: 0 0% 15%; /* Gris très sombre */
-    --muted-foreground: 0 0% 60%;
+    --muted: 28 22% 14%; /* #2A221B */
+    --muted-foreground: 34 13% 56%; /* #9E9282 */
 
-    --accent: 3 75% 55%; /* Rouge accent */
+    --accent: 3 68% 55%;
     --accent-foreground: 0 0% 100%;
 
-    /* Variables personnalisées */
-    --header-bg: 0 0% 7%; /* Header noir avec transparence */
-    --header-text: 0 0% 100%;
-    --hero-bg: 0 0% 5%; /* Hero encore plus sombre */
-    --adventure-bg: 36 35% 85%; /* Section sable claire #E4D7CA */
-    --sand-light: 36 40% 88%; /* Sable clair original */
-    --sand-dark: 36 25% 40%; /* Sable foncé */
-    
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 3 58% 48%; /* #C23A33 */
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 15%;
-    --ring: 3 75% 55%;
+    --border: 30 10% 18%;
+    --input: 30 10% 22%;
+    --ring: 3 68% 55%;
 
-    --radius: 0.75rem;
-
-    /* Animations & Transitions Premium */
-    --ease-smooth: cubic-bezier(0.4, 0.0, 0.2, 1);
-    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-    --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
-    
-    --sidebar-background: 0 0% 10%;
-    --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 3 75% 55%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 15%;
-    --sidebar-accent-foreground: 0 0% 90%;
-    --sidebar-border: 0 0% 20%;
-    --sidebar-ring: 3 75% 55%;
-  }
-
-  /* Mode clair (sections sable) */
-  .light-section {
-    --background: 36 40% 88%; /* Sable clair */
-    --foreground: 0 0% 10%; /* Noir pour texte */
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 10%;
+    --radius: 0.25rem;
   }
 }
 
@@ -77,275 +46,163 @@
     @apply border-border;
   }
 
-  body {
-    @apply bg-background text-foreground antialiased;
-    font-feature-settings: 'cv11', 'ss01';
-    font-optical-sizing: auto;
-  }
-
   html {
     scroll-behavior: smooth;
     overflow-x: hidden;
   }
 
-  /* Typographie premium */
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-bold tracking-tight;
-    letter-spacing: -0.025em;
+  body {
+    @apply bg-ink font-sans text-cream antialiased;
+    overflow-x: clip;
   }
 
-  h1 {
-    @apply text-5xl md:text-7xl lg:text-8xl;
-    line-height: 1;
+  a {
+    @apply transition-colors;
   }
 
-  h2 {
-    @apply text-4xl md:text-5xl lg:text-6xl;
-    line-height: 1.1;
-  }
-
-  h3 {
-    @apply text-3xl md:text-4xl;
-    line-height: 1.2;
-  }
-
-  /* Sélection personnalisée */
   ::selection {
-    background-color: hsl(var(--primary) / 0.3);
-    color: hsl(var(--foreground));
+    background-color: rgba(219, 71, 64, 0.35);
   }
 
-  /* Scrollbar personnalisée */
   ::-webkit-scrollbar {
     width: 10px;
   }
 
   ::-webkit-scrollbar-track {
-    background: hsl(var(--background));
+    background: #120f0c;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: hsl(var(--muted));
-    border-radius: 5px;
+    background: #3a322a;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--primary));
+    background: #db4740;
   }
 }
 
-@layer utilities {
-  /* Glassmorphism */
-  .glass {
-    background: rgba(18, 18, 18, 0.7);
-    backdrop-filter: blur(12px) saturate(180%);
-    -webkit-backdrop-filter: blur(12px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+@layer components {
+  /* Petite étiquette en capitales mono (« kicker ») */
+  .tt-kicker {
+    @apply font-mono text-[11px] uppercase tracking-[0.16em];
   }
-
-  .glass-light {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(12px) saturate(180%);
-    -webkit-backdrop-filter: blur(12px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-
-  /* Gradient premium */
-  .gradient-radial {
-    background: radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.15) 0%, transparent 50%);
-  }
-
-  .gradient-sand {
-    background: linear-gradient(180deg, hsl(36 40% 88%) 0%, hsl(36 35% 85%) 100%);
-  }
-
-  /* Effets de lumière */
-  .glow-red {
-    box-shadow: 0 0 30px hsla(3, 75%, 55%, 0.3);
-  }
-
-  .glow-red-strong {
-    box-shadow: 0 0 60px hsla(3, 75%, 55%, 0.5), 0 0 120px hsla(3, 75%, 55%, 0.2);
-  }
-
-  /* Text gradient */
-  .text-gradient {
-    background: linear-gradient(135deg, hsl(var(--foreground)) 0%, hsl(var(--muted-foreground)) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .text-gradient-red {
-    background: linear-gradient(135deg, hsl(3 75% 65%) 0%, hsl(3 75% 45%) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  /* Animation utilities */
-  .animate-fade-in-up {
-    animation: fadeInUp 0.8s var(--ease-out-expo) forwards;
-  }
-
-  .animate-fade-in {
-    animation: fadeIn 0.6s var(--ease-smooth) forwards;
-  }
-
-  .animate-slide-up {
-    animation: slideUp 1s var(--ease-out-expo) forwards;
-  }
-
-  .animate-scale-in {
-    animation: scaleIn 0.8s var(--ease-out-expo) forwards;
+  /* Grand titre condensé */
+  .tt-display {
+    @apply font-display font-black uppercase leading-[0.9];
   }
 }
 
-/* Animations Keyframes */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+/* ─── Cartes MapLibre (accueil) ──────────────────────────────────────────── */
+.maplibregl-ctrl-attrib {
+  font-size: 10px;
+}
+.maplibregl-ctrl-attrib a {
+  color: inherit;
+}
+/* Au-dessus de la barre de progression de « La route » */
+@media (min-width: 1000px) {
+  .tt-journey-map .maplibregl-ctrl-bottom-right {
+    bottom: 52px;
   }
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+/* Fond de carte « parchemin » (tuiles Positron teintées sépia) */
+.tt-parchment .maplibregl-canvas,
+.tt-parchment .leaflet-gl-layer {
+  filter: sepia(0.55) saturate(1.25) contrast(0.95) brightness(1.02);
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(60px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
-}
-
-@keyframes pulse-glow {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: 200% center;
-  }
-  100% {
-    background-position: -200% center;
-  }
-}
 /* ─── Marqueurs de carte (Leaflet) ───────────────────────────────────────── */
 .tt-marker {
   background: transparent !important;
   border: none !important;
 }
-.tt-pin,
-.tt-sponsor,
-.tt-crew {
+
+/* Point du parcours : pastille + étiquette mono */
+.tt-wp {
+  position: relative;
+  width: 12px;
+  height: 12px;
+}
+.tt-wp-dot {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 2px solid #f4ecdf;
+  box-shadow: 0 0 0 2px rgba(18, 15, 12, 0.6);
+}
+.tt-wp-label {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #1a1612;
+  color: #f4ecdf;
+  font: 600 10px 'JetBrains Mono', monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 6px;
+  white-space: nowrap;
+}
+
+.tt-sponsor {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100%;
-  border-radius: 9999px;
+  border-radius: 6px;
   background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 2px solid #db4740;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
   overflow: hidden;
-}
-.tt-pin {
-  border: 2px solid;
-  font-size: 18px;
-  line-height: 1;
-}
-.tt-sponsor {
-  border: 2px solid hsl(var(--primary));
   padding: 3px;
-  font-size: 11px;
-  font-weight: 700;
-  color: #111;
+  font: 800 12px 'Big Shoulders Display', sans-serif;
+  text-transform: uppercase;
+  color: #1a1612;
 }
-.tt-sponsor img,
-.tt-crew img {
+.tt-sponsor img {
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
-.tt-crew {
-  border: 3px solid #9ca3af;
-  font-size: 12px;
-  font-weight: 800;
-  color: hsl(var(--primary));
-}
-.tt-crew--live {
-  border-color: #22c55e;
-}
+
+/* La 4L : point rouge cerclé de blanc, qui pulse quand l'équipage est en direct */
 .tt-car {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   width: 100%;
   height: 100%;
-  border-radius: 9999px;
-  background: hsl(var(--primary));
-  border: 3px solid #fff;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
-  font-size: 20px;
 }
-.tt-car--live::after {
+.tt-car::before,
+.tt-car::after {
   content: '';
   position: absolute;
-  inset: -3px;
+  inset: 0;
   border-radius: 9999px;
-  border: 3px solid hsl(var(--primary));
-  animation: tt-pulse 1.8s ease-out infinite;
+  background: #db4740;
+}
+.tt-car::after {
+  border: 3px solid #fff;
+  box-shadow: 0 0 18px 4px rgba(255, 74, 61, 0.7);
+}
+.tt-car--live::before {
+  animation: tt-pulse 1.6s ease-out infinite;
 }
 @keyframes tt-pulse {
-  from { transform: scale(1); opacity: 0.9; }
-  to { transform: scale(2.2); opacity: 0; }
+  from { transform: scale(1); opacity: 0.8; }
+  to { transform: scale(3.2); opacity: 0; }
 }
+
 .leaflet-container {
-  font-family: inherit;
+  font-family: 'Archivo', system-ui, sans-serif;
   background: #e8e2d8;
 }
 .leaflet-popup-content-wrapper {
-  border-radius: 12px;
+  border-radius: 4px;
+  border-left: 3px solid #db4740;
+}
+.leaflet-control-attribution {
+  font-size: 10px;
 }
 
 @media (prefers-reduced-motion: reduce) {

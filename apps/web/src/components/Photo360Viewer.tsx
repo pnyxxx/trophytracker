@@ -137,7 +137,7 @@ export const Photo360Viewer = ({ imageUrl, title, description, onClose }: Photo3
   return (
     <div
       ref={containerRef}
-      className={`relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl overflow-hidden ${
+      className={`relative bg-gradient-to-br from-ink-900 via-ink-800 to-ink-900 overflow-hidden ${
         isFullscreen ? 'fixed inset-0 z-50 rounded-none' : 'w-full h-[500px] md:h-[600px]'
       }`}
     >
@@ -145,9 +145,9 @@ export const Photo360Viewer = ({ imageUrl, title, description, onClose }: Photo3
       <div className="absolute top-0 left-0 right-0 z-20 p-4 bg-gradient-to-b from-black/60 to-transparent">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-white font-bold text-lg md:text-xl">{title}</h3>
+            <h3 className="font-display text-2xl font-black uppercase text-cream md:text-3xl">{title}</h3>
             {description && (
-              <p className="text-gray-300 text-sm mt-1 hidden md:block">{description}</p>
+              <p className="text-dust-200 text-sm mt-1 hidden md:block">{description}</p>
             )}
           </div>
           <div className="flex gap-2">
@@ -193,11 +193,11 @@ export const Photo360Viewer = ({ imageUrl, title, description, onClose }: Photo3
 
       {/* Error Overlay */}
       {error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80 z-10">
+        <div className="absolute inset-0 flex items-center justify-center bg-ink/80 z-10">
           <div className="text-center max-w-md px-4">
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
             <p className="text-white text-lg font-semibold mb-2">Erreur de chargement</p>
-            <p className="text-gray-300 text-sm">{error}</p>
+            <p className="text-dust-200 text-sm">{error}</p>
             <Button
               onClick={() => window.location.reload()}
               className="mt-6"

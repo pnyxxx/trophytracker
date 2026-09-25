@@ -1,4 +1,4 @@
-# TrophysTracker
+# TrophyTracker
 
 **Suivez les équipages du 4L Trophy en direct.**
 Proches, amis et sponsors retrouvent la position en temps réel, la trace GPS complète, les photos (dont 360°) et les sponsors de l'équipage qu'ils soutiennent. Les équipages créent leur page gratuitement en quelques minutes.

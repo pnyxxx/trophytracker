@@ -27,18 +27,18 @@ services:
       # Mots de passe : 10 caractères minimum.
       GOTRUE_PASSWORD_MIN_LENGTH: "10"
       # Emails en français, servis par notre conteneur `web` (apps/web/email-templates).
-      GOTRUE_MAILER_SUBJECTS_CONFIRMATION: "Confirmez votre inscription sur TrophysTracker"
-      GOTRUE_MAILER_SUBJECTS_RECOVERY: "Réinitialisation de votre mot de passe TrophysTracker"
-      GOTRUE_MAILER_SUBJECTS_MAGIC_LINK: "Votre lien de connexion TrophysTracker"
+      GOTRUE_MAILER_SUBJECTS_CONFIRMATION: "Confirmez votre inscription sur TrophyTracker"
+      GOTRUE_MAILER_SUBJECTS_RECOVERY: "Réinitialisation de votre mot de passe TrophyTracker"
+      GOTRUE_MAILER_SUBJECTS_MAGIC_LINK: "Votre lien de connexion TrophyTracker"
       GOTRUE_MAILER_SUBJECTS_EMAIL_CHANGE: "Confirmez votre nouvelle adresse email"
-      GOTRUE_MAILER_SUBJECTS_INVITE: "Vous êtes invité sur TrophysTracker"
+      GOTRUE_MAILER_SUBJECTS_INVITE: "Vous êtes invité sur TrophyTracker"
       GOTRUE_MAILER_TEMPLATES_CONFIRMATION: http://web/email-templates/confirmation.html
       GOTRUE_MAILER_TEMPLATES_RECOVERY: http://web/email-templates/recovery.html
       GOTRUE_MAILER_TEMPLATES_MAGIC_LINK: http://web/email-templates/magic-link.html
       GOTRUE_MAILER_TEMPLATES_EMAIL_CHANGE: http://web/email-templates/email-change.html
       GOTRUE_MAILER_TEMPLATES_INVITE: http://web/email-templates/invite.html
       GOTRUE_MAILER_TEMPLATES_REAUTHENTICATION: http://web/email-templates/reauthentication.html
-      GOTRUE_MAILER_SUBJECTS_REAUTHENTICATION: "Votre code de confirmation TrophysTracker"
+      GOTRUE_MAILER_SUBJECTS_REAUTHENTICATION: "Votre code de confirmation TrophyTracker"
       # Changement d'email : confirmation demandée sur l'ancienne ET la nouvelle adresse.
       GOTRUE_MAILER_SECURE_EMAIL_CHANGE_ENABLED: "true"
       # Changer de mot de passe exige un code reçu par email (sauf juste après connexion).

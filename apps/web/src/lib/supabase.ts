@@ -11,7 +11,14 @@ import type { Database } from './database.types';
 
 declare global {
   interface Window {
-    __TT_CONFIG__?: { anonKey?: string; googleEnabled?: boolean };
+    __TT_CONFIG__?: {
+      anonKey?: string;
+      googleEnabled?: boolean;
+      /** IP du PC sur le réseau local (dev) : pour que le téléphone joigne le service GPS. */
+      lanIp?: string;
+      /** Port HTTP publié par Caddy en local (WEB_HTTP_PORT). */
+      lanPort?: string;
+    };
   }
 }
 

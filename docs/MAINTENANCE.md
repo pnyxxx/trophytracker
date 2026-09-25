@@ -6,7 +6,7 @@
 sh scripts/backup.sh       # ou : make backup
 ```
 
-Crée `backups/trophystracker-AAAAMMJJ-HHMMSS.tar.gz` contenant :
+Crée `backups/trophytracker-AAAAMMJJ-HHMMSS.tar.gz` contenant :
 - `database.dump` : toute la base (comptes, équipages, traces…) au format `pg_dump -Fc` ;
 - `storage.tar.gz` : les fichiers (photos, logos).
 
@@ -16,7 +16,7 @@ copiez-la ailleurs, par exemple chaque nuit avec `rclone` vers un stockage objet
 ## Restauration
 
 ```bash
-mkdir /tmp/restore && tar -xzf backups/trophystracker-XXXX.tar.gz -C /tmp/restore
+mkdir /tmp/restore && tar -xzf backups/trophytracker-XXXX.tar.gz -C /tmp/restore
 
 docker compose stop web tracker functions storage
 # Base : restaure par-dessus l'existant

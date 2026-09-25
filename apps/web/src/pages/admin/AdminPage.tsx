@@ -7,6 +7,7 @@ import { PageShell } from '@/components/layout/PageShell';
 import { Seo } from '@/components/common/Seo';
 import { Spinner } from '@/components/common/Spinner';
 import { Button } from '@/components/ui/button';
+import { Container, PageHero } from '@/components/common/Brand';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Field, Panel, selectClass } from '@/components/manage/shared';
@@ -25,14 +26,14 @@ function Overview() {
   });
   const labels: Record<string, string> = { users: 'Comptes', crews: 'Équipages', live_crews: 'En direct', positions: 'Positions GPS', follows: 'Abonnements' };
   return (
-    <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+    <dl className="m-0 grid grid-cols-2 gap-px border border-cream/[0.14] bg-cream/[0.14] md:grid-cols-5">
       {Object.entries(labels).map(([k, label]) => (
-        <div key={k} className="rounded-2xl bg-card p-5">
-          <p className="text-3xl font-bold text-white">{data?.[k] ?? '…'}</p>
-          <p className="text-xs uppercase text-white/50">{label}</p>
+        <div key={k} className="flex flex-col-reverse gap-2 bg-ink p-5">
+          <dd className="m-0 font-display text-5xl font-black leading-none text-cream">{data?.[k] ?? '…'}</dd>
+          <dt className="tt-kicker text-dust-400">{label}</dt>
         </div>
       ))}
-    </div>
+    </dl>
   );
 }
 
@@ -56,18 +57,18 @@ function CrewsAdmin() {
     <Panel title={`Équipages (${data.length})`} description="Associez un équipage à un appareil du serveur Traccar (identifiant, id numérique ou nom).">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead className="text-xs uppercase text-white/50">
+          <thead className="font-mono text-[11px] uppercase tracking-[0.14em] text-dust-400">
             <tr><th className="py-2">Équipage</th><th>Abonnés</th><th>GPS</th><th className="min-w-[260px]">Appareil Traccar</th></tr>
           </thead>
-          <tbody className="divide-y divide-white/10">
+          <tbody className="divide-y divide-cream/10">
             {data.map((c) => (
               <tr key={c.id}>
                 <td className="py-3 pr-4">
-                  <Link to={`/equipages/${c.slug}`} className="font-semibold text-white hover:text-primary">{c.name}</Link>
-                  <p className="text-xs text-white/40">{c.car_number ? `#${c.car_number} · ` : ''}{c.is_public ? 'Public' : 'Privé'}</p>
+                  <Link to={`/equipages/${c.slug}`} className="font-display text-xl font-extrabold uppercase text-cream hover:text-primary">{c.name}</Link>
+                  <p className="text-xs text-dust-500">{c.car_number ? `#${c.car_number} · ` : ''}{c.is_public ? 'Public' : 'Privé'}</p>
                 </td>
-                <td className="pr-4 text-white/70">{c.followers_count}</td>
-                <td className="pr-4 text-xs text-white/60">
+                <td className="pr-4 text-dust-200">{c.followers_count}</td>
+                <td className="pr-4 text-xs text-dust-300">
                   {c.last_fix_at ? formatRelative(c.last_fix_at) : '—'}
                   {c.has_device_key && <span className="ml-1" title="Clé téléphone active">📱</span>}
                 </td>
@@ -107,12 +108,12 @@ function UsersAdmin() {
     <Panel title="Comptes">
       <Input className="mb-4" placeholder="Rechercher par email ou nom…" value={search} onChange={(e) => setSearch(e.target.value)} aria-label="Rechercher un compte" />
       {isLoading ? <Spinner /> : (
-        <ul className="divide-y divide-white/10">
+        <ul className="divide-y divide-cream/10">
           {data.map((u) => (
             <li key={u.id} className="flex flex-wrap items-center gap-3 py-3">
               <div className="min-w-0 flex-1">
-                <p className="font-semibold text-white">{u.display_name} {u.role === 'admin' && <span className="ml-1 rounded bg-primary px-1.5 text-xs">admin</span>}</p>
-                <p className="truncate text-xs text-white/50">{u.email} · inscrit {formatRelative(u.created_at)} · vu {formatRelative(u.last_sign_in_at)}</p>
+                <p className="font-display text-xl font-extrabold uppercase leading-tight text-cream">{u.display_name} {u.role === 'admin' && <span className="ml-1 rounded-[3px] bg-primary px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.1em] text-white">admin</span>}</p>
+                <p className="truncate text-xs text-dust-400">{u.email} · inscrit {formatRelative(u.created_at)} · vu {formatRelative(u.last_sign_in_at)}</p>
               </div>
               {u.id !== user?.id && (
                 <Button size="sm" variant="ghost" onClick={() => {
@@ -159,13 +160,13 @@ function RouteAdmin() {
 
   return (
     <Panel title="Parcours officiel" description="Points affichés sur toutes les cartes et dans « La route », dans l’ordre croissant.">
-      <ul className="mb-6 divide-y divide-white/10">
+      <ul className="mb-6 divide-y divide-cream/10">
         {event?.waypoints.map((w) => (
           <li key={w.id} className="flex items-center gap-3 py-2">
-            <span className="w-10 text-xs text-white/40">{w.sort_order}</span>
+            <span className="w-10 text-xs text-dust-500">{w.sort_order}</span>
             <span className="text-xl">{waypointStyle(w.kind).emoji}</span>
-            <span className="flex-1 text-white">{w.name} <span className="text-xs text-white/40">{w.country} · {w.lat.toFixed(3)}, {w.lon.toFixed(3)}</span></span>
-            <Button size="icon" variant="ghost" className="hover:text-red-400" aria-label={`Supprimer ${w.name}`}
+            <span className="flex-1 text-cream">{w.name} <span className="text-xs text-dust-500">{w.country} · {w.lat.toFixed(3)}, {w.lon.toFixed(3)}</span></span>
+            <Button size="icon" variant="ghost" className="hover:text-primary-light" aria-label={`Supprimer ${w.name}`}
               onClick={() => { if (confirm(`Supprimer ${w.name} ?`)) remove.mutate(w.id); }}><Trash2 className="h-4 w-4" /></Button>
           </li>
         ))}
@@ -226,16 +227,15 @@ function SettingsAdmin() {
 
 export default function AdminPage() {
   return (
-    <PageShell>
+    <PageShell padTop={false}>
       <Seo title="Administration" />
-      <div className="container mx-auto max-w-6xl space-y-6 px-4 py-10">
-        <div>
-          <h1 className="text-4xl font-bold text-white">Administration</h1>
-          <p className="text-white/60">Pour les opérations avancées sur la base, utilisez Supabase Studio (voir docs/ADMINISTRATION.md).</p>
-        </div>
+      <PageHero kicker="Direction de course" title="Administration">
+        Pour les opérations avancées sur la base, utilisez Supabase Studio (voir docs/ADMINISTRATION.md).
+      </PageHero>
+      <Container className="max-w-6xl space-y-8 pb-16">
         <Overview />
         <Tabs defaultValue="crews">
-          <TabsList className="mb-6 flex h-auto flex-wrap justify-start">
+          <TabsList className="mb-8 flex w-full justify-start overflow-x-auto">
             <TabsTrigger value="crews">Équipages</TabsTrigger>
             <TabsTrigger value="users">Comptes</TabsTrigger>
             <TabsTrigger value="route">Parcours</TabsTrigger>
@@ -246,7 +246,7 @@ export default function AdminPage() {
           <TabsContent value="route"><RouteAdmin /></TabsContent>
           <TabsContent value="settings"><SettingsAdmin /></TabsContent>
         </Tabs>
-      </div>
+      </Container>
     </PageShell>
   );
 }

@@ -1,13 +1,15 @@
 import { PageShell } from '@/components/layout/PageShell';
 import { Seo } from '@/components/common/Seo';
+import { Container, PageHero } from '@/components/common/Brand';
 
 export default function PrivacyPage() {
   return (
-    <PageShell>
+    <PageShell padTop={false}>
       <Seo title="Confidentialité" />
-      <article className="container mx-auto max-w-3xl px-4 py-12 text-white/80 [&_h2]:mb-3 [&_h2]:mt-10 [&_h2]:text-2xl [&_h2]:text-white [&_li]:mb-1 [&_p]:mb-3 [&_ul]:list-disc [&_ul]:pl-6">
-        <h1 className="mb-6 text-4xl font-bold text-white">Confidentialité & données personnelles</h1>
-        <p>TrophysTracker est un projet indépendant. Nous collectons le strict minimum, ne vendons aucune donnée et n’affichons aucune publicité.</p>
+      <PageHero kicker="Informations" title={<>Confidentialité<br />& données</>} />
+      <Container className="border-t border-cream/[0.12] py-14 md:py-20">
+      <article className="max-w-3xl text-lg leading-relaxed text-dust-100 [&_h2]:mb-4 [&_h2]:mt-14 [&_h2]:border-t [&_h2]:border-cream/[0.14] [&_h2]:pt-8 [&_h2]:font-display [&_h2]:text-[40px] [&_h2]:font-black [&_h2]:uppercase [&_h2]:leading-none [&_h2]:text-cream [&_li]:mb-2 [&_p]:mb-4 [&_strong]:text-cream [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:marker:text-primary">
+        <p className="border-l-[3px] border-primary pl-5 text-xl text-cream">TrophyTracker est un projet indépendant. Nous collectons le strict minimum, ne vendons aucune donnée et n’affichons aucune publicité.</p>
 
         <h2>Ce que nous stockons</h2>
         <ul>
@@ -35,6 +37,7 @@ export default function PrivacyPage() {
         <h2>Cookies</h2>
         <p>Nous n’utilisons aucun cookie publicitaire ni traceur. Seule votre session de connexion est conservée dans votre navigateur.</p>
       </article>
+      </Container>
     </PageShell>
   );
 }

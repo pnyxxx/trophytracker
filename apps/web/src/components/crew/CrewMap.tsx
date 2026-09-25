@@ -70,9 +70,11 @@ export function CrewMap({ crew, points, waypoints, sponsors }: Props) {
   }, [points, car]);
 
   const mapSponsors = sponsors.filter((s) => s.lat != null && s.lon != null);
+  // Icônes créées une seule fois par étape (la trace, elle, se met à jour en direct).
+  const waypointIcons = useMemo(() => new Map(waypoints.map((w) => [w.id, waypointIcon(w)])), [waypoints]);
 
   return (
-    <div ref={containerRef} className="relative h-[70vh] min-h-[420px] w-full overflow-hidden rounded-2xl border border-black/10 shadow-2xl md:h-[560px]">
+    <div ref={containerRef} className="relative h-[70vh] min-h-[420px] w-full overflow-hidden border border-cream/[0.14] bg-[#E8E2D8] md:h-[600px]">
       <MapContainer center={[40, -3]} zoom={5} preferCanvas scrollWheelZoom className="h-full w-full" style={{ zIndex: 0 }}>
         <BaseMap />
         <MapController car={car} points={points} waypoints={waypoints} follow={follow} />
@@ -86,7 +88,7 @@ export function CrewMap({ crew, points, waypoints, sponsors }: Props) {
         )}
 
         {waypoints.map((w) => (
-          <Marker key={w.id} position={[w.lat, w.lon]} icon={waypointIcon(w.kind)}>
+          <Marker key={w.id} position={[w.lat, w.lon]} icon={waypointIcons.get(w.id)}>
             <Popup>
               <p className="text-xs font-semibold uppercase text-black/50">{waypointStyle(w.kind).label}</p>
               <p className="font-bold text-black">{w.name}</p>
@@ -115,7 +117,7 @@ export function CrewMap({ crew, points, waypoints, sponsors }: Props) {
             <Popup>
               <p className="font-bold text-black">{crew.name}</p>
               <p className="text-sm text-black/70">
-                {live ? '🟢 En direct' : `Dernière position ${formatRelative(crew.last_fix_at)}`}
+                {live ? '● En direct' : `Dernière position ${formatRelative(crew.last_fix_at)}`}
               </p>
               {live && crew.last_speed_kmh != null && (
                 <p className="text-sm text-black/70">{Math.round(crew.last_speed_kmh)} km/h</p>
@@ -130,8 +132,8 @@ export function CrewMap({ crew, points, waypoints, sponsors }: Props) {
         {car && (
           <button
             onClick={() => setFollow((f) => !f)}
-            className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold shadow-lg transition ${
-              follow ? 'bg-primary text-white' : 'bg-white text-black hover:bg-gray-100'
+            className={`flex items-center gap-2 rounded-[4px] px-3 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.12em] shadow-lg transition ${
+              follow ? 'bg-primary text-white' : 'bg-ink text-cream hover:bg-primary'
             }`}
             aria-pressed={follow}
           >
@@ -141,7 +143,7 @@ export function CrewMap({ crew, points, waypoints, sponsors }: Props) {
         )}
         <button
           onClick={() => containerRef.current?.requestFullscreen?.()}
-          className="flex items-center justify-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-black shadow-lg hover:bg-gray-100"
+          className="flex items-center justify-center gap-2 rounded-[4px] bg-ink px-3 py-2.5 text-cream shadow-lg hover:bg-primary"
           aria-label="Carte en plein écran"
         >
           <Maximize className="h-4 w-4" />
@@ -149,7 +151,7 @@ export function CrewMap({ crew, points, waypoints, sponsors }: Props) {
       </div>
 
       {!car && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-4 z-[500] mx-auto w-fit rounded-full bg-black/80 px-4 py-2 text-sm text-white">
+        <div className="pointer-events-none absolute inset-x-3 bottom-4 z-[500] mx-auto w-fit border-l-[3px] border-primary bg-ink/[0.94] px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-cream">
           Pas encore de position GPS : l'équipage n'a pas démarré son suivi.
         </div>
       )}

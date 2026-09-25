@@ -45,7 +45,7 @@ export default function SignupPage() {
   if (sent) {
     return (
       <AuthLayout title="Plus qu'une étape ✉️" subtitle={`Nous avons envoyé un lien de confirmation à ${form.email}. Cliquez dessus pour activer votre compte.`}>
-        <p className="text-sm text-white/60">Rien reçu ? Vérifiez vos spams, ou patientez une minute avant de réessayer.</p>
+        <p className="text-sm text-dust-300">Rien reçu ? Vérifiez vos spams, ou patientez une minute avant de réessayer.</p>
       </AuthLayout>
     );
   }
@@ -67,16 +67,16 @@ export default function SignupPage() {
           <Input id="email" type="email" autoComplete="email" required value={form.email} onChange={set('email')} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password">Mot de passe <span className="text-white/40">(10 caractères min.)</span></Label>
+          <Label htmlFor="password">Mot de passe <span className="text-dust-500">(10 caractères min.)</span></Label>
           <Input id="password" type="password" autoComplete="new-password" required minLength={10} value={form.password} onChange={set('password')} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="confirm">Confirmer le mot de passe</Label>
           <Input id="confirm" type="password" autoComplete="new-password" required value={form.confirm} onChange={set('confirm')} />
         </div>
-        {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
+        {error && <p role="alert" className="text-sm text-primary-light">{error}</p>}
         <Button type="submit" className="w-full" disabled={busy}>{busy ? 'Création…' : 'Créer mon compte'}</Button>
-        <p className="text-center text-xs text-white/40">
+        <p className="text-center text-xs text-dust-500">
           En créant un compte, vous acceptez notre <Link to="/confidentialite" className="underline">politique de confidentialité</Link>.
         </p>
       </form>

@@ -13,7 +13,7 @@ const db = createDb(config.DATABASE_URL, {
   maxSilenceS: config.TRACK_MAX_SILENCE_S,
 });
 
-const app = await buildHttp(db, { trustProxy: config.TRUST_PROXY, logger: config.NODE_ENV !== 'production' });
+const app = await buildHttp(db, { trustProxy: config.TRUST_PROXY, logger: config.NODE_ENV !== 'production', log });
 await app.listen({ port: config.PORT, host: '0.0.0.0' });
 log(`réception GPS prête sur le port ${config.PORT} (/ingest/osmand)`);
 

@@ -25,7 +25,7 @@ apt install -y ufw && ufw allow OpenSSH && ufw allow 80 && ufw allow 443/tcp && 
 
 ```bash
 su - deploy
-git clone git@github.com:pnyxxx/trophystracker.git && cd trophystracker
+git clone git@github.com:pnyxxx/trophytracker.git && cd trophytracker
 sh scripts/init-env.sh        # génère des secrets uniques pour CE serveur
 nano .env
 ```
@@ -69,7 +69,7 @@ docker compose exec db psql -U postgres -c \
 ```bash
 crontab -e
 # Tous les jours à 3h :
-0 3 * * * cd /home/deploy/trophystracker && sh scripts/backup.sh >> backups/backup.log 2>&1
+0 3 * * * cd /home/deploy/trophytracker && sh scripts/backup.sh >> backups/backup.log 2>&1
 ```
 
 **Copiez les sauvegardes hors du serveur** (autre machine, stockage objet…) : voir MAINTENANCE.md.

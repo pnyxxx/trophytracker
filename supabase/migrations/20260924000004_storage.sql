@@ -1,5 +1,5 @@
 -- ═════════════════════════════════════════════════════════════════════════════
---  TrophysTracker — 4/5 : stockage des images (Supabase Storage)
+--  TrophyTracker — 4/5 : stockage des images (Supabase Storage)
 --
 --  Un seul bucket public « crew-media », rangé par équipage :
 --    <crew_id>/avatar/…   <crew_id>/cover/…   <crew_id>/photos/…   <crew_id>/sponsors/…

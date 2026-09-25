@@ -80,13 +80,13 @@ export default function LoginPage() {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="password">Mot de passe</Label>
-            <Link to="/mot-de-passe-oublie" className="text-xs text-white/60 hover:text-white">Mot de passe oublié ?</Link>
+            <Link to="/mot-de-passe-oublie" className="text-xs text-dust-300 hover:text-cream">Mot de passe oublié ?</Link>
           </div>
           <Input id="password" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
         </div>
-        {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
+        {error && <p role="alert" className="text-sm text-primary-light">{error}</p>}
         <Button type="submit" className="w-full" disabled={busy}>{busy ? 'Connexion…' : 'Se connecter'}</Button>
-        <Button type="button" variant="ghost" className="w-full text-white/70 hover:text-white" onClick={sendMagicLink} disabled={busy}>
+        <Button type="button" variant="ghost" className="w-full text-dust-200 hover:text-cream" onClick={sendMagicLink} disabled={busy}>
           Recevoir un lien de connexion par email
         </Button>
       </form>

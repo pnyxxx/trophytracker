@@ -1,39 +1,54 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Globe, Instagram, Mail, MapPin, Settings } from 'lucide-react';
+import { Globe, Instagram, Mail, Settings } from 'lucide-react';
 import { PageShell } from '@/components/layout/PageShell';
 import { Seo } from '@/components/common/Seo';
+import { Container, Kicker, LiveDot, SectionTitle } from '@/components/common/Brand';
 import { PageLoader } from '@/components/common/Spinner';
 import { Button } from '@/components/ui/button';
-import ScrollReveal from '@/components/animations/ScrollReveal';
 import { CrewAvatar, FollowButton, LiveBadge, ShareButton } from '@/components/crew/CrewBits';
 import { CrewStats } from '@/components/crew/CrewStats';
 import { CrewGallery } from '@/components/crew/CrewGallery';
 import { CrewSponsors } from '@/components/crew/CrewSponsors';
-import { CrewRoadTimeline } from '@/components/crew/CrewRoadTimeline';
+import { CrewRoadbook } from '@/components/crew/CrewRoadbook';
 import { useCrew, useCrewMembers, useCrewStats, useEvent, useMyRole, usePhotos, useSponsors } from '@/hooks/queries';
 import { useLiveTrack } from '@/hooks/useLiveTrack';
 import { formatRelative, isLive } from '@/lib/format';
 import { mediaUrl } from '@/lib/media';
+import { cn } from '@/lib/utils';
 import NotFound from './NotFound';
 
 const CrewMap = lazy(() => import('@/components/crew/CrewMap').then((m) => ({ default: m.CrewMap })));
 
-function Section({ id, title, subtitle, dark, children }: {
-  id: string; title: string; subtitle?: string; dark?: boolean; children: React.ReactNode;
+const TONES = {
+  dark: 'bg-ink text-cream',
+  sand: 'bg-sand text-coal',
+  cream: 'bg-cream text-coal',
+};
+
+function Section({ id, kicker, title, subtitle, tone = 'dark', children }: {
+  id: string; kicker?: ReactNode; title: ReactNode; subtitle?: string; tone?: keyof typeof TONES; children: ReactNode;
 }) {
+  const dark = tone === 'dark';
   return (
-    <section id={id} className={`scroll-mt-16 py-16 md:py-24 ${dark ? 'bg-black' : 'gradient-sand'}`}>
-      <div className="container mx-auto px-4">
-        <ScrollReveal>
-          <h2 className={`mb-2 text-3xl font-bold md:text-5xl ${dark ? 'text-white' : 'text-black'}`}>{title}</h2>
-          {subtitle && <p className={`mb-10 max-w-2xl ${dark ? 'text-white/60' : 'text-black/60'}`}>{subtitle}</p>}
-        </ScrollReveal>
+    <section id={id} className={cn('scroll-mt-[120px] py-20 md:py-[120px]', TONES[tone])}>
+      <Container className="flex flex-col gap-10 md:gap-14">
+        <div className="flex flex-wrap items-end justify-between gap-6">
+          <div className="flex flex-col gap-3.5">
+            {kicker && <Kicker className={dark ? undefined : 'text-primary'}>{kicker}</Kicker>}
+            <SectionTitle>{title}</SectionTitle>
+          </div>
+          {subtitle && <p className={cn('m-0 max-w-[420px] text-base leading-relaxed', dark ? 'text-dust-300' : 'text-dust-700')}>{subtitle}</p>}
+        </div>
         {children}
-      </div>
+      </Container>
     </section>
   );
 }
+
+/** « 31.085°N · 4.023°O » */
+const coords = (lat: number, lon: number) =>
+  `${Math.abs(lat).toFixed(3)}°${lat >= 0 ? 'N' : 'S'} · ${Math.abs(lon).toFixed(3)}°${lon < 0 ? 'O' : 'E'}`;
 
 export default function CrewPage() {
   const { slug } = useParams();
@@ -51,101 +66,158 @@ export default function CrewPage() {
 
   const cover = mediaUrl(crew.cover_path);
   const live = isLive(crew.last_fix_at);
+  const hasRoute = !!event && event.waypoints.length > 1;
+  const hasContact = !!(crew.contact_email || crew.instagram_url || crew.website_url);
+
+  const anchors = [
+    { id: 'carte', label: 'Carte' },
+    { id: 'stats', label: 'Stats' },
+    hasRoute && { id: 'route', label: 'La route' },
+    crew.story && { id: 'histoire', label: 'L’aventure' },
+    photos.length > 0 && { id: 'photos', label: 'Photos' },
+    sponsors.length > 0 && { id: 'sponsors', label: 'Sponsors' },
+  ].filter(Boolean) as { id: string; label: string }[];
 
   return (
     <PageShell padTop={false}>
       <Seo title={crew.name} description={crew.tagline ?? `Suivez l'équipage ${crew.name} en direct sur le 4L Trophy.`} />
 
       {/* ── En-tête ──────────────────────────────────────────────────────── */}
-      <header className="relative overflow-hidden bg-black pb-10 pt-28 md:pb-14 md:pt-36">
-        {cover && <img src={cover} alt="" className="absolute inset-0 h-full w-full object-cover opacity-40" />}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30" />
-        <div className="container relative mx-auto flex flex-col gap-6 px-4 md:flex-row md:items-end">
-          <CrewAvatar name={crew.name} path={crew.avatar_path} className="h-24 w-24 text-3xl ring-4 ring-black md:h-32 md:w-32" />
-          <div className="flex-1">
-            <div className="mb-2 flex flex-wrap items-center gap-3">
-              {crew.car_number && <span className="rounded-md bg-primary px-2 py-1 font-mono text-sm font-bold text-white">#{crew.car_number}</span>}
+      <header className="relative overflow-hidden bg-[radial-gradient(120%_80%_at_80%_0%,#3A2215_0%,#1B1310_45%,#120F0C_75%)]">
+        {cover && <img src={cover} alt="" className="absolute inset-0 h-full w-full object-cover opacity-35" />}
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(18,15,12,.55)_0%,rgba(18,15,12,.3)_40%,#120F0C_100%)]" />
+        <Container className="relative grid gap-10 pb-14 pt-32 md:pb-16 md:pt-40 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div className="flex min-w-0 flex-col gap-6">
+            <Kicker className="flex-wrap gap-x-4 gap-y-2">
+              {crew.car_number && (
+                <span className="rounded-[3px] bg-primary px-2 py-1 font-mono text-xs font-bold tracking-normal text-white">#{crew.car_number}</span>
+              )}
+              <span>Équipage · {event?.name ?? '4L Trophy'}</span>
               <LiveBadge lastFixAt={crew.last_fix_at} />
-              {!live && crew.last_fix_at && <span className="text-sm text-white/50">Dernière position {formatRelative(crew.last_fix_at)}</span>}
-              {!crew.is_public && <span className="rounded-md bg-white/10 px-2 py-1 text-xs text-white/70">🔒 Page privée</span>}
+              {!live && crew.last_fix_at && <span className="text-dust-400">Dernière position {formatRelative(crew.last_fix_at)}</span>}
+              {!crew.is_public && <span className="border border-cream/25 px-2 py-1 text-dust-100">Page privée</span>}
+            </Kicker>
+            <h1 className="m-0 break-words font-display text-[clamp(56px,9vw,152px)] font-black uppercase leading-[0.92] text-cream">
+              {crew.name}
+            </h1>
+            {crew.tagline && <p className="m-0 max-w-[640px] text-pretty text-xl leading-snug text-dust-100">{crew.tagline}</p>}
+            <div className="flex flex-col gap-1.5 font-mono text-xs uppercase tracking-[0.12em] text-dust-400">
+              {(crew.school || crew.city) && <span>{[crew.school, crew.city].filter(Boolean).join(' · ')}</span>}
+              {members.length > 0 && <span>Équipage : {members.map((m) => m.display_name).join(' & ')}</span>}
             </div>
-            <h1 className="text-4xl font-bold text-white md:text-6xl">{crew.name}</h1>
-            {crew.tagline && <p className="mt-2 text-lg text-white/80">{crew.tagline}</p>}
-            {(crew.school || crew.city) && (
-              <p className="mt-2 flex items-center gap-1.5 text-sm text-white/50">
-                <MapPin className="h-4 w-4" /> {[crew.school, crew.city].filter(Boolean).join(' · ')}
-              </p>
-            )}
-            {members.length > 0 && (
-              <p className="mt-1 text-sm text-white/50">Équipage : {members.map((m) => m.display_name).join(' & ')}</p>
-            )}
           </div>
-          <div className="flex flex-wrap gap-2">
-            <FollowButton crewId={crew.id} slug={crew.slug} count={crew.followers_count} />
-            <ShareButton title={crew.name} className="border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white" />
-            {canEdit && (
-              <Button asChild variant="secondary">
-                <Link to={`/mon-compte/equipages/${crew.slug}`}><Settings className="mr-2 h-4 w-4" />Gérer</Link>
-              </Button>
+
+          <div className="flex flex-col gap-5 lg:items-end">
+            <CrewAvatar name={crew.name} path={crew.avatar_path} className="h-24 w-24 border-2 border-cream/20 text-4xl md:h-32 md:w-32 md:text-5xl" />
+            {crew.last_lat != null && crew.last_lon != null && (
+              <span className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.12em] text-cream">
+                <span className="h-[7px] w-[7px] rounded-full bg-primary shadow-[0_0_10px_#DB4740]" />
+                {coords(crew.last_lat, crew.last_lon)}
+              </span>
             )}
+            <div className="flex flex-wrap gap-2">
+              <FollowButton crewId={crew.id} slug={crew.slug} count={crew.followers_count} />
+              <ShareButton title={crew.name} />
+              {canEdit && (
+                <Button asChild variant="secondary">
+                  <Link to={`/mon-compte/equipages/${crew.slug}`}><Settings />Gérer</Link>
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
+        </Container>
       </header>
 
+      {/* Sommaire de la page, collé sous l'en-tête du site */}
+      <nav aria-label="Sections de la page" className="sticky top-[68px] z-[900] border-y border-cream/[0.12] bg-ink/90 backdrop-blur-md">
+        <Container className="flex gap-6 overflow-x-auto py-3 font-mono text-xs uppercase tracking-[0.14em]">
+          {anchors.map((a) => (
+            <a key={a.id} href={`#${a.id}`} className="shrink-0 text-dust-300 hover:text-cream">
+              <span className="text-primary">◆</span> {a.label}
+            </a>
+          ))}
+        </Container>
+      </nav>
+
       {/* ── Carte ────────────────────────────────────────────────────────── */}
-      <Section id="carte" title="Live tracking" subtitle="Position en temps réel et trace complète depuis le départ.">
-        <Suspense fallback={<div className="h-[560px] animate-pulse rounded-2xl bg-black/10" />}>
+      <Section
+        id="carte"
+        kicker={live ? <><LiveDot />Suivi en direct</> : 'Suivi GPS'}
+        title="Où est la 4L ?"
+        subtitle="Position en temps réel et trace complète depuis le départ."
+      >
+        <Suspense fallback={<div className="h-[600px] animate-pulse border border-cream/[0.14] bg-ink-900" />}>
           <CrewMap crew={crew} points={points} waypoints={event?.waypoints ?? []} sponsors={sponsors} />
         </Suspense>
       </Section>
 
       {/* ── Statistiques ─────────────────────────────────────────────────── */}
-      <Section id="stats" title="Statistiques" subtitle="Mises à jour automatiquement à chaque nouvelle position." dark>
-        <CrewStats stats={stats} startDate={event?.startDate ?? null} />
-      </Section>
+      <section id="stats" className="scroll-mt-[120px] border-t border-cream/[0.12] bg-ink pb-20 pt-16 md:pb-[120px]">
+        <Container className="flex flex-col gap-10">
+          <div className="flex flex-wrap items-end justify-between gap-6">
+            <div className="flex flex-col gap-3.5">
+              <Kicker>Tableau de bord</Kicker>
+              <SectionTitle>Les chiffres</SectionTitle>
+            </div>
+            <p className="m-0 max-w-[420px] text-base leading-relaxed text-dust-300">Mises à jour automatiquement à chaque nouvelle position.</p>
+          </div>
+          <CrewStats stats={stats} startDate={event?.startDate ?? null} />
+        </Container>
+      </section>
 
       {/* ── La route ─────────────────────────────────────────────────────── */}
-      {event && event.waypoints.length > 1 && (
-        <Section id="route" title="La route" subtitle={`De ${event.waypoints[0]!.name} à ${event.waypoints.at(-1)!.name}`}>
-          <CrewRoadTimeline waypoints={event.waypoints} distanceKm={stats?.total_distance_km ?? 0} />
+      {hasRoute && (
+        <Section
+          id="route"
+          tone="sand"
+          kicker="Le roadbook"
+          title="La route"
+          subtitle={`De ${event.waypoints[0]!.name} à ${event.waypoints.at(-1)!.name} : où en est l’équipage sur le parcours officiel.`}
+        >
+          <CrewRoadbook waypoints={event.waypoints} distanceKm={stats?.total_distance_km ?? 0} totalKm={event.totalKm} />
         </Section>
       )}
 
       {/* ── Histoire ─────────────────────────────────────────────────────── */}
       {crew.story && (
-        <Section id="histoire" title="Notre aventure" dark>
-          <div className="max-w-3xl whitespace-pre-line text-lg leading-relaxed text-white/80">{crew.story}</div>
+        <Section id="histoire" tone="cream" kicker="Carnet de bord" title="Notre aventure">
+          <div className="max-w-3xl whitespace-pre-line border-l-[3px] border-primary pl-6 text-lg leading-relaxed text-dust-800 md:text-xl">
+            {crew.story}
+          </div>
         </Section>
       )}
 
       {/* ── Photos ───────────────────────────────────────────────────────── */}
       {photos.length > 0 && (
-        <Section id="photos" title="Photos & 360°" subtitle="Cliquez pour agrandir. Les photos 360° se parcourent en glissant.">
+        <Section id="photos" kicker="Depuis la route" title="Photos & 360°" subtitle="Cliquez pour agrandir. Les photos 360° se parcourent en glissant.">
           <CrewGallery photos={photos} />
         </Section>
       )}
 
       {/* ── Sponsors ─────────────────────────────────────────────────────── */}
       {sponsors.length > 0 && (
-        <Section id="sponsors" title="Nos sponsors" subtitle="Merci à eux : sans eux, pas d'aventure !" dark>
+        <Section id="sponsors" tone="sand" kicker="Merci à eux" title="Nos sponsors" subtitle="Sans eux, pas d’aventure !">
           <CrewSponsors sponsors={sponsors} />
         </Section>
       )}
 
       {/* ── Contact ──────────────────────────────────────────────────────── */}
-      {(crew.contact_email || crew.instagram_url || crew.website_url) && (
-        <section className="bg-[hsl(var(--background))] py-12">
-          <div className="container mx-auto flex flex-wrap justify-center gap-3 px-4">
-            {crew.contact_email && (
-              <Button asChild variant="secondary"><a href={`mailto:${crew.contact_email}`}><Mail className="mr-2 h-4 w-4" />Contacter l'équipage</a></Button>
-            )}
-            {crew.instagram_url && (
-              <Button asChild variant="secondary"><a href={crew.instagram_url} target="_blank" rel="noopener noreferrer"><Instagram className="mr-2 h-4 w-4" />Instagram</a></Button>
-            )}
-            {crew.website_url && (
-              <Button asChild variant="secondary"><a href={crew.website_url} target="_blank" rel="noopener noreferrer"><Globe className="mr-2 h-4 w-4" />Site web</a></Button>
-            )}
-          </div>
+      {hasContact && (
+        <section className="border-t border-cream/[0.12] bg-ink py-14">
+          <Container className="flex flex-wrap items-center justify-between gap-6">
+            <p className="m-0 font-display text-4xl font-black uppercase leading-none">Un message pour l’équipage ?</p>
+            <div className="flex flex-wrap gap-3">
+              {crew.contact_email && (
+                <Button asChild variant="secondary"><a href={`mailto:${crew.contact_email}`}><Mail />Contacter l'équipage</a></Button>
+              )}
+              {crew.instagram_url && (
+                <Button asChild variant="secondary"><a href={crew.instagram_url} target="_blank" rel="noopener noreferrer"><Instagram />Instagram</a></Button>
+              )}
+              {crew.website_url && (
+                <Button asChild variant="secondary"><a href={crew.website_url} target="_blank" rel="noopener noreferrer"><Globe />Site web</a></Button>
+              )}
+            </div>
+          </Container>
         </section>
       )}
     </PageShell>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { departureTime } from '@/lib/format';
 
 function remaining(target: number) {
   const d = Math.max(0, target - Date.now());
@@ -10,9 +11,9 @@ function remaining(target: number) {
   };
 }
 
-/** Compte à rebours jusqu'au départ (masqué une fois la date passée). */
+/** Compte à rebours jusqu'au départ, en cases façon tableau de bord (masqué une fois la date passée). */
 export function Countdown({ date }: { date: string }) {
-  const target = new Date(`${date}T00:00:00`).getTime();
+  const target = departureTime(date);
   const [left, setLeft] = useState(() => remaining(target));
   useEffect(() => {
     const t = setInterval(() => setLeft(remaining(target)), 1000);
@@ -21,11 +22,11 @@ export function Countdown({ date }: { date: string }) {
   if (target <= Date.now()) return null;
 
   return (
-    <div className="flex justify-center gap-2 md:gap-4" aria-label="Temps restant avant le départ">
+    <div className="grid grid-cols-4 gap-2" role="timer" aria-label="Temps restant avant le départ">
       {Object.entries(left).map(([label, value]) => (
-        <div key={label} className="border-l-2 border-primary bg-black/30 px-3 py-2 text-center md:px-4 md:py-3">
-          <div className="font-mono text-lg font-bold tracking-wider text-white md:text-2xl">{String(value).padStart(2, '0')}</div>
-          <div className="text-xs font-bold uppercase tracking-widest text-primary">{label}</div>
+        <div key={label} className="border-l-[3px] border-primary bg-black/35 px-3.5 py-3">
+          <div className="font-mono text-[28px] font-bold leading-none text-cream sm:text-[34px]">{String(value).padStart(2, '0')}</div>
+          <div className="mt-1.5 font-mono text-[11px] font-bold tracking-[0.2em] text-primary">{label}</div>
         </div>
       ))}
     </div>

@@ -1,5 +1,5 @@
 -- ═════════════════════════════════════════════════════════════════════════════
---  TrophysTracker — 3/5 : sécurité (droits + Row Level Security)
+--  TrophyTracker — 3/5 : sécurité (droits + Row Level Security)
 --
 --  Principe : TOUT est interdit par défaut, puis on autorise précisément.
 --

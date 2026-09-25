@@ -50,11 +50,11 @@ function ImagePicker({ crew, kind }: { crew: Crew; kind: 'avatar' | 'cover' }) {
   });
 
   return (
-    <label className={`group relative flex cursor-pointer items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-white/20 bg-white/5 hover:border-primary ${kind === 'avatar' ? 'h-32 w-32' : 'h-32 w-full'}`}>
+    <label className={`group relative flex cursor-pointer items-center justify-center overflow-hidden rounded-[4px] border-2 border-dashed border-cream/20 bg-cream/5 hover:border-primary ${kind === 'avatar' ? 'h-32 w-32' : 'h-32 w-full'}`}>
       {current ? <img src={current} alt="" className="h-full w-full object-cover" /> : (
-        <span className="flex flex-col items-center gap-1 text-xs text-white/50"><ImagePlus className="h-6 w-6" />{kind === 'avatar' ? 'Logo' : 'Couverture'}</span>
+        <span className="flex flex-col items-center gap-1 text-xs text-dust-400"><ImagePlus className="h-6 w-6" />{kind === 'avatar' ? 'Logo' : 'Couverture'}</span>
       )}
-      {upload.isPending && <span className="absolute inset-0 flex items-center justify-center bg-black/70 text-sm text-white">Envoi…</span>}
+      {upload.isPending && <span className="absolute inset-0 flex items-center justify-center bg-black/70 text-sm text-cream">Envoi…</span>}
       <input
         type="file"
         accept="image/*"
@@ -141,8 +141,8 @@ export function InfoTab({ crew }: { crew: Crew }) {
         <div className="flex items-start gap-3">
           <Switch id="public" checked={form.is_public} onCheckedChange={(v) => setForm({ ...form, is_public: v })} />
           <div>
-            <Label htmlFor="public" className="text-white">Page publique</Label>
-            <p className="text-sm text-white/50">
+            <Label htmlFor="public" className="text-cream">Page publique</Label>
+            <p className="text-sm text-dust-400">
               {form.is_public
                 ? 'Tout le monde peut voir la page et la position GPS avec le lien.'
                 : 'Seuls les membres de l’équipage voient la page (y compris la position).'}

@@ -10,7 +10,8 @@ import rateLimit from '@fastify/rate-limit';
 import type { Db } from './db.js';
 import { parseDeviceRequest } from './parse.js';
 
-export async function buildHttp(db: Db, opts: { trustProxy: boolean; logger: boolean }) {
+export async function buildHttp(db: Db, opts: { trustProxy: boolean; logger: boolean; log?: (msg: string) => void }) {
+  const log = opts.log ?? (() => {});
   const app = Fastify({ logger: opts.logger, trustProxy: opts.trustProxy, bodyLimit: 16 * 1024 });
 
   // Traccar Client peut envoyer du application/x-www-form-urlencoded.
@@ -26,14 +27,25 @@ export async function buildHttp(db: Db, opts: { trustProxy: boolean; logger: boo
     return { status: 'ok' };
   });
 
-  const ingest = async (req: { query: unknown; body: unknown }, reply: import('fastify').FastifyReply) => {
+  // Seuls les refus sont journalisés (jamais la clé en entier ni les coordonnées) :
+  // de quoi dépanner un équipage sans noyer les journaux sous les positions normales.
+  const ingest = async (req: { query: unknown; body: unknown; ip: string }, reply: import('fastify').FastifyReply) => {
     const parsed = parseDeviceRequest(req.query, req.body);
-    if ('error' in parsed) return reply.status(400).send({ error: parsed.error });
+    if ('error' in parsed) {
+      log(`position refusée (400 ${parsed.error}) depuis ${req.ip}`);
+      return reply.status(400).send({ error: parsed.error });
+    }
 
     const crewId = await db.crewForDeviceKey(parsed.key);
-    if (!crewId) return reply.status(401).send({ error: "Clé d'appareil inconnue" });
+    if (!crewId) {
+      log(`position refusée (401 clé inconnue ${parsed.key.slice(0, 7)}…) depuis ${req.ip}`);
+      return reply.status(401).send({ error: "Clé d'appareil inconnue" });
+    }
 
     const result = await db.ingest(crewId, parsed.point);
+    if (result === 'glitch' || result === 'invalid') {
+      log(`position écartée (${result === 'glitch' ? 'saut impossible depuis le point précédent' : 'coordonnées invalides'}) pour l'équipage ${crewId.slice(0, 8)} depuis ${req.ip}`);
+    }
     // Un point écarté (doublon, glitch…) répond quand même 200 :
     // sinon l'application le renverrait indéfiniment.
     return reply.send({ result });

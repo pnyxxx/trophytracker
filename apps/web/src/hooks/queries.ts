@@ -55,9 +55,10 @@ export type CrewSummary = Pick<
   | 'last_lat' | 'last_lon' | 'last_speed_kmh' | 'last_fix_at' | 'total_distance_m'
 >;
 
-export function useCrewSearch(query: string, liveOnly: boolean, limit = 24) {
+export function useCrewSearch(query: string, liveOnly: boolean, limit = 24, enabled = true) {
   return useQuery({
     queryKey: keys.crews(query, liveOnly, limit),
+    enabled,
     placeholderData: (prev) => prev,
     refetchInterval: 60_000,
     queryFn: async () =>

@@ -1,48 +1,54 @@
-import { lazy, Suspense, useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Bell, Camera, Gift, HeartHandshake, Map, Search, ShieldCheck, Smartphone, Users } from 'lucide-react';
+import { lazy, Suspense, useMemo, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { PageShell } from '@/components/layout/PageShell';
 import { Seo } from '@/components/common/Seo';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Kicker, LiveDot, SectionTitle } from '@/components/common/Brand';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import ScrollReveal from '@/components/animations/ScrollReveal';
 import { CrewCard } from '@/components/crew/CrewBits';
 import { Countdown } from '@/components/landing/Countdown';
+import { CrewFinder } from '@/components/landing/CrewFinder';
+import { RouteJourney } from '@/components/landing/RouteJourney';
+import { fmtKm, STOPS, TOTAL_KM } from '@/components/landing/journey';
 import { useCrewSearch, useEvent } from '@/hooks/queries';
+import { departureTime, isLive } from '@/lib/format';
+import { useSeen } from '@/hooks/useInView';
 
-const CrewsOverviewMap = lazy(() => import('@/components/landing/CrewsOverviewMap'));
+// Les cartes (MapLibre) sont chargées à part : le haut de page s'affiche tout de suite.
+const LiveCrewsMap = lazy(() => import('@/components/landing/LiveCrewsMap'));
+const CtaMap = lazy(() => import('@/components/landing/CtaMap'));
 
 const audiences = [
   {
-    icon: HeartHandshake,
+    n: '01',
+    km: 'KM 0 · À la maison',
     title: 'Pour les proches',
     text: 'Parents, amis, grands-parents : voyez où se trouve votre équipage à tout moment, sans attendre un message. Rassurant quand ils traversent le désert !',
   },
   {
-    icon: Gift,
+    n: '02',
+    km: 'KM ∞ · Sur la carte',
     title: 'Pour les sponsors',
     text: 'Suivez l’aventure que vous financez. Votre logo apparaît sur la page et sur la carte de l’équipage, vue par toute sa communauté.',
   },
   {
-    icon: Users,
+    n: '03',
+    km: `KM ${TOTAL_KM} · Au volant`,
     title: 'Pour les équipages',
     text: 'Une page à vous, gratuite, en 5 minutes : carte en direct, statistiques, photos et 360°, sponsors. Un seul lien à partager.',
   },
 ];
 
 const steps = [
-  { icon: Users, title: 'L’équipage crée sa page', text: 'Nom, numéro, photos, sponsors… tout se gère depuis un espace simple.' },
-  { icon: Smartphone, title: 'Il active le GPS', text: 'L’appli gratuite Traccar Client sur un téléphone de la 4L suffit. Aucun boîtier à acheter.' },
-  { icon: Map, title: 'Vous suivez en direct', text: 'Position, trace complète depuis le départ, vitesse, kilomètres parcourus, photos du bivouac…' },
+  { n: '1', title: 'L’équipage crée sa page', text: 'Nom, numéro, photos, sponsors… tout se gère depuis un espace simple.' },
+  { n: '2', title: 'Il active le GPS', text: 'L’appli gratuite Traccar Client sur un téléphone de la 4L suffit. Aucun boîtier à acheter.' },
+  { n: '3', title: 'Vous suivez en direct', text: 'Position, trace complète depuis le départ, vitesse, kilomètres parcourus, photos du bivouac…' },
 ];
 
 const features = [
-  { icon: Map, title: 'Carte en temps réel', text: 'La 4L bouge sur la carte sans recharger la page.' },
-  { icon: Camera, title: 'Photos & 360°', text: 'Revivez les dunes de Merzouga comme si vous y étiez.' },
-  { icon: Bell, title: 'Vos favoris', text: 'Retrouvez en un clic les équipages que vous suivez.' },
-  { icon: ShieldCheck, title: 'Gratuit & respectueux', text: 'Sans publicité, sans revente de données, sur nos propres serveurs.' },
+  { tag: '01 · CARTE', title: 'Carte en temps réel', text: 'La 4L bouge sur la carte sans recharger la page.' },
+  { tag: '02 · PHOTOS', title: 'Photos & 360°', text: 'Revivez les dunes de Merzouga comme si vous y étiez.' },
+  { tag: '03 · FAVORIS', title: 'Vos favoris', text: 'Retrouvez en un clic les équipages que vous suivez.' },
+  { tag: '04 · ÉTHIQUE', title: 'Gratuit & respectueux', text: 'Sans publicité, sans revente de données, sur nos propres serveurs.' },
 ];
 
 const faq = [
@@ -64,224 +70,290 @@ const faq = [
   },
   {
     q: 'Combien ça coûte ?',
-    a: 'Rien. TrophysTracker est un projet indépendant et gratuit, né de l’expérience d’un équipage du 4L Trophy.',
+    a: 'Rien. TrophyTracker est un projet indépendant et gratuit, né de l’expérience d’un équipage du 4L Trophy.',
   },
 ];
 
 export default function Landing() {
-  const navigate = useNavigate();
-  const [query, setQuery] = useState('');
+  const liveRef = useRef<HTMLDivElement>(null);
+  const ctaRef = useRef<HTMLElement>(null);
+  const liveSeen = useSeen(liveRef);
+  const ctaSeen = useSeen(ctaRef);
   const { data: event } = useEvent();
   const { data: crews } = useCrewSearch('', false, 60);
 
-  const search = (e: FormEvent) => {
-    e.preventDefault();
-    navigate(query.trim() ? `/equipages?q=${encodeURIComponent(query.trim())}` : '/equipages');
-  };
+  const items = useMemo(() => crews?.items ?? [], [crews]);
+  const liveCount = items.filter((c) => isLive(c.last_fix_at)).length;
+  // En tête de liste : ceux qui émettent, puis les plus avancés sur la route.
+  const leaders = useMemo(
+    () =>
+      [...items]
+        .sort((a, b) => Number(isLive(b.last_fix_at)) - Number(isLive(a.last_fix_at)) || b.total_distance_m - a.total_distance_m)
+        .slice(0, 6),
+    [items],
+  );
+  const route = useMemo(
+    () => (event?.waypoints.length ? event.waypoints : STOPS).map((w) => ({ name: w.name, lat: w.lat, lon: w.lon })),
+    [event],
+  );
+  const totalKm = fmtKm(event?.totalKm ?? TOTAL_KM);
+  const beforeStart = !!event?.startDate && departureTime(event.startDate) > Date.now();
 
   return (
     <PageShell padTop={false}>
       <Seo />
 
-      {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <section className="relative flex min-h-screen items-center overflow-hidden bg-gradient-to-b from-black via-[hsl(var(--hero-bg))] to-black pb-16 pt-28">
-        <div className="absolute inset-0">
-          <motion.div
-            animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.25, 0.15] }}
-            transition={{ duration: 8, repeat: Infinity }}
-            className="absolute -left-1/4 top-1/4 h-[600px] w-[600px] rounded-full bg-primary/20 blur-[120px]"
-          />
-          <motion.div
-            animate={{ scale: [1, 1.3, 1], opacity: [0.1, 0.2, 0.1] }}
-            transition={{ duration: 10, repeat: Infinity, delay: 2 }}
-            className="absolute -right-1/4 bottom-1/4 h-[700px] w-[700px] rounded-full bg-secondary/20 blur-[120px]"
-          />
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:100px_100px] [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_80%)]" />
-        </div>
+      {/* ── 01 Hero ──────────────────────────────────────────────────────── */}
+      <section className="relative flex min-h-[100svh] flex-col overflow-x-clip bg-[radial-gradient(120%_80%_at_80%_0%,#3A2215_0%,#1B1310_45%,#120F0C_75%)]">
+        <div className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col justify-end gap-8 px-4 pb-10 pt-28 sm:px-7 lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:content-center lg:items-end lg:gap-12 lg:pb-14">
+          <div className="flex flex-col gap-5">
+            <Kicker>
+              <span className="h-2 w-2 rounded-full bg-live" />
+              <span>{event?.name ?? '4L Trophy'} · suivi GPS en direct</span>
+            </Kicker>
+            {/* Une ligne par segment. La taille suit la largeur disponible (« jusqu’au désert. » doit tenir,
+                à côté de la colonne de droite sur grand écran) ET la hauteur : tout le hero tient sur un écran. */}
+            <h1 className="m-0 font-display text-[clamp(44px,min(13vw,calc((100svh_-_540px)/2.85)),200px)] font-black lg:text-[clamp(64px,min(calc((min(100vw,1400px)_-_496px)/6.55),calc((100svh_-_260px)/2.85)),200px)] uppercase leading-[0.95] tracking-[-0.01em] text-cream sm:whitespace-nowrap">
+              Suivez
+              <br />
+              votre équipage
+              <br />
+              jusqu’au <span className="font-stencil text-primary">désert.</span>
+            </h1>
+          </div>
 
-        <div className="container relative z-10 mx-auto px-4 text-center">
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mx-auto mb-6 w-fit rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-sm text-white/80"
-          >
-            🚗 {event?.name ?? '4L Trophy'} · suivi GPS en direct
-          </motion.p>
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="mx-auto mb-6 max-w-4xl text-4xl font-bold text-white md:text-7xl"
-          >
-            Suivez votre équipage <span className="text-gradient-red">en direct</span>, jusqu’au bout du désert.
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-gray-300 md:text-xl"
-          >
-            Proches, amis, sponsors : retrouvez la position, la trace complète, les photos et les
-            statistiques de l’équipage que vous soutenez. Gratuit, sans application à installer.
-          </motion.p>
-
-          <motion.form
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            onSubmit={search}
-            className="mx-auto mb-8 flex max-w-xl flex-col gap-3 sm:flex-row"
-            role="search"
-          >
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/40" />
-              <Input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Nom de l’équipage, numéro, école…"
-                aria-label="Rechercher un équipage"
-                className="h-14 rounded-xl border-white/20 bg-white/10 pl-12 text-base text-white placeholder:text-white/40"
-              />
-            </div>
-            <Button type="submit" size="lg" className="h-14 rounded-xl px-8 text-base font-bold">
-              Trouver
-            </Button>
-          </motion.form>
-
-          {event?.startDate && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }} className="mb-8">
-              <p className="mb-3 text-sm uppercase tracking-widest text-white/50">Départ dans</p>
-              <Countdown date={event.startDate} />
-            </motion.div>
-          )}
-
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45 }} className="text-sm text-white/60">
-            Vous participez au raid ?{' '}
-            <Link to="/inscription" className="font-semibold text-primary underline-offset-4 hover:underline">
-              Créez la page de votre équipage gratuitement →
-            </Link>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ── Pour qui ─────────────────────────────────────────────────────── */}
-      <section className="gradient-sand py-20 md:py-28">
-        <div className="container mx-auto px-4">
-          <ScrollReveal>
-            <h2 className="mb-4 text-center text-3xl font-bold text-black md:text-5xl">Pourquoi TrophysTracker ?</h2>
-            <p className="mx-auto mb-14 max-w-2xl text-center text-lg text-black/70">
-              Pendant 10 jours, des milliers d’étudiants traversent la France, l’Espagne et le Maroc en 4L.
-              À la maison, on aimerait bien savoir où ils sont. C’est exactement ce que nous faisons.
+          <div className="flex w-full max-w-[560px] flex-col gap-5">
+            <p className="m-0 text-pretty text-lg leading-relaxed text-dust-200">
+              Proches, amis, sponsors : retrouvez la position, la trace complète, les photos et les statistiques de
+              l’équipage que vous soutenez. Gratuit, sans application à installer.
             </p>
-          </ScrollReveal>
-          <div className="grid gap-6 md:grid-cols-3">
-            {audiences.map((a, i) => (
-              <ScrollReveal key={a.title} delay={i * 0.1}>
-                <div className="h-full rounded-3xl bg-white p-8 shadow-sm">
-                  <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
-                    <a.icon className="h-7 w-7 text-primary" />
-                  </div>
-                  <h3 className="mb-3 text-2xl font-bold text-black">{a.title}</h3>
-                  <p className="text-black/70">{a.text}</p>
+
+            <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-3">
+                <div className="flex justify-between gap-4 font-mono text-[11px] uppercase tracking-[0.16em] text-dust-400">
+                  <span>{beforeStart ? 'Départ dans' : 'Sur la route en ce moment'}</span>
+                  <span className="hidden sm:inline lg:hidden">Biarritz · 43°27′N 1°32′O</span>
                 </div>
-              </ScrollReveal>
-            ))}
+                {beforeStart ? (
+                  <Countdown date={event!.startDate!} />
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { v: crews?.total ?? '—', l: 'Équipages' },
+                      { v: liveCount, l: 'En direct' },
+                    ].map((c) => (
+                      <div key={c.l} className="border-l-[3px] border-primary bg-black/35 px-3.5 py-3">
+                        <div className="font-mono text-[34px] font-bold leading-none text-cream">{c.v}</div>
+                        <div className="mt-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-primary">{c.l}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <CrewFinder />
+
+              <div className="text-sm text-dust-400">
+                Vous participez au raid ?{' '}
+                <Link to="/inscription" className="font-semibold text-primary hover:text-primary-light">
+                  Créez la page de votre équipage gratuitement →
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
-      </section>
 
-      {/* ── Carte d'ensemble ─────────────────────────────────────────────── */}
-      <section className="bg-black py-20 md:py-28">
-        <div className="container mx-auto px-4">
-          <ScrollReveal>
-            <h2 className="mb-4 text-center text-3xl font-bold text-white md:text-5xl">Sur la route en ce moment</h2>
-            <p className="mx-auto mb-10 max-w-2xl text-center text-white/60">
-              Dernière position connue de chaque équipage. Cliquez sur un équipage pour suivre sa trace complète.
-            </p>
-          </ScrollReveal>
-          <div className="h-[60vh] min-h-[380px] overflow-hidden rounded-3xl border border-white/10">
-            <Suspense fallback={<div className="h-full w-full animate-pulse bg-white/5" />}>
-              <CrewsOverviewMap crews={crews?.items ?? []} />
-            </Suspense>
-          </div>
-
-          {crews && crews.items.length > 0 && (
-            <>
-              <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {crews.items.slice(0, 6).map((c) => (
-                  <CrewCard key={c.id} crew={c} />
+        {/* Bandeau défilant des étapes */}
+        <div className="overflow-hidden border-y border-cream/[0.12] bg-ink py-3" aria-hidden="true">
+          <div className="flex w-max animate-marquee font-mono text-[13px] uppercase tracking-[0.14em] text-dust-100">
+            {[0, 1].map((k) => (
+              <div key={k} className="flex gap-10 pr-10">
+                {STOPS.map((s) => (
+                  <span key={s.name} className="whitespace-nowrap">
+                    <span className="text-primary">◆ </span>
+                    {s.name} · {s.country} · km {fmtKm(s.km)}
+                  </span>
                 ))}
               </div>
-              <div className="mt-8 text-center">
-                <Button asChild variant="secondary" size="lg">
-                  <Link to="/equipages">Voir les {crews.total} équipages</Link>
-                </Button>
-              </div>
-            </>
-          )}
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ── Comment ça marche ────────────────────────────────────────────── */}
-      <section id="comment-ca-marche" className="scroll-mt-16 bg-[hsl(var(--background))] py-20 md:py-28">
-        <div className="container mx-auto px-4">
-          <ScrollReveal>
-            <h2 className="mb-14 text-center text-3xl font-bold text-white md:text-5xl">Comment ça marche ?</h2>
-          </ScrollReveal>
-          <div className="relative grid gap-10 md:grid-cols-3">
-            {steps.map((s, i) => (
-              <ScrollReveal key={s.title} delay={i * 0.1}>
-                <div className="text-center">
-                  <div className="relative mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/30">
-                    <s.icon className="h-9 w-9" />
-                    <span className="absolute -right-1 -top-1 flex h-8 w-8 items-center justify-center rounded-full bg-white font-bold text-black">
-                      {i + 1}
-                    </span>
-                  </div>
-                  <h3 className="mb-2 text-xl font-bold text-white">{s.title}</h3>
-                  <p className="mx-auto max-w-xs text-white/60">{s.text}</p>
+      {/* ── 02 La route ──────────────────────────────────────────────────── */}
+      <RouteJourney />
+
+      {/* ── 03 Pour qui ──────────────────────────────────────────────────── */}
+      <section className="bg-sand px-4 py-[120px] text-coal sm:px-7">
+        <div className="mx-auto flex max-w-[1240px] flex-col gap-14">
+          <div className="flex flex-wrap items-end justify-between gap-7">
+            <SectionTitle className="max-w-[780px] leading-[0.96]">
+              Un seul lien.
+              <br />
+              Trois raisons
+              <br />
+              de l’ouvrir.
+            </SectionTitle>
+            <p className="m-0 max-w-[420px] text-pretty text-[17px] leading-relaxed text-dust-700">
+              Pendant 10 jours, des milliers d’étudiants traversent la France, l’Espagne et le Maroc en 4L. À la maison,
+              on aimerait bien savoir où ils sont. C’est exactement ce que nous faisons.
+            </p>
+          </div>
+
+          {/* Le roadbook : une case par public */}
+          <div className="border-2 border-coal bg-cream">
+            <div className="flex flex-wrap border-b-2 border-coal bg-coal font-mono text-[11px] uppercase tracking-[0.16em] text-sand" aria-hidden="true">
+              <div className="flex-[0_0_150px] px-5 py-2.5">Case</div>
+              <div className="flex-[1_1_220px] px-5 py-2.5">Direction</div>
+              <div className="hidden flex-[2_1_320px] px-5 py-2.5 sm:block">Note du roadbook</div>
+            </div>
+            {audiences.map((a) => (
+              <div key={a.n} className="flex flex-wrap border-b-2 border-coal transition-colors last:border-b-0 hover:bg-paper">
+                <div className="flex flex-[0_0_150px] flex-col gap-1.5 border-r-2 border-coal px-5 py-7">
+                  <span className="font-stencil text-[64px] font-black leading-[0.9] text-primary">{a.n}</span>
+                  <span className="font-mono text-[11px] text-dust-700">{a.km}</span>
                 </div>
-              </ScrollReveal>
-            ))}
-          </div>
-
-          <div className="mt-20 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {features.map((f) => (
-              <div key={f.title} className="glass rounded-2xl p-6">
-                <f.icon className="mb-3 h-6 w-6 text-primary" />
-                <p className="mb-1 font-bold text-white">{f.title}</p>
-                <p className="text-sm text-white/60">{f.text}</p>
+                <div className="flex flex-[1_1_220px] items-center px-5 py-7">
+                  <h3 className="m-0 font-display text-[40px] font-black uppercase leading-[0.95]">{a.title}</h3>
+                </div>
+                <div className="flex flex-[2_1_320px] items-center px-5 pb-7 sm:py-7">
+                  <p className="m-0 text-pretty text-[17px] leading-relaxed text-dust-800">{a.text}</p>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── FAQ ──────────────────────────────────────────────────────────── */}
-      <section className="gradient-sand py-20 md:py-28">
-        <div className="container mx-auto max-w-3xl px-4">
-          <h2 className="mb-10 text-center text-3xl font-bold text-black md:text-5xl">Questions fréquentes</h2>
-          <Accordion type="single" collapsible className="rounded-3xl bg-white px-6 text-black shadow-sm">
+      {/* ── 04 En direct ─────────────────────────────────────────────────── */}
+      <section id="live" className="scroll-mt-[68px] bg-ink px-4 py-[120px] sm:px-7">
+        <div className="mx-auto flex max-w-[1400px] flex-col gap-10">
+          <div className="flex flex-wrap items-end justify-between gap-6">
+            <div className="flex flex-col gap-3.5">
+              <Kicker className="text-live">
+                <LiveDot />
+                Sur la route en ce moment
+              </Kicker>
+              <SectionTitle className="leading-[0.88]">Où sont-ils ?</SectionTitle>
+            </div>
+            <p className="m-0 max-w-[420px] text-base leading-relaxed text-dust-300">
+              Dernière position connue de chaque équipage. Cliquez sur un équipage pour suivre sa trace complète.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,440px),1fr))] gap-5">
+            <div ref={liveRef} className="relative min-h-[560px] overflow-hidden border border-cream/[0.14] bg-[#E8E2D8] min-[1000px]:col-span-2">
+              {liveSeen && (
+                <Suspense fallback={null}>
+                  <LiveCrewsMap route={route} crews={items} />
+                </Suspense>
+              )}
+              <div className="pointer-events-none absolute left-3.5 top-3.5 z-[2] bg-ink px-3 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-cream">
+                {route[0]?.name ?? 'Biarritz'} → {route.at(-1)?.name ?? 'Marrakech'} · {totalKm} km
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              {leaders.length === 0 ? (
+                <div className="flex flex-1 flex-col justify-center gap-3 border border-cream/[0.08] bg-ink-800 p-8">
+                  <p className="m-0 font-display text-3xl font-black uppercase">Personne sur la route… pour l’instant</p>
+                  <p className="m-0 text-sm text-dust-400">Les équipages apparaissent ici dès qu’ils ont créé leur page.</p>
+                </div>
+              ) : (
+                leaders.map((c) => <CrewCard key={c.id} crew={c} />)
+              )}
+              <Link
+                to="/equipages"
+                className="mt-2 border border-cream p-4 text-center font-mono text-xs font-bold uppercase tracking-[0.14em] text-cream hover:bg-cream hover:text-ink"
+              >
+                {crews && crews.total > 0 ? `Voir les ${crews.total} équipages →` : 'Voir tous les équipages →'}
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 05 Comment ça marche ─────────────────────────────────────────── */}
+      <section id="comment" className="scroll-mt-[68px] bg-cream px-4 py-[120px] text-coal sm:px-7">
+        <div className="mx-auto flex max-w-[1240px] flex-col gap-16">
+          <SectionTitle className="leading-[0.88]">
+            Comment
+            <br />
+            ça marche ?
+          </SectionTitle>
+          <ol className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(min(100%,300px),1fr))] border-t-2 border-coal p-0">
+            {steps.map((s) => (
+              <li key={s.n} className="flex flex-col gap-4 border-b-2 border-coal py-8 pr-7">
+                <div className="flex items-baseline gap-3">
+                  <span className="font-stencil text-[120px] font-black leading-[0.8] text-primary">{s.n}</span>
+                  <span className="tt-kicker text-dust-700">Étape</span>
+                </div>
+                <h3 className="m-0 font-display text-[34px] font-black uppercase leading-[0.95]">{s.title}</h3>
+                <p className="m-0 max-w-[340px] text-base leading-relaxed text-dust-800">{s.text}</p>
+              </li>
+            ))}
+          </ol>
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,240px),1fr))] gap-5">
+            {features.map((f) => (
+              <div key={f.tag} className="flex flex-col gap-2.5 bg-coal p-6 text-cream">
+                <span className="font-mono text-[11px] tracking-[0.14em] text-ochre">{f.tag}</span>
+                <span className="font-display text-[26px] font-extrabold uppercase leading-none">{f.title}</span>
+                <span className="text-sm leading-[1.55] text-dust-300">{f.text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 06 FAQ ───────────────────────────────────────────────────────── */}
+      <section className="bg-ink px-4 py-[120px] sm:px-7">
+        <div className="mx-auto grid max-w-[1240px] grid-cols-[repeat(auto-fit,minmax(min(100%,380px),1fr))] items-start gap-14">
+          <div className="flex flex-col gap-[18px]">
+            <Kicker>Briefing avant départ</Kicker>
+            <SectionTitle className="leading-[0.88]">
+              Questions
+              <br />
+              fréquentes
+            </SectionTitle>
+          </div>
+          <Accordion type="single" collapsible defaultValue="q0" className="border-t border-cream/20">
             {faq.map((f, i) => (
-              <AccordionItem key={f.q} value={`q${i}`} className="border-black/10">
-                <AccordionTrigger className="text-left text-base font-semibold">{f.q}</AccordionTrigger>
-                <AccordionContent className="text-black/70">{f.a}</AccordionContent>
+              <AccordionItem key={f.q} value={`q${i}`}>
+                <AccordionTrigger>{f.q}</AccordionTrigger>
+                <AccordionContent>{f.a}</AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>
         </div>
       </section>
 
-      {/* ── Appel à l'action ─────────────────────────────────────────────── */}
-      <section className="bg-primary py-16 text-center text-white">
-        <div className="container mx-auto px-4">
-          <h2 className="mb-4 text-3xl font-bold md:text-4xl">Vous partez sur le raid ?</h2>
-          <p className="mx-auto mb-8 max-w-xl text-white/85">
+      {/* ── 07 Inscription ───────────────────────────────────────────────── */}
+      <section ref={ctaRef} id="inscription" className="relative h-[820px] overflow-hidden bg-ink-900">
+        {ctaSeen && (
+          <Suspense fallback={null}>
+            <CtaMap />
+          </Suspense>
+        )}
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,#120F0C_0%,rgba(18,15,12,.5)_22%,rgba(18,15,12,.35)_60%,#0A0806_100%)]" />
+        <div className="absolute bottom-6 left-4 z-[3] font-mono text-[10px] uppercase tracking-[0.14em] text-dust-300 sm:left-7">
+          Merzouga, Maroc · vue satellite
+        </div>
+        <div className="relative z-[3] mx-auto flex max-w-[1240px] flex-col items-center gap-[22px] px-4 pt-[110px] text-center sm:px-7">
+          <Kicker className="text-gold">Merzouga · 31°05′N 4°00′O</Kicker>
+          <h2 className="m-0 w-full font-display text-[clamp(56px,8vw,128px)] font-black uppercase leading-[0.96] text-cream">
+            Vous partez
+            <br />
+            sur le raid&nbsp;?
+          </h2>
+          <p className="m-0 max-w-[520px] text-lg leading-relaxed text-dust-100">
             Créez la page de votre équipage en 5 minutes et partagez un seul lien à vos proches et sponsors.
           </p>
-          <Button asChild size="lg" variant="secondary" className="px-10 text-base font-bold">
-            <Link to="/inscription">Inscrire mon équipage</Link>
-          </Button>
+          <Link
+            to="/inscription"
+            className="rounded-[4px] bg-primary px-8 py-[18px] font-mono text-sm font-bold uppercase tracking-[0.12em] text-white shadow-[0_10px_40px_rgba(219,71,64,.45)] hover:bg-primary-dark hover:text-white"
+          >
+            Inscrire mon équipage →
+          </Link>
         </div>
       </section>
     </PageShell>

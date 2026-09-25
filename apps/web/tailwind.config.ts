@@ -1,6 +1,10 @@
 import type { Config } from "tailwindcss";
 import animate from "tailwindcss-animate";
 
+/**
+ * Charte « roadbook de rallye » : fond brun nuit, crème, rouge 4L Trophy,
+ * titres Big Shoulders, texte Archivo, données en JetBrains Mono.
+ */
 export default {
 	darkMode: ["class"],
 	content: [
@@ -13,13 +17,46 @@ export default {
 	theme: {
 		container: {
 			center: true,
-			padding: '2rem',
+			padding: '1.75rem',
 			screens: {
 				'2xl': '1400px'
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['Archivo', 'system-ui', 'sans-serif'],
+				display: ['"Big Shoulders Display"', 'Impact', 'sans-serif'],
+				stencil: ['"Big Shoulders Stencil Display"', '"Big Shoulders Display"', 'Impact', 'sans-serif'],
+				mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+			},
 			colors: {
+				// Palette du design
+				ink: {
+					DEFAULT: '#120F0C', // fond principal
+					950: '#0A0806', // pied de page
+					900: '#1A1510', // fond des cartes
+					800: '#1B1713', // cartes / panneaux
+					700: '#2A221B', // avatars, surfaces
+					600: '#3A322A', // bordures fortes
+				},
+				coal: '#1A1612', // texte sur fond clair
+				cream: '#F4ECDF',
+				sand: '#E9DCC8',
+				paper: '#FFF8EC',
+				ochre: '#D98A3D',
+				gold: '#F2B45A',
+				live: '#3DD68C',
+				dust: {
+					100: '#D9CDBD',
+					200: '#C9BDAC',
+					300: '#B3A796',
+					400: '#9E9282',
+					500: '#8C8176',
+					600: '#6B6157',
+					700: '#5A4E42',
+					800: '#3A3027',
+				},
+				// Jetons shadcn/ui
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
@@ -27,7 +64,9 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					dark: '#C23A33',
+					light: '#F07A6E',
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -53,65 +92,35 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				sidebar: {
-					DEFAULT: 'hsl(var(--sidebar-background))',
-					foreground: 'hsl(var(--sidebar-foreground))',
-					primary: 'hsl(var(--sidebar-primary))',
-					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-					accent: 'hsl(var(--sidebar-accent))',
-					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-					border: 'hsl(var(--sidebar-border))',
-					ring: 'hsl(var(--sidebar-ring))'
-				}
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
-				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+				md: 'calc(var(--radius) - 1px)',
+				sm: 'calc(var(--radius) - 2px)'
 			},
 			keyframes: {
 				'accordion-down': {
-					from: {
-						height: '0'
-					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
-					}
+					from: { height: '0' },
+					to: { height: 'var(--radix-accordion-content-height)' }
 				},
 				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
-					},
-					to: {
-						height: '0'
-					}
+					from: { height: 'var(--radix-accordion-content-height)' },
+					to: { height: '0' }
 				},
-				'fade-in': {
-					'0%': {
-						opacity: '0',
-						transform: 'translateY(20px)'
-					},
-					'100%': {
-						opacity: '1',
-						transform: 'translateY(0)'
-					}
+				marquee: {
+					from: { transform: 'translateX(0)' },
+					to: { transform: 'translateX(-50%)' }
 				},
-				'scale-in': {
-					'0%': {
-						transform: 'scale(0.95)',
-						opacity: '0'
-					},
-					'100%': {
-						transform: 'scale(1)',
-						opacity: '1'
-					}
-				}
+				ping: {
+					from: { transform: 'scale(1)', opacity: '0.8' },
+					to: { transform: 'scale(2.6)', opacity: '0' }
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'fade-in': 'fade-in 0.6s ease-out',
-				'scale-in': 'scale-in 0.3s ease-out'
+				marquee: 'marquee 40s linear infinite',
+				ping: 'ping 1.6s ease-out infinite',
 			}
 		}
 	},

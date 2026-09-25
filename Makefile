@@ -1,5 +1,5 @@
 # ═════════════════════════════════════════════════════════════════════════════
-#  Raccourcis TrophysTracker — tapez `make` pour la liste.
+#  Raccourcis TrophyTracker — tapez `make` pour la liste.
 # ═════════════════════════════════════════════════════════════════════════════
 .DEFAULT_GOAL := help
 COMPOSE := docker compose
@@ -12,6 +12,7 @@ setup: ## Première installation : dépendances + fichier .env avec secrets
 	@test -f .env || sh scripts/init-env.sh
 
 up: ## Démarre toute la stack en local (avec Mailpit)
+	HOST_LAN_IP=$$(ip route get 1.1.1.1 2>/dev/null | sed -n 's/.*src \([0-9.]*\).*/\1/p') \
 	$(COMPOSE) --profile dev up -d --build
 
 prod: ## Démarre la stack en production (sans Mailpit)

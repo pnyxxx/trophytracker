@@ -10,12 +10,13 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
 
-select plan(51);
+select plan(57);
 
--- ─── Préparation : 3 comptes (alice propriétaire, bob inconnu, admin) ───────
+-- ─── Préparation : 4 comptes (alice propriétaire, bob inconnu, carol sans équipage, admin) ─
 insert into auth.users (id, email, raw_user_meta_data, aud, role) values
   ('00000000-0000-0000-0000-00000000000a', 'alice@test.local', '{"display_name":"Alice"}', 'authenticated', 'authenticated'),
   ('00000000-0000-0000-0000-00000000000b', 'bob@test.local',   '{"display_name":"Bob"}',   'authenticated', 'authenticated'),
+  ('00000000-0000-0000-0000-00000000000c', 'carol@test.local', '{"display_name":"Carol"}', 'authenticated', 'authenticated'),
   ('00000000-0000-0000-0000-0000000000ad', 'admin@test.local', '{}',                       'authenticated', 'authenticated');
 update public.profiles set role = 'admin' where id = '00000000-0000-0000-0000-0000000000ad';
 
@@ -45,15 +46,33 @@ select is((select slug from public.crews where name = 'Les Écureuils du Désert
   'le slug est généré sans accents');
 select is((select role from public.crew_members where user_id = '00000000-0000-0000-0000-00000000000a'), 'owner',
   'la créatrice devient propriétaire');
+select throws_ok($$ select public.create_crew('Deuxième') $$, 'P0001', null,
+  'un compte ne peut créer qu''un seul équipage');
+
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000b');
 select lives_ok($$ select public.create_crew('Les Écureuils du Désert') $$, 'un nom en double est accepté…');
 select ok(exists(select 1 from public.crews where slug = 'les-ecureuils-du-desert-2'), '… avec un slug unique');
-select lives_ok($$ select public.create_crew('Troisième') $$, 'troisième équipage');
-select throws_ok($$ select public.create_crew('Quatrième') $$, 'P0001', null, 'limite de 3 équipages par personne');
 
 reset role;
 create temp table t_ids as select id from public.crews where slug = 'les-ecureuils-du-desert';
 grant select on t_ids to anon, authenticated;
 create function pg_temp.crew() returns uuid language sql as $$ select id from t_ids $$;
+
+-- ─── Un seul équipage par compte ────────────────────────────────────────────
+select throws_ok(
+  $$ insert into public.crew_members (crew_id, user_id) values (pg_temp.crew(), '00000000-0000-0000-0000-00000000000b') $$,
+  '23505', null, 'la base refuse un deuxième équipage pour un même compte');
+
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
+select throws_ok($$ select public.add_crew_member(pg_temp.crew(), 'bob@test.local') $$, 'P0001', null,
+  'alice ne peut pas ajouter bob, qui a déjà son équipage');
+select lives_ok($$ select public.add_crew_member(pg_temp.crew(), 'carol@test.local') $$,
+  'alice ajoute carol, qui n''a pas d''équipage');
+
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000c');
+select throws_ok($$ select public.create_crew('Carol Team') $$, 'P0001', null,
+  'carol, désormais membre, ne peut plus créer d''équipage');
+reset role;
 
 -- ─── Visibilité ─────────────────────────────────────────────────────────────
 select pg_temp.as_anon();
@@ -156,9 +175,24 @@ select ok(not has_table_privilege('tracker', 'public.positions', 'select')
        and not has_table_privilege('tracker', 'public.crews', 'update'),
   'le tracker ne peut ni lire ni modifier les tables directement');
 
+-- Le point 5 (saut vers Paris) est en attente : un 2e point au même endroit le confirme.
+create temp table t_jump (result text);
+grant insert on t_jump to tracker;
+set local role tracker;
+insert into t_jump values
+  (private.ingest_position(pg_temp.crew(), now() - interval '6 min', 48.0005, 2.0005, 60, null, null, null, null, 'device'));
+reset role;
+select is((select result from t_jump), 'stored',
+  'un saut confirmé par le point suivant est un vrai changement de lieu (accepté)');
+select ok((select abs(last_lat - 48.0005) < 1e-9 from public.crews where id = pg_temp.crew()),
+  'la dernière position suit le changement de lieu');
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
+select throws_ok($$ select * from private.gps_pending_jumps $$, '42501', null,
+  'les sauts en attente ne sont pas lisibles depuis le site');
+
 reset role;
 select ok((select total_distance_m between 1100 and 1125 from public.crews where id = pg_temp.crew()),
-  'la distance cumulée est correcte (~1,1 km)');
+  'la distance cumulée est correcte (~1,1 km : le changement de lieu ne compte pas)');
 
 -- ─── Compte & administration ────────────────────────────────────────────────
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
