@@ -22,7 +22,7 @@ import { Panel } from './shared';
 const GpsCheckMap = lazy(() => import('./GpsCheckMap'));
 
 /** Réglages conseillés pour le raid (repris dans le tableau ET dans le QR code). */
-const SETTINGS = { accuracy: 'high', distance: 100, heartbeat: 300, buffer: true, stopDetection: true };
+const SETTINGS = { accuracy: 'high', distance: 50, heartbeat: 300, buffer: true, stopDetection: true };
 
 /**
  * Texte du QR code « Settings → icône QR » de Traccar Client (v10).
@@ -306,7 +306,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
             name="Distance"
             fr="Distance entre deux positions (mètres)"
             value={<Value>{SETTINGS.distance}</Value>}
-            why="Par défaut 75. Une position tous les 100 m quand la 4L roule (environ toutes les 4 secondes à 90 km/h) : la voiture avance en douceur sur la carte, sans surcharger le forfait."
+            why="Par défaut 75. Une position tous les 50 m quand la 4L roule (environ toutes les 2 secondes à 90 km/h) : une trace fidèle qui suit bien les virages, pour environ 20 Mo de forfait par journée de route."
           />
           <SettingRow
             name="Stationary heartbeat"

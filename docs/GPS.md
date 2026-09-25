@@ -9,7 +9,7 @@ son espace : *Mon compte → Gérer → onglet GPS*, qui guide pas à pas.
 
 **Configuration express** : quand l'équipage génère sa clé, l'onglet GPS affiche un QR code. Dans l'appli,
 *Settings* → icône QR en haut à droite → scanner : tous les réglages ci-dessous sont appliqués d'un coup.
-Le QR code contient `https://votre-domaine.fr/ingest/osmand?id=<clé>&accuracy=high&distance=100&heartbeat=300&buffer=true&stop_detection=true`
+Le QR code contient `https://votre-domaine.fr/ingest/osmand?id=<clé>&accuracy=high&distance=50&heartbeat=300&buffer=true&stop_detection=true`
 (l'appli prend l'adresse sans ses paramètres comme *Server URL*). Il contient la clé : ne pas le partager.
 
 | Réglage de l'appli (en anglais) | Valeur | Défaut de l'appli |
@@ -17,7 +17,7 @@ Le QR code contient `https://votre-domaine.fr/ingest/osmand?id=<clé>&accuracy=h
 | Device identifier | la clé `tt_…` générée dans l'onglet GPS (affichée une seule fois) | numéro aléatoire → **à changer** |
 | Server URL | `https://votre-domaine.fr/ingest/osmand` | serveur de démo Traccar → **à changer** |
 | Location accuracy | High (*Highest* ignore la distance et vide la batterie) | Medium → **à changer** |
-| Distance | 100 m | 75 |
+| Distance | 50 m (une position toutes les ~2 s à 90 km/h : trace qui suit les virages) | 75 |
 | Stationary heartbeat | 300 s (le site affiche « En direct » jusqu'à 10 min sans nouvelles) | 0 = désactivé → **à changer** |
 | Advanced → Offline buffering | activé (indispensable dans le désert) | activé |
 | Advanced → Stop detection | activé (économise la batterie à l'arrêt) | activé |
@@ -37,7 +37,8 @@ pour cet équipage. En cas de fuite : « Générer une nouvelle clé » (l'ancie
   ou en formulaire `application/x-www-form-urlencoded` — c'est ce qu'envoie Traccar Client 10 (+ `charge`, `alarm`, ignorés) ;
 - JSON des anciennes versions 9.x : `{ device_id, location: { timestamp, coords: {…}, battery } }` (vitesse en m/s).
 
-Limite : 120 requêtes/minute par adresse IP.
+Limite : 300 requêtes/minute par adresse IP (un téléphone en envoie ~30 à 90 km/h ; la marge couvre le renvoi
+des positions gardées hors réseau et plusieurs équipages derrière la même IP d'opérateur mobile).
 
 ## Option 2 — Un serveur Traccar existant
 

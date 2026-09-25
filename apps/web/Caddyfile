@@ -9,7 +9,7 @@
 	admin off
 	# Derrière un tunnel (Tailscale Funnel, Cloudflare Tunnel…), les requêtes arrivent d'une adresse privée :
 	# on lit alors la vraie IP du visiteur dans X-Forwarded-For. Sans ça, tous les téléphones partageraient
-	# la même IP et la limite du service GPS (120 requêtes/min par IP) s'appliquerait à tous ensemble.
+	# la même IP et la limite du service GPS (300 requêtes/min par IP) s'appliquerait à tous ensemble.
 	servers {
 		trusted_proxies static private_ranges
 	}

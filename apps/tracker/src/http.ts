@@ -19,8 +19,10 @@ export async function buildHttp(db: Db, opts: { trustProxy: boolean; logger: boo
     done(null, Object.fromEntries(new URLSearchParams(body as string)));
   });
 
-  // Limite par IP : un téléphone envoie au plus une position toutes les quelques secondes.
-  await app.register(rateLimit, { max: 120, timeWindow: '1 minute' });
+  // Limite par IP. Un téléphone réglé sur 50 m envoie ~30 positions/min à 90 km/h (~45 à 130 km/h) ;
+  // la marge couvre le renvoi des positions gardées hors réseau et plusieurs équipages derrière
+  // la même IP d'opérateur mobile (fréquent au Maroc).
+  await app.register(rateLimit, { max: 300, timeWindow: '1 minute' });
 
   app.get('/health', async () => {
     await db.ping();
