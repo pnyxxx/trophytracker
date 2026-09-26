@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { Kicker, LiveDot } from '@/components/common/Brand';
+import { useRaceStart } from '@/hooks/queries';
 import { departureTime } from '@/lib/format';
 
 function remaining(target: number) {
@@ -30,5 +32,28 @@ export function Countdown({ date }: { date: string }) {
         </div>
       ))}
     </div>
+  );
+}
+
+/**
+ * En-tête des sections « Où sont-ils ? » : avant le départ, « Départ dans » + compte à
+ * rebours ; une fois le raid lancé, la pastille « Sur la route en ce moment ».
+ */
+export function RaceStatus() {
+  const { ready, startDate, beforeStart } = useRaceStart();
+  if (!ready) return <div className="h-5" aria-hidden="true" />;
+  if (beforeStart) {
+    return (
+      <div className="flex max-w-[420px] flex-col gap-3">
+        <Kicker>Départ de Biarritz dans</Kicker>
+        <Countdown date={startDate!} />
+      </div>
+    );
+  }
+  return (
+    <Kicker className="text-live">
+      <LiveDot />
+      Sur la route en ce moment
+    </Kicker>
   );
 }

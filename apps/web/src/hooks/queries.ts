@@ -5,6 +5,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase, type Crew } from '@/lib/supabase';
 import { unwrap } from '@/lib/errors';
+import { departureTime } from '@/lib/format';
 import { useAuth } from './auth';
 
 export const keys = {
@@ -173,4 +174,14 @@ export function useMyRole(crewId: string | undefined) {
   const { isAdmin } = useAuth();
   const role = data?.find((m) => m.crew.id === crewId)?.role ?? null;
   return { role, canEdit: !!role || isAdmin, isOwner: role === 'owner' || isAdmin };
+}
+
+/**
+ * Le raid n'a pas encore commencé ? (date de départ réglée et encore à venir).
+ * `ready` reste faux tant que les réglages ne sont pas chargés, pour éviter un clignotement.
+ */
+export function useRaceStart() {
+  const { data: event, isLoading } = useEvent();
+  const startDate = event?.startDate ?? null;
+  return { ready: !isLoading, startDate, beforeStart: !!startDate && departureTime(startDate) > Date.now() };
 }

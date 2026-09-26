@@ -2,12 +2,13 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { PageShell } from '@/components/layout/PageShell';
 import { Seo } from '@/components/common/Seo';
-import { Container, Kicker, LiveDot, PageHero, SectionTitle } from '@/components/common/Brand';
+import { Container, PageHero, SectionTitle } from '@/components/common/Brand';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { CrewCard } from '@/components/crew/CrewBits';
 import { Spinner } from '@/components/common/Spinner';
+import { RaceStatus } from '@/components/landing/Countdown';
 import { fmtKm, STOPS, TOTAL_KM } from '@/components/landing/journey';
 import { useCrewSearch, useEvent } from '@/hooks/queries';
 import { useSeen } from '@/hooks/useInView';
@@ -67,10 +68,7 @@ export default function CrewsPage() {
         <Container className="flex flex-col gap-10">
           <div className="flex flex-wrap items-end justify-between gap-6">
             <div className="flex flex-col gap-3.5">
-              <Kicker className="text-live">
-                <LiveDot />
-                Sur la route en ce moment
-              </Kicker>
+              <RaceStatus />
               <SectionTitle className="leading-[0.88]">Où sont-ils ?</SectionTitle>
             </div>
             <p className="m-0 max-w-[420px] text-base leading-relaxed text-dust-300">

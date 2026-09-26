@@ -4,7 +4,7 @@ import { PageShell } from '@/components/layout/PageShell';
 import { Seo } from '@/components/common/Seo';
 import { Kicker, LiveDot, SectionTitle } from '@/components/common/Brand';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Countdown } from '@/components/landing/Countdown';
+import { Countdown, RaceStatus } from '@/components/landing/Countdown';
 import { CrewFinder } from '@/components/landing/CrewFinder';
 import { RouteJourney } from '@/components/landing/RouteJourney';
 import { fmtKm, STOPS, TOTAL_KM } from '@/components/landing/journey';
@@ -167,10 +167,7 @@ export default function Landing() {
       {/* Sur grand écran, ce titre est incrusté dans l'écran fixe de « La route ». */}
       <section className="bg-ink px-4 pt-[120px] sm:px-7 min-[1000px]:hidden">
         <div className="flex flex-col gap-3.5">
-          <Kicker className="text-live">
-            <LiveDot />
-            Sur la route en ce moment
-          </Kicker>
+          <RaceStatus />
           <SectionTitle className="leading-[0.88]">Où sont-ils ?</SectionTitle>
         </div>
       </section>
