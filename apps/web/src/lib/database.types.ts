@@ -76,6 +76,74 @@ export type Database = {
           },
         ]
       }
+      crew_purchases: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          crew_id: string | null
+          currency: string
+          customer_email: string | null
+          id: string
+          immediate_start_at: string | null
+          paid_at: string | null
+          refunded_at: string | null
+          refunded_cents: number
+          source: string
+          status: string
+          stripe_payment_intent: string | null
+          stripe_session_id: string | null
+          terms_accepted_at: string | null
+          used_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          crew_id?: string | null
+          currency?: string
+          customer_email?: string | null
+          id?: string
+          immediate_start_at?: string | null
+          paid_at?: string | null
+          refunded_at?: string | null
+          refunded_cents?: number
+          source: string
+          status?: string
+          stripe_payment_intent?: string | null
+          stripe_session_id?: string | null
+          terms_accepted_at?: string | null
+          used_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          crew_id?: string | null
+          currency?: string
+          customer_email?: string | null
+          id?: string
+          immediate_start_at?: string | null
+          paid_at?: string | null
+          refunded_at?: string | null
+          refunded_cents?: number
+          source?: string
+          status?: string
+          stripe_payment_intent?: string | null
+          stripe_session_id?: string | null
+          terms_accepted_at?: string | null
+          used_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crew_purchases_crew_id_fkey"
+            columns: ["crew_id"]
+            isOneToOne: false
+            referencedRelation: "crews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crews: {
         Row: {
           avatar_path: string | null
@@ -436,6 +504,7 @@ export type Database = {
         Args: { p_crew: string; p_email: string }
         Returns: undefined
       }
+      admin_grant_crew_access: { Args: { p_email: string }; Returns: undefined }
       admin_list_crews: {
         Args: never
         Returns: {
@@ -448,6 +517,21 @@ export type Database = {
           name: string
           slug: string
           traccar_device_id: string
+        }[]
+      }
+      admin_list_purchases: {
+        Args: never
+        Returns: {
+          amount_cents: number
+          created_at: string
+          crew_name: string
+          crew_slug: string
+          customer_email: string
+          id: string
+          paid_at: string
+          refunded_cents: number
+          source: string
+          status: string
         }[]
       }
       admin_list_users: {
@@ -505,6 +589,15 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      crew_price: {
+        Args: never
+        Returns: {
+          amount_cents: number
+          is_launch_price: boolean
+          launch_price_until: string
+          regular_cents: number
+        }[]
+      }
       delete_my_account: { Args: never; Returns: undefined }
       get_crew_members: {
         Args: { p_crew: string }
@@ -525,6 +618,31 @@ export type Database = {
         }[]
       }
       get_track: { Args: { p_crew: string; p_since?: string }; Returns: Json }
+      purchase_attach_session: {
+        Args: { p_purchase: string; p_session: string }
+        Returns: undefined
+      }
+      purchase_expired: { Args: { p_session: string }; Returns: undefined }
+      purchase_paid: {
+        Args: {
+          p_amount: number
+          p_email: string
+          p_payment_intent: string
+          p_session: string
+        }
+        Returns: string
+      }
+      purchase_refunded: {
+        Args: { p_payment_intent: string; p_refunded_cents: number }
+        Returns: string
+      }
+      purchase_start: {
+        Args: { p_email: string; p_user: string }
+        Returns: {
+          amount_cents: number
+          purchase_id: string
+        }[]
+      }
       regenerate_device_key: { Args: { p_crew: string }; Returns: string }
       remove_crew_member: {
         Args: { p_crew: string; p_user: string }

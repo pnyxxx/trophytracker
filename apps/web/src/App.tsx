@@ -21,6 +21,7 @@ const AdminPage = lazy(() => import('@/pages/admin/AdminPage'));
 const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'));
 const LegalNoticePage = lazy(() => import('@/pages/LegalNoticePage'));
 const TermsPage = lazy(() => import('@/pages/TermsPage'));
+const SalesTermsPage = lazy(() => import('@/pages/SalesTermsPage'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
 const queryClient = new QueryClient({
@@ -58,6 +59,7 @@ export default function App() {
               <Route path="/confidentialite" element={<PrivacyPage />} />
               <Route path="/mentions-legales" element={<LegalNoticePage />} />
               <Route path="/conditions-utilisation" element={<TermsPage />} />
+              <Route path="/conditions-vente" element={<SalesTermsPage />} />
               <Route path="/mon-compte" element={<RequireAuth><AccountPage /></RequireAuth>} />
               <Route path="/mon-compte/equipages/:slug" element={<RequireAuth><ManageCrewPage /></RequireAuth>} />
               <Route path="/admin" element={<RequireAuth admin><AdminPage /></RequireAuth>} />

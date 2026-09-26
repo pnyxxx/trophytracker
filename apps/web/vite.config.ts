@@ -55,6 +55,7 @@ function devRuntimeConfig(env: Record<string, string>): Plugin {
           `window.__TT_CONFIG__ = ${JSON.stringify({
             anonKey: env.ANON_KEY ?? '',
             googleEnabled: env.GOOGLE_ENABLED === 'true',
+            paymentsEnabled: !!env.STRIPE_SECRET_KEY,
             // Le téléphone envoie ses positions à Caddy (conteneur web), pas à Vite.
             lanIp: lanIp(),
             lanPort: env.WEB_HTTP_PORT ?? '80',

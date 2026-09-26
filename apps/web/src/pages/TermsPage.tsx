@@ -19,8 +19,8 @@ export default function TermsPage() {
         C’est un <strong>projet indépendant</strong> : il n’est ni organisé, ni soutenu, ni validé par l’organisation du 4L Trophy.
       </p>
       <p>
-        Le service est actuellement gratuit. Si une offre payante est proposée un jour, elle aura ses propres conditions de vente,
-        présentées et acceptées au moment du paiement : aucune somme ne sera demandée sans votre accord explicite.
+        <strong>Suivre un équipage est gratuit.</strong> Créer la page d’un équipage demande l’achat d’un accès équipage (paiement
+        unique), régi par les <Link to="/conditions-vente">conditions de vente</Link>. Les coéquipiers invités n’ont rien à payer.
       </p>
 
       <h2>2. Votre compte</h2>

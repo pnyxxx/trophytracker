@@ -10,7 +10,7 @@ import { RouteJourney } from '@/components/landing/RouteJourney';
 import { fmtKm, STOPS, TOTAL_KM } from '@/components/landing/journey';
 import { useCrewSearch, useEvent } from '@/hooks/queries';
 import { departureTime, isLive } from '@/lib/format';
-import { FAIR_PLAY } from '@/lib/legal';
+import { FAIR_PLAY, priceSentence } from '@/lib/legal';
 import { useSeen } from '@/hooks/useInView';
 
 // La carte (MapLibre) est chargée à part : le haut de page s'affiche tout de suite.
@@ -33,12 +33,12 @@ const audiences = [
     n: '03',
     km: `KM ${TOTAL_KM} · Au volant`,
     title: 'Pour les équipages',
-    text: 'Une page à vous, gratuite, en 5 minutes : carte en direct, statistiques, photos et 360°, sponsors. Un seul lien à partager.',
+    text: 'Une page à vous en 5 minutes : carte en direct, statistiques, photos et 360°, sponsors. Un seul lien à partager, pour un paiement unique.',
   },
 ];
 
 const steps = [
-  { n: '1', title: 'L’équipage crée sa page', text: 'Nom, numéro, photos, sponsors… tout se gère depuis un espace simple.' },
+  { n: '1', title: 'L’équipage crée sa page', text: 'Un paiement unique, puis nom, numéro, photos, sponsors… tout se gère depuis un espace simple.' },
   { n: '2', title: 'Il active le GPS', text: 'L’appli gratuite Traccar Client sur un téléphone de la 4L suffit. Aucun boîtier à acheter.' },
   { n: '3', title: 'Vous suivez en direct', text: 'Position, trace complète depuis le départ, vitesse, kilomètres parcourus, photos du bivouac…' },
 ];
@@ -47,7 +47,7 @@ const features = [
   { tag: '01 · CARTE', title: 'Carte en temps réel', text: 'La 4L bouge sur la carte sans recharger la page.' },
   { tag: '02 · PHOTOS', title: 'Photos & 360°', text: 'Revivez les dunes de Merzouga comme si vous y étiez.' },
   { tag: '03 · FAVORIS', title: 'Vos favoris', text: 'Retrouvez en un clic les équipages que vous suivez.' },
-  { tag: '04 · ÉTHIQUE', title: 'Gratuit & respectueux', text: 'Sans publicité, sans revente de données, sur nos propres serveurs.' },
+  { tag: '04 · ÉTHIQUE', title: 'Sans pub & respectueux', text: 'Gratuit pour les proches, sans publicité, sans revente de données, sur nos propres serveurs.' },
 ];
 
 const faq = [
@@ -69,7 +69,7 @@ const faq = [
   },
   {
     q: 'Combien ça coûte ?',
-    a: 'Rien. TrophyTracker est un projet indépendant et gratuit, né de l’expérience d’un équipage du 4L Trophy.',
+    a: `Suivre un équipage est gratuit, pour tout le monde. Pour créer la page de son équipage : ${priceSentence()}. C’est un paiement unique, sans abonnement, et les coéquipiers la rejoignent gratuitement. TrophyTracker est un projet indépendant, né de l’expérience d’un équipage du 4L Trophy, sans publicité ni revente de données.`,
   },
 ];
 
@@ -108,7 +108,7 @@ export default function Landing() {
           <div className="flex w-full max-w-[560px] flex-col gap-5">
             <p className="m-0 text-pretty text-lg leading-relaxed text-dust-200">
               Proches, amis, sponsors : retrouvez la position, la trace complète, les photos et les statistiques de
-              l’équipage que vous soutenez. Gratuit, sans application à installer.
+              l’équipage que vous soutenez. Gratuit pour vous, sans application à installer.
             </p>
 
             <div className="flex flex-col gap-5">
@@ -139,7 +139,7 @@ export default function Landing() {
               <div className="text-sm text-dust-400">
                 Vous participez au raid ?{' '}
                 <Link to="/inscription" className="font-semibold text-primary hover:text-primary-light">
-                  Créez la page de votre équipage gratuitement →
+                  Inscrivez votre équipage →
                 </Link>
               </div>
             </div>
@@ -324,6 +324,7 @@ export default function Landing() {
           <p className="m-0 max-w-[520px] text-lg leading-relaxed text-dust-100">
             Créez la page de votre équipage en 5 minutes et partagez un seul lien à vos proches et sponsors.
           </p>
+          <p className="m-0 font-mono text-xs uppercase tracking-[0.14em] text-gold">{priceSentence()} · paiement unique</p>
           <Link
             to="/inscription"
             className="rounded-[4px] bg-primary px-8 py-[18px] font-mono text-sm font-bold uppercase tracking-[0.12em] text-white shadow-[0_10px_40px_rgba(219,71,64,.45)] hover:bg-primary-dark hover:text-white"

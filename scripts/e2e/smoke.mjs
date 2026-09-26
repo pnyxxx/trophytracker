@@ -77,6 +77,25 @@ const { c: alice } = await signUpConfirmed('alice');
 const { c: bob } = await signUpConfirmed('bob');
 const anon = client();
 
+// Inscription payante : sans accès payé, pas d'équipage ; le paiement est confirmé par Stripe (webhook signé).
+const { error: unpaid } = await alice.rpc('create_crew', { p_name: `Sans paiement ${run}` });
+check(unpaid?.message?.includes('Paiement requis'), 'alice ne peut pas créer d’équipage sans payer');
+const { data: aliceUser } = await alice.auth.getUser();
+const service = createClient(SITE, env.SERVICE_ROLE_KEY, { auth: { persistSession: false } });
+const { data: started } = await service.rpc('purchase_start', { p_user: aliceUser.user.id, p_email: aliceUser.user.email });
+await service.rpc('purchase_attach_session', { p_purchase: started[0].purchase_id, p_session: `cs_test_${run}` });
+async function stripeEvent(event, secret = env.STRIPE_WEBHOOK_SECRET) {
+  const body = JSON.stringify(event);
+  const t = Math.floor(Date.now() / 1000);
+  const sig = createHmac('sha256', secret).update(`${t}.${body}`).digest('hex');
+  return fetch(`${SITE}/functions/v1/stripe-webhook`, { method: 'POST', body, headers: { 'Stripe-Signature': `t=${t},v1=${sig}`, 'Content-Type': 'application/json' } });
+}
+const paidEvent = { type: 'checkout.session.completed', data: { object: { id: `cs_test_${run}`, payment_status: 'paid', payment_intent: `pi_test_${run}`, amount_total: started[0].amount_cents, customer_details: { email: aliceUser.user.email } } } };
+const forged = await stripeEvent(paidEvent, 'whsec_faux');
+check(forged.status === 400, 'un faux événement Stripe (mauvaise signature) est refusé');
+const webhook = await stripeEvent(paidEvent);
+check(webhook.status === 200 && (await webhook.json()).result === 'paid', 'Stripe confirme le paiement d’alice (webhook signé)');
+
 const { data: crew, error: ce } = await alice.rpc('create_crew', { p_name: `Les Dunes ${run}`, p_car_number: '42' });
 check(!ce && crew?.slug, `alice crée l'équipage « ${crew?.name} »`);
 

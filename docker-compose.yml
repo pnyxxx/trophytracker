@@ -78,6 +78,8 @@ services:
       SITE_ADDRESS: ${SITE_ADDRESS:-:80}
       ANON_KEY: ${ANON_KEY}
       GOOGLE_ENABLED: ${GOOGLE_ENABLED:-false}
+      # « true » dès qu'une clé Stripe est configurée : le site ouvre alors le paiement.
+      PAYMENTS_ENABLED: ${STRIPE_SECRET_KEY:+true}
       # En local uniquement (rempli par `make up`) : adresse joignable depuis un téléphone.
       HOST_LAN_IP: ${HOST_LAN_IP:-}
       WEB_HTTP_PORT: ${WEB_HTTP_PORT:-80}

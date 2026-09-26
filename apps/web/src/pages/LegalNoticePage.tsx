@@ -1,13 +1,16 @@
 import { Link } from 'react-router-dom';
 import { LegalPage } from '@/components/common/LegalPage';
-import { CONTACT_HREF, EDITOR } from '@/lib/legal';
+import { BUSINESS, CONTACT_HREF, EDITOR, VAT_MENTION } from '@/lib/legal';
 
 export default function LegalNoticePage() {
   return (
     <LegalPage seoTitle="Mentions légales" title={<>Mentions<br />légales</>}>
       <h2>Éditeur</h2>
       <p>
-        TrophyTracker est un projet personnel et indépendant, édité par <strong>{EDITOR.name}</strong>, particulier.
+        TrophyTracker est un projet indépendant, édité par <strong>{EDITOR.name}</strong>, {BUSINESS.status.toLowerCase()}.
+        <br />
+        {BUSINESS.siret ? <>SIRET : {BUSINESS.siret}</> : <>Immatriculation en cours.</>} {VAT_MENTION}.
+        {BUSINESS.address && <><br />Adresse : {BUSINESS.address}</>}
         <br />
         Contact : <a href={CONTACT_HREF}>{EDITOR.email}</a>
       </p>
@@ -21,6 +24,10 @@ export default function LegalNoticePage() {
         <li>
           <strong>Acheminement du trafic et protection</strong> : Cloudflare, Inc., 101 Townsend Street, San Francisco, CA 94107, États-Unis
           (<a href="https://www.cloudflare.com" target="_blank" rel="noopener noreferrer">cloudflare.com</a>).
+        </li>
+        <li>
+          <strong>Paiements</strong> : Stripe Payments Europe, Ltd., 1 Grand Canal Street Lower, Dublin 2, Irlande
+          (<a href="https://stripe.com" target="_blank" rel="noopener noreferrer">stripe.com</a>).
         </li>
         <li>
           <strong>Envoi des emails</strong> : Brevo (Sendinblue SAS), Paris, France

@@ -59,6 +59,13 @@ export default function PrivacyPage() {
         Elles sont compressées sur votre appareil avant l’envoi et leurs métadonnées (dont la position GPS de la prise de vue) sont
         supprimées. <em>Conservation : jusqu’à leur suppression par l’équipage.</em>
       </p>
+      <h3>Les achats</h3>
+      <p>
+        Pour l’accès équipage : compte acheteur, email, montant, date, statut du paiement, équipage créé et date d’acceptation des
+        conditions de vente. Le paiement lui-même est traité par Stripe : nous ne voyons jamais vos coordonnées bancaires.
+        <em> Base légale : l’exécution du contrat et nos obligations comptables. Conservation : 10 ans (pièces comptables), même
+        si le compte est supprimé.</em>
+      </p>
       <h3>Les journaux techniques</h3>
       <p>
         Comme tout site, le serveur enregistre des journaux (adresse IP, date, page demandée, erreurs) pour assurer la sécurité et
@@ -74,6 +81,10 @@ export default function PrivacyPage() {
           européenne est encadré par le Data Privacy Framework UE–États-Unis ;
         </li>
         <li><strong>Brevo</strong> (France), qui envoie les emails ;</li>
+        <li>
+          <strong>Stripe</strong> (Irlande et États-Unis), qui traite les paiements de l’accès équipage, en tant que prestataire de
+          paiement ; ses transferts hors de l’Union européenne sont encadrés par le Data Privacy Framework et des clauses types ;
+        </li>
         <li><strong>Google</strong>, uniquement si vous choisissez de vous connecter avec votre compte Google.</li>
       </ul>
       <p>
@@ -99,7 +110,7 @@ export default function PrivacyPage() {
       <p>
         Vous pouvez accéder à vos données, les corriger, les supprimer, les récupérer, vous opposer à leur traitement ou retirer votre
         consentement. La plupart se fait directement depuis « Mon compte » : la suppression du compte efface immédiatement vos données.
-        Un équipage peut supprimer sa page, sa trace et ses photos. Pour le reste, écrivez à{' '}
+        Un équipage peut supprimer sa page et ses photos ; pour effacer seulement la trace, écrivez-nous. Pour le reste, écrivez à{' '}
         <a href={CONTACT_HREF}>{EDITOR.email}</a> : réponse sous un mois au plus.
       </p>
       <p>

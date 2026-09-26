@@ -45,7 +45,7 @@ http://web {
 	handle /config.js {
 		header Content-Type "application/javascript; charset=utf-8"
 		header Cache-Control "no-cache"
-		respond `window.__TT_CONFIG__ = { anonKey: "{$ANON_KEY}", googleEnabled: {$GOOGLE_ENABLED:false}, lanIp: "{$HOST_LAN_IP}", lanPort: "{$WEB_HTTP_PORT:80}" };`
+		respond `window.__TT_CONFIG__ = { anonKey: "{$ANON_KEY}", googleEnabled: {$GOOGLE_ENABLED:false}, paymentsEnabled: "{$PAYMENTS_ENABLED}" === "true", lanIp: "{$HOST_LAN_IP}", lanPort: "{$WEB_HTTP_PORT:80}" };`
 	}
 
 	# API Supabase

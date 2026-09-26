@@ -336,6 +336,15 @@ le lui signale. Il faut donc :
 9. Adresse de l'hébergeur : les mentions légales donnent le nom et l'e-mail, pas l'adresse postale du serveur (le domicile).
    Tolérable pour un particulier ; à régler (domiciliation) quand le site deviendra professionnel.
 
+**Passage au payant (décidé le 2026-09-27)** — mise en œuvre technique : [PAIEMENT.md](PAIEMENT.md)
+- Accès équipage payé **avant de créer la page** : 15 € jusqu'au 30 novembre 2026 inclus, puis 19 €, paiement unique.
+- Remboursement : **minimum légal** (rétractation 14 jours, au prorata du service fourni, art. L.221-25) ; les deux
+  cases (CGV + demande d'exécution immédiate) sont exigées et horodatées avant le paiement.
+- Équipages existants : offerts. Suivre reste gratuit. Coéquipiers invités : gratuits.
+- ✅ Fait : page `/conditions-vente` (CGV + formulaire de rétractation), parcours d'achat, textes du site, mentions
+  légales et confidentialité mises à jour, admin « Paiements ». En attente : SIRET, médiateur, adresse → `BUSINESS`
+  dans `apps/web/src/lib/legal.ts` ; clés Stripe.
+
 **Avant d'ouvrir le paiement**
 8. **Écrire à l'organisation** (annexe A) et attendre la réponse.
 9. Créer le **statut** (micro-entreprise ou association), choisir l'adresse publiée.

@@ -16,7 +16,8 @@ import { keys, useEvent } from '@/hooks/queries';
 import { useAuth } from '@/hooks/auth';
 import { supabase } from '@/lib/supabase';
 import { toastError, unwrap } from '@/lib/errors';
-import { formatRelative } from '@/lib/format';
+import { formatDateTime, formatRelative } from '@/lib/format';
+import { euros } from '@/lib/legal';
 
 function Overview() {
   const { data } = useQuery({
@@ -84,6 +85,70 @@ function CrewsAdmin() {
         </table>
       </div>
     </Panel>
+  );
+}
+
+const PURCHASE_STATUS: Record<string, string> = { pending: 'En attente', paid: 'Payé', refunded: 'Remboursé' };
+
+function PurchasesAdmin() {
+  const queryClient = useQueryClient();
+  const [email, setEmail] = useState('');
+  const { data = [], isLoading } = useQuery({
+    queryKey: ['admin', 'purchases'],
+    queryFn: async () => unwrap(await supabase.rpc('admin_list_purchases')),
+  });
+  const grant = useMutation({
+    mutationFn: async () => unwrap(await supabase.rpc('admin_grant_crew_access', { p_email: email.trim() })),
+    onSuccess: () => {
+      toast.success('Accès offert : la personne peut créer son équipage depuis « Mon compte »');
+      setEmail('');
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'purchases'] });
+    },
+    onError: toastError,
+  });
+  const paid = data.filter((p) => p.status === 'paid' && p.source === 'stripe');
+  const total = paid.reduce((sum, p) => sum + p.amount_cents - p.refunded_cents, 0);
+
+  return (
+    <div className="space-y-6">
+      <Panel title="Offrir un accès équipage" description="Pour un partenaire, un test ou un geste : la personne doit déjà avoir un compte.">
+        <form className="flex flex-col gap-3 sm:flex-row" onSubmit={(e: FormEvent) => { e.preventDefault(); grant.mutate(); }}>
+          <Input type="email" required placeholder="email du compte" value={email} onChange={(e) => setEmail(e.target.value)} aria-label="Email du compte" />
+          <Button type="submit" disabled={grant.isPending}>Offrir l’accès</Button>
+        </form>
+      </Panel>
+      <Panel
+        title={`Paiements (${paid.length})`}
+        description={`Encaissé : ${euros(total)} (hors frais Stripe). Les remboursements se font depuis le tableau de bord Stripe.`}
+      >
+        {isLoading ? <Spinner /> : !data.length ? <p className="m-0 text-dust-300">Aucun achat pour l’instant.</p> : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="font-mono text-[11px] uppercase tracking-[0.14em] text-dust-400">
+                <tr><th className="py-2">Date</th><th>Compte</th><th>Montant</th><th>Statut</th><th>Équipage</th></tr>
+              </thead>
+              <tbody className="divide-y divide-cream/10">
+                {data.map((p) => (
+                  <tr key={p.id}>
+                    <td className="py-3 pr-4 text-xs text-dust-300">{formatDateTime(p.paid_at ?? p.created_at)}</td>
+                    <td className="pr-4 text-dust-200">{p.customer_email ?? '—'}</td>
+                    <td className="pr-4 text-dust-200">
+                      {p.source === 'admin' ? 'Offert' : euros(p.amount_cents)}
+                      {p.refunded_cents > 0 && <span className="text-xs text-dust-500"> (−{euros(p.refunded_cents)})</span>}
+                    </td>
+                    <td className="pr-4 text-dust-200">{PURCHASE_STATUS[p.status] ?? p.status}</td>
+                    <td>
+                      {p.crew_slug ? <Link to={`/equipages/${p.crew_slug}`} className="text-cream hover:text-primary">{p.crew_name}</Link>
+                        : <span className="text-xs text-dust-500">{p.status === 'paid' ? 'Pas encore créé' : '—'}</span>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Panel>
+    </div>
   );
 }
 
@@ -237,11 +302,13 @@ export default function AdminPage() {
         <Tabs defaultValue="crews">
           <TabsList className="mb-8 flex w-full justify-start overflow-x-auto">
             <TabsTrigger value="crews">Équipages</TabsTrigger>
+            <TabsTrigger value="purchases">Paiements</TabsTrigger>
             <TabsTrigger value="users">Comptes</TabsTrigger>
             <TabsTrigger value="route">Parcours</TabsTrigger>
             <TabsTrigger value="settings">Réglages</TabsTrigger>
           </TabsList>
           <TabsContent value="crews"><CrewsAdmin /></TabsContent>
+          <TabsContent value="purchases"><PurchasesAdmin /></TabsContent>
           <TabsContent value="users"><UsersAdmin /></TabsContent>
           <TabsContent value="route"><RouteAdmin /></TabsContent>
           <TabsContent value="settings"><SettingsAdmin /></TabsContent>

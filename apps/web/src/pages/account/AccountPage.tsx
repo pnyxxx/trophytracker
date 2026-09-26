@@ -1,6 +1,6 @@
-import { useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState, type FormEvent } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Plus, Settings } from 'lucide-react';
 import { Container, PageHero } from '@/components/common/Brand';
@@ -18,14 +18,15 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { CrewAvatar, CrewCard } from '@/components/crew/CrewBits';
 import { SecuritySection } from '@/components/account/SecuritySection';
+import { CrewAccessPurchase } from '@/components/account/CrewAccessPurchase';
 import { useAuth } from '@/hooks/auth';
 import { useFollowedCrews, useMyCrews } from '@/hooks/queries';
 import { supabase } from '@/lib/supabase';
 import { toastError, unwrap } from '@/lib/errors';
 import { formatRelative } from '@/lib/format';
 
-function CreateCrewDialog() {
-  const [open, setOpen] = useState(false);
+function CreateCrewDialog({ defaultOpen = false }: { defaultOpen?: boolean }) {
+  const [open, setOpen] = useState(defaultOpen);
   const [form, setForm] = useState({ name: '', car: '', tagline: '' });
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -81,6 +82,23 @@ export default function AccountPage() {
   const myCrew = myCrews?.[0];
   const [name, setName] = useState<string | null>(null);
 
+  // Accès équipage payé et pas encore utilisé ? Au retour de Stripe (?paiement=ok), on
+  // réinterroge quelques secondes le temps que Stripe confirme le paiement au serveur.
+  const [params, setParams] = useSearchParams();
+  const payment = params.get('paiement');
+  const [waitingSince] = useState(() => (payment === 'ok' ? Date.now() : 0));
+  const { data: hasAccess, isLoading: loadingAccess } = useQuery({
+    queryKey: ['crew-access', user?.id],
+    queryFn: async () =>
+      unwrap(await supabase.from('crew_purchases').select('id').eq('status', 'paid').is('used_at', null).limit(1)).length > 0,
+    refetchInterval: (q) => (payment === 'ok' && !q.state.data && Date.now() - waitingSince < 60_000 ? 2_000 : false),
+  });
+  useEffect(() => {
+    if (payment !== 'annule') return;
+    toast('Paiement annulé : rien n’a été débité.');
+    setParams({}, { replace: true });
+  }, [payment, setParams]);
+
   const saveName = useMutation({
     mutationFn: async (displayName: string) => {
       unwrap(await supabase.from('profiles').update({ display_name: displayName }).eq('id', user!.id));
@@ -113,14 +131,22 @@ export default function AccountPage() {
 
         {/* Un compte = un seul équipage (règle garantie par la base) */}
         <Panel title="Mon équipage">
-          {loadingMine ? <Spinner /> : !myCrew ? (
+          {loadingMine || loadingAccess ? <Spinner /> : !myCrew && (hasAccess || profile?.role === 'admin') ? (
             <div className="flex flex-wrap items-center justify-between gap-4">
               <p className="m-0 max-w-[520px] text-dust-300">
-                Vous participez au raid ? Créez la page de votre équipage pour la partager à vos proches et sponsors.
-                Vos coéquipiers la rejoindront ensuite par invitation.
+                {payment === 'ok' ? <><strong className="text-cream">Paiement reçu, merci !</strong> </> : null}
+                Votre accès équipage est prêt : créez la page de votre équipage. Vos coéquipiers la rejoindront ensuite par
+                invitation, gratuitement.
               </p>
-              <CreateCrewDialog />
+              <CreateCrewDialog defaultOpen={payment === 'ok'} />
             </div>
+          ) : !myCrew && payment === 'ok' ? (
+            <div className="flex items-center gap-3 text-dust-200">
+              <Spinner />
+              Paiement en cours de confirmation… Cela prend quelques secondes. Si rien ne se passe, rechargez la page.
+            </div>
+          ) : !myCrew ? (
+            <CrewAccessPurchase />
           ) : (
             <div className="flex flex-wrap items-center gap-5">
               <CrewAvatar name={myCrew.crew.name} path={myCrew.crew.avatar_path} className="h-16 w-16 text-2xl" />

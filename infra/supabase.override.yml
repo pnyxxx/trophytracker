@@ -77,6 +77,10 @@ services:
 
   # Nos Edge Functions (supabase/functions) remplacent les exemples officiels.
   functions:
+    environment:
+      # Paiement de l'accès équipage (docs/PAIEMENT.md). Vides = paiement pas encore ouvert.
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
     volumes: !override
       - ../../supabase/functions:/home/deno/functions:ro,z
       - deno-cache:/root/.cache/deno

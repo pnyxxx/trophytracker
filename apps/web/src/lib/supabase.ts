@@ -14,6 +14,8 @@ declare global {
     __TT_CONFIG__?: {
       anonKey?: string;
       googleEnabled?: boolean;
+      /** Paiement en ligne ouvert (clé Stripe configurée sur le serveur). */
+      paymentsEnabled?: boolean;
       /** IP du PC sur le réseau local (dev) : pour que le téléphone joigne le service GPS. */
       lanIp?: string;
       /** Port HTTP publié par Caddy en local (WEB_HTTP_PORT). */
@@ -38,6 +40,7 @@ export const supabase = createClient<Database>(window.location.origin, anonKey, 
 });
 
 export const googleEnabled = window.__TT_CONFIG__?.googleEnabled === true;
+export const paymentsEnabled = window.__TT_CONFIG__?.paymentsEnabled === true;
 
 export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row'];
 export type Crew = Tables<'crews'>;

@@ -19,6 +19,10 @@ insert into auth.users (id, email, raw_user_meta_data, aud, role) values
   ('00000000-0000-0000-0000-00000000000c', 'carol@test.local', '{"display_name":"Carol"}', 'authenticated', 'authenticated'),
   ('00000000-0000-0000-0000-0000000000ad', 'admin@test.local', '{}',                       'authenticated', 'authenticated');
 update public.profiles set role = 'admin' where id = '00000000-0000-0000-0000-0000000000ad';
+-- Créer un équipage demande un accès payé (voir payments.test.sql) : on l'offre à alice et bob.
+insert into public.crew_purchases (user_id, source, status, amount_cents, paid_at) values
+  ('00000000-0000-0000-0000-00000000000a', 'admin', 'paid', 0, now()),
+  ('00000000-0000-0000-0000-00000000000b', 'admin', 'paid', 0, now());
 
 select is((select display_name from public.profiles where id = '00000000-0000-0000-0000-00000000000a'), 'Alice',
   'le profil est créé automatiquement à l''inscription');
