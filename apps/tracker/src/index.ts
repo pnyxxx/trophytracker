@@ -4,6 +4,7 @@ import { createDb } from './db.js';
 import { buildHttp } from './http.js';
 import { TraccarClient } from './traccar.js';
 import { startTraccarSync } from './traccar-sync.js';
+import { startAdminNotifier } from './notifier.js';
 
 const config = loadConfig();
 const log = (msg: string) => console.log(`[tracker] ${new Date().toISOString()} ${msg}`);
@@ -26,11 +27,26 @@ if (config.TRACCAR_URL && config.TRACCAR_EMAIL && config.TRACCAR_PASSWORD) {
   log('Traccar non configuré : seule la réception directe des téléphones est active');
 }
 
+let stopNotifier = () => {};
+if (config.SMTP_HOST) {
+  stopNotifier = startAdminNotifier(
+    db,
+    { host: config.SMTP_HOST, port: config.SMTP_PORT, user: config.SMTP_USER || undefined, pass: config.SMTP_PASS, from: config.SMTP_ADMIN_EMAIL, fromName: config.SMTP_SENDER_NAME },
+    config.SITE_URL.replace(/\/$/, ''),
+    config.NOTIFY_POLL_SECONDS,
+    log,
+  );
+  log(`emails aux admins activés (${config.SMTP_HOST}:${config.SMTP_PORT}, toutes les ${config.NOTIFY_POLL_SECONDS}s)`);
+} else {
+  log('SMTP non configuré : pas d’emails aux admins');
+}
+
 // Arrêt propre (docker stop).
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.once(signal, async () => {
     log(`${signal} reçu, arrêt`);
     stopSync();
+    stopNotifier();
     await app.close();
     await db.close();
     process.exit(0);

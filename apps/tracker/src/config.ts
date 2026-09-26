@@ -13,6 +13,18 @@ const schema = z.object({
   TRACCAR_PASSWORD: z.string().optional(),
   TRACCAR_POLL_SECONDS: z.coerce.number().int().min(5).default(10),
 
+  /** Emails aux admins (nouveau compte, nouvel abonnement) : même SMTP que le site. Vide = désactivé. */
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().int().positive().default(587),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  // Docker Compose passe une chaîne vide quand la variable n'est pas définie : même effet qu'absente.
+  SMTP_ADMIN_EMAIL: z.string().optional().transform((v) => v || 'noreply@trophytracker.local'),
+  SMTP_SENDER_NAME: z.string().optional().transform((v) => v || 'TrophyTracker'),
+  /** Adresse publique du site (liens dans les emails). */
+  SITE_URL: z.string().optional().transform((v) => v || 'http://localhost'),
+  NOTIFY_POLL_SECONDS: z.coerce.number().int().min(5).default(30),
+
   /** Seuils de stockage : distance minimale (m) et silence maximal (s) entre deux points. */
   TRACK_MIN_DISTANCE_M: z.coerce.number().min(0).default(15),
   TRACK_MAX_SILENCE_S: z.coerce.number().min(0).default(300),

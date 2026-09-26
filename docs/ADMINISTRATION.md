@@ -55,3 +55,13 @@ where slug = 'nom-equipage';
 
 `make seed` crée trois équipages d'exemple, chacun avec son compte (un compte ne peut faire partie que d'un seul équipage) : `demo@trophytracker.local` pour « J4L Club », `demo-<slug>@trophytracker.local` pour les autres.
 **À ne pas lancer en production.**
+
+## Emails aux administrateurs
+
+Chaque admin reçoit un email à chaque **nouveau compte** et à chaque **nouvel abonnement** à un équipage.
+- Les événements sont rangés en base (`private.admin_notifications`) par des déclencheurs, puis envoyés toutes les
+  30 s par le service `tracker`, avec le même SMTP que les emails du site (`SMTP_*` du `.env`).
+- Si le SMTP est indisponible, l'envoi est retenté (5 essais). Sans `SMTP_HOST`, rien n'est envoyé.
+- Les destinataires sont tous les comptes au rôle admin : nommer ou retirer un admin suffit.
+- Suivi : `docker compose logs tracker | grep "email admin"`.
+

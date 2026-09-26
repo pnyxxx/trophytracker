@@ -75,7 +75,10 @@ export default function PrivacyPage() {
       <h2>Qui peut y accéder</h2>
       <p>Personne n’achète ni ne reçoit vos données à des fins commerciales. Seuls y ont accès, pour faire fonctionner le site :</p>
       <ul>
-        <li>l’éditeur du site ;</li>
+        <li>
+          l’éditeur du site, qui reçoit un email à chaque nouveau compte et à chaque nouvel abonnement (nom affiché, email du
+          compte, équipage suivi) pour suivre l’activité du service ; ces notifications sont effacées après 30 jours ;
+        </li>
         <li>
           <strong>Cloudflare</strong> (États-Unis), par qui passe le trafic du site pour le protéger. Ce transfert hors de l’Union
           européenne est encadré par le Data Privacy Framework UE–États-Unis ;

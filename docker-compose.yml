@@ -56,6 +56,14 @@ services:
       TRACCAR_PASSWORD: ${TRACCAR_PASSWORD:-}
       TRACCAR_POLL_SECONDS: ${TRACCAR_POLL_SECONDS:-10}
       TRUST_PROXY: "true"
+      # Emails aux admins (nouveau compte, nouvel abonnement) : même SMTP que Supabase Auth.
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_ADMIN_EMAIL: ${SMTP_ADMIN_EMAIL:-}
+      SMTP_SENDER_NAME: ${SMTP_SENDER_NAME:-TrophyTracker}
+      SITE_URL: ${SITE_URL:-}
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
       interval: 15s

@@ -1,9 +1,11 @@
 /**
- * Accès à la base. Le rôle `tracker` ne peut appeler QUE ces trois fonctions :
- * même en cas de faille dans ce service, il ne peut rien lire ni modifier d'autre.
+ * Accès à la base. Le rôle `tracker` ne peut appeler QUE ces fonctions (GPS et
+ * file des emails admin) : même en cas de faille dans ce service, il ne peut rien
+ * lire ni modifier d'autre.
  */
 import postgres from 'postgres';
 import type { IncomingPoint } from './points.js';
+import type { AdminNotification } from './admin-emails.js';
 
 export type IngestResult = 'stored' | 'skipped' | 'stale' | 'invalid' | 'glitch';
 
@@ -31,6 +33,16 @@ export function createDb(url: string, opts: { minDistanceM: number; maxSilenceS:
 
     traccarLinks() {
       return sql<{ crew_id: string; traccar_device_id: string }[]>`select * from private.traccar_links()`;
+    },
+
+    /** Emails admin en attente, avec la liste des destinataires (les admins). */
+    pendingAdminNotifications() {
+      return sql<(AdminNotification & { recipients: string[] })[]>`
+        select * from private.pending_admin_notifications(20)`;
+    },
+
+    async adminNotificationDone(id: number, error: string | null) {
+      await sql`select private.admin_notification_done(${id}, ${error})`;
     },
 
     async ping() {
