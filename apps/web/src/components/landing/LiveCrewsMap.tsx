@@ -1,5 +1,5 @@
 /**
- * Carte « Où sont-ils ? » : parcours officiel et dernière position connue
+ * Carte « Où sont-ils ? » : parcours prévu et dernière position connue
  * de chaque équipage public. Un clic sur un équipage ouvre sa page.
  */
 import { useEffect, useRef } from 'react';

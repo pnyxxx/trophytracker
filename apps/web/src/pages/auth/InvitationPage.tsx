@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -81,6 +81,10 @@ export default function InvitationPage() {
         </div>
         {error && <p role="alert" className="text-sm text-primary-light">{error}</p>}
         <Button type="submit" className="w-full" disabled={busy}>{busy ? 'Activation…' : 'Activer mon compte'}</Button>
+        <p className="text-center text-xs text-dust-500">
+          En activant votre compte, vous acceptez les <Link to="/conditions-utilisation" className="underline">conditions d’utilisation</Link> et
+          la <Link to="/confidentialite" className="underline">politique de confidentialité</Link>.
+        </p>
       </form>
     </AuthLayout>
   );

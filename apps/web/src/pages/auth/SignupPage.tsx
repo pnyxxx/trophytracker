@@ -77,7 +77,8 @@ export default function SignupPage() {
         {error && <p role="alert" className="text-sm text-primary-light">{error}</p>}
         <Button type="submit" className="w-full" disabled={busy}>{busy ? 'Création…' : 'Créer mon compte'}</Button>
         <p className="text-center text-xs text-dust-500">
-          En créant un compte, vous acceptez notre <Link to="/confidentialite" className="underline">politique de confidentialité</Link>.
+          En créant un compte, vous acceptez les <Link to="/conditions-utilisation" className="underline">conditions d’utilisation</Link> et
+          la <Link to="/confidentialite" className="underline">politique de confidentialité</Link>.
         </p>
       </form>
     </AuthLayout>

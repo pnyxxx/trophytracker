@@ -4,6 +4,7 @@
  * en direct de la réception des positions.
  */
 import { lazy, Suspense, useState, type ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Check, Copy, KeyRound, QrCode as QrCodeIcon, ShieldOff, Smartphone } from 'lucide-react';
@@ -14,6 +15,7 @@ import { keys } from '@/hooks/queries';
 import { supabase, type Crew } from '@/lib/supabase';
 import { toastError, unwrap } from '@/lib/errors';
 import { formatDateTime, formatRelative, isLive } from '@/lib/format';
+import { FAIR_PLAY } from '@/lib/legal';
 import { ingestAddress } from '@/lib/ingest';
 import { cn } from '@/lib/utils';
 import { Panel } from './shared';
@@ -121,6 +123,7 @@ function Step({ n, title, children }: { n: string; title: string; children: Reac
 export function GpsTab({ crew }: { crew: Crew }) {
   const queryClient = useQueryClient();
   const [newKey, setNewKey] = useState<string | null>(null);
+  const [charterChecked, setCharterChecked] = useState(false);
   const address = ingestAddress();
 
   const { data: tracking } = useQuery({
@@ -141,8 +144,14 @@ export function GpsTab({ crew }: { crew: Crew }) {
   const lastSpeed = status ? status.last_speed_kmh : crew.last_speed_kmh;
   const live = isLive(lastFix);
 
+  const fairPlayAccepted = !!tracking?.fair_play_accepted_at;
+
   const generate = useMutation({
-    mutationFn: async () => unwrap(await supabase.rpc('regenerate_device_key', { p_crew: crew.id })),
+    mutationFn: async () => {
+      // Première clé : la charte fair-play est acceptée juste avant (le serveur l'exige).
+      if (!fairPlayAccepted) unwrap(await supabase.rpc('accept_fair_play', { p_crew: crew.id }));
+      return unwrap(await supabase.rpc('regenerate_device_key', { p_crew: crew.id }));
+    },
     onSuccess: (key) => { setNewKey(key); void queryClient.invalidateQueries({ queryKey: keys.tracking(crew.id) }); },
     onError: toastError,
   });
@@ -201,6 +210,31 @@ export function GpsTab({ crew }: { crew: Crew }) {
           La clé identifie votre équipage : c’est elle que le téléphone envoie avec chaque position. Sans elle, les positions sont refusées.
         </p>
 
+        {!fairPlayAccepted && (
+          <div className="mb-5 border-l-[3px] border-primary bg-black/30 p-5 md:p-6">
+            <p className="tt-kicker m-0 text-ochre">Charte fair-play · à lire avant d’activer le suivi</p>
+            <p className="mb-4 mt-3 text-dust-200">{FAIR_PLAY.spirit}</p>
+            <p className="m-0 mb-3 text-sm text-dust-300">En activant le suivi, notre équipage s’engage :</p>
+            <ol className="m-0 grid list-none gap-3 p-0 md:grid-cols-2">
+              {FAIR_PLAY.rules.map((r, i) => (
+                <li key={r.title} className="flex gap-3 text-sm leading-relaxed text-dust-200">
+                  <span className="font-stencil text-2xl font-black leading-none text-primary">{i + 1}</span>
+                  <span><strong className="text-cream">{r.title}.</strong> {r.text}</span>
+                </li>
+              ))}
+            </ol>
+            <label className="mt-5 flex cursor-pointer items-start gap-3 border-t border-cream/[0.1] pt-4 text-sm font-semibold text-cream">
+              <input
+                type="checkbox"
+                checked={charterChecked}
+                onChange={(e) => setCharterChecked(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+              />
+              J’ai lu la charte et je l’accepte au nom de l’équipage.
+            </label>
+          </div>
+        )}
+
         {newKey ? (
           <div className="mb-5 grid gap-6 border border-primary/40 bg-black/30 p-5 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-start">
             <div className="flex min-w-0 flex-col gap-3">
@@ -245,7 +279,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
             onClick={() => {
               if (!tracking?.has_device_key || confirm('Générer une nouvelle clé ? L’ancienne cessera immédiatement de fonctionner.')) generate.mutate();
             }}
-            disabled={generate.isPending}
+            disabled={generate.isPending || (!fairPlayAccepted && !charterChecked)}
           >
             <KeyRound />{tracking?.has_device_key || newKey ? 'Générer une nouvelle clé' : 'Générer la clé'}
           </Button>
@@ -255,6 +289,13 @@ export function GpsTab({ crew }: { crew: Crew }) {
             </Button>
           )}
         </div>
+        {fairPlayAccepted && (
+          <p className="mb-0 mt-3 text-xs leading-relaxed text-dust-400">
+            ✅ <Link to="/conditions-utilisation#fair-play" className="underline hover:text-cream">Charte fair-play</Link> acceptée
+            le {formatDateTime(tracking?.fair_play_accepted_at)}
+            {tracking?.fair_play_accepted_by_name && <> par {tracking.fair_play_accepted_by_name}</>}.
+          </p>
+        )}
       </Step>
 
       {/* ── 03 Réglages ────────────────────────────────────────────────── */}
@@ -446,6 +487,10 @@ export function GpsTab({ crew }: { crew: Crew }) {
         </div>
         <p className="mb-0 mt-2 text-xs text-dust-400">
           Le point n’est pas où est le téléphone ? Vérifiez que la localisation est en « Position exacte » et que l’appli n’envoie pas une ancienne position gardée en mémoire.
+        </p>
+        <p className="mb-0 mt-2 text-xs text-dust-400">
+          Si la page est publique, tout le monde voit la position : lancez le suivi pour de bon une fois partis de chez vous. Et pendant
+          la course, la carte n’est pas faite pour s’orienter : le règlement du 4L Trophy interdit le GPS.
         </p>
       </Step>
 

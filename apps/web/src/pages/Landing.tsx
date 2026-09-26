@@ -10,6 +10,7 @@ import { RouteJourney } from '@/components/landing/RouteJourney';
 import { fmtKm, STOPS, TOTAL_KM } from '@/components/landing/journey';
 import { useCrewSearch, useEvent } from '@/hooks/queries';
 import { departureTime, isLive } from '@/lib/format';
+import { FAIR_PLAY } from '@/lib/legal';
 import { useSeen } from '@/hooks/useInView';
 
 // La carte (MapLibre) est chargée à part : le haut de page s'affiche tout de suite.
@@ -249,7 +250,38 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── 05 FAQ ───────────────────────────────────────────────────────── */}
+      {/* ── 05 Charte fair-play ──────────────────────────────────────────── */}
+      <section className="bg-sand px-4 py-[120px] text-coal sm:px-7">
+        <div className="mx-auto flex max-w-[1240px] flex-col gap-14">
+          <div className="flex flex-wrap items-end justify-between gap-7">
+            <div className="flex flex-col gap-[18px]">
+              <Kicker className="text-dust-700">Charte fair-play</Kicker>
+              <SectionTitle className="leading-[0.88]">
+                L’esprit
+                <br />
+                du raid.
+              </SectionTitle>
+            </div>
+            <p className="m-0 max-w-[460px] text-pretty text-[17px] leading-relaxed text-dust-700">
+              {FAIR_PLAY.spirit} Chaque équipage s’y engage avant d’activer son suivi.
+            </p>
+          </div>
+          <ol className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(min(100%,260px),1fr))] border-t-2 border-coal p-0">
+            {FAIR_PLAY.rules.map((r, i) => (
+              <li key={r.title} className="flex flex-col gap-3 border-b-2 border-coal py-8 pr-7">
+                <span className="font-stencil text-[64px] font-black leading-[0.85] text-primary">{i + 1}</span>
+                <h3 className="m-0 font-display text-[28px] font-black uppercase leading-[0.95]">{r.title}</h3>
+                <p className="m-0 max-w-[340px] text-base leading-relaxed text-dust-800">{r.text}</p>
+              </li>
+            ))}
+          </ol>
+          <Link to="/conditions-utilisation#fair-play" className="self-start font-mono text-sm font-bold uppercase tracking-[0.12em] text-primary hover:text-primary-dark">
+            Lire les conditions d’utilisation →
+          </Link>
+        </div>
+      </section>
+
+      {/* ── 06 FAQ ───────────────────────────────────────────────────────── */}
       <section className="bg-ink px-4 py-[120px] sm:px-7">
         <div className="mx-auto grid max-w-[1240px] grid-cols-[repeat(auto-fit,minmax(min(100%,380px),1fr))] items-start gap-14">
           <div className="flex flex-col gap-[18px]">
@@ -271,7 +303,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── 06 Inscription ───────────────────────────────────────────────── */}
+      {/* ── 07 Inscription ───────────────────────────────────────────────── */}
       <section ref={ctaRef} id="inscription" className="relative h-[820px] overflow-hidden bg-ink-900">
         {ctaSeen && (
           <Suspense fallback={null}>

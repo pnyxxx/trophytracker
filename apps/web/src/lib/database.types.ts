@@ -13,18 +13,27 @@ export type Database = {
         Row: {
           crew_id: string
           device_key_hash: string | null
+          fair_play_accepted_at: string | null
+          fair_play_accepted_by: string | null
+          fair_play_accepted_by_name: string | null
           traccar_device_id: string | null
           updated_at: string
         }
         Insert: {
           crew_id: string
           device_key_hash?: string | null
+          fair_play_accepted_at?: string | null
+          fair_play_accepted_by?: string | null
+          fair_play_accepted_by_name?: string | null
           traccar_device_id?: string | null
           updated_at?: string
         }
         Update: {
           crew_id?: string
           device_key_hash?: string | null
+          fair_play_accepted_at?: string | null
+          fair_play_accepted_by?: string | null
+          fair_play_accepted_by_name?: string | null
           traccar_device_id?: string | null
           updated_at?: string
         }
@@ -422,6 +431,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_fair_play: { Args: { p_crew: string }; Returns: undefined }
       add_crew_member: {
         Args: { p_crew: string; p_email: string }
         Returns: undefined
@@ -508,6 +518,8 @@ export type Database = {
       get_crew_tracking: {
         Args: { p_crew: string }
         Returns: {
+          fair_play_accepted_at: string
+          fair_play_accepted_by_name: string
           has_device_key: boolean
           traccar_device_id: string
         }[]

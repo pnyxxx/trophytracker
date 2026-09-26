@@ -50,3 +50,4 @@ Classées par priorité. ✅ = déjà fait dans cette version.
 - Badge « équipage vérifié » (numéro officiel confirmé par un admin).
 - Livre d'or : les proches laissent des messages d'encouragement (modérés par l'équipage).
 - Cagnotte / lien de don vers l'association partenaire de l'équipage.
+- Mettre automatiquement le classement a jour en allant voir sur https://podium.desertours.com/R4L2026

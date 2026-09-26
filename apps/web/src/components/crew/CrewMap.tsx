@@ -1,6 +1,6 @@
 /**
  * Carte en direct d'un équipage : trace complète, position actuelle,
- * points du parcours officiel et sponsors.
+ * points du parcours prévu et sponsors.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { MapContainer, Marker, Polyline, Popup, useMap } from 'react-leaflet';

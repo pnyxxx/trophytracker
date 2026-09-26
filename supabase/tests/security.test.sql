@@ -10,7 +10,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
 
-select plan(57);
+select plan(61);
 
 -- ─── Préparation : 4 comptes (alice propriétaire, bob inconnu, carol sans équipage, admin) ─
 insert into auth.users (id, email, raw_user_meta_data, aud, role) values
@@ -143,8 +143,15 @@ select throws_ok(
 -- ─── Clé d'appareil GPS ─────────────────────────────────────────────────────
 select throws_ok($$ select public.regenerate_device_key(pg_temp.crew()) $$, '42501', null,
   'bob ne peut pas générer la clé GPS de l''équipage');
+select throws_ok($$ select public.accept_fair_play(pg_temp.crew()) $$, '42501', null,
+  'bob ne peut pas accepter la charte fair-play à la place de l''équipage');
 
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
+select throws_ok($$ select public.regenerate_device_key(pg_temp.crew()) $$, 'P0001', null,
+  'pas de clé GPS tant que la charte fair-play n''est pas acceptée');
+select lives_ok($$ select public.accept_fair_play(pg_temp.crew()) $$, 'alice accepte la charte fair-play');
+select is((select fair_play_accepted_by_name from public.get_crew_tracking(pg_temp.crew())), 'Alice',
+  'l''acceptation de la charte est enregistrée avec son auteur');
 create temp table t_key as select public.regenerate_device_key(pg_temp.crew()) as k;
 reset role;
 select is(private.crew_for_device_key((select k from t_key)), pg_temp.crew(), 'la clé générée identifie l''équipage');

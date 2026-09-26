@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Wordmark } from '@/components/common/Logo';
+import { CONTACT_HREF, REPORT_HREF } from '@/lib/legal';
 
 const link = 'text-dust-400 hover:text-white';
 
@@ -21,6 +22,8 @@ export function SiteFooter() {
         </nav>
         <nav className="flex flex-col gap-2.5 text-sm" aria-label="Informations">
           <p className="tt-kicker text-cream">Informations</p>
+          <Link to="/mentions-legales" className={link}>Mentions légales</Link>
+          <Link to="/conditions-utilisation" className={link}>Conditions d’utilisation</Link>
           <Link to="/confidentialite" className={link}>Confidentialité & données</Link>
           <a href="https://www.4ltrophy.com" target="_blank" rel="noopener noreferrer" className={link}>
             Site officiel du 4L Trophy ↗
@@ -29,6 +32,8 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-cream/10 px-4 py-5 text-center text-xs sm:px-7">
         © {new Date().getFullYear()} TrophyTracker — projet indépendant, non affilié à l’organisation du 4L Trophy.
+        {' · '}<a href={CONTACT_HREF} className={link}>Contact</a>
+        {' · '}<a href={REPORT_HREF} className={link}>Signaler un contenu</a>
       </div>
     </footer>
   );

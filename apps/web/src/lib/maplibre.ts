@@ -26,6 +26,7 @@ export function satelliteStyle(hillshade: boolean): StyleSpecification {
     encoding: 'terrarium' as const,
     tileSize: 256,
     maxzoom: 12,
+    attribution: 'Relief : Mapzen / AWS Terrain Tiles',
   };
   return {
     version: 8,

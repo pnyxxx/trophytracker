@@ -110,6 +110,8 @@ const { data: found } = await anon.rpc('search_crews', { p_query: `dunes ${run}`
 check(found?.total === 1 && found.items[0].followers_count === 1, 'un visiteur trouve l’équipage (1 abonné)');
 
 // GPS + temps réel
+const { error: fairPlayErr } = await alice.rpc('accept_fair_play', { p_crew: crew.id });
+check(!fairPlayErr, 'charte fair-play acceptée');
 const { data: key } = await alice.rpc('regenerate_device_key', { p_crew: crew.id });
 check(key?.startsWith('tt_'), 'clé GPS générée');
 

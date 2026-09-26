@@ -172,7 +172,7 @@ export default function CrewPage() {
           tone="sand"
           kicker="Le roadbook"
           title="La route"
-          subtitle={`De ${event.waypoints[0]!.name} à ${event.waypoints.at(-1)!.name} : où en est l’équipage sur le parcours officiel.`}
+          subtitle={`De ${event.waypoints[0]!.name} à ${event.waypoints.at(-1)!.name} : où en est l’équipage sur le parcours prévu.`}
         >
           <CrewRoadbook waypoints={event.waypoints} distanceKm={stats?.total_distance_km ?? 0} totalKm={event.totalKm} />
         </Section>

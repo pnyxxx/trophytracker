@@ -159,7 +159,7 @@ function RouteAdmin() {
   });
 
   return (
-    <Panel title="Parcours officiel" description="Points affichés sur toutes les cartes et dans « La route », dans l’ordre croissant.">
+    <Panel title="Parcours prévu" description="Points affichés sur toutes les cartes et dans « La route », dans l’ordre croissant.">
       <ul className="mb-6 divide-y divide-cream/10">
         {event?.waypoints.map((w) => (
           <li key={w.id} className="flex items-center gap-3 py-2">
