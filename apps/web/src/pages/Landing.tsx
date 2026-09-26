@@ -1,10 +1,9 @@
-import { lazy, Suspense, useMemo, useRef } from 'react';
+import { lazy, Suspense, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { PageShell } from '@/components/layout/PageShell';
 import { Seo } from '@/components/common/Seo';
 import { Kicker, LiveDot, SectionTitle } from '@/components/common/Brand';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { CrewCard } from '@/components/crew/CrewBits';
 import { Countdown } from '@/components/landing/Countdown';
 import { CrewFinder } from '@/components/landing/CrewFinder';
 import { RouteJourney } from '@/components/landing/RouteJourney';
@@ -13,8 +12,7 @@ import { useCrewSearch, useEvent } from '@/hooks/queries';
 import { departureTime, isLive } from '@/lib/format';
 import { useSeen } from '@/hooks/useInView';
 
-// Les cartes (MapLibre) sont chargées à part : le haut de page s'affiche tout de suite.
-const LiveCrewsMap = lazy(() => import('@/components/landing/LiveCrewsMap'));
+// La carte (MapLibre) est chargée à part : le haut de page s'affiche tout de suite.
 const CtaMap = lazy(() => import('@/components/landing/CtaMap'));
 
 const audiences = [
@@ -75,28 +73,12 @@ const faq = [
 ];
 
 export default function Landing() {
-  const liveRef = useRef<HTMLDivElement>(null);
   const ctaRef = useRef<HTMLElement>(null);
-  const liveSeen = useSeen(liveRef);
   const ctaSeen = useSeen(ctaRef);
   const { data: event } = useEvent();
   const { data: crews } = useCrewSearch('', false, 60);
 
-  const items = useMemo(() => crews?.items ?? [], [crews]);
-  const liveCount = items.filter((c) => isLive(c.last_fix_at)).length;
-  // En tête de liste : ceux qui émettent, puis les plus avancés sur la route.
-  const leaders = useMemo(
-    () =>
-      [...items]
-        .sort((a, b) => Number(isLive(b.last_fix_at)) - Number(isLive(a.last_fix_at)) || b.total_distance_m - a.total_distance_m)
-        .slice(0, 6),
-    [items],
-  );
-  const route = useMemo(
-    () => (event?.waypoints.length ? event.waypoints : STOPS).map((w) => ({ name: w.name, lat: w.lat, lon: w.lon })),
-    [event],
-  );
-  const totalKm = fmtKm(event?.totalKm ?? TOTAL_KM);
+  const liveCount = (crews?.items ?? []).filter((c) => isLive(c.last_fix_at)).length;
   const beforeStart = !!event?.startDate && departureTime(event.startDate) > Date.now();
 
   return (
@@ -181,6 +163,16 @@ export default function Landing() {
       </section>
 
       {/* ── 02 La route ──────────────────────────────────────────────────── */}
+      {/* Sur grand écran, ce titre est incrusté dans l'écran fixe de « La route ». */}
+      <section className="bg-ink px-4 pt-[120px] sm:px-7 min-[1000px]:hidden">
+        <div className="flex flex-col gap-3.5">
+          <Kicker className="text-live">
+            <LiveDot />
+            Sur la route en ce moment
+          </Kicker>
+          <SectionTitle className="leading-[0.88]">Où sont-ils ?</SectionTitle>
+        </div>
+      </section>
       <RouteJourney />
 
       {/* ── 03 Pour qui ──────────────────────────────────────────────────── */}
@@ -225,55 +217,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── 04 En direct ─────────────────────────────────────────────────── */}
-      <section id="live" className="scroll-mt-[68px] bg-ink px-4 py-[120px] sm:px-7">
-        <div className="mx-auto flex max-w-[1400px] flex-col gap-10">
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <div className="flex flex-col gap-3.5">
-              <Kicker className="text-live">
-                <LiveDot />
-                Sur la route en ce moment
-              </Kicker>
-              <SectionTitle className="leading-[0.88]">Où sont-ils ?</SectionTitle>
-            </div>
-            <p className="m-0 max-w-[420px] text-base leading-relaxed text-dust-300">
-              Dernière position connue de chaque équipage. Cliquez sur un équipage pour suivre sa trace complète.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,440px),1fr))] gap-5">
-            <div ref={liveRef} className="relative min-h-[560px] overflow-hidden border border-cream/[0.14] bg-[#E8E2D8] min-[1000px]:col-span-2">
-              {liveSeen && (
-                <Suspense fallback={null}>
-                  <LiveCrewsMap route={route} crews={items} />
-                </Suspense>
-              )}
-              <div className="pointer-events-none absolute left-3.5 top-3.5 z-[2] bg-ink px-3 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-cream">
-                {route[0]?.name ?? 'Biarritz'} → {route.at(-1)?.name ?? 'Marrakech'} · {totalKm} km
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              {leaders.length === 0 ? (
-                <div className="flex flex-1 flex-col justify-center gap-3 border border-cream/[0.08] bg-ink-800 p-8">
-                  <p className="m-0 font-display text-3xl font-black uppercase">Personne sur la route… pour l’instant</p>
-                  <p className="m-0 text-sm text-dust-400">Les équipages apparaissent ici dès qu’ils ont créé leur page.</p>
-                </div>
-              ) : (
-                leaders.map((c) => <CrewCard key={c.id} crew={c} />)
-              )}
-              <Link
-                to="/equipages"
-                className="mt-2 border border-cream p-4 text-center font-mono text-xs font-bold uppercase tracking-[0.14em] text-cream hover:bg-cream hover:text-ink"
-              >
-                {crews && crews.total > 0 ? `Voir les ${crews.total} équipages →` : 'Voir tous les équipages →'}
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── 05 Comment ça marche ─────────────────────────────────────────── */}
+      {/* ── 04 Comment ça marche ─────────────────────────────────────────── */}
       <section id="comment" className="scroll-mt-[68px] bg-cream px-4 py-[120px] text-coal sm:px-7">
         <div className="mx-auto flex max-w-[1240px] flex-col gap-16">
           <SectionTitle className="leading-[0.88]">
@@ -305,7 +249,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── 06 FAQ ───────────────────────────────────────────────────────── */}
+      {/* ── 05 FAQ ───────────────────────────────────────────────────────── */}
       <section className="bg-ink px-4 py-[120px] sm:px-7">
         <div className="mx-auto grid max-w-[1240px] grid-cols-[repeat(auto-fit,minmax(min(100%,380px),1fr))] items-start gap-14">
           <div className="flex flex-col gap-[18px]">
@@ -327,7 +271,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── 07 Inscription ───────────────────────────────────────────────── */}
+      {/* ── 06 Inscription ───────────────────────────────────────────────── */}
       <section ref={ctaRef} id="inscription" className="relative h-[820px] overflow-hidden bg-ink-900">
         {ctaSeen && (
           <Suspense fallback={null}>

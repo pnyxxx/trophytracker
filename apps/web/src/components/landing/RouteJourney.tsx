@@ -4,6 +4,7 @@
  * pendant que le texte de l'étape, le compteur et le roadbook se mettent à jour.
  */
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { Kicker, LiveDot } from '@/components/common/Brand';
 import { useSeen } from '@/hooks/useInView';
 import { fmtKm, headingAt, posAt, STOP_FRAC, STOPS, TOTAL_KM } from './journey';
 
@@ -61,13 +62,21 @@ export function RouteJourney() {
           <div aria-hidden="true" className="pointer-events-none absolute -bottom-[70px] -left-2.5 font-stencil text-[400px] font-black leading-none text-transparent [-webkit-text-stroke:1px_rgba(244,236,223,.08)]">
             {num}
           </div>
+          {/* Titre accroché en haut ; le bloc de l'étape reste centré dans l'espace restant. */}
+          <div className="relative mb-auto flex flex-col gap-4">
+            <Kicker className="text-live">
+              <LiveDot />
+              Sur la route en ce moment
+            </Kicker>
+            <h2 className="tt-display m-0 whitespace-nowrap text-[clamp(40px,calc(6vw_-_16px),120px)] leading-[0.88] text-cream">Où sont-ils ?</h2>
+          </div>
           <div className="tt-kicker text-xs text-ochre">La route · étape {num} / {pad(STOPS.length)}</div>
           <div className="relative flex flex-col gap-1.5">
             <div className="font-mono text-[13px] uppercase tracking-[0.1em] text-dust-400">{cur.country} — {cur.kind}</div>
-            <h2 className="m-0 text-balance font-display text-[clamp(52px,5.6vw,100px)] font-black uppercase leading-[0.96] text-cream">{cur.name}</h2>
+            <h3 className="m-0 text-balance font-display text-[clamp(52px,5.6vw,100px)] font-black uppercase leading-[0.96] text-cream">{cur.name}</h3>
           </div>
           <p className="relative m-0 max-w-[420px] text-pretty text-[19px] leading-[1.55] text-dust-100">{cur.text}</p>
-          <div className="relative font-mono text-xs tracking-[0.08em] text-dust-400">↓ Faites défiler pour rouler</div>
+          <div className="relative mb-auto font-mono text-xs tracking-[0.08em] text-dust-400">↓ Faites défiler pour rouler</div>
         </div>
 
         {/* Centre : la vue satellite */}
