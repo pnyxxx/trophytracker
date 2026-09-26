@@ -12,6 +12,7 @@ import { readFileSync } from 'node:fs';
 import { randomBytes } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 import { loadEnv } from './lib-env.mjs';
+import { MERZOUGA, roadUntil, SALAMANQUE, traceSql } from './lib-demo-trace.mjs';
 
 const env = loadEnv();
 const admin = createClient(env.SITE_URL, env.SERVICE_ROLE_KEY, { auth: { persistSession: false } });
@@ -106,29 +107,8 @@ for (const [i, [name, logo, lat, lon, city]] of sponsors.entries()) {
 }
 
 // ── Traces GPS (via la même fonction d'ingestion que les vrais téléphones) ─────
-const route = [[43.464, -1.536], [42.85, -2.67], [41.65, -4.72], [40.968, -5.666], [38.99, -5.8], [37.39, -5.98], [36.129, -5.444],
-  [35.76, -5.83], [34.02, -5.0], [33.53, -5.11], [32.883, -4.959], [32.3, -4.6]];
-
-function trackSql(crewId, stops, endAgoMin, hours) {
-  const pts = [];
-  for (let i = 1; i < stops.length; i++) {
-    const [a, b] = [stops[i - 1], stops[i]];
-    const n = Math.max(2, Math.round(Math.hypot(b[0] - a[0], b[1] - a[1]) * 60));
-    for (let k = 0; k < n; k++) {
-      const t = k / n;
-      pts.push([a[0] + (b[0] - a[0]) * t + Math.sin(k) * 0.004, a[1] + (b[1] - a[1]) * t + Math.cos(k * 1.3) * 0.004]);
-    }
-  }
-  pts.push(stops.at(-1));
-  const end = Date.now() - endAgoMin * 60_000;
-  const step = (hours * 3600_000) / pts.length;
-  return pts.map(([lat, lon], i) => {
-    const at = new Date(end - (pts.length - 1 - i) * step).toISOString();
-    return `select private.ingest_position('${crewId}', '${at}', ${lat}, ${lon}, ${60 + (i % 30)}, null, null, 10, 80, 'device');`;
-  }).join('\n');
-}
-
-sql(`\\o /dev/null\n${trackSql(j4l, route, 0.2, 60)}\n${trackSql(ids['les-sables-mouvants'], route.slice(0, 5), 150, 20)}`);
+// Elles suivent le vrai tracé routier de la page d'accueil (scripts/lib-demo-trace.mjs).
+sql(`\\o /dev/null\n${traceSql(j4l, roadUntil(...MERZOUGA), 0.2, 60)}\n${traceSql(ids['les-sables-mouvants'], roadUntil(...SALAMANQUE), 150, 20)}`);
 
 console.log(`✅ Données de démo créées.
    Compte démo : ${DEMO_EMAIL} / ${DEMO_PASSWORD}
