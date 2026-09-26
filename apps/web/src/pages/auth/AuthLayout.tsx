@@ -13,8 +13,8 @@ export function AuthLayout({ title, subtitle, children, footer }: {
       <div className="mx-auto grid min-h-screen max-w-[1400px] items-center gap-12 px-4 py-10 sm:px-7 lg:grid-cols-[1fr_minmax(0,480px)] lg:gap-20">
         {/* Colonne d'accroche (grand écran) */}
         <div className="hidden flex-col gap-8 lg:flex">
-          <Link to="/" className="flex items-center gap-2.5 text-cream hover:text-cream" aria-label="Accueil TrophyTracker">
-            <LogoMark /> <Wordmark />
+          <Link to="/" className="flex items-center gap-3.5 text-cream hover:text-cream" aria-label="Accueil TrophyTracker">
+            <LogoMark className="h-14 w-14" /> <Wordmark className="text-[40px]" />
           </Link>
           <p className="m-0 font-display text-[clamp(64px,7vw,120px)] font-black uppercase leading-[0.95] text-cream">
             Suivez

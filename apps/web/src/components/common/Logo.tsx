@@ -1,21 +1,39 @@
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
-/** Logo TrophyTracker : un repère GPS stylisé + le nom. */
-export function LogoMark({ className }: { className?: string }) {
+/**
+ * Logo validé « La trace dessine la 4L » (docs/branding/) : la trace part du sol,
+ * dessine le profil de la 4L d'un seul trait et s'arrête sur le point rouge en direct.
+ * `tone` : « dark » sur fond sombre (le site), « light » sur fond clair.
+ */
+const TONES = {
+  dark: { trace: '#F2B45A', wheelFill: '#120F0C', ink: '#F4ECDF', dotStroke: '#F4ECDF' },
+  light: { trace: '#D98A3D', wheelFill: '#F4ECDF', ink: '#1A1612', dotStroke: '#FFF8EC' },
+};
+
+export function LogoMark({ className, tone = 'dark' }: { className?: string; tone?: keyof typeof TONES }) {
+  const c = TONES[tone];
   return (
-    <svg viewBox="0 0 32 32" className={cn('h-8 w-8', className)} aria-hidden="true">
-      <rect width="32" height="32" rx="9" fill="#DB4740" />
-      <path d="M16 6.5c-4 0-7 3-7 6.9 0 5.2 7 12.1 7 12.1s7-6.9 7-12.1c0-3.9-3-6.9-7-6.9z" fill="white" />
-      <circle cx="16" cy="13.4" r="2.7" fill="#DB4740" />
+    <svg viewBox="0 0 64 64" className={cn('h-11 w-11 shrink-0', className)} aria-hidden="true">
+      <g transform="translate(1 2.5) scale(0.93)">
+        <path d="M5 51 H12 V24 Q12 21 15 21 H38 L46 29 H54 Q58 29 58 33" fill="none" stroke={c.trace} strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="20" cy="46" r="5.5" fill={c.wheelFill} stroke={c.ink} strokeWidth="3" />
+        <circle cx="47" cy="46" r="5.5" fill={c.wheelFill} stroke={c.ink} strokeWidth="3" />
+        <circle cx="5" cy="51" r="3" fill={c.wheelFill} stroke={c.ink} strokeWidth="2.5" />
+        <circle cx="58" cy="33" r="10" fill="none" stroke="#DB4740" strokeWidth="2" opacity="0.45" />
+        <circle cx="58" cy="33" r="6" fill="#DB4740" stroke={c.dotStroke} strokeWidth="2.8" />
+      </g>
     </svg>
   );
 }
 
-/** Nom de la marque en capitales condensées, « Tracker » en rouge. */
+/**
+ * Nom de la marque en capitales condensées, « Tracker » toujours en rouge
+ * (choix de Julien : la maquette le mettait en doré sur fond sombre).
+ */
 export function Wordmark({ className }: { className?: string }) {
   return (
-    <span className={cn('font-display text-2xl font-black uppercase tracking-[0.02em]', className)}>
+    <span className={cn('font-display text-2xl font-black uppercase leading-[0.85]', className)}>
       Trophy<span className="text-primary">Tracker</span>
     </span>
   );
