@@ -6,14 +6,20 @@ import { useMemo } from 'react';
 import type { Waypoint } from '@/lib/supabase';
 import { haversineKm } from '@/lib/geo';
 import { formatNumber } from '@/lib/format';
+import { routeKmOf } from '@/components/landing/journey';
 import { waypointStyle } from './mapIcons';
 
 // La route réelle est ~30 % plus longue que la ligne droite entre les étapes.
 const ROAD_FACTOR = 1.3;
 
 export function CrewRoadbook({ waypoints, distanceKm, totalKm }: { waypoints: Waypoint[]; distanceKm: number; totalKm: number | null }) {
-  // Kilomètre de chaque étape, mis à l'échelle de la distance officielle si elle est connue.
+  // Kilomètre de chaque étape : lu sur la route de référence (celle de l'accueil) quand toutes les
+  // étapes s'y trouvent ; sinon estimé à vol d'oiseau, mis à l'échelle de la distance officielle.
   const stops = useMemo(() => {
+    const onRoute = waypoints.map((w) => routeKmOf(w.lat, w.lon));
+    if (onRoute.every((km, i) => km !== null && (i === 0 || km >= onRoute[i - 1]!))) {
+      return waypoints.map((w, i) => ({ ...w, km: onRoute[i]! - onRoute[0]! }));
+    }
     let acc = 0;
     const raw = waypoints.map((w, i) => {
       const prev = waypoints[i - 1];

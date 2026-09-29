@@ -5,12 +5,13 @@
 import { useEffect, useRef } from 'react';
 import type { GeoJSONSource, Map as MlMap, Marker } from 'maplibre-gl';
 import { maplibregl, satelliteStyle, webglAvailable } from '@/lib/maplibre';
-import { citySignHtml, DENSE, headingAt, idxAt, PATH, posAt, STOP_FRAC, STOPS } from './journey';
+import { citySignHtml, DENSE, headingAt, idxAt, PASSAGES, PATH, posAt, STOP_FRAC, STOPS } from './journey';
 
 interface Scene {
   map: MlMap;
   car: Marker;
-  signs: HTMLElement[];
+  /** Panneaux des étapes, avec la progression à laquelle on les atteint. */
+  signs: { el: HTMLElement; frac: number }[];
 }
 
 function update(scene: Scene, p: number) {
@@ -27,8 +28,8 @@ function update(scene: Scene, p: number) {
     geometry: { type: 'LineString', coordinates: [...DENSE.slice(0, idxAt(p) + 1), pos] },
   });
   car.setLngLat(pos);
-  signs.forEach((el, j) => {
-    el.style.opacity = STOP_FRAC[j]! <= p + 0.012 ? '1' : '.6';
+  signs.forEach(({ el, frac }) => {
+    el.style.opacity = frac <= p + 0.012 ? '1' : '.6';
   });
 }
 
@@ -74,12 +75,21 @@ export default function JourneyMap({ progress }: { progress: number }) {
       map.addLayer({ id: 'done-glow', type: 'line', source: 'done', layout: round, paint: { 'line-color': '#FF4A3D', 'line-opacity': 0.55, 'line-width': 12, 'line-blur': 9 } });
       map.addLayer({ id: 'done', type: 'line', source: 'done', layout: round, paint: { 'line-color': '#FF6A5E', 'line-width': 3.5 } });
 
-      const signs = STOPS.map((s) => {
+      // Un panneau par étape (sauf les boucles, qui reviennent à Merzouga) ; les villes du marathon sont floues.
+      const sign = (name: string, lon: number, lat: number, blurred: boolean) => {
         const el = document.createElement('div');
         el.style.cssText = 'display:flex;flex-direction:column;align-items:center;transition:opacity .4s';
-        el.innerHTML = citySignHtml(s.name);
-        new maplibregl.Marker({ element: el, anchor: 'bottom' }).setLngLat([s.lon, s.lat]).addTo(map);
+        el.innerHTML = citySignHtml(name, blurred);
+        new maplibregl.Marker({ element: el, anchor: 'bottom' }).setLngLat([lon, lat]).addTo(map);
         return el;
+      };
+      const signs = STOPS.flatMap((s, i) =>
+        s.sign === null ? [] : [{ el: sign(s.name, s.lon, s.lat, s.sign === 'blurred'), frac: STOP_FRAC[i]! }],
+      );
+      PASSAGES.forEach((s) => {
+        const el = sign(s.name, s.lon, s.lat, !!s.blurred);
+        el.style.opacity = '.75';
+        if (s.blurred) el.setAttribute('aria-hidden', 'true');
       });
 
       const carEl = document.createElement('div');

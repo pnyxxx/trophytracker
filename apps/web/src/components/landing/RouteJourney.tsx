@@ -5,16 +5,28 @@
  */
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useSeen } from '@/hooks/useInView';
-import { fmtKm, headingAt, posAt, STOP_FRAC, STOPS, TOTAL_KM } from './journey';
+import { useEvent } from '@/hooks/queries';
+import { countryAt, dayAt, fmtKm, stageAt, headingAt, kmAt, posAt, ROUTE_KM, STOP_FRAC, STOPS, TOTAL_DAYS } from './journey';
 
 const JourneyMap = lazy(() => import('./JourneyMap'));
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
+/** « 6–8 » → « 23 – 25 févr. » à partir de la date d'ouverture du village départ. */
+function dateOfDays(start: string, days: string) {
+  const [a, b = a] = days.split('–').map(Number);
+  const at = (d: number) => new Date(`${start}T12:00:00`).getTime() + (d - 1) * 86_400_000;
+  const fmt = (t: number, opts: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('fr-FR', opts).format(t);
+  return a === b
+    ? fmt(at(a!), { weekday: 'short', day: 'numeric', month: 'short' })
+    : `${fmt(at(a!), { day: 'numeric' })} – ${fmt(at(b!), { day: 'numeric', month: 'short' })}`;
+}
+
 export function RouteJourney() {
   const ref = useRef<HTMLElement>(null);
   const [p, setP] = useState(0);
   const seen = useSeen(ref);
+  const { data: event } = useEvent();
 
   useEffect(() => {
     let frame = 0;
@@ -39,15 +51,10 @@ export function RouteJourney() {
     };
   }, []);
 
-  // Kilométrage interpolé entre deux étapes, et étape courante.
-  let seg = 0;
-  while (seg < STOP_FRAC.length - 2 && p > STOP_FRAC[seg + 1]!) seg++;
-  const t = Math.min(1, Math.max(0, (p - STOP_FRAC[seg]!) / (STOP_FRAC[seg + 1]! - STOP_FRAC[seg]! || 1)));
-  const km = Math.round(STOPS[seg]!.km + (STOPS[seg + 1]!.km - STOPS[seg]!.km) * t);
-  let idx = 0;
-  STOP_FRAC.forEach((f, i) => {
-    if (p >= f - 0.012) idx = i;
-  });
+  // Kilométrage, jour du raid et étape courante.
+  const km = kmAt(p);
+  const day = dayAt(p);
+  const idx = stageAt(p);
   const cur = STOPS[idx]!;
   const num = pad(idx + 1);
   const [lon, lat] = posAt(p);
@@ -98,13 +105,13 @@ export function RouteJourney() {
                 <span
                   key={i}
                   className="absolute -top-1 -ml-[5.5px] h-[11px] w-[11px] rounded-full border-2 border-cream"
-                  style={{ left: `${(f * 100).toFixed(2)}%`, background: i <= idx ? '#DB4740' : '#120F0C' }}
+                  style={{ left: `${(f * 100).toFixed(2)}%`, background: f <= p + 0.012 ? '#DB4740' : '#120F0C' }}
                 />
               ))}
             </div>
             <div className="flex justify-between font-mono text-[10px] uppercase tracking-[0.14em] text-dust-300">
               <span>{STOPS[0]!.name}</span>
-              <span>{fmtKm(km)} / {fmtKm(TOTAL_KM)} km</span>
+              <span>{fmtKm(km)} / {fmtKm(ROUTE_KM)} km</span>
               <span>{STOPS.at(-1)!.name}</span>
             </div>
           </div>
@@ -112,7 +119,7 @@ export function RouteJourney() {
           {/* Carte de l'étape (petit écran) */}
           <div className="absolute inset-x-3 bottom-3 z-[6] flex flex-col gap-2 border-l-[3px] border-primary bg-ink/[0.94] p-[18px] min-[1000px]:hidden">
             <div className="flex justify-between font-mono text-[11px] uppercase tracking-[0.14em] text-ochre">
-              <span>Étape {num} / {pad(STOPS.length)} · {cur.country}</span>
+              <span>Étape {num} / {pad(STOPS.length)} · Jour {day}</span>
               <span>{fmtKm(km)} km</span>
             </div>
             <div className="font-display text-4xl font-black uppercase leading-none">{cur.name}</div>
@@ -137,13 +144,14 @@ export function RouteJourney() {
             <div className="bg-ink p-4">
               <div className="tt-kicker text-dust-400">Jour</div>
               <div className="font-display text-[44px] font-black leading-none">
-                {1 + Math.floor(p * 9)}
-                <span className="text-xl text-dust-400"> / 10</span>
+                {day}
+                <span className="text-xl text-dust-400"> / {TOTAL_DAYS}</span>
               </div>
+              {event?.startDate && <div className="mt-2 font-mono text-[11px] uppercase tracking-[0.12em] text-dust-400">{dateOfDays(event.startDate, day)}</div>}
             </div>
             <div className="bg-ink p-4">
               <div className="tt-kicker text-dust-400">Pays</div>
-              <div className="font-display text-[44px] font-black leading-none">{cur.cc}</div>
+              <div className="font-display text-[44px] font-black leading-none">{countryAt([lon, lat])}</div>
             </div>
           </div>
           <ol className="m-0 flex list-none flex-col p-0">

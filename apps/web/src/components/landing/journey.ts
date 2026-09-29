@@ -1,7 +1,7 @@
 /**
- * Le parcours illustré de l'accueil (Biarritz → Marrakech) : étapes racontées,
- * tracé routier approximatif et fonctions pour placer la 4L selon le défilement.
- * Données purement illustratives : la vraie trace de chaque équipage vient du GPS.
+ * Le parcours illustré de l'accueil (Biarritz → Marrakech) : étapes de l'édition 2027 jour par
+ * jour (d'après 4ltrophy.com), tracé routier et fonctions pour placer la 4L selon le défilement.
+ * Données illustratives : la vraie trace de chaque équipage vient du GPS.
  */
 import { haversineKm } from '@/lib/geo';
 // Partagé avec scripts/demo-trace.mjs : la trace de démo de J4L Club suit exactement ce tracé.
@@ -15,27 +15,57 @@ export interface JourneyStop {
   lat: number;
   lon: number;
   text: string;
-  /** Kilomètre de l'étape sur un parcours total de TOTAL_KM. */
+  /** Jours du raid passés à l'étape (J1 = ouverture du village départ). */
+  days: [number, number];
+  /** Panneau sur la carte : net (par défaut), flou, ou aucun (lieu déjà signalé). */
+  sign?: 'blurred' | null;
+  /** Kilomètre de l'étape sur la route depuis Biarritz. */
   km: number;
 }
 
+/** Distance officielle annoncée par l'organisation (aller-retour compris). */
 export const TOTAL_KM = 6000;
+/** Durée du raid, du village départ à la traversée retour. */
+export const TOTAL_DAYS = 12;
 
+// Une étape par jour de route. Les boucles autour de Merzouga sont un tracé illustratif.
 const WP: Omit<JourneyStop, 'km'>[] = [
-  { kind: 'Village départ', name: 'Biarritz', country: 'France', cc: 'FR', lat: 43.46484, lon: -1.53571, text: 'Les 4L s’alignent au village départ. À la maison, vous ouvrez un lien. C’est tout : pas d’appli, pas de compte.' },
-  { kind: 'Étape de nuit', name: 'Salamanque', country: 'Espagne', cc: 'ES', lat: 40.96821, lon: -5.66642, text: 'Première nuit en Espagne. La trace se dessine en temps réel, kilomètre après kilomètre, sans recharger la page.' },
-  { kind: 'Traversée vers le Maroc', name: 'Algésiras', country: 'Espagne', cc: 'ES', lat: 36.21315, lon: -5.41098, text: 'Le ferry. Plus de réseau ? Le téléphone garde les points en mémoire et complète la trace dès qu’il capte.' },
-  { kind: 'Bivouac', name: 'Boulajoul', country: 'Maroc', cc: 'MA', lat: 32.88438, lon: -4.98768, text: 'Premier bivouac. Les photos du soir arrivent sur la page — et les 360° pour y être presque.' },
-  { kind: 'Dunes de l’Erg Chebbi', name: 'Merzouga', country: 'Maroc', cc: 'MA', lat: 31.21516, lon: -3.99763, text: 'Les dunes. Les sponsors y sont aussi : leur logo sur la carte, au milieu du Sahara.' },
-  { kind: 'Arrivée', name: 'Marrakech', country: 'Maroc', cc: 'MA', lat: 31.58108, lon: -7.98231, text: 'Ligne d’arrivée. Une trace souvenir complète, du premier au dernier kilomètre.' },
+  { kind: 'Village départ', name: 'Biarritz', country: 'France', cc: 'FR', lat: 43.46484, lon: -1.53571, days: [1, 2], text: 'Deux jours de contrôles au village départ, puis les 4L s’élancent. À la maison, vous ouvrez un lien : pas d’appli, pas de compte.' },
+  { kind: 'Étape libre · première nuit', name: 'Salamanque', country: 'Espagne', cc: 'ES', lat: 40.96821, lon: -5.66642, days: [3, 3], text: 'Première nuit en Espagne. La trace se dessine en temps réel, kilomètre après kilomètre, sans recharger la page.' },
+  { kind: 'Bivouac avant la traversée', name: 'Algésiras', country: 'Espagne', cc: 'ES', lat: 36.21315, lon: -5.41098, days: [4, 4], text: 'Premier bivouac, au bout de l’Europe. Demain matin, embarquement pour l’Afrique.' },
+  { kind: 'Traversée · bivouac du Moyen Atlas', name: 'Boulajoul', country: 'Maroc', cc: 'MA', lat: 32.88438, lon: -4.98768, days: [5, 5], text: 'Deux heures de ferry jusqu’à Tanger Med, puis la route du Moyen Atlas. Plus de réseau ? Le téléphone garde les points en mémoire et complète la trace dès qu’il capte.' },
+  { kind: 'Arrivée dans les dunes', name: 'Merzouga', country: 'Maroc', cc: 'MA', lat: 31.21516, lon: -3.99763, days: [6, 6], text: 'Première étape d’orientation jusqu’à l’Erg Chebbi. Les photos du soir arrivent sur la page de l’équipage.' },
+  { kind: 'Boucle dans le désert · Merzouga', name: 'Boucle 1', country: 'Maroc', cc: 'MA', lat: 31.21516, lon: -3.99763, days: [7, 7], sign: null, text: 'Une journée de boucle au roadbook et à la boussole, retour au bivouac le soir. Les 360° pour y être presque.' },
+  { kind: 'Boucle dans le désert · Merzouga', name: 'Boucle 2', country: 'Maroc', cc: 'MA', lat: 31.21516, lon: -3.99763, days: [8, 8], sign: null, text: 'Deuxième boucle dans les dunes. Les sponsors y sont aussi : leur logo sur la carte, au milieu du Sahara.' },
+  { kind: 'Étape marathon · nuit en autonomie', name: 'Marathon', country: 'Maroc', cc: 'MA', lat: 30.69721, lon: -6.24786, days: [9, 9], sign: 'blurred', text: 'Merzouga – Marrakech d’une traite : 48 heures en totale autonomie, et une nuit en plein désert, loin de tout.' },
+  { kind: 'Arrivée', name: 'Marrakech', country: 'Maroc', cc: 'MA', lat: 31.58108, lon: -7.98231, days: [10, 12], text: 'Fin du marathon par le Haut Atlas et la ligne d’arrivée. Remise des prix le lendemain, puis le bateau du retour : une trace souvenir complète.' },
 ];
 
 /**
- * Tracé [lon, lat] qui suit les routes (de Biarritz au village de Merzouga, puis approximatif
- * jusqu'à Marrakech) ; chaque étape est un sommet exact du tracé.
+ * Lieux traversés qui ne sont pas des fins d'étape : le port d'arrivée au Maroc, et les villes de
+ * l'étape marathon (Merzouga → Marrakech), dont les panneaux sont flous sur la carte.
+ */
+export const PASSAGES: { name: string; lat: number; lon: number; blurred?: boolean }[] = [
+  { name: 'Tanger Med', lat: 35.87604, lon: -5.51333 },
+  { name: 'Tazarine', lat: 30.77971, lon: -5.56691, blurred: true },
+  { name: 'Ouarzazate', lat: 30.9205, lon: -6.89998, blurred: true },
+  { name: 'Tizi n’Tichka', lat: 31.2877, lon: -7.38261, blurred: true },
+];
+
+/**
+ * Tracé [lon, lat] qui suit les routes (vraie trace de Biarritz à Merzouga, deux boucles illustratives
+ * dans le désert, puis l'itinéraire routier du marathon par Tazarine, Ouarzazate et le Tichka) ;
+ * chaque étape est un sommet exact du tracé.
  */
 export const PATH = ROAD_PATH as [number, number][];
-const STOP_PATH_IDX = WP.map((w) => PATH.findIndex(([lon, lat]) => lon === w.lon && lat === w.lat));
+// Merzouga revient trois fois (arrivée puis deux boucles) : on cherche chaque étape après la précédente.
+const STOP_PATH_IDX: number[] = [];
+WP.forEach((w) => {
+  const from = (STOP_PATH_IDX.at(-1) ?? -1) + 1;
+  const i = PATH.findIndex(([lon, lat], k) => k >= from && lon === w.lon && lat === w.lat);
+  if (i < 0) throw new Error(`Étape ${w.name} absente du tracé`);
+  STOP_PATH_IDX.push(i);
+});
 
 // Tracé densifié (un point tous les ~6 km) et distance cumulée : la 4L avance à vitesse régulière.
 export const DENSE: [number, number][] = [PATH[0]!];
@@ -57,7 +87,46 @@ const LEN = CUM.at(-1)!;
 /** Position (0 → 1) de chaque étape le long du tracé. */
 export const STOP_FRAC = stopDenseIdx.map((i) => CUM[i]! / LEN);
 
-export const STOPS: JourneyStop[] = WP.map((w, i) => ({ ...w, km: Math.round(STOP_FRAC[i]! * TOTAL_KM) }));
+/** Longueur de la route, de Biarritz à Marrakech (≈ 2 400 km). */
+export const ROUTE_KM = Math.round(LEN);
+
+export const STOPS: JourneyStop[] = WP.map((w, i) => ({ ...w, km: Math.round(CUM[stopDenseIdx[i]!]!) }));
+
+/** Kilomètre de la 4L pour une progression p (0 → 1). */
+export const kmAt = (p: number) => Math.round(Math.min(1, Math.max(0, p)) * LEN);
+
+/**
+ * Étape en cours pour une progression p : celle qu'on est en train de rouler (chaque étape est une
+ * journée, de l'étape précédente jusqu'à celle-ci), ou celle où l'on se trouve à l'arrêt.
+ */
+export const stageAt = (p: number) => {
+  const i = STOP_FRAC.findIndex((f) => f >= p - 0.012);
+  return i === -1 ? STOPS.length - 1 : i;
+};
+
+/** Jour du raid : sur la route, le jour de l'étape ; à l'arrêt, les jours qu'on y passe (« 1–2 »). */
+export function dayAt(p: number): string {
+  const i = stageAt(p);
+  const [a, b] = STOPS[i]!.days;
+  return i > 0 && p < STOP_FRAC[i]! - 0.012 ? String(a) : a === b ? String(a) : `${a}–${b}`;
+}
+
+/** Pays traversé (code ISO) à une position : la frontière est à Hendaye, le Maroc commence à Tanger. */
+export const countryAt = ([lon, lat]: [number, number]) => (lat < 35.95 ? 'MA' : lat > 43.35 && lon > -1.79 ? 'FR' : 'ES');
+
+/**
+ * Kilomètre sur la route du point de passage le plus proche de (lat, lon), ou null s'il est
+ * à plus de 15 km du tracé : sert à placer les étapes officielles sur le roadbook des équipages.
+ */
+export function routeKmOf(lat: number, lon: number): number | null {
+  let best = Infinity;
+  let at = 0;
+  DENSE.forEach(([x, y], i) => {
+    const d = haversineKm(lat, lon, y, x);
+    if (d < best) [best, at] = [d, i];
+  });
+  return best <= 15 ? Math.round(CUM[at]!) : null;
+}
 
 export const idxAt = (p: number) => {
   const target = p * LEN;
@@ -95,7 +164,7 @@ export const headingAt = (p: number) => (p > 0.96 ? bearing(posAt(p - 0.04), pos
 export const fmtKm = (n: number) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 
 /** Panneau d'entrée de ville (cadre gris, bord rouge) en HTML, pour les marqueurs de carte. */
-export function citySignHtml(name: string) {
+export function citySignHtml(name: string, blurred = false) {
   const safe = name.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
-  return `<div style="background:#C9CDD2;padding:3px;border-radius:6px;box-shadow:0 6px 14px rgba(0,0,0,.5)"><div style="background:#fff;border:3px solid #D22B2B;border-radius:3px;padding:3px 9px;font:800 14px 'Big Shoulders Display',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#111;white-space:nowrap">${safe}</div></div><div style="width:2px;height:18px;background:#C9CDD2"></div><div style="width:6px;height:6px;border-radius:50%;background:#F4ECDF;box-shadow:0 0 0 2px rgba(0,0,0,.4)"></div>`;
+  return `<div style="background:#C9CDD2;${blurred ? 'filter:blur(3px);' : ''}padding:3px;border-radius:6px;box-shadow:0 6px 14px rgba(0,0,0,.5)"><div style="background:#fff;border:3px solid #D22B2B;border-radius:3px;padding:3px 9px;font:800 14px 'Big Shoulders Display',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#111;white-space:nowrap">${safe}</div></div><div style="width:2px;height:18px;background:#C9CDD2"></div><div style="width:6px;height:6px;border-radius:50%;background:#F4ECDF;box-shadow:0 0 0 2px rgba(0,0,0,.4)"></div>`;
 }

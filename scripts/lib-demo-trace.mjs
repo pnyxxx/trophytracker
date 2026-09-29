@@ -5,7 +5,7 @@
  */
 import { readFileSync } from 'node:fs';
 
-/** Tracé routier complet [lon, lat] : Biarritz → village de Merzouga (puis approximatif jusqu'à Marrakech). */
+/** Tracé routier complet [lon, lat] : Biarritz → Merzouga (vraie trace), puis étape marathon jusqu'à Marrakech. */
 export const ROAD_PATH = JSON.parse(
   readFileSync(new URL('../apps/web/src/components/landing/road-path.json', import.meta.url), 'utf8'),
 );
