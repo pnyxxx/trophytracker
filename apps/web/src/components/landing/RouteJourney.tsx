@@ -4,10 +4,8 @@
  * pendant que le texte de l'étape, le compteur et le roadbook se mettent à jour.
  */
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
-import { Kicker, LiveDot } from '@/components/common/Brand';
 import { useSeen } from '@/hooks/useInView';
 import { fmtKm, headingAt, posAt, STOP_FRAC, STOPS, TOTAL_KM } from './journey';
-import { RaceStatus } from './Countdown';
 
 const JourneyMap = lazy(() => import('./JourneyMap'));
 
@@ -65,7 +63,6 @@ export function RouteJourney() {
           </div>
           {/* Titre accroché en haut ; le bloc de l'étape reste centré dans l'espace restant. */}
           <div className="relative mb-auto flex flex-col gap-4">
-            <RaceStatus />
             <h2 className="tt-display m-0 whitespace-nowrap text-[clamp(40px,calc(6vw_-_16px),120px)] leading-[0.88] text-cream">Où sont-ils ?</h2>
           </div>
           <div className="tt-kicker text-xs text-ochre">La route · étape {num} / {pad(STOPS.length)}</div>

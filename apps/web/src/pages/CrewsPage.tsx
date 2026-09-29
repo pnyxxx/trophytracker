@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { CrewCard } from '@/components/crew/CrewBits';
 import { Spinner } from '@/components/common/Spinner';
-import { RaceStatus } from '@/components/landing/Countdown';
 import { fmtKm, STOPS, TOTAL_KM } from '@/components/landing/journey';
 import { useCrewSearch, useEvent } from '@/hooks/queries';
 import { useSeen } from '@/hooks/useInView';
@@ -68,7 +67,6 @@ export default function CrewsPage() {
         <Container className="flex flex-col gap-10">
           <div className="flex flex-wrap items-end justify-between gap-6">
             <div className="flex flex-col gap-3.5">
-              <RaceStatus />
               <SectionTitle className="leading-[0.88]">Où sont-ils ?</SectionTitle>
             </div>
             <p className="m-0 max-w-[420px] text-base leading-relaxed text-dust-300">
