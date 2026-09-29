@@ -6,7 +6,7 @@
 > CCI / CMA pour le statut, INPI pour la marque.
 
 Contexte pris en compte :
-- aujourd'hui : site public et gratuit (https://trophytracker.plmn.fr), comptes, pages d'équipages, **positions GPS en
+- aujourd'hui : site public et gratuit (https://trophytracker.fr), comptes, pages d'équipages, **positions GPS en
   direct**, photos, sponsors ; hébergé sur un serveur personnel derrière Cloudflare ;
 - demain : **inscrire un équipage coûtera 10 à 20 €**, tout le reste reste gratuit.
 
@@ -70,7 +70,7 @@ Ce qui fait basculer vers la contrefaçon ou le parasitisme :
 - copier leur charte graphique, leurs photos, leurs textes, leur roadbook.
 
 **État actuel du site :**
-- ✅ Nom et domaine neutres (TrophyTracker, plmn.fr), aucun logo ni photo du 4L Trophy, pied de page
+- ✅ Nom et domaine neutres (TrophyTracker, trophytracker.fr), aucun logo ni photo du 4L Trophy, pied de page
   « projet indépendant, non affilié à l'organisation du 4L Trophy » + lien vers le site officiel. C'est exactement ce qu'il faut.
 - ⚠️ À corriger :
   - « **parcours officiel** » ([CrewPage.tsx:175](../apps/web/src/pages/CrewPage.tsx#L175), admin, commentaires) : laisse
@@ -362,7 +362,7 @@ le lui signale. Il faut donc :
 >
 > Bonjour,
 >
-> Ancien participant du 4L Trophy (équipage J4L Club), j'ai développé TrophyTracker (https://trophytracker.plmn.fr),
+> Ancien participant du 4L Trophy (équipage J4L Club), j'ai développé TrophyTracker (https://trophytracker.fr),
 > un site indépendant qui permet aux familles et sponsors d'un équipage de suivre sa position et ses photos pendant
 > le raid, avec l'application gratuite Traccar Client sur un téléphone.
 >
@@ -370,7 +370,7 @@ le lui signale. Il faut donc :
 > - il n'utilise ni votre logo ni vos contenus, et indique clairement ne pas être affilié au 4L Trophy ;
 > - il n'est pas un outil de navigation : l'application n'affiche aucune carte à l'équipage, et chaque équipage doit
 >   accepter une charte fair-play avant d'activer le suivi (ne jamais s'en servir pour s'orienter, respecter votre
->   règlement et vos consignes) : https://trophytracker.plmn.fr/conditions-utilisation#fair-play
+>   règlement et vos consignes) : https://trophytracker.fr/conditions-utilisation#fair-play
 >
 > Avant de le proposer plus largement, j'aimerais connaître votre position : l'utilisation d'un tel traceur par les
 > équipages est-elle compatible avec le règlement ? Y a-t-il des conditions que vous souhaiteriez que je respecte ?

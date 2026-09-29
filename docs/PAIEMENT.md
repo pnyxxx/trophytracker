@@ -31,12 +31,12 @@ Mon compte (?paiement=ok) ── « Créer mon équipage » ── create_crew (
 
 1. **Compte Stripe** sur stripe.com, en tant qu'entrepreneur individuel, avec le SIRET et un compte bancaire.
    Dans *Paramètres → Informations publiques* : nom « TrophyTracker », email de contact, site
-   `https://trophytracker.plmn.fr`, et **conditions d'utilisation** = `https://trophytracker.plmn.fr/conditions-vente`.
+   `https://trophytracker.fr`, et **conditions d'utilisation** = `https://trophytracker.fr/conditions-vente`.
 2. *Paramètres → Emails clients* : activer les **reçus pour les paiements réussis** (c'est la confirmation de commande
    envoyée au client ; ajouter le lien des CGV dans le pied de page du reçu).
 3. **Clé secrète** : *Développeurs → Clés API* → « Clé secrète » (`sk_live_…`).
 4. **Webhook** : *Développeurs → Webhooks → Ajouter une destination*
-   - URL : `https://trophytracker.plmn.fr/functions/v1/stripe-webhook`
+   - URL : `https://trophytracker.fr/functions/v1/stripe-webhook`
    - événements : `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
      `checkout.session.expired`, `charge.refunded`
    - copier le **secret de signature** (`whsec_…`).
