@@ -16,6 +16,12 @@ export { maplibregl };
 export const POSITRON_STYLE = 'https://tiles.openfreemap.org/styles/positron';
 
 /**
+ * Fond vectoriel détaillé OpenFreeMap (routes colorées, relief ombré, pistes) : bien lisible une fois
+ * zoomé, pour suivre un équipage de près.
+ */
+export const LIBERTY_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
+
+/**
  * Imagerie satellite Esri + relief (tuiles d'altitude Terrarium d'AWS Open Data).
  * Utilisée pour les vues « immersives » de l'accueil.
  */

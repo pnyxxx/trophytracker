@@ -112,6 +112,11 @@
   filter: sepia(0.55) saturate(1.25) contrast(0.95) brightness(1.02);
 }
 
+/* Fond détaillé des pages équipage (Liberty) teinté parchemin, en gardant le contraste des routes */
+.tt-map-warm .leaflet-gl-layer {
+  filter: sepia(0.6) saturate(1.2) brightness(0.95) contrast(1.06);
+}
+
 /* ─── Marqueurs de carte (Leaflet) ───────────────────────────────────────── */
 .tt-marker {
   background: transparent !important;
