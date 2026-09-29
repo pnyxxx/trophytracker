@@ -11,7 +11,16 @@ import { maplibregl, POSITRON_STYLE, webglAvailable } from '@/lib/maplibre';
 
 interface Point { name: string; lat: number; lon: number }
 
-export default function LiveCrewsMap({ route, crews }: { route: Point[]; crews: CrewSummary[] }) {
+/**
+ * `route` : étapes nommées ; `line` : tracé [lon, lat] qui les relie ;
+ * `passages` : lieux traversés sans nom affiché (villes floutées de l'étape marathon).
+ */
+export default function LiveCrewsMap({ route, line, passages, crews }: {
+  route: Point[];
+  line: [number, number][];
+  passages: { lat: number; lon: number }[];
+  crews: CrewSummary[];
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MlMap | null>(null);
   // Actions en attente du chargement du style (on ne peut rien ajouter avant).
@@ -45,17 +54,30 @@ export default function LiveCrewsMap({ route, crews }: { route: Point[]; crews: 
     };
   }, []);
 
-  // Parcours : trait pointillé + étiquettes des étapes, cadrage sur l'ensemble.
+  // Parcours : trait pointillé, points des lieux traversés, étiquettes des étapes, cadrage sur l'ensemble.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || route.length === 0) return;
+    if (!map || line.length === 0) return;
     const draw = () => {
-      const data = { type: 'Feature' as const, properties: {}, geometry: { type: 'LineString' as const, coordinates: route.map((w) => [w.lon, w.lat]) } };
+      const data = { type: 'Feature' as const, properties: {}, geometry: { type: 'LineString' as const, coordinates: line } };
+      // Un point exactement sur chaque étape (plein) et sur chaque lieu sans nom (creux).
+      const dots = {
+        type: 'FeatureCollection' as const,
+        features: [...route.map((p) => ({ ...p, named: true })), ...passages.map((p) => ({ ...p, named: false }))].map((p) => ({
+          type: 'Feature' as const,
+          properties: { named: p.named },
+          geometry: { type: 'Point' as const, coordinates: [p.lon, p.lat] },
+        })),
+      };
       const src = map.getSource('route') as GeoJSONSource | undefined;
-      if (src) src.setData(data);
-      else {
+      if (src) {
+        src.setData(data);
+        (map.getSource('passages') as GeoJSONSource).setData(dots);
+      } else {
         map.addSource('route', { type: 'geojson', data });
-        map.addLayer({ id: 'route', type: 'line', source: 'route', paint: { 'line-color': '#1A1612', 'line-width': 2.5, 'line-dasharray': [2, 1.5] } });
+        map.addLayer({ id: 'route', type: 'line', source: 'route', layout: { 'line-join': 'round' }, paint: { 'line-color': '#1A1612', 'line-width': 2.5, 'line-dasharray': [2, 1.5] } });
+        map.addSource('passages', { type: 'geojson', data: dots });
+        map.addLayer({ id: 'passages', type: 'circle', source: 'passages', paint: { 'circle-radius': 4, 'circle-color': ['case', ['get', 'named'], '#1A1612', '#F4ECDF'], 'circle-stroke-color': '#1A1612', 'circle-stroke-width': 2 } });
       }
       routeMarkers.current.forEach((m) => m.remove());
       routeMarkers.current = route.map((w) => {
@@ -65,11 +87,11 @@ export default function LiveCrewsMap({ route, crews }: { route: Point[]; crews: 
         return new maplibregl.Marker({ element: el, anchor: 'left', offset: [8, 0] }).setLngLat([w.lon, w.lat]).addTo(map);
       });
       const bounds = new maplibregl.LngLatBounds();
-      route.forEach((w) => bounds.extend([w.lon, w.lat]));
+      line.forEach((pt) => bounds.extend(pt));
       map.fitBounds(bounds, { padding: 60, duration: 0 });
     };
     whenLoaded(draw);
-  }, [route]);
+  }, [route, line, passages]);
 
   // Équipages : pastille « #numéro », bord vert s'ils émettent en ce moment.
   useEffect(() => {

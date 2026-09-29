@@ -3,12 +3,10 @@ import { useSearchParams } from 'react-router-dom';
 import { PageShell } from '@/components/layout/PageShell';
 import { Seo } from '@/components/common/Seo';
 import { Container, PageHero, SectionTitle } from '@/components/common/Brand';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { CrewCard } from '@/components/crew/CrewBits';
 import { Spinner } from '@/components/common/Spinner';
-import { fmtKm, STOPS, TOTAL_KM } from '@/components/landing/journey';
+import { fmtKm, PASSAGES, ROUTE_LINE, routeKmOf, STOPS, TOTAL_KM } from '@/components/landing/journey';
 import { useCrewSearch, useEvent } from '@/hooks/queries';
 import { useSeen } from '@/hooks/useInView';
 
@@ -22,7 +20,6 @@ export default function CrewsPage() {
   const [input, setInput] = useState(params.get('q') ?? '');
   const [debounced, setDebounced] = useState(input);
   const [limit, setLimit] = useState(PAGE);
-  const liveOnly = params.get('live') === '1';
   const searchRef = useRef<HTMLInputElement>(null);
 
   // Curseur dans la recherche dès l'arrivée, sans faire défiler la page sous la carte.
@@ -43,17 +40,27 @@ export default function CrewsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debounced]);
 
-  const { data, isLoading, isFetching } = useCrewSearch(debounced, liveOnly, limit);
+  const { data, isLoading, isFetching } = useCrewSearch(debounced, false, limit);
 
   // Carte « Où sont-ils ? » : dernière position de tous les équipages, indépendamment de la recherche.
   const mapRef = useRef<HTMLDivElement>(null);
   const mapSeen = useSeen(mapRef);
   const { data: event } = useEvent();
   const { data: all } = useCrewSearch('', false, 60);
-  const route = useMemo(
-    () => (event?.waypoints.length ? event.waypoints : STOPS).map((w) => ({ name: w.name, lat: w.lat, lon: w.lon })),
-    [event],
-  );
+  // Étapes nommées (celles de l'administration, sinon celles de l'accueil) ; tracé allégé de la vraie route
+  // tant que les étapes s'y trouvent (sinon lignes droites) ; la nuit du marathon en simple point, sans nom.
+  const { route, line, passages } = useMemo(() => {
+    const named = event?.waypoints.length
+      ? event.waypoints
+      : [...STOPS.filter((s) => s.sign === undefined), ...PASSAGES.filter((p) => !p.blurred)];
+    const points = named.map((w) => ({ name: w.name, lat: w.lat, lon: w.lon }));
+    const onRoute = points.every((w) => routeKmOf(w.lat, w.lon) !== null);
+    return {
+      route: points,
+      line: onRoute ? ROUTE_LINE : points.map((w) => [w.lon, w.lat] as [number, number]),
+      passages: onRoute ? STOPS.filter((s) => s.sign === 'blurred') : [],
+    };
+  }, [event]);
   const totalKm = fmtKm(event?.totalKm ?? TOTAL_KM);
 
   return (
@@ -77,7 +84,7 @@ export default function CrewsPage() {
           <div ref={mapRef} className="relative min-h-[560px] overflow-hidden border border-cream/[0.14] bg-[#E8E2D8]">
             {mapSeen && (
               <Suspense fallback={null}>
-                <LiveCrewsMap route={route} crews={all?.items ?? []} />
+                <LiveCrewsMap route={route} line={line} passages={passages} crews={all?.items ?? []} />
               </Suspense>
             )}
             <div className="pointer-events-none absolute left-3.5 top-3.5 z-[2] bg-ink px-3 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-cream">
@@ -104,19 +111,6 @@ export default function CrewsPage() {
                 {isFetching && <Spinner className="h-5 w-5 border-2" />}
               </div>
             </div>
-            <div className="flex items-center gap-3 border border-cream/[0.14] bg-ink-800 px-5 py-4">
-              <Switch
-                id="live"
-                checked={liveOnly}
-                onCheckedChange={(v) => {
-                  const next = new URLSearchParams(params);
-                  if (v) next.set('live', '1');
-                  else next.delete('live');
-                  setParams(next, { replace: true });
-                }}
-              />
-              <Label htmlFor="live" className="cursor-pointer text-cream">En direct uniquement</Label>
-            </div>
           </div>
 
           {isLoading ? (
@@ -125,7 +119,7 @@ export default function CrewsPage() {
             <div className="border border-cream/[0.08] bg-ink-800 px-6 py-20 text-center">
               <p className="m-0 font-display text-4xl font-black uppercase">Aucun équipage</p>
               <p className="mt-2 text-dust-400">
-                {debounced || liveOnly ? 'Aucun équipage ne correspond à votre recherche.' : 'Aucun équipage inscrit pour le moment.'}
+                {debounced ?'Aucun équipage ne correspond à votre recherche.' : 'Aucun équipage inscrit pour le moment.'}
               </p>
             </div>
           ) : (

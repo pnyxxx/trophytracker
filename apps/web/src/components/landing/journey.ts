@@ -111,6 +111,51 @@ export function dayAt(p: number): string {
   return i > 0 && p < STOP_FRAC[i]! - 0.012 ? String(a) : a === b ? String(a) : `${a}–${b}`;
 }
 
+/**
+ * Tracé allégé pour la carte de la page Équipages : suit la route à ~`toleranceKm`
+ * près (moins détaillé que l'accueil), sans les boucles de Merzouga, et passe exactement par chaque
+ * étape et chaque lieu traversé.
+ */
+function simplifiedRoute(toleranceKm: number): [number, number][] {
+  const keep = new Set([...WP, ...PASSAGES].map((w) => [w.lon, w.lat].join()));
+  // Sans les boucles : quand on revient sur une étape (Merzouga), on retire le détour fait depuis.
+  const path: [number, number][] = [];
+  PATH.forEach((pt) => {
+    const at = keep.has(pt.join()) ? path.findIndex((p) => p.join() === pt.join()) : -1;
+    if (at >= 0) path.splice(at + 1);
+    else path.push(pt);
+  });
+  // Distance (km) d'un point au segment [a, b], en projection plane locale.
+  const off = (p: [number, number], a: [number, number], b: [number, number]) => {
+    const k = Math.cos((a[1] * Math.PI) / 180);
+    const [ax, ay, bx, by, px, py] = [a[0] * k, a[1], b[0] * k, b[1], p[0] * k, p[1]];
+    const [dx, dy] = [bx - ax, by - ay];
+    const t = dx || dy ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy))) : 0;
+    return Math.hypot(px - ax - t * dx, py - ay - t * dy) * 111;
+  };
+  // Douglas-Peucker, appliqué entre deux lieux à garder.
+  const rdp = (pts: [number, number][]): [number, number][] => {
+    if (pts.length < 3) return pts;
+    let [far, dist] = [0, 0];
+    for (let i = 1; i < pts.length - 1; i++) {
+      const d = off(pts[i]!, pts[0]!, pts.at(-1)!);
+      if (d > dist) [far, dist] = [i, d];
+    }
+    return dist > toleranceKm ? [...rdp(pts.slice(0, far + 1)).slice(0, -1), ...rdp(pts.slice(far))] : [pts[0]!, pts.at(-1)!];
+  };
+  const out: [number, number][] = [path[0]!];
+  let from = 0;
+  path.forEach((pt, i) => {
+    if (i && (keep.has(pt.join()) || i === path.length - 1)) {
+      out.push(...rdp(path.slice(from, i + 1)).slice(1));
+      from = i;
+    }
+  });
+  return out;
+}
+
+export const ROUTE_LINE = simplifiedRoute(5);
+
 /** Pays traversé (code ISO) à une position : la frontière est à Hendaye, le Maroc commence à Tanger. */
 export const countryAt = ([lon, lat]: [number, number]) => (lat < 35.95 ? 'MA' : lat > 43.35 && lon > -1.79 ? 'FR' : 'ES');
 
