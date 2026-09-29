@@ -86,7 +86,7 @@ export default function LoginPage() {
         </div>
         {error && <p role="alert" className="text-sm text-primary-light">{error}</p>}
         <Button type="submit" className="w-full" disabled={busy}>{busy ? 'Connexion…' : 'Se connecter'}</Button>
-        <Button type="button" variant="ghost" className="w-full text-dust-200 hover:text-cream" onClick={sendMagicLink} disabled={busy}>
+        <Button type="button" variant="ghost" className="h-auto min-h-10 w-full whitespace-normal py-2.5 leading-snug text-dust-200 hover:text-cream" onClick={sendMagicLink} disabled={busy}>
           Recevoir un lien de connexion par email
         </Button>
       </form>
