@@ -125,7 +125,7 @@ export default function AccountPage() {
 
   return (
     <PageShell padTop={false}>
-      <Seo title="Mon compte" />
+      <Seo title="Mon compte" noindex />
       <PageHero kicker={<>Mon compte · <span className="normal-case tracking-normal text-dust-300">{user?.email}</span></>} title={<>Bonjour<br />{profile?.display_name ?? ''}</>} />
       <Container className="max-w-5xl space-y-6 border-t border-cream/[0.12] py-12 md:py-16">
 

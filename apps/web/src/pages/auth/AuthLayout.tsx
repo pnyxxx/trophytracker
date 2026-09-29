@@ -9,7 +9,7 @@ export function AuthLayout({ title, subtitle, children, footer }: {
 }) {
   return (
     <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(120%_80%_at_80%_0%,#3A2215_0%,#1B1310_45%,#120F0C_75%)]">
-      <Seo title={title} />
+      <Seo title={title} noindex />
       <div className="mx-auto grid min-h-screen max-w-[1400px] items-center gap-12 px-4 py-10 sm:px-7 lg:grid-cols-[1fr_minmax(0,480px)] lg:gap-20">
         {/* Colonne d'accroche (grand écran) */}
         <div className="hidden flex-col gap-8 lg:flex">

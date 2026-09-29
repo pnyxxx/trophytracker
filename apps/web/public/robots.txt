@@ -1,14 +1,13 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
+# Tout le site est public, sauf l'API. Les pages de compte et d'administration portent la
+# consigne « noindex » (Seo.tsx) : elles ne sont volontairement PAS bloquées ici, sinon Google
+# ne pourrait pas lire cette consigne. Les photos (/storage/) restent accessibles : Google Images.
 User-agent: *
 Allow: /
+Disallow: /auth/
+Disallow: /rest/
+Disallow: /realtime/
+Disallow: /functions/
+Disallow: /ingest/
+
+# Le plan du site est généré à partir de la base (équipages publics) : voir apps/tracker/src/http.ts.
+Sitemap: https://trophytracker.fr/sitemap.xml

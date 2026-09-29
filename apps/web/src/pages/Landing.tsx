@@ -84,7 +84,33 @@ export default function Landing() {
 
   return (
     <PageShell padTop={false}>
-      <Seo />
+      <Seo
+        jsonLd={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            name: 'TrophyTracker',
+            url: `${window.location.origin}/`,
+            inLanguage: 'fr-FR',
+            description: 'Suivi en direct des équipages du 4L Trophy : position, trace, photos et sponsors.',
+          },
+          // Dates réglées dans l'administration : l'événement n'est décrit que lorsqu'elles sont connues.
+          event?.startDate && {
+            '@context': 'https://schema.org',
+            '@type': 'SportsEvent',
+            name: event.name,
+            startDate: event.startDate,
+            endDate: event.endDate ?? undefined,
+            eventStatus: 'https://schema.org/EventScheduled',
+            eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+            location: [
+              { '@type': 'Place', name: 'Biarritz', address: { '@type': 'PostalAddress', addressLocality: 'Biarritz', addressCountry: 'FR' } },
+              { '@type': 'Place', name: 'Marrakech', address: { '@type': 'PostalAddress', addressLocality: 'Marrakech', addressCountry: 'MA' } },
+            ],
+            description: 'Raid humanitaire étudiant en Renault 4L de Biarritz à Marrakech, suivi en direct sur TrophyTracker.',
+          },
+        ].filter(Boolean) as object[]}
+      />
 
       {/* ── 01 Hero ──────────────────────────────────────────────────────── */}
       <section className="relative flex min-h-[100svh] flex-col overflow-x-clip bg-[radial-gradient(120%_80%_at_80%_0%,#3A2215_0%,#1B1310_45%,#120F0C_75%)]">

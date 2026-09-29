@@ -1,6 +1,6 @@
 /**
- * Accès à la base. Le rôle `tracker` ne peut appeler QUE ces fonctions (GPS et
- * file des emails admin) : même en cas de faille dans ce service, il ne peut rien
+ * Accès à la base. Le rôle `tracker` ne peut appeler QUE ces fonctions (GPS,
+ * file des emails admin et liste des équipages publics) : même en cas de faille dans ce service, il ne peut rien
  * lire ni modifier d'autre.
  */
 import postgres from 'postgres';
@@ -43,6 +43,11 @@ export function createDb(url: string, opts: { minDistanceM: number; maxSilenceS:
 
     async adminNotificationDone(id: number, error: string | null) {
       await sql`select private.admin_notification_done(${id}, ${error})`;
+    },
+
+    /** Équipages publics (plan du site). */
+    sitemapCrews() {
+      return sql<{ slug: string; updated_at: Date }[]>`select * from private.sitemap_crews()`;
     },
 
     async ping() {

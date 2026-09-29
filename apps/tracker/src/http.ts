@@ -2,6 +2,7 @@
  * Petit serveur HTTP :
  *   GET|POST /ingest/osmand   ← positions envoyées par les téléphones
  *   GET      /health          ← santé du service (Docker healthcheck)
+ *   GET      /sitemap.xml     ← plan du site pour Google (équipages publics)
  *
  * Exposé publiquement via Caddy sous /ingest/.
  */
@@ -9,8 +10,9 @@ import Fastify from 'fastify';
 import rateLimit from '@fastify/rate-limit';
 import type { Db } from './db.js';
 import { parseDeviceRequest } from './parse.js';
+import { buildSitemap } from './sitemap.js';
 
-export async function buildHttp(db: Db, opts: { trustProxy: boolean; logger: boolean; log?: (msg: string) => void }) {
+export async function buildHttp(db: Db, opts: { trustProxy: boolean; logger: boolean; siteUrl?: string; log?: (msg: string) => void }) {
   const log = opts.log ?? (() => {});
   const app = Fastify({ logger: opts.logger, trustProxy: opts.trustProxy, bodyLimit: 16 * 1024 });
 
@@ -27,6 +29,11 @@ export async function buildHttp(db: Db, opts: { trustProxy: boolean; logger: boo
   app.get('/health', async () => {
     await db.ping();
     return { status: 'ok' };
+  });
+
+  app.get('/sitemap.xml', async (_req, reply) => {
+    const xml = buildSitemap(opts.siteUrl ?? 'http://localhost', await db.sitemapCrews());
+    return reply.header('Content-Type', 'application/xml; charset=utf-8').header('Cache-Control', 'public, max-age=3600').send(xml);
   });
 
   // Seuls les refus sont journalisés (jamais la clé en entier ni les coordonnées) :

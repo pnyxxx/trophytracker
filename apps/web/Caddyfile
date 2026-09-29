@@ -51,7 +51,14 @@ http://web {
 	# API Supabase
 	@supabase path /auth/v1/* /rest/v1/* /storage/v1/* /realtime/v1/* /functions/v1/*
 	handle @supabase {
+		# Les réponses de l'API n'ont rien à faire dans Google.
+		header X-Robots-Tag "noindex"
 		reverse_proxy api-gw:8000
+	}
+
+	# Plan du site pour Google : généré par le service tracker à partir des équipages publics.
+	handle /sitemap.xml {
+		reverse_proxy tracker:3000
 	}
 
 	# Positions envoyées par les téléphones (Traccar Client)

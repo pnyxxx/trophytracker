@@ -80,7 +80,34 @@ export default function CrewPage() {
 
   return (
     <PageShell padTop={false}>
-      <Seo title={crew.name} description={crew.tagline ?? `Suivez l'équipage ${crew.name} en direct sur le 4L Trophy.`} />
+      <Seo
+        title={crew.name}
+        description={crew.tagline ?? `Suivez l'équipage ${crew.name} en direct sur le 4L Trophy.`}
+        image={cover ?? mediaUrl(crew.avatar_path)}
+        noindex={!crew.is_public}
+        jsonLd={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'SportsTeam',
+            name: crew.name,
+            description: crew.tagline ?? undefined,
+            sport: '4L Trophy',
+            image: cover ?? mediaUrl(crew.avatar_path) ?? undefined,
+            url: `${window.location.origin}/equipages/${crew.slug}`,
+            sameAs: [crew.instagram_url, crew.website_url].filter(Boolean),
+            athlete: members.map((m) => ({ '@type': 'Person', name: m.display_name })),
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Accueil', item: `${window.location.origin}/` },
+              { '@type': 'ListItem', position: 2, name: 'Équipages', item: `${window.location.origin}/equipages` },
+              { '@type': 'ListItem', position: 3, name: crew.name },
+            ],
+          },
+        ]}
+      />
 
       {/* ── En-tête ──────────────────────────────────────────────────────── */}
       <header className="relative overflow-hidden bg-[radial-gradient(120%_80%_at_80%_0%,#3A2215_0%,#1B1310_45%,#120F0C_75%)]">

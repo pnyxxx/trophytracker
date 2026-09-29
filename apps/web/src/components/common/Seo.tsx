@@ -1,10 +1,69 @@
 import { useEffect } from 'react';
 
-/** Titre de l'onglet et description de la page. */
-export function Seo({ title, description }: { title?: string; description?: string }) {
+const DEFAULT_TITLE = 'TrophyTracker — Suivez les équipages du 4L Trophy en direct';
+const DEFAULT_DESCRIPTION =
+  'Proches, amis, sponsors : suivez en direct la position, la trace complète et les photos des équipages du 4L Trophy. Gratuit pour les proches.';
+
+/** Crée la balise `<meta>` (ou `<link>`) si elle manque, puis règle son contenu. */
+function setTag(selector: string, create: () => HTMLElement, attr: 'content' | 'href', value: string) {
+  let el = document.head.querySelector<HTMLElement>(selector);
+  if (!el) {
+    el = create();
+    document.head.appendChild(el);
+  }
+  el.setAttribute(attr, value);
+}
+
+const meta = (key: 'name' | 'property') => (name: string, value: string) =>
+  setTag(`meta[${key}="${name}"]`, () => Object.assign(document.createElement('meta'), { [key]: name }), 'content', value);
+const setName = meta('name');
+const setProperty = meta('property');
+
+/**
+ * Référencement de la page : titre, description, adresse canonique, aperçus de partage
+ * (Open Graph / X), consigne `noindex` et données structurées (JSON-LD).
+ * Google exécute le JavaScript du site : ces balises sont lues après le rendu.
+ */
+export function Seo({ title, description, image, noindex, jsonLd }: {
+  title?: string;
+  description?: string;
+  /** Aperçu de partage ; par défaut l'image du site. */
+  image?: string | null;
+  /** Page à ne pas faire apparaître dans Google (comptes, pages privées, 404). */
+  noindex?: boolean;
+  /** Données structurées schema.org (un objet ou une liste d'objets). */
+  jsonLd?: object | object[];
+}) {
+  const json = jsonLd ? JSON.stringify(jsonLd) : null;
+
   useEffect(() => {
-    document.title = title ? `${title} · TrophyTracker` : 'TrophyTracker — Suivez les équipages du 4L Trophy en direct';
-    if (description) document.querySelector('meta[name="description"]')?.setAttribute('content', description);
-  }, [title, description]);
+    const fullTitle = title ? `${title} · TrophyTracker` : DEFAULT_TITLE;
+    const desc = description ?? DEFAULT_DESCRIPTION;
+    // Sans chaîne de requête ni ancre : /equipages?live=1 et /equipages sont la même page.
+    const url = `${window.location.origin}${window.location.pathname === '/' ? '/' : window.location.pathname.replace(/\/$/, '')}`;
+    const img = new URL(image ?? '/og-image.png', window.location.origin).href;
+
+    document.title = fullTitle;
+    setName('description', desc);
+    setName('robots', noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large');
+    setTag('link[rel="canonical"]', () => Object.assign(document.createElement('link'), { rel: 'canonical' }), 'href', url);
+    setProperty('og:title', fullTitle);
+    setProperty('og:description', desc);
+    setProperty('og:url', url);
+    setProperty('og:image', img);
+    setName('twitter:title', fullTitle);
+    setName('twitter:description', desc);
+    setName('twitter:image', img);
+
+    let script: HTMLScriptElement | null = null;
+    if (json) {
+      script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.textContent = json;
+      document.head.appendChild(script);
+    }
+    return () => script?.remove();
+  }, [title, description, image, noindex, json]);
+
   return null;
 }
