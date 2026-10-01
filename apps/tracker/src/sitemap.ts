@@ -5,11 +5,13 @@ export interface SitemapCrew {
   updated_at: Date | string;
 }
 
-/** Pages fixes, de la plus importante à la moins importante. Les comptes et l'admin n'y figurent pas (noindex). */
+/**
+ * Pages fixes, de la plus importante à la moins importante (titres : apps/web/src/lib/seo-pages.ts).
+ * Les comptes, l'inscription et l'admin n'y figurent pas : ils portent la consigne « noindex ».
+ */
 const PAGES: { path: string; priority: string; changefreq: string }[] = [
   { path: '/', priority: '1.0', changefreq: 'daily' },
   { path: '/equipages', priority: '0.9', changefreq: 'daily' },
-  { path: '/inscription', priority: '0.6', changefreq: 'monthly' },
   { path: '/mentions-legales', priority: '0.2', changefreq: 'yearly' },
   { path: '/confidentialite', priority: '0.2', changefreq: 'yearly' },
   { path: '/conditions-utilisation', priority: '0.2', changefreq: 'yearly' },

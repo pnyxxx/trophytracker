@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { PageShell } from '@/components/layout/PageShell';
 import { Seo } from '@/components/common/Seo';
+import { PAGES } from '@/lib/seo-pages';
 import { Container, PageHero, SectionTitle } from '@/components/common/Brand';
 import { Button } from '@/components/ui/button';
 import { CrewCard } from '@/components/crew/CrewBits';
@@ -65,7 +66,7 @@ export default function CrewsPage() {
 
   return (
     <PageShell padTop={false}>
-      <Seo title="Équipages" description="Trouvez et suivez en direct les équipages du 4L Trophy." />
+      <Seo {...PAGES['/equipages']} />
       <PageHero kicker="Le plateau · tous les équipages" title="Les équipages">
         Recherchez un équipage par son nom, son numéro, son école ou sa ville.
       </PageHero>

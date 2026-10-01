@@ -1,8 +1,5 @@
 import { useEffect } from 'react';
-
-const DEFAULT_TITLE = 'TrophyTracker — Suivez les équipages du 4L Trophy en direct';
-const DEFAULT_DESCRIPTION =
-  'Proches, amis, sponsors : suivez en direct la position, la trace complète et les photos des équipages du 4L Trophy. Gratuit pour les proches.';
+import { DEFAULT_DESCRIPTION, fullTitle as makeTitle } from '@/lib/seo-pages';
 
 /** Crée la balise `<meta>` (ou `<link>`) si elle manque, puis règle son contenu. */
 function setTag(selector: string, create: () => HTMLElement, attr: 'content' | 'href', value: string) {
@@ -22,7 +19,8 @@ const setProperty = meta('property');
 /**
  * Référencement de la page : titre, description, adresse canonique, aperçus de partage
  * (Open Graph / X), consigne `noindex` et données structurées (JSON-LD).
- * Google exécute le JavaScript du site : ces balises sont lues après le rendu.
+ * Le HTML envoyé par le serveur porte déjà les bonnes balises (seo-plugin.ts, apps/tracker/src/crew-page.ts) ;
+ * ce composant les tient à jour lors de la navigation dans le site.
  */
 export function Seo({ title, description, image, noindex, jsonLd }: {
   title?: string;
@@ -37,7 +35,7 @@ export function Seo({ title, description, image, noindex, jsonLd }: {
   const json = jsonLd ? JSON.stringify(jsonLd) : null;
 
   useEffect(() => {
-    const fullTitle = title ? `${title} · TrophyTracker` : DEFAULT_TITLE;
+    const fullTitle = makeTitle(title);
     const desc = description ?? DEFAULT_DESCRIPTION;
     // Sans chaîne de requête ni ancre : /equipages?live=1 et /equipages sont la même page.
     const url = `${window.location.origin}${window.location.pathname === '/' ? '/' : window.location.pathname.replace(/\/$/, '')}`;

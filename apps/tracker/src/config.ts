@@ -23,6 +23,8 @@ const schema = z.object({
   SMTP_SENDER_NAME: z.string().optional().transform((v) => v || 'TrophyTracker'),
   /** Adresse publique du site (liens dans les emails). */
   SITE_URL: z.string().optional().transform((v) => v || 'http://localhost'),
+  /** Site web vu depuis le réseau Docker : modèles HTML des pages équipage (/_shell/…). */
+  WEB_INTERNAL_URL: z.string().optional().transform((v) => v || 'http://web'),
   NOTIFY_POLL_SECONDS: z.coerce.number().int().min(5).default(30),
 
   /** Seuils de stockage : distance minimale (m) et silence maximal (s) entre deux points. */

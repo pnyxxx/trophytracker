@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom';
 import { LegalPage } from '@/components/common/LegalPage';
 import { BUSINESS, CONTACT_HREF, EDITOR, euros, PRICING, VAT_MENTION } from '@/lib/legal';
+import { PAGES } from '@/lib/seo-pages';
 
 export default function SalesTermsPage() {
   return (
     <LegalPage
-      seoTitle="Conditions de vente"
+      seoTitle={PAGES['/conditions-vente'].title}
       title={<>Conditions<br />de vente</>}
       intro="Suivre un équipage est gratuit. Ces conditions s’appliquent à l’achat d’un accès équipage, qui permet de créer la page d’un équipage."
     >

@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom';
 import { LegalPage } from '@/components/common/LegalPage';
 import { CONTACT_HREF, EDITOR } from '@/lib/legal';
+import { PAGES } from '@/lib/seo-pages';
 
 export default function PrivacyPage() {
   return (
     <LegalPage
-      seoTitle="Confidentialité"
+      seoTitle={PAGES['/confidentialite'].title}
       title={<>Confidentialité<br />& données</>}
       intro="TrophyTracker est un projet indépendant. Nous collectons le strict minimum, ne vendons aucune donnée et n’affichons aucune publicité."
     >

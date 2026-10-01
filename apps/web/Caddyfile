@@ -15,11 +15,16 @@
 	}
 }
 
-# Réseau interne Docker uniquement : Supabase Auth vient y chercher les modèles d'emails.
+# Réseau interne Docker uniquement : Supabase Auth vient y chercher les modèles d'emails…
 http://web {
 	root * /srv
 	@templates path /email-templates/*
 	handle @templates {
+		file_server
+	}
+	# … et le service tracker les modèles HTML des pages équipage.
+	@shells path /_shell/*
+	handle @shells {
 		file_server
 	}
 	respond 404
@@ -66,14 +71,79 @@ http://web {
 		reverse_proxy tracker:3000
 	}
 
-	# Site web (application React) : toute URL inconnue renvoie index.html.
+	# Site web (application React). Chaque adresse reçoit un HTML qui porte déjà son titre, sa description et
+	# son adresse canonique (apps/web/seo-plugin.ts) : Google et les aperçus de partage n'ont pas à exécuter
+	# le JavaScript. Une adresse inconnue répond « 404 » (sinon Google la prend pour une vraie page).
 	handle {
 		root * /srv
 		@immutable path /assets/*
 		header @immutable Cache-Control "public, max-age=31536000, immutable"
-		@html path / /index.html
-		header @html Cache-Control "no-cache"
-		try_files {path} /index.html
-		file_server
+
+		# /equipages/ → /equipages : une seule adresse par page.
+		@trailing path_regexp trailing ^(.+)/$
+		redir @trailing {re.trailing.1}{?query} 301
+
+		# Page d'un équipage : HTML complété par le service tracker (nom, description, photo).
+		# S'il ne répond pas correctement, coquille neutre : le JavaScript affiche quand même la page.
+		@crew path_regexp ^/equipages/[^/]+$
+		handle @crew {
+			reverse_proxy tracker:3000 {
+				@failed status 5xx
+				handle_response @failed {
+					rewrite * /_shell/app.html
+					header Cache-Control "no-cache"
+					file_server {
+						status 200
+					}
+				}
+			}
+		}
+
+		# Fichiers du site et pages fixes pré-générées (/ → index.html, /equipages → equipages.html).
+		# Les modèles restent internes.
+		@file {
+			not path /_shell/*
+			file {path} {path}.html {path}index.html
+		}
+		handle @file {
+			# « route » garde cet ordre : l'en-tête dépend du fichier choisi par la réécriture.
+			route {
+				rewrite * {file_match.relative}
+				@html path / *.html
+				header @html Cache-Control "no-cache"
+				file_server
+			}
+		}
+
+		# Pages affichées par le JavaScript seul (comptes, connexion…), qui portent la consigne « noindex ».
+		# ⚠️ À tenir à jour avec les routes de apps/web/src/App.tsx.
+		@app path /connexion /inscription /mot-de-passe-oublie /nouveau-mot-de-passe /invitation /mon-compte /mon-compte/* /admin
+		handle @app {
+			rewrite * /_shell/app.html
+			header Cache-Control "no-cache"
+			file_server
+		}
+
+		# Tout le reste n'existe pas : coquille neutre (le site affiche « Page introuvable ») avec le statut 404.
+		handle {
+			rewrite * /_shell/app.html
+			header Cache-Control "no-cache"
+			file_server {
+				status 404
+			}
+		}
+	}
+
+	# Service tracker injoignable (redémarrage…) : les pages équipage s'affichent quand même.
+	handle_errors 502 503 504 {
+		@crew path_regexp ^/equipages/[^/]+$
+		handle @crew {
+			root * /srv
+			rewrite * /_shell/app.html
+			header Cache-Control "no-cache"
+			file_server {
+				status 200
+			}
+		}
 	}
 }

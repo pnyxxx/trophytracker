@@ -84,32 +84,23 @@ export default function Landing() {
 
   return (
     <PageShell padTop={false}>
+      {/* Le site lui-même (WebSite, Organization) est décrit dans le HTML statique de l'accueil : seo-plugin.ts.
+          Dates réglées dans l'administration : l'événement n'est décrit que lorsqu'elles sont connues. */}
       <Seo
-        jsonLd={[
-          {
-            '@context': 'https://schema.org',
-            '@type': 'WebSite',
-            name: 'TrophyTracker',
-            url: `${window.location.origin}/`,
-            inLanguage: 'fr-FR',
-            description: 'Suivi en direct des équipages du 4L Trophy : position, trace, photos et sponsors.',
-          },
-          // Dates réglées dans l'administration : l'événement n'est décrit que lorsqu'elles sont connues.
-          event?.startDate && {
-            '@context': 'https://schema.org',
-            '@type': 'SportsEvent',
-            name: event.name,
-            startDate: event.startDate,
-            endDate: event.endDate ?? undefined,
-            eventStatus: 'https://schema.org/EventScheduled',
-            eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-            location: [
-              { '@type': 'Place', name: 'Biarritz', address: { '@type': 'PostalAddress', addressLocality: 'Biarritz', addressCountry: 'FR' } },
-              { '@type': 'Place', name: 'Marrakech', address: { '@type': 'PostalAddress', addressLocality: 'Marrakech', addressCountry: 'MA' } },
-            ],
-            description: 'Raid humanitaire étudiant en Renault 4L de Biarritz à Marrakech, suivi en direct sur TrophyTracker.',
-          },
-        ].filter(Boolean) as object[]}
+        jsonLd={event?.startDate ? {
+          '@context': 'https://schema.org',
+          '@type': 'SportsEvent',
+          name: event.name,
+          startDate: event.startDate,
+          endDate: event.endDate ?? undefined,
+          eventStatus: 'https://schema.org/EventScheduled',
+          eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+          location: [
+            { '@type': 'Place', name: 'Biarritz', address: { '@type': 'PostalAddress', addressLocality: 'Biarritz', addressCountry: 'FR' } },
+            { '@type': 'Place', name: 'Marrakech', address: { '@type': 'PostalAddress', addressLocality: 'Marrakech', addressCountry: 'MA' } },
+          ],
+          description: 'Raid humanitaire étudiant en Renault 4L de Biarritz à Marrakech, suivi en direct sur TrophyTracker.',
+        } : undefined}
       />
 
       {/* ── 01 Hero ──────────────────────────────────────────────────────── */}

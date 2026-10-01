@@ -21,6 +21,7 @@ describe('buildSitemap', () => {
     expect(xml).not.toContain('/admin');
     expect(xml).not.toContain('/mon-compte');
     expect(xml).not.toContain('/connexion');
+    expect(xml).not.toContain('/inscription');
   });
 
   it('échappe les caractères spéciaux', () => {

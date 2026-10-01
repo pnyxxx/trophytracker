@@ -3,16 +3,18 @@
  *   GET|POST /ingest/osmand   ← positions envoyées par les téléphones
  *   GET      /health          ← santé du service (Docker healthcheck)
  *   GET      /sitemap.xml     ← plan du site pour Google (équipages publics)
+ *   GET      /equipages/:slug ← HTML d'une page équipage, avec son titre et son aperçu de partage
  *
- * Exposé publiquement via Caddy sous /ingest/.
+ * Exposé publiquement via Caddy sous /ingest/, /sitemap.xml et /equipages/….
  */
 import Fastify from 'fastify';
 import rateLimit from '@fastify/rate-limit';
 import type { Db } from './db.js';
 import { parseDeviceRequest } from './parse.js';
 import { buildSitemap } from './sitemap.js';
+import { CREW_SLUG, renderCrewPage } from './crew-page.js';
 
-export async function buildHttp(db: Db, opts: { trustProxy: boolean; logger: boolean; siteUrl?: string; log?: (msg: string) => void }) {
+export async function buildHttp(db: Db, opts: { trustProxy: boolean; logger: boolean; siteUrl?: string; webUrl?: string; log?: (msg: string) => void }) {
   const log = opts.log ?? (() => {});
   const app = Fastify({ logger: opts.logger, trustProxy: opts.trustProxy, bodyLimit: 16 * 1024 });
 
@@ -34,6 +36,22 @@ export async function buildHttp(db: Db, opts: { trustProxy: boolean; logger: boo
   app.get('/sitemap.xml', async (_req, reply) => {
     const xml = buildSitemap(opts.siteUrl ?? 'http://localhost', await db.sitemapCrews());
     return reply.header('Content-Type', 'application/xml; charset=utf-8').header('Cache-Control', 'public, max-age=3600').send(xml);
+  });
+
+  /** Modèle HTML servi par Caddy (relu à chaque fois : il change à chaque mise à jour du site). */
+  const shell = async (name: 'app' | 'crew') => {
+    const res = await fetch(`${opts.webUrl ?? 'http://web'}/_shell/${name}.html`, { signal: AbortSignal.timeout(3000) });
+    if (!res.ok) throw new Error(`modèle ${name}.html indisponible (${res.status})`);
+    return res.text();
+  };
+
+  // Équipage privé ou inconnu : coquille neutre, la page React affiche ce qu'il faut (sans rien révéler ici).
+  // En cas d'erreur, Caddy sert lui-même la coquille neutre (apps/web/Caddyfile).
+  app.get<{ Params: { slug: string } }>('/equipages/:slug', async (req, reply) => {
+    const { slug } = req.params;
+    const crew = CREW_SLUG.test(slug) ? await db.crewPageMeta(slug) : null;
+    const html = crew ? renderCrewPage(await shell('crew'), opts.siteUrl ?? 'http://localhost', slug, crew) : await shell('app');
+    return reply.header('Content-Type', 'text/html; charset=utf-8').header('Cache-Control', 'no-cache').send(html);
   });
 
   // Seuls les refus sont journalisés (jamais la clé en entier ni les coordonnées) :

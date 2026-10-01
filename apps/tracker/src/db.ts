@@ -1,11 +1,12 @@
 /**
  * Accès à la base. Le rôle `tracker` ne peut appeler QUE ces fonctions (GPS,
- * file des emails admin et liste des équipages publics) : même en cas de faille dans ce service, il ne peut rien
+ * file des emails admin, liste et aperçu des équipages publics) : même en cas de faille dans ce service, il ne peut rien
  * lire ni modifier d'autre.
  */
 import postgres from 'postgres';
 import type { IncomingPoint } from './points.js';
 import type { AdminNotification } from './admin-emails.js';
+import type { CrewMeta } from './crew-page.js';
 
 export type IngestResult = 'stored' | 'skipped' | 'stale' | 'invalid' | 'glitch';
 
@@ -48,6 +49,12 @@ export function createDb(url: string, opts: { minDistanceM: number; maxSilenceS:
     /** Équipages publics (plan du site). */
     sitemapCrews() {
       return sql<{ slug: string; updated_at: Date }[]>`select * from private.sitemap_crews()`;
+    },
+
+    /** Nom, accroche et photos d'un équipage PUBLIC (null sinon) : aperçu de sa page. */
+    async crewPageMeta(slug: string): Promise<CrewMeta | null> {
+      const [row] = await sql<CrewMeta[]>`select * from private.crew_page_meta(${slug})`;
+      return row ?? null;
     },
 
     async ping() {

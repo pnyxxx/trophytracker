@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom';
 import { LegalPage } from '@/components/common/LegalPage';
 import { CONTACT_HREF, EDITOR, FAIR_PLAY, REPORT_HREF } from '@/lib/legal';
+import { PAGES } from '@/lib/seo-pages';
 
 export default function TermsPage() {
   return (
     <LegalPage
-      seoTitle="Conditions d’utilisation"
+      seoTitle={PAGES['/conditions-utilisation'].title}
       title={<>Conditions<br />d’utilisation</>}
       intro="Les règles du jeu, en clair. En créant un compte ou la page d’un équipage, vous les acceptez."
     >

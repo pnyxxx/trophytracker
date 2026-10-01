@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom';
 import { LegalPage } from '@/components/common/LegalPage';
 import { BUSINESS, CONTACT_HREF, EDITOR, VAT_MENTION } from '@/lib/legal';
+import { PAGES } from '@/lib/seo-pages';
 
 export default function LegalNoticePage() {
   return (
-    <LegalPage seoTitle="Mentions légales" title={<>Mentions<br />légales</>}>
+    <LegalPage seoTitle={PAGES['/mentions-legales'].title} title={<>Mentions<br />légales</>}>
       <h2>Éditeur</h2>
       <p>
         TrophyTracker est un projet indépendant, édité par <strong>{EDITOR.name}</strong>, {BUSINESS.status.toLowerCase()}.
