@@ -18,10 +18,30 @@ Activez la **double authentification** sur tous les comptes admin (*Mon compte �
 | Vue d'ensemble | comptes, équipages, équipages en direct, positions, abonnements |
 | Équipages | associer un équipage à un appareil Traccar ; accès à toutes les pages (même privées) |
 | Comptes | recherche, nommer / retirer un admin |
-| Parcours | points officiels (départ, étapes, bivouacs, traversée, arrivée) affichés sur toutes les cartes |
-| Réglages | nom de l'édition, dates (compte à rebours, « jours de raid »), distance totale |
+| Parcours | points officiels (départ, étapes, bivouacs, traversée, arrivée) affichés sur toutes les cartes, avec leurs jours (J1…) et leurs sous-étapes (boucles) |
+| Réglages | nom de l'édition, dates (compte à rebours, jour du raid J1…J12), distance totale |
 
 Un admin peut aussi gérer n'importe quel équipage via son bouton « Gérer ».
+
+### Comment l'étape en cours d'un équipage est décidée
+
+Dans « La route » de chaque équipage, l'étape en cours combine (code : `apps/web/src/lib/stages.ts`) :
+
+1. **la position GPS**, recalée sur la route de référence (celle de l'accueil, sans les boucles) :
+   le kilomètre atteint sur le parcours, qui ne recule jamais. À moins de 10 km d'une étape, l'équipage
+   y est (« Sur place ») ; au-delà, il est « En route » vers la suivante ;
+2. **le calendrier** : les jours des étapes (J1 = date de départ des Réglages). Tant que le programme dit
+   qu'un équipage est à une étape et qu'il reste à moins de 150 km sur la route, l'étape reste « Sur place » — c'est ce
+   qui garde Merzouga en cours pendant les boucles J7-J8 (~100 km chacune, retour au bivouac). Les
+   sous-étapes (Boucle 1, Boucle 2) passent « En cours » puis « Faite » selon leur jour ;
+3. **sans position GPS** pendant le raid, on affiche l'étape du programme du jour, en le signalant.
+
+Il n'y a pas de statut manuel. Une **sous-étape** se crée dans *Parcours* avec « Sous-étape de » :
+elle n'apparaît pas sur les cartes (même lieu que son étape), seulement dans le roadbook.
+
+Le **profil d'élévation** (D+ / D− par jour et par étape) vient de l'altitude que le téléphone envoie
+avec chaque position (Traccar Client). Si un équipage n'a aucune position avec altitude, la section
+n'apparaît pas (c'est le cas de la trace de démo de J4L Club, simulée sans altitude).
 
 ## Supabase Studio
 

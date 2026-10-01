@@ -13,6 +13,7 @@ import { SponsorsTab } from '@/components/manage/SponsorsTab';
 import { MembersTab } from '@/components/manage/MembersTab';
 import { GpsTab } from '@/components/manage/GpsTab';
 import { DangerTab } from '@/components/manage/DangerTab';
+import { CrewQrPanel } from '@/components/crew/CrewQr';
 
 const TABS = [
   { id: 'infos', label: 'Infos' },
@@ -20,6 +21,7 @@ const TABS = [
   { id: 'photos', label: 'Photos' },
   { id: 'sponsors', label: 'Sponsors' },
   { id: 'membres', label: 'Membres' },
+  { id: 'qr', label: 'QR code' },
   { id: 'suppression', label: 'Suppression', ownerOnly: true },
 ];
 
@@ -59,6 +61,7 @@ export default function ManageCrewPage() {
           <TabsContent value="photos"><PhotosTab crew={crew} /></TabsContent>
           <TabsContent value="sponsors"><SponsorsTab crew={crew} /></TabsContent>
           <TabsContent value="membres"><MembersTab crew={crew} /></TabsContent>
+          <TabsContent value="qr"><CrewQrPanel crew={crew} /></TabsContent>
           {isOwner && <TabsContent value="suppression"><DangerTab crew={crew} /></TabsContent>}
         </Tabs>
       </Container>

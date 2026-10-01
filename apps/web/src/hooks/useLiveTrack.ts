@@ -12,8 +12,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { supabase, type Crew } from '@/lib/supabase';
 import { keys } from './queries';
 
-/** [lat, lon, timestamp (s), vitesse km/h | null] */
-export type TrackPoint = [number, number, number, number | null];
+/** [lat, lon, timestamp (s), vitesse km/h | null, altitude m | null (absente des anciennes réponses)] */
+export type TrackPoint = [number, number, number, number | null, (number | null)?];
 
 export function useLiveTrack(crew: Crew | null | undefined) {
   const queryClient = useQueryClient();

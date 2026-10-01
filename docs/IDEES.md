@@ -23,6 +23,7 @@ Classées par priorité. ✅ = déjà fait dans cette version.
 - **Import d'une trace GPX** (pour les équipages qui ont enregistré sans réseau) et **export GPX** souvenir.
 
 ## 🤝 Pour les sponsors
+- ✅ **QR code personnalisé** de chaque équipage (autocollant pour la 4L, story réseaux) en PNG.
 - **Page sponsor** : un sponsor voit tous les équipages qu'il soutient sur une seule carte.
 - **Statistiques de visibilité** pour l'équipage (vues de la page, clics sur les logos) à montrer aux sponsors — sans traceur tiers.
 - **Kit de partage** : visuels générés automatiquement (« Nous sommes à 1 234 km de Marrakech ! ») pour Instagram/Facebook.
@@ -30,9 +31,11 @@ Classées par priorité. ✅ = déjà fait dans cette version.
 
 ## 🏁 Pour la course
 - **Classement / comparaison** entre équipages suivis (distance, étape atteinte) — « course » amicale entre amis.
-- **Étapes franchies automatiquement** : détection du passage aux points du parcours (au lieu de la saisie manuelle).
+- ✅ **Étape en cours automatique** : position GPS recalée sur le parcours + calendrier des étapes (boucles de Merzouga).
+- **Étapes franchies → notifications** : réutiliser `lib/stages.ts` pour prévenir les abonnés à chaque étape atteinte.
 - **Carte de tous les équipages en direct** en plein écran pour le soir au bivouac ou l'école (mode TV).
-- **Altitude et vitesse** en graphique sur la trace (les données sont déjà stockées).
+- ✅ **Profil d'élévation** réel de l'équipage, par jour et par étape (D+ / D−, point culminant), d'après l'altitude GPS du téléphone.
+- **Vitesse** en graphique sur la trace (les données sont déjà stockées).
 - **Météo** sur la position actuelle (Open-Meteo, gratuit sans clé).
 - **Rejouer le raid** : animation de la trace complète, jour par jour, après l'arrivée.
 

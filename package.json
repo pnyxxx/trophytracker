@@ -17,7 +17,7 @@
     "build": "npm run build -w apps/tracker && npm run build -w apps/web",
     "typecheck": "npm run typecheck -w apps/tracker && npm run typecheck -w apps/web",
     "lint": "npm run lint -w apps/web",
-    "test": "npm run test -w apps/tracker",
+    "test": "npm run test -w apps/tracker && npm run test -w apps/web",
     "test:db": "sh scripts/test-db.sh",
     "test:e2e": "node scripts/e2e/smoke.mjs",
     "db:types": "sh scripts/gen-types.sh"

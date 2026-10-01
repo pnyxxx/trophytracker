@@ -112,19 +112,40 @@ export function dayAt(p: number): string {
 }
 
 /**
+ * Tracé SANS les boucles de Merzouga (tracé illustratif) : quand le tracé revient sur une étape
+ * (Merzouga), on retire le détour fait depuis. Seulement sur les étapes : l'arrivée et le départ du
+ * marathon partagent la route de Rissani, qu'il faut garder. C'est la route de référence du
+ * roadbook des équipages (kilomètres des étapes, position de la 4L, profil d'élévation).
+ */
+export const MAIN_PATH: [number, number][] = [];
+const STOP_KEYS = new Set(WP.map((w) => [w.lon, w.lat].join()));
+PATH.forEach((pt) => {
+  const at = STOP_KEYS.has(pt.join()) ? MAIN_PATH.findIndex((p) => p[0] === pt[0] && p[1] === pt[1]) : -1;
+  if (at >= 0) MAIN_PATH.splice(at + 1);
+  else MAIN_PATH.push(pt);
+});
+
+/** Route de référence densifiée (un point tous les ~2 km) et son kilométrage cumulé. */
+export const MAIN_ROUTE: { pts: [number, number][]; cum: number[] } = { pts: [MAIN_PATH[0]!], cum: [0] };
+MAIN_PATH.forEach((pt, i) => {
+  if (!i) return;
+  const a = MAIN_PATH[i - 1]!;
+  const d = haversineKm(a[1], a[0], pt[1], pt[0]);
+  const n = Math.max(1, Math.ceil(d / 2));
+  for (let k = 1; k <= n; k++) {
+    MAIN_ROUTE.pts.push([a[0] + ((pt[0] - a[0]) * k) / n, a[1] + ((pt[1] - a[1]) * k) / n]);
+    MAIN_ROUTE.cum.push(MAIN_ROUTE.cum.at(-1)! + d / n);
+  }
+});
+
+/**
  * Tracé allégé pour la carte de la page Équipages : suit la route à ~`toleranceKm`
  * près (moins détaillé que l'accueil), sans les boucles de Merzouga, et passe exactement par chaque
  * étape et chaque lieu traversé.
  */
 function simplifiedRoute(toleranceKm: number): [number, number][] {
   const keep = new Set([...WP, ...PASSAGES].map((w) => [w.lon, w.lat].join()));
-  // Sans les boucles : quand on revient sur une étape (Merzouga), on retire le détour fait depuis.
-  const path: [number, number][] = [];
-  PATH.forEach((pt) => {
-    const at = keep.has(pt.join()) ? path.findIndex((p) => p.join() === pt.join()) : -1;
-    if (at >= 0) path.splice(at + 1);
-    else path.push(pt);
-  });
+  const path = MAIN_PATH;
   // Distance (km) d'un point au segment [a, b], en projection plane locale.
   const off = (p: [number, number], a: [number, number], b: [number, number]) => {
     const k = Math.cos((a[1] * Math.PI) / 180);
@@ -160,17 +181,17 @@ export const ROUTE_LINE = simplifiedRoute(5);
 export const countryAt = ([lon, lat]: [number, number]) => (lat < 35.95 ? 'MA' : lat > 43.35 && lon > -1.79 ? 'FR' : 'ES');
 
 /**
- * Kilomètre sur la route du point de passage le plus proche de (lat, lon), ou null s'il est
- * à plus de 15 km du tracé : sert à placer les étapes officielles sur le roadbook des équipages.
+ * Kilomètre sur la route de référence (sans les boucles) du point le plus proche de (lat, lon),
+ * ou null s'il est à plus de 15 km du tracé : sert à placer les étapes officielles sur le roadbook.
  */
 export function routeKmOf(lat: number, lon: number): number | null {
   let best = Infinity;
   let at = 0;
-  DENSE.forEach(([x, y], i) => {
+  MAIN_ROUTE.pts.forEach(([x, y], i) => {
     const d = haversineKm(lat, lon, y, x);
     if (d < best) [best, at] = [d, i];
   });
-  return best <= 15 ? Math.round(CUM[at]!) : null;
+  return best <= 15 ? Math.round(MAIN_ROUTE.cum[at]!) : null;
 }
 
 export const idxAt = (p: number) => {

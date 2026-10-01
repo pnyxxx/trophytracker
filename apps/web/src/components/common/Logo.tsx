@@ -1,16 +1,12 @@
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { LOGO_TONES as TONES } from './logo-svg';
 
 /**
  * Logo validé « La trace dessine la 4L » (docs/branding/) : la trace part du sol,
  * dessine le profil de la 4L d'un seul trait et s'arrête sur le point rouge en direct.
  * `tone` : « dark » sur fond sombre (le site), « light » sur fond clair.
  */
-const TONES = {
-  dark: { trace: '#F2B45A', wheelFill: '#120F0C', ink: '#F4ECDF', dotStroke: '#F4ECDF' },
-  light: { trace: '#D98A3D', wheelFill: '#F4ECDF', ink: '#1A1612', dotStroke: '#FFF8EC' },
-};
-
 export function LogoMark({ className, tone = 'dark' }: { className?: string; tone?: keyof typeof TONES }) {
   const c = TONES[tone];
   return (

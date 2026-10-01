@@ -1,4 +1,4 @@
-import { lazy, Suspense, type ReactNode } from 'react';
+import { lazy, Suspense, useMemo, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Globe, Instagram, Mail, Settings } from 'lucide-react';
 import { PageShell } from '@/components/layout/PageShell';
@@ -11,9 +11,13 @@ import { CrewStats } from '@/components/crew/CrewStats';
 import { CrewGallery } from '@/components/crew/CrewGallery';
 import { CrewSponsors } from '@/components/crew/CrewSponsors';
 import { CrewRoadbook } from '@/components/crew/CrewRoadbook';
+import { CrewQrButton } from '@/components/crew/CrewQr';
+import { useRoadbook } from '@/components/crew/roadbook';
 import { useCrew, useCrewMembers, useCrewStats, useEvent, useMyRole, usePhotos, useSponsors } from '@/hooks/queries';
 import { useLiveTrack } from '@/hooks/useLiveTrack';
 import { formatRelative, isLive } from '@/lib/format';
+import { raidDay } from '@/lib/stages';
+import { altitudeProfile } from '@/lib/elevation';
 import { mediaUrl } from '@/lib/media';
 import { cn } from '@/lib/utils';
 import NotFound from './NotFound';
@@ -46,6 +50,8 @@ function Section({ id, kicker, title, subtitle, tone = 'dark', children }: {
   );
 }
 
+const NO_WAYPOINTS: never[] = [];
+
 /** « 31.085°N · 4.023°O » */
 const coords = (lat: number, lon: number) =>
   `${Math.abs(lat).toFixed(3)}°${lat >= 0 ? 'N' : 'S'} · ${Math.abs(lon).toFixed(3)}°${lon < 0 ? 'O' : 'E'}`;
@@ -60,13 +66,21 @@ export default function CrewPage() {
   const { data: members = [] } = useCrewMembers(crew?.id);
   const { canEdit } = useMyRole(crew?.id);
   const { points } = useLiveTrack(crew);
+  // Jour du raid (recalculé à chaque nouvelle position, donc aussi après minuit pendant le raid).
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- points.length : recalcul voulu à chaque position
+  const cal = useMemo(() => raidDay(event?.startDate ?? null, event?.endDate ?? null), [event?.startDate, event?.endDate, points.length]);
+  const profile = useMemo(() => altitudeProfile(points, event?.startDate ?? null), [points, event?.startDate]);
+  const roadbook = useRoadbook(event?.waypoints ?? NO_WAYPOINTS, event?.totalKm ?? null, points, cal);
+  const plannedStop = roadbook.stops[roadbook.planned.index];
+  const plannedSub = plannedStop?.subs[roadbook.planned.sub];
+  const planned = plannedStop ? (plannedSub ? `${plannedSub.name} · ${plannedStop.name}` : plannedStop.name) : null;
 
   if (isLoading) return <PageShell><PageLoader /></PageShell>;
   if (!crew) return <NotFound />;
 
   const cover = mediaUrl(crew.cover_path);
   const live = isLive(crew.last_fix_at);
-  const hasRoute = !!event && event.waypoints.length > 1;
+  const hasRoute = !!event && roadbook.stops.length > 1;
   const hasContact = !!(crew.contact_email || crew.instagram_url || crew.website_url);
 
   const anchors = [
@@ -145,6 +159,7 @@ export default function CrewPage() {
             <div className="flex flex-wrap gap-2">
               <FollowButton crewId={crew.id} slug={crew.slug} count={crew.followers_count} />
               <ShareButton title={crew.name} />
+              <CrewQrButton crew={crew} />
               {canEdit && (
                 <Button asChild variant="secondary">
                   <Link to={`/mon-compte/equipages/${crew.slug}`}><Settings />Gérer</Link>
@@ -188,7 +203,7 @@ export default function CrewPage() {
             </div>
             <p className="m-0 max-w-[420px] text-base leading-relaxed text-dust-300">Mises à jour automatiquement à chaque nouvelle position.</p>
           </div>
-          <CrewStats stats={stats} startDate={event?.startDate ?? null} />
+          <CrewStats stats={stats} cal={cal} planned={planned} />
         </Container>
       </section>
 
@@ -199,9 +214,9 @@ export default function CrewPage() {
           tone="sand"
           kicker="Le roadbook"
           title="La route"
-          subtitle={`De ${event.waypoints[0]!.name} à ${event.waypoints.at(-1)!.name} : où en est l’équipage sur le parcours prévu.`}
+          subtitle={`De ${roadbook.stops[0]!.name} à ${roadbook.stops.at(-1)!.name} : où en est l’équipage sur le parcours prévu, jour après jour.`}
         >
-          <CrewRoadbook waypoints={event.waypoints} distanceKm={stats?.total_distance_km ?? 0} totalKm={event.totalKm} />
+          <CrewRoadbook roadbook={roadbook} cal={cal} distanceKm={stats?.total_distance_km ?? 0} profile={profile} />
         </Section>
       )}
 

@@ -51,7 +51,9 @@ function MapController({ car, points, waypoints, follow }: {
   return null;
 }
 
-export function CrewMap({ crew, points, waypoints, sponsors }: Props) {
+export function CrewMap({ crew, points, waypoints: allWaypoints, sponsors }: Props) {
+  // Les sous-étapes (boucles) sont au même endroit que leur étape : un seul repère sur la carte.
+  const waypoints = useMemo(() => allWaypoints.filter((w) => !w.parent_id), [allWaypoints]);
   const [follow, setFollow] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const live = isLive(crew.last_fix_at);

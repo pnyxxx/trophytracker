@@ -1,24 +1,31 @@
 import type { CrewStats as Stats } from '@/hooks/queries';
 import { formatNumber } from '@/lib/format';
+import type { RaidDay } from '@/lib/stages';
 
-/** Nombre de jours depuis le départ officiel (0 avant le départ). */
-function daysOnRoad(startDate: string | null) {
-  if (!startDate) return null;
-  const start = new Date(`${startDate}T00:00:00`).getTime();
-  const diff = Date.now() - start;
-  return diff < 0 ? 0 : Math.ceil(diff / 86_400_000);
+/** Case « Calendrier » : jour du raid (J7 / 12), compte à rebours avant, ou raid terminé. */
+function calendarItem(cal: RaidDay, planned: string | null) {
+  switch (cal.phase) {
+    case 'before':
+      return { label: 'Avant le départ', value: `J-${cal.daysUntil}`, unit: '' };
+    case 'during':
+      return { label: planned ? `Au programme : ${planned}` : 'Jour de raid', value: `J${cal.day}`, unit: cal.total ? `/ ${cal.total}` : '' };
+    case 'after':
+      return { label: 'Raid terminé', value: String(cal.total ?? '—'), unit: cal.total ? 'jours' : '' };
+    default:
+      return { label: 'Jour de raid', value: '—', unit: '' };
+  }
 }
 
 /** Tableau de bord de l'équipage : cases séparées d'un filet, comme un roadbook. */
-export function CrewStats({ stats, startDate }: { stats: Stats | null | undefined; startDate: string | null }) {
-  const days = daysOnRoad(startDate);
+export function CrewStats({ stats, cal, planned }: { stats: Stats | null | undefined; cal: RaidDay; planned: string | null }) {
+  const day = calendarItem(cal, planned);
   const items = [
     { tag: '01 · DISTANCE', label: 'Distance parcourue', value: formatNumber(stats?.total_distance_km, 1), unit: 'km' },
     { tag: '02 · VITESSE', label: 'Vitesse actuelle', value: formatNumber(stats?.current_speed_kmh), unit: 'km/h' },
     { tag: '03 · MOYENNE', label: 'Moyenne (dernière heure)', value: formatNumber(stats?.avg_speed_kmh), unit: 'km/h' },
     { tag: '04 · CLASSEMENT', label: 'Classement', value: stats?.current_rank ? `${stats.current_rank}ᵉ` : '—', unit: '' },
     { tag: '05 · SOLIDARITÉ', label: 'Fournitures à livrer', value: formatNumber(stats?.supplies_count), unit: '' },
-    { tag: '06 · CALENDRIER', label: 'Jours de raid', value: days == null ? '—' : String(days), unit: days ? (days > 1 ? 'jours' : 'jour') : '' },
+    { tag: '06 · CALENDRIER', ...day },
   ];
 
   return (

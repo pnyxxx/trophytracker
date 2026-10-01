@@ -4,7 +4,7 @@ import type { Waypoint } from '@/lib/supabase';
 const escapeHtml = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
-export type WaypointKind = 'start' | 'stage' | 'night' | 'boat' | 'bivouac' | 'finish';
+export type WaypointKind = 'start' | 'stage' | 'night' | 'boat' | 'bivouac' | 'finish' | 'loop';
 
 export const WAYPOINT_STYLE: Record<WaypointKind, { emoji: string; color: string; label: string }> = {
   start: { emoji: '🏁', color: '#DB4740', label: 'Départ' },
@@ -13,6 +13,7 @@ export const WAYPOINT_STYLE: Record<WaypointKind, { emoji: string; color: string
   boat: { emoji: '🚢', color: '#3E7C8C', label: 'Traversée' },
   bivouac: { emoji: '⛺', color: '#F2B45A', label: 'Bivouac' },
   finish: { emoji: '🏆', color: '#DB4740', label: 'Arrivée' },
+  loop: { emoji: '🔁', color: '#D98A3D', label: 'Boucle' },
 };
 
 /** Style d'un type de point (repli sur « étape » si le type est inconnu). */

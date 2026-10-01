@@ -196,7 +196,9 @@ function UsersAdmin() {
   );
 }
 
-const emptyWaypoint = { kind: 'stage' as WaypointKind, name: '', description: '', country: '', lat: '', lon: '', sort_order: '' };
+const emptyWaypoint = { kind: 'stage' as WaypointKind, name: '', description: '', country: '', lat: '', lon: '', sort_order: '', day_start: '', day_end: '', parent_id: '' };
+
+const dayOrNull = (v: string) => (v.trim() ? Number(v) : null);
 
 function RouteAdmin() {
   const { data: event } = useEvent();
@@ -204,14 +206,21 @@ function RouteAdmin() {
   const [form, setForm] = useState(emptyWaypoint);
   const refresh = () => queryClient.invalidateQueries({ queryKey: keys.event });
 
+  const parents = event?.waypoints.filter((w) => !w.parent_id) ?? [];
+  const parent = parents.find((w) => w.id === form.parent_id);
+  // Une sous-étape est au même endroit que son étape : coordonnées reprises si non saisies.
   const add = useMutation({
     mutationFn: async () => {
-      const lat = Number(form.lat), lon = Number(form.lon);
+      const lat = form.lat.trim() ? Number(form.lat) : parent?.lat ?? NaN;
+      const lon = form.lon.trim() ? Number(form.lon) : parent?.lon ?? NaN;
       if (!Number.isFinite(lat) || !Number.isFinite(lon)) throw new Error('Coordonnées invalides');
+      const siblings = event?.waypoints.filter((w) => (parent ? w.parent_id === parent.id || w.id === parent.id : true)) ?? [];
       unwrap(await supabase.from('waypoints').insert({
         kind: form.kind, name: form.name.trim(), description: form.description.trim() || null,
-        country: form.country.trim() || null, lat, lon,
-        sort_order: form.sort_order ? Number(form.sort_order) : ((event?.waypoints.at(-1)?.sort_order ?? 0) + 10),
+        country: form.country.trim() || parent?.country || null, lat, lon,
+        sort_order: form.sort_order ? Number(form.sort_order) : ((siblings.at(-1)?.sort_order ?? 0) + (parent ? 1 : 10)),
+        day_start: dayOrNull(form.day_start), day_end: dayOrNull(form.day_end) ?? dayOrNull(form.day_start),
+        parent_id: parent?.id ?? null,
       }));
     },
     onSuccess: () => { toast.success('Point ajouté'); setForm(emptyWaypoint); void refresh(); },
@@ -224,12 +233,13 @@ function RouteAdmin() {
   });
 
   return (
-    <Panel title="Parcours prévu" description="Points affichés sur toutes les cartes et dans « La route », dans l’ordre croissant.">
+    <Panel title="Parcours prévu" description="Points affichés sur toutes les cartes et dans « La route », dans l’ordre croissant. Les jours (J1 = jour du départ) relient le calendrier aux étapes : tant que le programme dit qu’un équipage est à une étape et qu’il reste dans les environs (boucles…), elle reste « en cours ».">
       <ul className="mb-6 divide-y divide-cream/10">
         {event?.waypoints.map((w) => (
-          <li key={w.id} className="flex items-center gap-3 py-2">
+          <li key={w.id} className={`flex items-center gap-3 py-2 ${w.parent_id ? 'pl-8' : ''}`}>
             <span className="w-10 text-xs text-dust-500">{w.sort_order}</span>
             <span className="text-xl">{waypointStyle(w.kind).emoji}</span>
+            <span className="w-14 font-mono text-xs text-gold">{w.day_start ? (w.day_end && w.day_end !== w.day_start ? `J${w.day_start}–${w.day_end}` : `J${w.day_start}`) : '—'}</span>
             <span className="flex-1 text-cream">{w.name} <span className="text-xs text-dust-500">{w.country} · {w.lat.toFixed(3)}, {w.lon.toFixed(3)}</span></span>
             <Button size="icon" variant="ghost" className="hover:text-primary-light" aria-label={`Supprimer ${w.name}`}
               onClick={() => { if (confirm(`Supprimer ${w.name} ?`)) remove.mutate(w.id); }}><Trash2 className="h-4 w-4" /></Button>
@@ -243,8 +253,16 @@ function RouteAdmin() {
           </select>
         </Field>
         <Field id="w-name" label="Nom"><Input id="w-name" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></Field>
-        <Field id="w-lat" label="Latitude"><Input id="w-lat" required inputMode="decimal" value={form.lat} onChange={(e) => setForm({ ...form, lat: e.target.value })} /></Field>
-        <Field id="w-lon" label="Longitude"><Input id="w-lon" required inputMode="decimal" value={form.lon} onChange={(e) => setForm({ ...form, lon: e.target.value })} /></Field>
+        <Field id="w-parent" label="Sous-étape de">
+          <select id="w-parent" className={selectClass} value={form.parent_id} onChange={(e) => setForm({ ...form, parent_id: e.target.value, kind: e.target.value ? 'loop' : form.kind })}>
+            <option value="">— (étape principale)</option>
+            {parents.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
+          </select>
+        </Field>
+        <Field id="w-lat" label="Latitude"><Input id="w-lat" required={!parent} inputMode="decimal" value={form.lat} placeholder={parent ? String(parent.lat) : undefined} onChange={(e) => setForm({ ...form, lat: e.target.value })} /></Field>
+        <Field id="w-lon" label="Longitude"><Input id="w-lon" required={!parent} inputMode="decimal" value={form.lon} placeholder={parent ? String(parent.lon) : undefined} onChange={(e) => setForm({ ...form, lon: e.target.value })} /></Field>
+        <Field id="w-d1" label="Premier jour (J)"><Input id="w-d1" type="number" min={1} max={60} value={form.day_start} onChange={(e) => setForm({ ...form, day_start: e.target.value })} placeholder="ex. 6" /></Field>
+        <Field id="w-d2" label="Dernier jour (J)"><Input id="w-d2" type="number" min={1} max={60} value={form.day_end} onChange={(e) => setForm({ ...form, day_end: e.target.value })} placeholder="ex. 8" /></Field>
         <Field id="w-country" label="Pays"><Input id="w-country" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} /></Field>
         <Field id="w-desc" label="Description"><Input id="w-desc" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></Field>
         <Field id="w-order" label="Ordre"><Input id="w-order" type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: e.target.value })} placeholder="auto" /></Field>

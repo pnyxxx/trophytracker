@@ -52,7 +52,7 @@ export default function CrewsPage() {
   // tant que les étapes s'y trouvent (sinon lignes droites) ; la nuit du marathon en simple point, sans nom.
   const { route, line, passages } = useMemo(() => {
     const named = event?.waypoints.length
-      ? event.waypoints
+      ? event.waypoints.filter((w) => !w.parent_id)
       : [...STOPS.filter((s) => s.sign === undefined), ...PASSAGES.filter((p) => !p.blurred)];
     const points = named.map((w) => ({ name: w.name, lat: w.lat, lon: w.lon }));
     const onRoute = points.every((w) => routeKmOf(w.lat, w.lon) !== null);

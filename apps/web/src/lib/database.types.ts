@@ -456,12 +456,15 @@ export type Database = {
         Row: {
           country: string | null
           created_at: string
+          day_end: number | null
+          day_start: number | null
           description: string | null
           id: string
           kind: string
           lat: number
           lon: number
           name: string
+          parent_id: string | null
           planned_at: string | null
           sort_order: number
           updated_at: string
@@ -469,12 +472,15 @@ export type Database = {
         Insert: {
           country?: string | null
           created_at?: string
+          day_end?: number | null
+          day_start?: number | null
           description?: string | null
           id?: string
           kind: string
           lat: number
           lon: number
           name: string
+          parent_id?: string | null
           planned_at?: string | null
           sort_order?: number
           updated_at?: string
@@ -482,17 +488,28 @@ export type Database = {
         Update: {
           country?: string | null
           created_at?: string
+          day_end?: number | null
+          day_start?: number | null
           description?: string | null
           id?: string
           kind?: string
           lat?: number
           lon?: number
           name?: string
+          parent_id?: string | null
           planned_at?: string | null
           sort_order?: number
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "waypoints_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "waypoints"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
