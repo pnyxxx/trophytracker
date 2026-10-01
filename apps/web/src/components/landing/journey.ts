@@ -115,7 +115,7 @@ export function dayAt(p: number): string {
  * Tracé SANS les boucles de Merzouga (tracé illustratif) : quand le tracé revient sur une étape
  * (Merzouga), on retire le détour fait depuis. Seulement sur les étapes : l'arrivée et le départ du
  * marathon partagent la route de Rissani, qu'il faut garder. C'est la route de référence du
- * roadbook des équipages (kilomètres des étapes, position de la 4L, profil d'élévation).
+ * roadbook des équipages (kilomètres des étapes, barre de progression).
  */
 export const MAIN_PATH: [number, number][] = [];
 const STOP_KEYS = new Set(WP.map((w) => [w.lon, w.lat].join()));

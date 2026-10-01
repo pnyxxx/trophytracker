@@ -70,7 +70,7 @@ export default function CrewPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps -- points.length : recalcul voulu à chaque position
   const cal = useMemo(() => raidDay(event?.startDate ?? null, event?.endDate ?? null), [event?.startDate, event?.endDate, points.length]);
   const profile = useMemo(() => altitudeProfile(points, event?.startDate ?? null), [points, event?.startDate]);
-  const roadbook = useRoadbook(event?.waypoints ?? NO_WAYPOINTS, event?.totalKm ?? null, points, cal);
+  const roadbook = useRoadbook(event?.waypoints ?? NO_WAYPOINTS, event?.totalKm ?? null, points, cal, event?.startDate ?? null);
   const plannedStop = roadbook.stops[roadbook.planned.index];
   const plannedSub = plannedStop?.subs[roadbook.planned.sub];
   const planned = plannedStop ? (plannedSub ? `${plannedSub.name} · ${plannedStop.name}` : plannedStop.name) : null;

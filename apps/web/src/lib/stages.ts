@@ -1,14 +1,14 @@
 /**
- * Où en est un équipage sur le parcours : jour du raid, étape en cours, sous-étapes.
+ * Où en est un équipage sur le parcours : jour du raid, étape en cours, sous-étapes (boucles).
  *
- * L'étape en cours combine deux sources :
- *  1. la POSITION GPS, recalée sur la route de référence (kilomètre atteint sur le parcours,
- *     qui ne recule jamais) — et non plus la distance totale parcourue, qui augmente aussi
- *     quand on tourne en rond (boucles de Merzouga) ;
- *  2. le CALENDRIER (jours J1… de chaque étape) : tant que le programme dit qu'on est à une
- *     étape (ex. Merzouga J6-8) et que la 4L reste dans les environs, l'étape reste « sur place »,
- *     même si les boucles l'emmènent à des dizaines de kilomètres du bivouac.
- * Sans position GPS pendant le raid, on affiche l'étape du programme, en le disant.
+ * Au 4L Trophy, chaque étape a son jour : c'est LA DATE qui choisit l'étape (J7 = Boucle 1,
+ * J8 = Boucle 2, J9 = départ du marathon…). Le GPS ne sert qu'à préciser où en est l'équipage
+ * dans sa journée, en distance à vol d'oiseau :
+ *  - étape de route : « En route » tant que la 4L n'est pas passée à moins de 10 km de l'étape,
+ *    puis « Sur place » ;
+ *  - boucle : « Au départ » au bivouac, « En cours » dès qu'elle s'en éloigne de plus de 5 km,
+ *    « Faite » quand elle revient à moins de 3 km ;
+ *  - sans position GPS : l'étape du programme, signalée comme telle.
  */
 import { haversineKm } from './geo';
 
@@ -43,95 +43,43 @@ export const dayOfRaid = (startDate: string, at: Date) => dayIndex(at) - dayInde
  */
 export function raidDay(startDate: string | null, endDate: string | null, now: Date = new Date()): RaidDay {
   if (!startDate) return { phase: 'unknown', day: null, total: null, daysUntil: null };
-  const day = dayIndex(now) - dayIndex(startDate) + 1;
+  const day = dayOfRaid(startDate, now);
   const total = endDate ? dayIndex(endDate) - dayIndex(startDate) + 1 : null;
   if (day < 1) return { phase: 'before', day: null, total, daysUntil: 1 - day };
   if (total != null && day > total) return { phase: 'after', day: null, total, daysUntil: null };
   return { phase: 'during', day, total, daysUntil: null };
 }
 
-// ─── Position sur la route ──────────────────────────────────────────────────
-
-export interface Route {
-  /** Points [lon, lat] du parcours, dans l'ordre. */
-  pts: [number, number][];
-  /** Kilomètre de chaque point. */
-  cum: number[];
-  /** Au-delà de cette distance (km) du tracé, une position est « hors parcours ». */
-  toleranceKm: number;
-}
-
-/** Point de trace : [lat, lon, …] (format de get_track). */
-type TrackPoint = readonly [number, number, ...unknown[]];
-
-/**
- * Kilomètre atteint sur la route d'après la trace GPS, ou null si la 4L n'est jamais passée sur
- * le parcours. Recalage simple : on suit la trace dans l'ordre (un point par kilomètre roulé) et on
- * cherche le point de route le plus proche dans une fenêtre plausible (on ne peut pas avancer de
- * 300 km sur la route en roulant 10 km), ce qui évite de « sauter » sur un autre tronçon proche.
- */
-export function routeProgress(points: readonly TrackPoint[], route: Route): number | null {
-  const { pts, cum, toleranceKm } = route;
-  if (pts.length < 2 || points.length === 0) return null;
-  let idx = -1;
-  let rolled = 0; // km roulés depuis le dernier recalage
-  let prev: TrackPoint | null = null;
-  let lastSample: TrackPoint | null = null;
-
-  const match = (p: TrackPoint) => {
-    // Fenêtre de recherche : un peu en arrière, et en avant de ce qui a pu être roulé.
-    const reach = idx < 0 ? Infinity : cum[idx]! + rolled * 1.5 + 30;
-    const lo = idx < 0 ? 0 : Math.max(0, lowerBound(cum, cum[idx]! - 10));
-    let best = Infinity;
-    let at = -1;
-    for (let j = lo; j < pts.length && cum[j]! <= reach; j++) {
-      const d = haversineKm(p[0], p[1], pts[j]![1], pts[j]![0]);
-      if (d < best) [best, at] = [d, j];
-    }
-    if (at >= 0 && best <= toleranceKm) {
-      if (at > idx) idx = at; // on ne recule jamais sur le parcours
-      rolled = 0;
-    }
-  };
-
-  points.forEach((p, i) => {
-    if (prev) rolled += haversineKm(prev[0], prev[1], p[0], p[1]);
-    prev = p;
-    const isLast = i === points.length - 1;
-    if (lastSample && !isLast && haversineKm(lastSample[0], lastSample[1], p[0], p[1]) < 1) return;
-    lastSample = p;
-    match(p);
-  });
-  return idx < 0 ? null : cum[idx]!;
-}
-
-/** Premier indice i tel que arr[i] >= x (arr croissant). */
-function lowerBound(arr: number[], x: number) {
-  let [lo, hi] = [0, arr.length];
-  while (lo < hi) {
-    const m = (lo + hi) >> 1;
-    if (arr[m]! < x) lo = m + 1;
-    else hi = m;
-  }
-  return lo;
-}
-
 // ─── Étape en cours ─────────────────────────────────────────────────────────
 
-export interface StageInput {
-  /** Kilomètre de l'étape sur la route. */
-  km: number;
+interface Place {
+  lat: number;
+  lon: number;
   dayStart: number | null;
   dayEnd: number | null;
-  subs: { dayStart: number | null; dayEnd: number | null }[];
+}
+
+export interface StageInput extends Place {
+  /** Kilomètre de l'étape sur la route (pour la barre de progression). */
+  km: number;
+  subs: Place[];
+}
+
+/** Position GPS avec son jour du raid. */
+export interface StagePoint {
+  lat: number;
+  lon: number;
+  day: number;
 }
 
 export type StageStatus = 'done' | 'current' | 'upcoming';
+/** Une sous-étape (boucle) peut aussi être « au départ » : jour J, 4L encore au bivouac. */
+export type SubStatus = StageStatus | 'ready';
 
 export interface StageState {
-  /** gps : d'après la position ; programme : d'après le calendrier (pas de position) ; none : pas commencé. */
+  /** gps : précisé par la position ; programme : d'après le calendrier seul ; none : hors raid. */
   source: 'gps' | 'programme' | 'none';
-  /** Étape en cours (celle où l'on est, ou vers laquelle on roule), -1 si aucune. */
+  /** Étape du jour (celle où l'on est, ou vers laquelle on roule), -1 avant le départ. */
   index: number;
   /** true : sur place à l'étape `index` ; false : en route vers elle. */
   here: boolean;
@@ -140,92 +88,89 @@ export interface StageState {
   /** Kilomètre atteint sur la route (pour la barre de progression). */
   progressKm: number;
   statuses: StageStatus[];
-  subStatuses: StageStatus[][];
+  subStatuses: SubStatus[][];
 }
 
 /** À moins de 10 km d'une étape, on y est. */
 export const ARRIVAL_KM = 10;
-/**
- * Distance sur la route, au-delà de l'étape, où l'on reste « sur place » tant que le calendrier le
- * dit. Les boucles de Merzouga font ~100 km et reviennent au bivouac : elles ne s'en éloignent pas de
- * plus de ~50 km, même en suivant la route du marathon. 150 km laisse une large marge ; hors des
- * jours de l'étape, cette règle ne joue pas (le départ du marathon, J9, passe tout de suite « en route »).
- */
-export const STAY_ZONE_KM = 150;
+/** Une boucle commence quand la 4L s'éloigne de plus de 5 km du bivouac (le camp est grand)… */
+export const LOOP_LEAVE_KM = 5;
+/** … et elle est faite quand la 4L revient à moins de 3 km. */
+export const LOOP_BACK_KM = 3;
 
-const within = (day: number | null, s: { dayStart: number | null; dayEnd: number | null }) =>
-  day != null && s.dayStart != null && day >= s.dayStart && day <= (s.dayEnd ?? s.dayStart);
+const covers = (day: number, s: { dayStart: number | null; dayEnd: number | null }) =>
+  s.dayStart != null && day >= s.dayStart && day <= (s.dayEnd ?? s.dayStart);
+const dist = (p: { lat: number; lon: number }, s: { lat: number; lon: number }) => haversineKm(p.lat, p.lon, s.lat, s.lon);
 
-export function stageState(stops: StageInput[], progressKm: number | null, cal: RaidDay): StageState {
-  const n = stops.length;
-  let index = -1;
-  let here = false;
-  let source: StageState['source'] = 'none';
-
-  if (n && progressKm != null) {
-    source = 'gps';
-    // Dernière étape atteinte (ou dépassée) par la 4L.
-    let reached = 0;
-    stops.forEach((s, i) => {
-      if (s.km <= progressKm + ARRIVAL_KM) reached = i;
-    });
-    const stop = stops[reached]!;
-    const sticky = within(cal.day, stop) && progressKm <= stop.km + STAY_ZONE_KM;
-    if (progressKm <= stop.km + ARRIVAL_KM || sticky || reached === n - 1) [index, here] = [reached, true];
-    else [index, here] = [reached + 1, false];
-  } else if (n && cal.phase === 'during') {
-    // Pas de position : étape du jour d'après le programme (la dernière qui couvre ce jour).
-    source = 'programme';
-    stops.forEach((s, i) => {
-      if (within(cal.day, s)) index = i;
-    });
-    if (index >= 0) here = cal.day! > (stops[index]!.dayStart ?? 0) || index === 0;
-    else source = 'none';
-  }
-
-  const finished = index === n - 1 && here && source === 'gps';
-  const statuses = stops.map((_, i): StageStatus => (i < index ? 'done' : i === index ? 'current' : 'upcoming'));
-  const subStatuses = stops.map((s, i) =>
-    s.subs.map((sub): StageStatus => {
-      if (i < index || cal.phase === 'after') return 'done';
-      if (i > index || !here || cal.day == null) return 'upcoming';
-      if (sub.dayEnd != null && cal.day > sub.dayEnd) return 'done';
-      return within(cal.day, sub) ? 'current' : 'upcoming';
-    }),
-  );
-
-  const progress =
-    progressKm ?? (source === 'programme' ? (here ? stops[index]!.km : (stops[index - 1]?.km ?? 0)) : 0);
-  return { source, index, here, finished, progressKm: progress, statuses, subStatuses };
-}
-
-/** Route en lignes droites entre des étapes (quand elles ne sont pas sur la route de référence). */
-export function straightRoute(stops: { lat: number; lon: number; km: number }[]): Route {
-  const pts: [number, number][] = [];
-  const cum: number[] = [];
-  stops.forEach((s, i) => {
-    const prev = stops[i - 1];
-    if (!prev) {
-      pts.push([s.lon, s.lat]);
-      cum.push(s.km);
-      return;
-    }
-    const k = Math.max(1, Math.ceil(haversineKm(prev.lat, prev.lon, s.lat, s.lon) / 2));
-    for (let j = 1; j <= k; j++) {
-      pts.push([prev.lon + ((s.lon - prev.lon) * j) / k, prev.lat + ((s.lat - prev.lat) * j) / k]);
-      cum.push(prev.km + ((s.km - prev.km) * j) / k);
-    }
-  });
-  // Les routes s'écartent des lignes droites : tolérance plus large.
-  return { pts, cum, toleranceKm: 60 };
+/** État d'une boucle d'après les positions du jour (dans l'ordre) autour du bivouac. */
+export function loopStatus(today: readonly StagePoint[], base: { lat: number; lon: number }): 'ready' | 'current' | 'done' {
+  if (!today.some((p) => dist(p, base) > LOOP_LEAVE_KM)) return 'ready';
+  return dist(today.at(-1)!, base) < LOOP_BACK_KM ? 'done' : 'current';
 }
 
 /** Étape (et sous-étape) prévue au programme un jour donné : la dernière étape qui couvre ce jour. */
-export function plannedFor(stops: StageInput[], day: number | null): { index: number; sub: number } {
+export function plannedFor(stops: Pick<StageInput, 'dayStart' | 'dayEnd' | 'subs'>[], day: number | null): { index: number; sub: number } {
   let index = -1;
-  stops.forEach((s, i) => {
-    if (within(day, s)) index = i;
+  if (day != null) stops.forEach((s, i) => covers(day, s) && (index = i));
+  return { index, sub: index < 0 ? -1 : stops[index]!.subs.findIndex((s) => covers(day!, s)) };
+}
+
+/**
+ * @param points positions du raid avec leur jour, dans l'ordre
+ * @param routeKm kilomètre de la dernière position sur la route (null : hors route ou inconnue)
+ */
+export function stageState(stops: StageInput[], cal: RaidDay, points: readonly StagePoint[], routeKm: number | null): StageState {
+  const n = stops.length;
+  const make = (index: number, here: boolean, source: StageState['source'], progressKm: number, subs?: (i: number) => SubStatus[]): StageState => ({
+    source,
+    index,
+    here,
+    finished: index === n - 1 && here,
+    progressKm,
+    statuses: stops.map((_, i) => (i < index ? 'done' : i === index ? 'current' : 'upcoming')),
+    subStatuses: stops.map((s, i) => subs?.(i) ?? s.subs.map(() => (i < index ? 'done' : 'upcoming'))),
   });
-  const sub = index < 0 ? -1 : stops[index]!.subs.findIndex((s) => within(day, s));
-  return { index, sub };
+
+  if (!n || cal.phase === 'before' || cal.phase === 'unknown') return make(-1, false, 'none', 0);
+  if (cal.phase === 'after') {
+    return { ...make(n - 1, true, 'none', stops.at(-1)!.km), statuses: stops.map(() => 'done'), subStatuses: stops.map((s) => s.subs.map(() => 'done')) };
+  }
+
+  const day = cal.day!;
+  // Étapes du jour (J5 : Tanger Med puis Boulajoul) ; un jour sans étape : en route vers la suivante.
+  let todays = stops.flatMap((s, i) => (covers(day, s) ? [i] : []));
+  if (!todays.length) {
+    const next = stops.findIndex((s) => s.dayStart != null && s.dayStart > day);
+    todays = [next === -1 ? n - 1 : next];
+  }
+  const since = stops[todays[0]!]!.dayStart ?? day;
+  const source = points.some((p) => p.day >= since && p.day <= day) ? 'gps' : 'programme';
+
+  // Étape atteinte : la 4L est passée à moins de 10 km depuis le premier jour de l'étape.
+  const reached = (i: number) =>
+    i === 0 || points.some((p) => p.day >= (stops[i]!.dayStart ?? day) && p.day <= day && dist(p, stops[i]!) <= ARRIVAL_KM);
+  let index: number;
+  let here: boolean;
+  if (source === 'gps') {
+    const next = todays.find((i) => !reached(i));
+    [index, here] = next === undefined ? [todays.at(-1)!, true] : [next, false];
+  } else {
+    // Sans GPS : on suppose l'étape atteinte après son premier jour (J10 à Marrakech, J7 à Merzouga…).
+    index = todays.at(-1)!;
+    here = index === 0 || day > (stops[index]!.dayStart ?? day);
+  }
+
+  const prevKm = stops[index - 1]?.km ?? 0;
+  const progressKm = here ? stops[index]!.km : Math.min(stops[index]!.km, Math.max(prevKm, routeKm ?? prevKm));
+  const today = points.filter((p) => p.day === day);
+
+  return make(index, here, source, progressKm, (i) =>
+    stops[i]!.subs.map((sub): SubStatus => {
+      if (i < index) return 'done';
+      if (i > index || !here) return 'upcoming';
+      if (sub.dayEnd != null && day > sub.dayEnd) return 'done';
+      if (!covers(day, sub)) return 'upcoming';
+      return today.length ? loopStatus(today, sub) : 'current';
+    }),
+  );
 }

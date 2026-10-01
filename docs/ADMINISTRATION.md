@@ -25,16 +25,15 @@ Un admin peut aussi gérer n'importe quel équipage via son bouton « Gérer ».
 
 ### Comment l'étape en cours d'un équipage est décidée
 
-Dans « La route » de chaque équipage, l'étape en cours combine (code : `apps/web/src/lib/stages.ts`) :
+Au 4L Trophy, chaque étape a son jour : **c'est la date qui choisit l'étape** (J1 = date de départ des
+Réglages ; J7 = Boucle 1, J8 = Boucle 2, J9 = départ du marathon…). Le GPS précise seulement où en est
+l'équipage dans sa journée, à vol d'oiseau (code : `apps/web/src/lib/stages.ts`) :
 
-1. **la position GPS**, recalée sur la route de référence (celle de l'accueil, sans les boucles) :
-   le kilomètre atteint sur le parcours, qui ne recule jamais. À moins de 10 km d'une étape, l'équipage
-   y est (« Sur place ») ; au-delà, il est « En route » vers la suivante ;
-2. **le calendrier** : les jours des étapes (J1 = date de départ des Réglages). Tant que le programme dit
-   qu'un équipage est à une étape et qu'il reste à moins de 150 km sur la route, l'étape reste « Sur place » — c'est ce
-   qui garde Merzouga en cours pendant les boucles J7-J8 (~100 km chacune, retour au bivouac). Les
-   sous-étapes (Boucle 1, Boucle 2) passent « En cours » puis « Faite » selon leur jour ;
-3. **sans position GPS** pendant le raid, on affiche l'étape du programme du jour, en le signalant.
+- **étape de route** : « En route » tant que la 4L n'est pas passée à moins de 10 km de l'étape, puis
+  « Sur place » ;
+- **boucle** (sous-étape) : « Au départ » tant que la 4L est au bivouac, « En cours » dès qu'elle s'en
+  éloigne de plus de 5 km, « Faite » quand elle revient à moins de 3 km ;
+- **sans position GPS** : l'étape du programme (atteinte à partir de son 2e jour), en le signalant.
 
 Il n'y a pas de statut manuel. Une **sous-étape** se crée dans *Parcours* avec « Sous-étape de » :
 elle n'apparaît pas sur les cartes (même lieu que son étape), seulement dans le roadbook.

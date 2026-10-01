@@ -1,22 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { MAIN_PATH, MAIN_ROUTE, PATH, routeKmOf } from '@/components/landing/journey';
-import { raidDay, routeProgress, stageState, type StageInput } from './stages';
-
-const ROUTE = { ...MAIN_ROUTE, toleranceKm: 15 };
-const MERZOUGA: [number, number] = [-3.99763, 31.21516];
-const same = (a: [number, number], b: [number, number]) => a[0] === b[0] && a[1] === b[1];
-
-/** Trace GPS [lat, lon, t] qui suit un tracé [lon, lat], un point tous les ~500 m. */
-function trace(path: [number, number][]) {
-  const out: [number, number, number][] = [];
-  path.forEach((b, i) => {
-    const a = path[i - 1];
-    if (!a) return void out.push([b[1], b[0], 0]);
-    const n = Math.max(1, Math.round(Math.hypot(b[0] - a[0], b[1] - a[1]) / 0.005));
-    for (let k = 1; k <= n; k++) out.push([a[1] + ((b[1] - a[1]) * k) / n, a[0] + ((b[0] - a[0]) * k) / n, out.length]);
-  });
-  return out;
-}
+import { routeKmOf } from '@/components/landing/journey';
+import { loopStatus, plannedFor, raidDay, stageState, type StageInput, type StagePoint } from './stages';
 
 // Étapes 2027 (comme en base après la migration 20261001000002).
 const W = [
@@ -29,18 +13,21 @@ const W = [
   { name: 'Marrakech', lat: 31.58108, lon: -7.98231, days: [9, 12] },
 ];
 const STOPS: StageInput[] = W.map((w) => ({
+  lat: w.lat,
+  lon: w.lon,
   km: routeKmOf(w.lat, w.lon)!,
   dayStart: w.days[0]!,
   dayEnd: w.days[1]!,
-  subs: (w.subs ?? []).map(([a, b]) => ({ dayStart: a!, dayEnd: b! })),
+  subs: (w.subs ?? []).map(([a, b]) => ({ lat: w.lat, lon: w.lon, dayStart: a!, dayEnd: b! })),
 }));
-const MZ = 5;
+const [ALG, TANGER, BOUL, MZ, MRK] = [2, 3, 4, 5, 6];
 const on = (day: number) => ({ phase: 'during' as const, day, total: 12, daysUntil: null });
+/** Une position à `dx` degrés à l'est d'une étape (0,1° ≈ 9,5 km à cette latitude), le jour `day`. */
+const near = (i: number, day: number, dx = 0): StagePoint => ({ lat: STOPS[i]!.lat, lon: STOPS[i]!.lon + dx, day });
+const state = (day: number, points: StagePoint[], routeKm: number | null = null) => stageState(STOPS, on(day), points, routeKm);
 
-const firstMerzouga = PATH.findIndex((p) => same(p, MERZOUGA));
-const lastMerzouga = PATH.length - 1 - [...PATH].reverse().findIndex((p) => same(p, MERZOUGA));
-const toMerzouga = trace(PATH.slice(0, firstMerzouga + 1));
-const loops = trace(PATH.slice(firstMerzouga, lastMerzouga + 1));
+// Arrivée à Merzouga le soir du J6.
+const ARRIVED = [near(BOUL, 5), near(BOUL, 6), near(MZ, 6, 0.5), near(MZ, 6)];
 
 describe('raidDay', () => {
   it('compte en jours calendaires et s’arrête à la date de fin', () => {
@@ -53,90 +40,112 @@ describe('raidDay', () => {
   });
 });
 
-describe('routeProgress', () => {
-  it('place une trace qui s’arrête à Merzouga sur Merzouga', () => {
-    expect(Math.abs(routeProgress(toMerzouga, ROUTE)! - STOPS[MZ]!.km)).toBeLessThan(3);
+describe('le jour choisit l’étape', () => {
+  it('programme : J7 = Boucle 1, J8 = Boucle 2, J9 = marathon vers Marrakech', () => {
+    expect(plannedFor(STOPS, 7)).toEqual({ index: MZ, sub: 0 });
+    expect(plannedFor(STOPS, 8)).toEqual({ index: MZ, sub: 1 });
+    expect(plannedFor(STOPS, 9)).toEqual({ index: MRK, sub: -1 });
   });
 
-  it('ne recule pas et ne compte pas les boucles comme de l’avance au-delà de leur rayon', () => {
-    const km = routeProgress([...toMerzouga, ...loops], ROUTE)!;
-    expect(km).toBeGreaterThanOrEqual(STOPS[MZ]!.km - 3);
-    expect(km).toBeLessThan(STOPS[MZ]!.km + 100);
+  it('avant le départ : aucune étape en cours, même avec une trace d’essai', () => {
+    const s = stageState(STOPS, { phase: 'before', day: null, total: 12, daysUntil: 30 }, [], 1896);
+    expect(s).toMatchObject({ source: 'none', index: -1, progressKm: 0 });
+    expect(s.statuses.every((x) => x === 'upcoming')).toBe(true);
   });
 
-  it('ignore la route depuis la maison avant d’arriver sur le parcours', () => {
-    const fromParis = trace([[2.35, 48.85], [0.0, 44.5], [-1.53571, 43.46484]]);
-    expect(routeProgress(fromParis, ROUTE)).toBe(0);
-    expect(routeProgress(trace([[2.35, 48.85], [1.5, 47]]), ROUTE)).toBeNull();
-  });
-
-  it('suit tout le parcours jusqu’à Marrakech', () => {
-    expect(routeProgress(trace(MAIN_PATH), ROUTE)).toBeCloseTo(MAIN_ROUTE.cum.at(-1)!, 0);
+  it('après le raid : tout est passé', () => {
+    const s = stageState(STOPS, { phase: 'after', day: null, total: 12, daysUntil: null }, [], null);
+    expect(s.statuses.every((x) => x === 'done')).toBe(true);
+    expect(s.subStatuses[MZ]).toEqual(['done', 'done']);
   });
 });
 
-describe('stageState', () => {
-  it('J4L Club arrivé à Merzouga : Merzouga sur place, Marrakech à venir (bug corrigé)', () => {
-    const s = stageState(STOPS, routeProgress(toMerzouga, ROUTE), on(6));
-    expect(s.index).toBe(MZ);
-    expect(s.here).toBe(true);
-    expect(s.statuses[MZ + 1]).toBe('upcoming');
-    expect(s.statuses[MZ - 1]).toBe('done');
+describe('le GPS précise la journée', () => {
+  it('J6 au matin, encore à Boulajoul : en route vers Merzouga', () => {
+    const s = state(6, [near(BOUL, 5), near(BOUL, 6)]);
+    expect([s.index, s.here, s.source]).toEqual([MZ, false, 'gps']);
+    expect(s.statuses[BOUL]).toBe('done');
   });
 
-  it('pendant les boucles (J7, à 60 km du bivouac sur la route du marathon) : toujours Merzouga, boucle 1 en cours', () => {
-    const s = stageState(STOPS, STOPS[MZ]!.km + 60, on(7));
+  it('J6 au soir, arrivés à Merzouga : sur place, Marrakech à venir (bug corrigé)', () => {
+    const s = state(6, ARRIVED);
+    expect([s.index, s.here]).toEqual([MZ, true]);
+    expect(s.statuses[MRK]).toBe('upcoming');
+    expect(s.subStatuses[MZ]).toEqual(['upcoming', 'upcoming']);
+  });
+
+  it('J5 : Tanger Med puis Boulajoul', () => {
+    expect(state(5, [near(ALG, 4), near(ALG, 5)])).toMatchObject({ index: TANGER, here: false });
+    expect(state(5, [near(ALG, 5), near(TANGER, 5), near(TANGER, 5, 0.6)])).toMatchObject({ index: BOUL, here: false });
+    expect(state(5, [near(TANGER, 5), near(BOUL, 5)])).toMatchObject({ index: BOUL, here: true });
+  });
+
+  it('barre de progression : entre l’étape précédente et l’étape du jour', () => {
+    const s = state(6, [near(BOUL, 6, 0.5)], STOPS[BOUL]!.km + 100);
+    expect(s.progressKm).toBe(STOPS[BOUL]!.km + 100);
+    expect(state(6, [near(BOUL, 6)], STOPS[MRK]!.km).progressKm).toBe(STOPS[MZ]!.km); // jamais au-delà
+    expect(state(6, ARRIVED, null).progressKm).toBe(STOPS[MZ]!.km);
+  });
+});
+
+describe('les boucles de Merzouga (~100 km, retour au bivouac le soir)', () => {
+  it('J7 au bivouac : Boucle 1 au départ', () => {
+    const s = state(7, [...ARRIVED, near(MZ, 7), near(MZ, 7, 0.02)]); // 2 km : on traverse le camp
+    expect([s.index, s.here]).toEqual([MZ, true]);
+    expect(s.subStatuses[MZ]).toEqual(['ready', 'upcoming']);
+  });
+
+  it('J7, la 4L s’éloigne de plus de 5 km : Boucle 1 en cours, Merzouga reste l’étape', () => {
+    const s = state(7, [...ARRIVED, near(MZ, 7), near(MZ, 7, 0.1), near(MZ, 7, 0.45)]);
     expect([s.index, s.here]).toEqual([MZ, true]);
     expect(s.subStatuses[MZ]).toEqual(['current', 'upcoming']);
-    expect(stageState(STOPS, STOPS[MZ]!.km, on(8)).subStatuses[MZ]).toEqual(['done', 'current']);
+    expect(s.statuses[MRK]).toBe('upcoming');
   });
 
-  // Boucles réelles : ~100 km chacune, retour au bivouac le soir. Pire cas : 50 km aller-retour SUR la
-  // route du marathon (la trace « pousse » vers Marrakech), ou sur la route d'arrivée (vallée du Ziz).
-  const mzIdx = MAIN_ROUTE.cum.findIndex((km) => km >= STOPS[MZ]!.km);
-  const along = (fromIdx: number, km: number) => {
-    const to = MAIN_ROUTE.cum.findIndex((c) => c >= MAIN_ROUTE.cum[fromIdx]! + km);
-    const path = km > 0 ? MAIN_ROUTE.pts.slice(fromIdx, to + 1) : MAIN_ROUTE.pts.slice(MAIN_ROUTE.cum.findIndex((c) => c >= MAIN_ROUTE.cum[fromIdx]! + km), fromIdx + 1).reverse();
-    return trace([...path, ...[...path].reverse()]);
-  };
-  const loopWest = along(mzIdx, 50);
-  const loopNorth = along(mzIdx, -50);
-
-  it('boucle de 100 km le long de la route du marathon : progression bornée à ~50 km après Merzouga', () => {
-    const km = routeProgress([...toMerzouga, ...loopNorth, ...loopWest], ROUTE)!;
-    expect(km - STOPS[MZ]!.km).toBeGreaterThan(40);
-    expect(km - STOPS[MZ]!.km).toBeLessThan(55);
+  it('J7, retour au bivouac : Boucle 1 faite', () => {
+    const s = state(7, [...ARRIVED, near(MZ, 7), near(MZ, 7, 0.45), near(MZ, 7, 0.01)]);
+    expect(s.subStatuses[MZ]).toEqual(['done', 'upcoming']);
   });
 
-  it('J7 et J8, après les deux boucles de 100 km : Merzouga reste sur place, Marrakech à venir', () => {
-    const km = routeProgress([...toMerzouga, ...loopWest, ...loopNorth], ROUTE);
-    for (const [day, subs] of [[6, ['upcoming', 'upcoming']], [7, ['current', 'upcoming']], [8, ['done', 'current']]] as const) {
-      const s = stageState(STOPS, km, on(day));
-      expect([s.index, s.here]).toEqual([MZ, true]);
-      expect(s.statuses[MZ + 1]).toBe('upcoming');
-      expect(s.subStatuses[MZ]).toEqual(subs);
-    }
+  it('J8 : Boucle 1 faite, Boucle 2 selon la position du jour', () => {
+    const day7 = [near(MZ, 7, 0.45), near(MZ, 7)];
+    expect(state(8, [...ARRIVED, ...day7, near(MZ, 8)]).subStatuses[MZ]).toEqual(['done', 'ready']);
+    expect(state(8, [...ARRIVED, ...day7, near(MZ, 8), near(MZ, 8, -0.4)]).subStatuses[MZ]).toEqual(['done', 'current']);
   });
 
-  it('J9, départ du marathon : en route vers Marrakech, boucles faites', () => {
-    const s = stageState(STOPS, STOPS[MZ]!.km + 60, on(9));
-    expect([s.index, s.here]).toEqual([MZ + 1, false]);
+  it('loopStatus : seuils de 5 km pour partir, 3 km pour revenir', () => {
+    const base = STOPS[MZ]!;
+    expect(loopStatus([near(MZ, 7, 0.04)], base)).toBe('ready'); // ~4 km
+    expect(loopStatus([near(MZ, 7, 0.06)], base)).toBe('current'); // ~6 km
+    expect(loopStatus([near(MZ, 7, 0.3), near(MZ, 7, 0.04)], base)).toBe('current'); // revenu à 4 km : pas encore
+    expect(loopStatus([near(MZ, 7, 0.3), near(MZ, 7, 0.02)], base)).toBe('done');
+  });
+});
+
+describe('marathon et arrivée', () => {
+  it('J9, même encore près de Merzouga : en route vers Marrakech, boucles faites', () => {
+    const s = state(9, [...ARRIVED, near(MZ, 9)]);
+    expect([s.index, s.here]).toEqual([MRK, false]);
     expect(s.statuses[MZ]).toBe('done');
     expect(s.subStatuses[MZ]).toEqual(['done', 'done']);
   });
 
-  it('en retard sur le programme : la position l’emporte', () => {
-    const s = stageState(STOPS, STOPS[1]!.km + 50, on(7));
-    expect([s.index, s.here]).toEqual([2, false]);
+  it('J10 au matin, pas encore à Marrakech : toujours en route ; puis arrivés', () => {
+    expect(state(10, [near(MZ, 9, -2), near(MZ, 10, -3)])).toMatchObject({ index: MRK, here: false, finished: false });
+    expect(state(10, [near(MZ, 10, -3), near(MRK, 10)])).toMatchObject({ index: MRK, here: true, finished: true });
+  });
+});
+
+describe('sans GPS : l’étape du programme', () => {
+  it('J7 : Merzouga, Boucle 1 en cours', () => {
+    const s = state(7, []);
+    expect(s).toMatchObject({ source: 'programme', index: MZ, here: true });
+    expect(s.subStatuses[MZ]).toEqual(['current', 'upcoming']);
   });
 
-  it('sans position GPS pendant le raid : étape du programme', () => {
-    expect(stageState(STOPS, null, on(7))).toMatchObject({ source: 'programme', index: MZ, here: true });
-    expect(stageState(STOPS, null, on(9))).toMatchObject({ source: 'programme', index: MZ + 1, here: false });
-    expect(stageState(STOPS, null, { phase: 'before', day: null, total: 12, daysUntil: 30 })).toMatchObject({ source: 'none', index: -1 });
-  });
-
-  it('arrivée à Marrakech', () => {
-    expect(stageState(STOPS, STOPS.at(-1)!.km, on(10))).toMatchObject({ index: W.length - 1, here: true, finished: true });
+  it('premier jour d’une étape : en route ; jours suivants : sur place', () => {
+    expect(state(9, [])).toMatchObject({ index: MRK, here: false });
+    expect(state(11, [])).toMatchObject({ index: MRK, here: true });
+    expect(state(1, [])).toMatchObject({ index: 0, here: true });
   });
 });

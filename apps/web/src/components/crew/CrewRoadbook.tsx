@@ -7,7 +7,7 @@
 import { lazy, Suspense } from 'react';
 import { formatNumber } from '@/lib/format';
 import { climbOf, pointsOfDays, type AltPoint } from '@/lib/elevation';
-import type { RaidDay, StageStatus } from '@/lib/stages';
+import type { RaidDay, StageStatus, SubStatus } from '@/lib/stages';
 import { cn } from '@/lib/utils';
 import { waypointStyle } from './mapIcons';
 import type { Roadbook } from './roadbook';
@@ -18,6 +18,7 @@ const CrewElevation = lazy(() => import('./CrewElevation').then((m) => ({ defaul
 const daysLabel = (a: number | null, b: number | null) => (a == null ? null : b == null || b === a ? `J${a}` : `J${a}–${b}`);
 
 const STATUS_TEXT: Record<StageStatus, string> = { done: '✓ Passée', current: '', upcoming: 'À venir' };
+const SUB_TEXT: Record<SubStatus, string> = { ready: '◆ Au départ', current: '● En cours', done: '✓ Faite', upcoming: 'À venir' };
 
 export function CrewRoadbook({ roadbook, cal, distanceKm, profile }: {
   roadbook: Roadbook; cal: RaidDay; distanceKm: number;
@@ -79,7 +80,7 @@ export function CrewRoadbook({ roadbook, cal, distanceKm, profile }: {
             </span>
           )}
           {state.source === 'programme' && (
-            <span className="w-full text-sm text-dust-700">Pas de position GPS sur le parcours : l’étape en cours est celle du programme.</span>
+            <span className="w-full text-sm text-dust-700">Pas de position GPS ces derniers jours : l’étape affichée est celle du programme.</span>
           )}
         </p>
       )}
@@ -129,8 +130,8 @@ export function CrewRoadbook({ roadbook, cal, distanceKm, profile }: {
                           <li key={u.id} className="flex flex-wrap items-baseline gap-x-2.5">
                             <span className="font-display text-lg font-extrabold uppercase leading-tight text-coal">{waypointStyle(u.kind).emoji} {u.name}</span>
                             {daysLabel(u.day_start, u.day_end) && <span className="font-mono text-[11px] font-bold text-coal">{daysLabel(u.day_start, u.day_end)}</span>}
-                            <span className={cn('font-mono text-[10px] font-bold uppercase tracking-[0.14em]', st === 'current' ? 'text-primary' : st === 'done' ? 'text-coal' : 'text-dust-600')}>
-                              {st === 'current' ? '● En cours' : st === 'done' ? '✓ Faite' : 'À venir'}
+                            <span className={cn('font-mono text-[10px] font-bold uppercase tracking-[0.14em]', st === 'current' || st === 'ready' ? 'text-primary' : st === 'done' ? 'text-coal' : 'text-dust-600')}>
+                              {SUB_TEXT[st]}
                             </span>
                           </li>
                         );
