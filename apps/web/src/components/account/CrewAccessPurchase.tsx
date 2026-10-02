@@ -92,7 +92,9 @@ export function CrewAccessPurchase() {
             <Button type="submit" className="w-full" disabled={!terms || !immediate || checkout.isPending}>
               <CreditCard />{checkout.isPending ? 'Redirection…' : `Payer ${euros(price)}`}
             </Button>
-            <p className="m-0 text-center text-[11px] text-dust-500">Paiement sécurisé par carte bancaire (Stripe).</p>
+            <p className="m-0 text-center text-[11px] text-dust-500">
+              Paiement sécurisé par carte bancaire (Stripe). Un code promo ? Saisissez-le sur la page de paiement.
+            </p>
           </form>
         ) : (
           <div className="mt-5 border-t border-cream/[0.1] pt-4">

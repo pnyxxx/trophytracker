@@ -10,6 +10,8 @@
  * leur date est gardée avec l'achat (preuve pour le droit de rétractation).
  * Sans clé Stripe configurée (STRIPE_SECRET_KEY), répond 503 : le site affiche
  * alors « paiement bientôt disponible ».
+ * Codes promo : créés dans le Dashboard Stripe (coupons), saisis sur la page de
+ * paiement ; un code à 100 % donne une commande gratuite (voir stripe-webhook).
  */
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
@@ -56,6 +58,7 @@ Deno.serve(async (req) => {
     mode: 'payment',
     locale: 'fr',
     customer_email: user.email,
+    allow_promotion_codes: 'true',
     client_reference_id: purchaseId,
     'metadata[purchase_id]': purchaseId,
     'metadata[user_id]': user.id,

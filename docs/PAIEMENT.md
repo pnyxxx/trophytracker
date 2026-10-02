@@ -27,6 +27,18 @@ Mon compte (?paiement=ok) ── « Créer mon équipage » ── create_crew (
   Remboursement partiel (rétractation au prorata) → seulement noté : dépublier la page à la main si besoin.
 - Les équipages créés avant le passage au payant sont offerts ; les admins peuvent créer un équipage sans payer.
 
+## Codes promo (offrir un ou plusieurs accès)
+
+Gérés entièrement par Stripe : *Catalogue de produits → Coupons → Créer un coupon*.
+- **Offrir l'accès** : pourcentage de réduction **100 %**. Pour une simple réduction : un pourcentage ou un montant (ex. 5 €).
+- Cocher **« Utiliser des codes promotionnels destinés aux clients »** et choisir le code (ex. `J4L-OFFERT`).
+- **Nombre d'accès offerts** : « Limiter le nombre d'utilisations » (ex. 3 → trois équipages). Date limite possible.
+
+Le client saisit le code sur la page de paiement Stripe. Avec 100 %, la commande est à 0 € (aucune carte demandée) et
+l'accès est débloqué comme un paiement (statut Stripe `no_payment_required`). Les commandes gratuites apparaissent dans
+*Administration → Paiements* (« Code promo (0 €) ») et dans l'onglet « Commandes gratuites » du Dashboard Stripe.
+Pour un seul ami, *Administration → Paiements → Offrir un accès* (par email) reste plus direct.
+
 ## Mise en route (quand le SIRET est là)
 
 1. **Compte Stripe** sur stripe.com, en tant qu'entrepreneur individuel, avec le SIRET et un compte bancaire.

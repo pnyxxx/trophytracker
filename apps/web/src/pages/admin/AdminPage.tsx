@@ -133,7 +133,7 @@ function PurchasesAdmin() {
                     <td className="py-3 pr-4 text-xs text-dust-300">{formatDateTime(p.paid_at ?? p.created_at)}</td>
                     <td className="pr-4 text-dust-200">{p.customer_email ?? '—'}</td>
                     <td className="pr-4 text-dust-200">
-                      {p.source === 'admin' ? 'Offert' : euros(p.amount_cents)}
+                      {p.source === 'admin' ? 'Offert' : p.amount_cents === 0 ? 'Code promo (0 €)' : euros(p.amount_cents)}
                       {p.refunded_cents > 0 && <span className="text-xs text-dust-500"> (−{euros(p.refunded_cents)})</span>}
                     </td>
                     <td className="pr-4 text-dust-200">{PURCHASE_STATUS[p.status] ?? p.status}</td>

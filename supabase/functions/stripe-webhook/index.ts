@@ -7,6 +7,7 @@
  * vérifiée avant tout : sans elle, n'importe qui pourrait « confirmer » un
  * paiement. Événements traités :
  *   - checkout.session.completed / async_payment_succeeded → accès payé
+ *     (y compris une commande gratuite grâce à un code promo à 100 %)
  *   - checkout.session.expired                             → achat abandonné
  *   - charge.refunded                                      → remboursement
  * Les fonctions SQL sont idempotentes : Stripe peut renvoyer un événement.
@@ -63,10 +64,11 @@ Deno.serve(async (req) => {
   switch (event.type) {
     case 'checkout.session.completed':
     case 'checkout.session.async_payment_succeeded': {
-      if (obj.payment_status !== 'paid') break;
+      // « no_payment_required » : commande à 0 € (code promo à 100 %), sans PaymentIntent.
+      if (obj.payment_status !== 'paid' && obj.payment_status !== 'no_payment_required') break;
       const { data, error } = await admin.rpc('purchase_paid', {
         p_session: obj.id,
-        p_payment_intent: obj.payment_intent,
+        p_payment_intent: obj.payment_intent ?? null,
         p_amount: obj.amount_total,
         p_email: obj.customer_details?.email ?? null,
       });

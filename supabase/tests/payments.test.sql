@@ -6,12 +6,13 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
 
-select plan(24);
+select plan(26);
 
 insert into auth.users (id, email, raw_user_meta_data, aud, role) values
   ('00000000-0000-0000-0000-0000000000d1', 'dora@test.local', '{"display_name":"Dora"}', 'authenticated', 'authenticated'),
   ('00000000-0000-0000-0000-0000000000e1', 'eve@test.local',  '{"display_name":"Eve"}',  'authenticated', 'authenticated'),
-  ('00000000-0000-0000-0000-0000000000ad', 'admin@test.local', '{}',                     'authenticated', 'authenticated');
+  ('00000000-0000-0000-0000-0000000000ad', 'admin@test.local', '{}',                     'authenticated', 'authenticated'),
+  ('00000000-0000-0000-0000-0000000000f7', 'fred@test.local', '{"display_name":"Fred"}',  'authenticated', 'authenticated');
 update public.profiles set role = 'admin' where id = '00000000-0000-0000-0000-0000000000ad';
 
 create function pg_temp.as_user(p uuid) returns void language sql as $$
@@ -84,6 +85,14 @@ select is((select device_key_hash from public.crew_devices where crew_id = (sele
 -- ─── Admin : offrir un accès ────────────────────────────────────────────────
 select pg_temp.as_user('00000000-0000-0000-0000-0000000000ad');
 select lives_ok($$ select public.admin_grant_crew_access('EVE@test.local') $$, 'un admin offre un accès à eve');
+reset role;
+
+-- ─── Code promo à 100 % : commande à 0 €, sans PaymentIntent ────────────────
+select pg_temp.as_service();
+create temp table t_promo as select * from public.purchase_start('00000000-0000-0000-0000-0000000000f7', 'fred@test.local');
+select public.purchase_attach_session((select purchase_id from t_promo), 'cs_test_promo');
+select is(public.purchase_paid('cs_test_promo', null, 0, 'fred@test.local'), 'paid', 'une commande gratuite (code promo) débloque l''accès');
+select is((select amount_cents from public.crew_purchases where stripe_session_id = 'cs_test_promo'), 0, 'et elle est notée à 0 €');
 reset role;
 
 select * from finish();
