@@ -140,9 +140,9 @@ function SettingRow({ name, fr, value, why, must }: { name: string; fr: string; 
 }
 
 /** Étape numérotée façon roadbook. */
-function Step({ n, title, children }: { n: string; title: string; children: ReactNode }) {
+function Step({ n, title, id, children }: { n: string; title: string; id?: string; children: ReactNode }) {
   return (
-    <section className="grid gap-5 border border-cream/[0.14] bg-ink-800 p-6 md:grid-cols-[88px_minmax(0,1fr)] md:p-8">
+    <section id={id} className="scroll-mt-24 grid gap-5 border border-cream/[0.14] bg-ink-800 p-6 md:grid-cols-[88px_minmax(0,1fr)] md:p-8">
       <span className="font-stencil text-[64px] font-black leading-[0.85] text-primary md:text-[80px]">{n}</span>
       <div className="min-w-0">
         <h2 className="m-0 mb-4 font-display text-[32px] font-black uppercase leading-none text-cream md:text-[38px]">{title}</h2>
@@ -236,6 +236,8 @@ export function GpsTab({ crew }: { crew: Crew }) {
       if (!fairPlayAccepted) setCharterJustAccepted(true);
       setNewKey(key);
       void queryClient.invalidateQueries({ queryKey: keys.tracking(crew.id) });
+      // La suite se passe à l'étape 03 (QR code / bouton) : on y emmène directement.
+      requestAnimationFrame(() => document.getElementById('gps-etape-03')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
     },
     onError: toastError,
   });
@@ -402,31 +404,32 @@ export function GpsTab({ crew }: { crew: Crew }) {
           </div>
         )}
 
-        <div className="flex flex-wrap gap-3">
-          <Button
-            onClick={() => {
-              if (!tracking?.has_device_key || confirm('Générer une nouvelle clé ? L’ancienne cessera immédiatement de fonctionner.')) generate.mutate();
-            }}
-            disabled={generate.isPending || (!fairPlayAccepted && !charterChecked)}
-          >
-            <KeyRound />{tracking?.has_device_key || newKey ? 'Générer une nouvelle clé' : 'Générer la clé'}
-          </Button>
-          {hasKey && (
-            <Button variant="ghost" className="hover:text-primary-light" onClick={() => { if (confirm('Désactiver la clé ? Le téléphone ne pourra plus envoyer de position.')) revoke.mutate(); }}>
-              <ShieldOff />Désactiver
+        {/* Un seul bouton : « Générer la clé » sans clé, « Désactiver » avec (puis on peut en regénérer une). */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
+          {hasKey ? (
+            <>
+              <Button
+                variant="outline"
+                disabled={revoke.isPending}
+                onClick={() => {
+                  if (confirm('Désactiver la clé ? Le téléphone ne pourra plus envoyer de position tant que vous n’en aurez pas généré une nouvelle et réglé l’appli avec.')) revoke.mutate();
+                }}
+              >
+                <ShieldOff />Désactiver la clé
+              </Button>
+              <span className="text-sm font-semibold text-live">✅ Clé active</span>
+            </>
+          ) : (
+            <Button onClick={() => generate.mutate()} disabled={generate.isPending || (!fairPlayAccepted && !charterChecked)}>
+              <KeyRound />Générer la clé
             </Button>
           )}
         </div>
-        {newKey ? (
-          <p className="mb-0 mt-4 border-l-[3px] border-live bg-live/[0.06] p-4 text-sm leading-relaxed text-dust-200">
-            <strong className="text-live">✅ Clé créée.</strong> Passez à l’étape 03 pour régler le téléphone de la 4L.
+        {hasKey && !newKey && (
+          <p className="mb-0 mt-3 text-sm leading-relaxed text-dust-300">
+            La clé n’est affichée qu’une fois. Pour régler un téléphone (nouveau ou à refaire), désactivez-la puis générez-en une nouvelle.
           </p>
-        ) : tracking?.has_device_key ? (
-          <p className="mb-0 mt-4 text-sm leading-relaxed text-dust-300">
-            ✅ Une clé est déjà active. Téléphone pas encore réglé, ou un autre à régler ? Générez une nouvelle clé :
-            l’ancienne cessera immédiatement de fonctionner.
-          </p>
-        ) : null}
+        )}
         {fairPlayAccepted && !charterJustAccepted && (
           <p className="mb-0 mt-3 text-xs leading-relaxed text-dust-400">
             ✅ <Link to="/conditions-utilisation#fair-play" className="underline hover:text-cream">Charte fair-play</Link> acceptée
@@ -437,13 +440,13 @@ export function GpsTab({ crew }: { crew: Crew }) {
       </Step>
 
       {/* ── 03 Réglages ────────────────────────────────────────────────── */}
-      <Step n="03" title="Régler l’appli">
+      <Step n="03" title="Régler l’appli" id="gps-etape-03">
         {!newKey ? (
           <div className="flex flex-col items-center gap-3 border border-dashed border-cream/20 bg-black/20 p-6 text-center">
             <QrCodeIcon className="h-10 w-10 text-dust-500" />
             <p className="m-0 max-w-[460px] text-sm leading-relaxed text-dust-300">
               Générez la clé à l’étape 02 : le <strong className="text-cream">QR code</strong> qui règle l’appli d’un coup apparaîtra ici.
-              {tracking?.has_device_key && ' (Une clé déjà active n’est jamais réaffichée : générez-en une nouvelle.)'}
+              {tracking?.has_device_key && ' (Une clé déjà active n’est jamais réaffichée : désactivez-la, puis générez-en une nouvelle.)'}
             </p>
           </div>
         ) : onPhone ? (
