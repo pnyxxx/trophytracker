@@ -180,20 +180,23 @@
   object-fit: contain;
 }
 
-/* Photo placée sur la carte : vignette ronde */
+/* Photo placée sur la carte : vignette carrée, cadre blanc façon tirage photo */
 .tt-photo {
   position: relative;
   width: 100%;
   height: 100%;
-  border-radius: 50%;
-  border: 2px solid #fff;
+  border-radius: 4px;
+  border: 3px solid #fff;
   background: #1a1612;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   overflow: hidden;
 }
-.tt-photo img {
-  width: 100%;
-  height: 100%;
+/* Leaflet impose « width: auto » aux images des marqueurs (règle plus précise que la nôtre) :
+   une photo en hauteur ne remplissait alors que la moitié de la vignette. */
+.leaflet-container .tt-photo img {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
   object-fit: cover;
 }
 .tt-photo span {

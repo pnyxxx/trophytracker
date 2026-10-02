@@ -75,7 +75,7 @@ export function CrewMap({ crew, points, waypoints: allWaypoints, sponsors, photo
   const mapSponsors = sponsors.filter((s) => s.lat != null && s.lon != null);
   const mapPhotos = useMemo(() => photos.filter((p) => p.lat != null && p.lon != null), [photos]);
   const photoIcons = useMemo(
-    () => new Map(mapPhotos.map((p) => [p.id, photoIcon(thumbUrl(p.storage_path, 96), p.kind === 'panorama')])),
+    () => new Map(mapPhotos.map((p) => [p.id, photoIcon(thumbUrl(p.storage_path, 160), p.kind === 'panorama')])),
     [mapPhotos],
   );
   // Icônes créées une seule fois par étape (la trace, elle, se met à jour en direct).
