@@ -7,7 +7,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Countdown } from '@/components/landing/Countdown';
 import { CrewFinder } from '@/components/landing/CrewFinder';
 import { RouteJourney } from '@/components/landing/RouteJourney';
-import { fmtKm, STOPS, TOTAL_KM } from '@/components/landing/journey';
+import { STOPS, TOTAL_KM } from '@/components/landing/journey';
 import { useCrewSearch, useEvent } from '@/hooks/queries';
 import { departureTime, isLive } from '@/lib/format';
 import { FAIR_PLAY, priceSentence } from '@/lib/legal';
@@ -171,7 +171,7 @@ export default function Landing() {
                 {STOPS.map((s) => (
                   <span key={s.name} className="whitespace-nowrap">
                     <span className="text-primary">◆ </span>
-                    {s.name} · {s.country} · km {fmtKm(s.km)}
+                    {s.name} · {s.country}
                   </span>
                 ))}
               </div>

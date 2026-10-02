@@ -1,5 +1,6 @@
 /**
- * Où en est un équipage sur le parcours : jour du raid, étape en cours, sous-étapes (boucles).
+ * Où en est un équipage sur le parcours : jour du raid, étape en cours, sous-étapes (boucles),
+ * et découpage affiché « de panneau en panneau » (legsOf).
  *
  * Au 4L Trophy, chaque étape a son jour : c'est LA DATE qui choisit l'étape (J7 = Boucle 1,
  * J8 = Boucle 2, J9 = départ du marathon…). Le GPS ne sert qu'à préciser où en est l'équipage
@@ -60,8 +61,10 @@ interface Place {
 }
 
 export interface StageInput extends Place {
-  /** Kilomètre de l'étape sur la route (pour la barre de progression). */
+  /** Kilomètre de l'étape sur la route de référence : sert seulement à peser les étapes dans le %. */
   km: number;
+  /** Lieu traversé (port, ferry) : n'arrête pas une étape. */
+  passage?: boolean;
   subs: Place[];
 }
 
@@ -85,8 +88,6 @@ export interface StageState {
   here: boolean;
   /** Arrivés à la dernière étape. */
   finished: boolean;
-  /** Kilomètre atteint sur la route (pour la barre de progression). */
-  progressKm: number;
   statuses: StageStatus[];
   subStatuses: SubStatus[][];
 }
@@ -115,25 +116,21 @@ export function plannedFor(stops: Pick<StageInput, 'dayStart' | 'dayEnd' | 'subs
   return { index, sub: index < 0 ? -1 : stops[index]!.subs.findIndex((s) => covers(day!, s)) };
 }
 
-/**
- * @param points positions du raid avec leur jour, dans l'ordre
- * @param routeKm kilomètre de la dernière position sur la route (null : hors route ou inconnue)
- */
-export function stageState(stops: StageInput[], cal: RaidDay, points: readonly StagePoint[], routeKm: number | null): StageState {
+/** @param points positions du raid avec leur jour, dans l'ordre */
+export function stageState(stops: StageInput[], cal: RaidDay, points: readonly StagePoint[]): StageState {
   const n = stops.length;
-  const make = (index: number, here: boolean, source: StageState['source'], progressKm: number, subs?: (i: number) => SubStatus[]): StageState => ({
+  const make = (index: number, here: boolean, source: StageState['source'], subs?: (i: number) => SubStatus[]): StageState => ({
     source,
     index,
     here,
     finished: index === n - 1 && here,
-    progressKm,
     statuses: stops.map((_, i) => (i < index ? 'done' : i === index ? 'current' : 'upcoming')),
     subStatuses: stops.map((s, i) => subs?.(i) ?? s.subs.map(() => (i < index ? 'done' : 'upcoming'))),
   });
 
-  if (!n || cal.phase === 'before' || cal.phase === 'unknown') return make(-1, false, 'none', 0);
+  if (!n || cal.phase === 'before' || cal.phase === 'unknown') return make(-1, false, 'none');
   if (cal.phase === 'after') {
-    return { ...make(n - 1, true, 'none', stops.at(-1)!.km), statuses: stops.map(() => 'done'), subStatuses: stops.map((s) => s.subs.map(() => 'done')) };
+    return { ...make(n - 1, true, 'none'), statuses: stops.map(() => 'done'), subStatuses: stops.map((s) => s.subs.map(() => 'done')) };
   }
 
   const day = cal.day!;
@@ -160,11 +157,9 @@ export function stageState(stops: StageInput[], cal: RaidDay, points: readonly S
     here = index === 0 || day > (stops[index]!.dayStart ?? day);
   }
 
-  const prevKm = stops[index - 1]?.km ?? 0;
-  const progressKm = here ? stops[index]!.km : Math.min(stops[index]!.km, Math.max(prevKm, routeKm ?? prevKm));
   const today = points.filter((p) => p.day === day);
 
-  return make(index, here, source, progressKm, (i) =>
+  return make(index, here, source, (i) =>
     stops[i]!.subs.map((sub): SubStatus => {
       if (i < index) return 'done';
       if (i > index || !here) return 'upcoming';
@@ -173,4 +168,87 @@ export function stageState(stops: StageInput[], cal: RaidDay, points: readonly S
       return today.length ? loopStatus(today, sub) : 'current';
     }),
   );
+}
+
+// ─── Étapes affichées : de panneau en panneau ───────────────────────────────
+
+export type LegStatus = 'done' | 'current' | 'ready' | 'upcoming';
+
+/**
+ * Une étape telle qu'on la raconte : le trajet d'un panneau au suivant (Biarritz → Salamanque),
+ * ou une boucle autour d'un bivouac. Elle est terminée quand la 4L atteint le panneau d'arrivée.
+ */
+export interface Leg {
+  type: 'road' | 'loop';
+  /** Indice de l'étape de départ et d'arrivée dans `stops` (boucle : les deux = le bivouac). */
+  from: number;
+  to: number;
+  /** Boucle : indice de la sous-étape dans stops[to].subs. */
+  sub: number;
+  /** Lieux traversés sans s'arrêter (Tanger Med). */
+  via: number[];
+  /** Jours de l'étape (pour le dénivelé et l'affichage). */
+  dayStart: number | null;
+  dayEnd: number | null;
+  status: LegStatus;
+  /** Poids dans le % du parcours (longueur approximative en km, jamais affichée). */
+  weight: number;
+}
+
+/** Une boucle dans le désert fait environ 100 km. */
+export const LOOP_WEIGHT_KM = 100;
+
+/** Découpe le parcours en étapes de panneau en panneau, avec leur statut d'après `state`. */
+export function legsOf(stops: StageInput[], state: StageState): Leg[] {
+  const legs: Leg[] = [];
+  let from = 0;
+  let via: number[] = [];
+  for (let i = 1; i < stops.length; i++) {
+    const stop = stops[i]!;
+    if (stop.passage && i < stops.length - 1) {
+      via.push(i);
+      continue;
+    }
+    const range = [...via, i];
+    const arrived = state.statuses[i] === 'done' || (state.statuses[i] === 'current' && state.here);
+    const firstSub = Math.min(...stop.subs.map((u) => u.dayStart ?? Infinity));
+    legs.push({
+      type: 'road',
+      from,
+      to: i,
+      sub: -1,
+      via,
+      dayStart: stop.dayStart,
+      dayEnd: stop.dayStart != null && Number.isFinite(firstSub) ? Math.max(stop.dayStart, firstSub - 1) : stop.dayEnd,
+      status: arrived ? 'done' : range.some((j) => state.statuses[j] !== 'upcoming') ? 'current' : 'upcoming',
+      weight: Math.max(1, stop.km - stops[from]!.km),
+    });
+    stop.subs.forEach((u, k) => {
+      legs.push({
+        type: 'loop', from: i, to: i, sub: k, via: [], dayStart: u.dayStart, dayEnd: u.dayEnd,
+        status: state.subStatuses[i]?.[k] ?? 'upcoming', weight: LOOP_WEIGHT_KM,
+      });
+    });
+    from = i;
+    via = [];
+  }
+  return legs;
+}
+
+/**
+ * Part du parcours faite (0 → 1), pondérée par la longueur de chaque étape. Dans l'étape en cours,
+ * on estime à vol d'oiseau ce qui reste jusqu'au panneau d'arrivée ; une boucle en cours compte pour moitié.
+ */
+export function legsProgress(stops: StageInput[], legs: Leg[], last: { lat: number; lon: number } | null): number {
+  const total = legs.reduce((t, l) => t + l.weight, 0);
+  if (!total) return 0;
+  const done = legs.reduce((t, l) => {
+    if (l.status === 'done') return t + l.weight;
+    if (l.status !== 'current') return t;
+    if (l.type === 'loop') return t + l.weight / 2;
+    const span = dist(stops[l.from]!, stops[l.to]!);
+    const left = last ? dist(last, stops[l.to]!) : span;
+    return t + l.weight * Math.min(0.95, Math.max(0, 1 - left / (span || 1)));
+  }, 0);
+  return Math.min(1, done / total);
 }

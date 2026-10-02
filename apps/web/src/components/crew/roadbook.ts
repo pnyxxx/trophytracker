@@ -1,13 +1,14 @@
 /**
- * Données du roadbook d'un équipage : étapes (avec sous-étapes et jours), kilomètre de chaque
- * étape et étape en cours (le jour choisit l'étape, le GPS précise : voir lib/stages.ts).
+ * Données du roadbook d'un équipage : étapes (avec sous-étapes et jours), étape en cours (le jour
+ * choisit l'étape, le GPS précise : voir lib/stages.ts), découpage de panneau en panneau et % du
+ * parcours. Le kilomètre de chaque étape sert seulement à peser les étapes : il n'est pas affiché.
  */
 import { useMemo } from 'react';
 import type { Waypoint } from '@/lib/supabase';
 import type { TrackPoint } from '@/hooks/useLiveTrack';
 import { haversineKm } from '@/lib/geo';
 import { routeKmOf } from '@/components/landing/journey';
-import { dayOfRaid, plannedFor, stageState, type RaidDay, type StageState, type StagePoint } from '@/lib/stages';
+import { dayOfRaid, legsOf, legsProgress, plannedFor, stageState, type Leg, type RaidDay, type StageState, type StagePoint } from '@/lib/stages';
 
 // La route réelle est ~30 % plus longue que la ligne droite entre les étapes.
 const ROAD_FACTOR = 1.3;
@@ -22,6 +23,10 @@ export interface Roadbook {
   /** Les étapes sont sur la route de référence (kilomètres réels de la route). */
   onReferenceRoute: boolean;
   state: StageState;
+  /** Étapes de panneau en panneau (trajets et boucles). */
+  legs: Leg[];
+  /** Part du parcours faite (0 → 1), pondérée par la longueur des étapes. */
+  progress: number;
   /** Étape prévue au programme aujourd'hui. */
   planned: { index: number; sub: number };
 }
@@ -59,6 +64,7 @@ export function useRoadbook(
         lat: s.lat,
         lon: s.lon,
         km: s.km,
+        passage: s.kind === 'boat',
         dayStart: s.day_start,
         dayEnd: s.day_end,
         subs: s.subs.map((u) => ({ lat: u.lat, lon: u.lon, dayStart: u.day_start, dayEnd: u.day_end })),
@@ -72,16 +78,11 @@ export function useRoadbook(
       .map(([lat, lon, t]) => ({ lat, lon, day: dayOfRaid(startDate, new Date(t * 1000)) }))
       .filter((p) => p.day >= 1);
   }, [points, startDate]);
-  // Kilomètre de la dernière position sur la route (barre de progression), si elle est dessus.
-  const last = points.at(-1);
-  const routeKm = useMemo(() => {
-    if (!last || !onReferenceRoute || !stops.length) return null;
-    const km = routeKmOf(last[0], last[1]);
-    return km == null ? null : km - (routeKmOf(stops[0]!.lat, stops[0]!.lon) ?? 0);
-  }, [last, onReferenceRoute, stops]);
+  const last = raidPoints.at(-1) ?? null;
 
-  return useMemo(
-    () => ({ stops, onReferenceRoute, state: stageState(input, cal, raidPoints, routeKm), planned: plannedFor(input, cal.day) }),
-    [stops, onReferenceRoute, input, cal, raidPoints, routeKm],
-  );
+  return useMemo(() => {
+    const state = stageState(input, cal, raidPoints);
+    const legs = legsOf(input, state);
+    return { stops, onReferenceRoute, state, legs, progress: legsProgress(input, legs, last), planned: plannedFor(input, cal.day) };
+  }, [stops, onReferenceRoute, input, cal, raidPoints, last]);
 }

@@ -6,7 +6,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useSeen } from '@/hooks/useInView';
 import { useEvent } from '@/hooks/queries';
-import { countryAt, dayAt, fmtKm, stageAt, headingAt, kmAt, posAt, ROUTE_KM, STOP_FRAC, STOPS, TOTAL_DAYS } from './journey';
+import { countryAt, dayAt, fmtKm, stageAt, headingAt, kmAt, posAt, STAGE_FRAC, STAGES, TOTAL_DAYS } from './journey';
 
 const JourneyMap = lazy(() => import('./JourneyMap'));
 
@@ -55,7 +55,7 @@ export function RouteJourney() {
   const km = kmAt(p);
   const day = dayAt(p);
   const idx = stageAt(p);
-  const cur = STOPS[idx]!;
+  const cur = STAGES[idx]!;
   const num = pad(idx + 1);
   const [lon, lat] = posAt(p);
   const coords = `${Math.abs(lat).toFixed(3)}°${lat >= 0 ? 'N' : 'S'} · ${Math.abs(lon).toFixed(3)}°${lon < 0 ? 'O' : 'E'}`;
@@ -72,9 +72,10 @@ export function RouteJourney() {
           <div className="relative mb-auto flex flex-col gap-4">
             <h2 className="tt-display m-0 whitespace-nowrap text-[clamp(40px,calc(6vw_-_16px),120px)] leading-[0.88] text-cream">Où sont-ils ?</h2>
           </div>
-          <div className="tt-kicker text-xs text-ochre">La route · étape {num} / {pad(STOPS.length)}</div>
+          <div className="tt-kicker text-xs text-ochre">La route · étape {num} / {pad(STAGES.length)}</div>
           <div className="relative flex flex-col gap-1.5">
             <div className="font-mono text-[13px] uppercase tracking-[0.1em] text-dust-400">{cur.country} — {cur.kind}</div>
+            {cur.from && <div className="font-display text-[clamp(24px,2.2vw,36px)] font-black uppercase leading-none text-dust-400">{cur.from} →</div>}
             <h3 className="m-0 text-balance font-display text-[clamp(52px,5.6vw,100px)] font-black uppercase leading-[0.96] text-cream">{cur.name}</h3>
           </div>
           <p className="relative m-0 max-w-[420px] text-pretty text-[19px] leading-[1.55] text-dust-100">{cur.text}</p>
@@ -101,7 +102,7 @@ export function RouteJourney() {
           <div className="pointer-events-none absolute inset-x-5 bottom-[22px] hidden flex-col gap-2.5 min-[1000px]:flex">
             <div className="relative h-[3px] bg-cream/[0.22]">
               <div className="absolute inset-y-0 left-0 bg-primary shadow-[0_0_10px_rgba(219,71,64,.8)]" style={{ width: `${(p * 100).toFixed(2)}%` }} />
-              {STOP_FRAC.map((f, i) => (
+              {STAGE_FRAC.map((f, i) => (
                 <span
                   key={i}
                   className="absolute -top-1 -ml-[5.5px] h-[11px] w-[11px] rounded-full border-2 border-cream"
@@ -110,19 +111,21 @@ export function RouteJourney() {
               ))}
             </div>
             <div className="flex justify-between font-mono text-[10px] uppercase tracking-[0.14em] text-dust-300">
-              <span>{STOPS[0]!.name}</span>
-              <span>{fmtKm(km)} / {fmtKm(ROUTE_KM)} km</span>
-              <span>{STOPS.at(-1)!.name}</span>
+              <span>{STAGES[0]!.from}</span>
+              <span>Étape {num} / {pad(STAGES.length)}</span>
+              <span>{STAGES.at(-1)!.name}</span>
             </div>
           </div>
 
           {/* Carte de l'étape (petit écran) */}
           <div className="absolute inset-x-3 bottom-3 z-[6] flex flex-col gap-2 border-l-[3px] border-primary bg-ink/[0.94] p-[18px] min-[1000px]:hidden">
             <div className="flex justify-between font-mono text-[11px] uppercase tracking-[0.14em] text-ochre">
-              <span>Étape {num} / {pad(STOPS.length)} · Jour {day}</span>
+              <span>Étape {num} / {pad(STAGES.length)} · Jour {day}</span>
               <span>{fmtKm(km)} km</span>
             </div>
-            <div className="font-display text-4xl font-black uppercase leading-none">{cur.name}</div>
+            <div className="font-display text-4xl font-black uppercase leading-none">
+              {cur.from && <span className="text-dust-400">{cur.from} → </span>}{cur.name}
+            </div>
             <p className="m-0 text-[15px] leading-normal text-dust-100">{cur.text}</p>
           </div>
         </div>
@@ -155,14 +158,16 @@ export function RouteJourney() {
             </div>
           </div>
           <ol className="m-0 flex list-none flex-col p-0">
-            {STOPS.map((s, i) => (
+            {STAGES.map((s, i) => (
               <li key={s.name} className="grid grid-cols-[16px_1fr_auto] items-center gap-3.5 border-b border-cream/[0.08] py-[9px]">
                 <span
                   className="h-2.5 w-2.5 rounded-full"
                   style={{ background: i <= idx ? '#DB4740' : '#3A322A', boxShadow: `0 0 0 3px ${i === idx ? 'rgba(219,71,64,.3)' : 'transparent'}` }}
                 />
-                <span className={`text-[15px] font-semibold ${i === idx ? 'text-cream' : i < idx ? 'text-dust-400' : 'text-dust-600'}`}>{s.name}</span>
-                <span className="font-mono text-xs text-dust-400">km {fmtKm(s.km)}</span>
+                <span className={`text-[15px] font-semibold ${i === idx ? 'text-cream' : i < idx ? 'text-dust-400' : 'text-dust-600'}`}>
+                  {s.from ? `${s.from} → ${s.name}` : s.name}
+                </span>
+                <span className="font-mono text-xs text-dust-400">J{s.days[0] === s.days[1] ? s.days[0] : `${s.days[0]}–${s.days[1]}`}</span>
               </li>
             ))}
           </ol>

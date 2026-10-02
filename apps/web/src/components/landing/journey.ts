@@ -96,17 +96,57 @@ export const STOPS: JourneyStop[] = WP.map((w, i) => ({ ...w, km: Math.round(CUM
 export const kmAt = (p: number) => Math.round(Math.min(1, Math.max(0, p)) * LEN);
 
 /**
- * Étape en cours pour une progression p : celle qu'on est en train de rouler (chaque étape est une
- * journée, de l'étape précédente jusqu'à celle-ci), ou celle où l'on se trouve à l'arrêt.
+ * Les étapes racontées : de panneau en panneau. Une étape commence au panneau de départ et dure
+ * jusqu'à ce que la 4L ait PASSÉ le panneau d'arrivée (Biarritz → Salamanque, puis Salamanque →
+ * Algésiras…). Les boucles de Merzouga sont des étapes ; la nuit du marathon (panneau flou) n'en
+ * termine pas une.
  */
+export interface JourneyStage {
+  /** Panneau de départ (absent pour une boucle). */
+  from?: string;
+  /** Titre : panneau d'arrivée, ou nom de la boucle. */
+  name: string;
+  kind: string;
+  country: string;
+  text: string;
+  days: [number, number];
+  /** Indice (dans STOPS) du panneau qui termine l'étape. */
+  end: number;
+}
+
+const stopIndex = (name: string) => WP.findIndex((w) => w.name === name);
+
+export const STAGES: JourneyStage[] = [
+  { from: 'Biarritz', name: 'Salamanque', kind: 'Village départ, puis étape libre', country: 'France · Espagne', days: [1, 3], end: stopIndex('Salamanque'), text: 'Deux jours de contrôles au village départ, puis les 4L s’élancent jusqu’à Salamanque. À la maison, vous ouvrez un lien : pas d’appli, pas de compte, la trace se dessine en direct.' },
+  { from: 'Salamanque', name: 'Algésiras', kind: 'Bivouac avant la traversée', country: 'Espagne', days: [4, 4], end: stopIndex('Algésiras'), text: WP[stopIndex('Algésiras')]!.text },
+  { from: 'Algésiras', name: 'Boulajoul', kind: 'Traversée par Tanger Med · Moyen Atlas', country: 'Espagne · Maroc', days: [5, 5], end: stopIndex('Boulajoul'), text: WP[stopIndex('Boulajoul')]!.text },
+  { from: 'Boulajoul', name: 'Merzouga', kind: 'Arrivée dans les dunes', country: 'Maroc', days: [6, 6], end: stopIndex('Merzouga'), text: WP[stopIndex('Merzouga')]!.text },
+  { name: 'Boucle 1', kind: 'Boucle dans le désert · Merzouga', country: 'Maroc', days: [7, 7], end: stopIndex('Boucle 1'), text: WP[stopIndex('Boucle 1')]!.text },
+  { name: 'Boucle 2', kind: 'Boucle dans le désert · Merzouga', country: 'Maroc', days: [8, 8], end: stopIndex('Boucle 2'), text: WP[stopIndex('Boucle 2')]!.text },
+  { from: 'Merzouga', name: 'Marrakech', kind: 'Étape marathon · nuit en autonomie', country: 'Maroc', days: [9, 10], end: stopIndex('Marrakech'), text: `${WP[stopIndex('Marathon')]!.text} ${WP[stopIndex('Marrakech')]!.text}` },
+];
+
+/** Position (0 → 1) des panneaux qui délimitent les étapes : départ, puis fin de chaque étape. */
+export const STAGE_FRAC = [STOP_FRAC[0]!, ...STAGES.map((s) => STOP_FRAC[s.end]!)];
+
+/** Marge de défilement après un panneau avant de passer à l'étape suivante. */
+const PASSED = 0.004;
+
+/** Étape en cours pour une progression p : on y reste tant que son panneau d'arrivée n'est pas passé. */
 export const stageAt = (p: number) => {
+  const i = STAGES.findIndex((s) => p <= STOP_FRAC[s.end]! + PASSED);
+  return i === -1 ? STAGES.length - 1 : i;
+};
+
+/** Lieu le plus proche devant la 4L (pour le jour du raid). */
+const stopAt = (p: number) => {
   const i = STOP_FRAC.findIndex((f) => f >= p - 0.012);
   return i === -1 ? STOPS.length - 1 : i;
 };
 
 /** Jour du raid : sur la route, le jour de l'étape ; à l'arrêt, les jours qu'on y passe (« 1–2 »). */
 export function dayAt(p: number): string {
-  const i = stageAt(p);
+  const i = stopAt(p);
   const [a, b] = STOPS[i]!.days;
   return i > 0 && p < STOP_FRAC[i]! - 0.012 ? String(a) : a === b ? String(a) : `${a}–${b}`;
 }

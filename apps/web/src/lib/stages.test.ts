@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { routeKmOf } from '@/components/landing/journey';
-import { loopStatus, plannedFor, raidDay, stageState, type StageInput, type StagePoint } from './stages';
+import { legsOf, legsProgress, loopStatus, plannedFor, raidDay, stageState, type StageInput, type StagePoint } from './stages';
 
 // Étapes 2027 (comme en base après la migration 20261001000002).
-const W = [
+const W: { name: string; lat: number; lon: number; days: number[]; subs?: number[][]; passage?: boolean }[] = [
   { name: 'Biarritz', lat: 43.46484, lon: -1.53571, days: [1, 2] },
   { name: 'Salamanque', lat: 40.96821, lon: -5.66642, days: [3, 3] },
   { name: 'Algésiras', lat: 36.21315, lon: -5.41098, days: [4, 4] },
-  { name: 'Tanger Med', lat: 35.87604, lon: -5.51333, days: [5, 5] },
+  { name: 'Tanger Med', lat: 35.87604, lon: -5.51333, days: [5, 5], passage: true },
   { name: 'Boulajoul', lat: 32.88438, lon: -4.98768, days: [5, 5] },
   { name: 'Merzouga', lat: 31.21516, lon: -3.99763, days: [6, 8], subs: [[7, 7], [8, 8]] },
   { name: 'Marrakech', lat: 31.58108, lon: -7.98231, days: [9, 12] },
@@ -18,13 +18,14 @@ const STOPS: StageInput[] = W.map((w) => ({
   km: routeKmOf(w.lat, w.lon)!,
   dayStart: w.days[0]!,
   dayEnd: w.days[1]!,
+  passage: w.passage,
   subs: (w.subs ?? []).map(([a, b]) => ({ lat: w.lat, lon: w.lon, dayStart: a!, dayEnd: b! })),
 }));
 const [ALG, TANGER, BOUL, MZ, MRK] = [2, 3, 4, 5, 6];
 const on = (day: number) => ({ phase: 'during' as const, day, total: 12, daysUntil: null });
 /** Une position à `dx` degrés à l'est d'une étape (0,1° ≈ 9,5 km à cette latitude), le jour `day`. */
 const near = (i: number, day: number, dx = 0): StagePoint => ({ lat: STOPS[i]!.lat, lon: STOPS[i]!.lon + dx, day });
-const state = (day: number, points: StagePoint[], routeKm: number | null = null) => stageState(STOPS, on(day), points, routeKm);
+const state = (day: number, points: StagePoint[]) => stageState(STOPS, on(day), points);
 
 // Arrivée à Merzouga le soir du J6.
 const ARRIVED = [near(BOUL, 5), near(BOUL, 6), near(MZ, 6, 0.5), near(MZ, 6)];
@@ -48,13 +49,13 @@ describe('le jour choisit l’étape', () => {
   });
 
   it('avant le départ : aucune étape en cours, même avec une trace d’essai', () => {
-    const s = stageState(STOPS, { phase: 'before', day: null, total: 12, daysUntil: 30 }, [], 1896);
-    expect(s).toMatchObject({ source: 'none', index: -1, progressKm: 0 });
+    const s = stageState(STOPS, { phase: 'before', day: null, total: 12, daysUntil: 30 }, []);
+    expect(s).toMatchObject({ source: 'none', index: -1 });
     expect(s.statuses.every((x) => x === 'upcoming')).toBe(true);
   });
 
   it('après le raid : tout est passé', () => {
-    const s = stageState(STOPS, { phase: 'after', day: null, total: 12, daysUntil: null }, [], null);
+    const s = stageState(STOPS, { phase: 'after', day: null, total: 12, daysUntil: null }, []);
     expect(s.statuses.every((x) => x === 'done')).toBe(true);
     expect(s.subStatuses[MZ]).toEqual(['done', 'done']);
   });
@@ -80,12 +81,6 @@ describe('le GPS précise la journée', () => {
     expect(state(5, [near(TANGER, 5), near(BOUL, 5)])).toMatchObject({ index: BOUL, here: true });
   });
 
-  it('barre de progression : entre l’étape précédente et l’étape du jour', () => {
-    const s = state(6, [near(BOUL, 6, 0.5)], STOPS[BOUL]!.km + 100);
-    expect(s.progressKm).toBe(STOPS[BOUL]!.km + 100);
-    expect(state(6, [near(BOUL, 6)], STOPS[MRK]!.km).progressKm).toBe(STOPS[MZ]!.km); // jamais au-delà
-    expect(state(6, ARRIVED, null).progressKm).toBe(STOPS[MZ]!.km);
-  });
 });
 
 describe('les boucles de Merzouga (~100 km, retour au bivouac le soir)', () => {
@@ -147,5 +142,50 @@ describe('sans GPS : l’étape du programme', () => {
     expect(state(9, [])).toMatchObject({ index: MRK, here: false });
     expect(state(11, [])).toMatchObject({ index: MRK, here: true });
     expect(state(1, [])).toMatchObject({ index: 0, here: true });
+  });
+});
+
+describe('étapes de panneau en panneau', () => {
+  const legs = (day: number, points: StagePoint[]) => legsOf(STOPS, state(day, points));
+  const names = (l: ReturnType<typeof legsOf>[number]) => (l.type === 'loop' ? `Boucle ${l.sub + 1}` : `${W[l.from]!.name} → ${W[l.to]!.name}`);
+
+  it('7 étapes : Tanger Med est traversé, les boucles sont des étapes', () => {
+    expect(legs(3, []).map(names)).toEqual([
+      'Biarritz → Salamanque', 'Salamanque → Algésiras', 'Algésiras → Boulajoul', 'Boulajoul → Merzouga',
+      'Boucle 1', 'Boucle 2', 'Merzouga → Marrakech',
+    ]);
+    expect(legs(3, [])[2]!.via).toEqual([TANGER]);
+    expect(legs(3, [])[3]).toMatchObject({ dayStart: 6, dayEnd: 6 });
+  });
+
+  it('on reste sur l’étape jusqu’au panneau d’arrivée', () => {
+    // J3, à mi-chemin de Salamanque : étape 1 en cours.
+    expect(legs(3, [near(0, 3, -2)]).map((l) => l.status).slice(0, 2)).toEqual(['current', 'upcoming']);
+    // J3 au soir, panneau Salamanque passé : étape 1 terminée, la suivante pas encore commencée.
+    expect(legs(3, [near(1, 3)]).map((l) => l.status).slice(0, 2)).toEqual(['done', 'upcoming']);
+    // J5 au port de Tanger Med : toujours l’étape Algésiras → Boulajoul.
+    expect(legs(5, [near(TANGER, 5)])[2]!.status).toBe('current');
+  });
+
+  it('les boucles suivent leur propre statut', () => {
+    expect(legs(7, [...ARRIVED, near(MZ, 7), near(MZ, 7, 0.45)]).map((l) => l.status).slice(3, 6)).toEqual(['done', 'current', 'upcoming']);
+  });
+
+  it('% du parcours pondéré par la longueur des étapes', () => {
+    const before = legsOf(STOPS, stageState(STOPS, { phase: 'before', day: null, total: 12, daysUntil: 3 }, []));
+    expect(legsProgress(STOPS, before, null)).toBe(0);
+    const ls = legs(3, [near(1, 3)]);
+    const p = legsProgress(STOPS, ls, STOPS[1]!);
+    const total = ls.reduce((t, l) => t + l.weight, 0);
+    expect(p).toBeCloseTo(ls[0]!.weight / total, 5);
+    // Le marathon pèse plus qu'une boucle.
+    expect(ls[6]!.weight).toBeGreaterThan(ls[4]!.weight);
+    // Au milieu de l’étape : environ la moitié de son poids.
+    const mid = { lat: (STOPS[0]!.lat + STOPS[1]!.lat) / 2, lon: (STOPS[0]!.lon + STOPS[1]!.lon) / 2 };
+    const half = legsProgress(STOPS, legs(3, [{ ...mid, day: 3 }]), mid);
+    expect(half * total).toBeGreaterThan(ls[0]!.weight * 0.4);
+    expect(half * total).toBeLessThan(ls[0]!.weight * 0.6);
+    const after = legsOf(STOPS, stageState(STOPS, { phase: 'after', day: null, total: 12, daysUntil: null }, []));
+    expect(legsProgress(STOPS, after, null)).toBe(1);
   });
 });
