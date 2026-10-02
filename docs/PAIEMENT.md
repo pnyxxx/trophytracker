@@ -27,17 +27,21 @@ Mon compte (?paiement=ok) ── « Créer mon équipage » ── create_crew (
   Remboursement partiel (rétractation au prorata) → seulement noté : dépublier la page à la main si besoin.
 - Les équipages créés avant le passage au payant sont offerts ; les admins peuvent créer un équipage sans payer.
 
-## Codes promo (offrir un ou plusieurs accès)
+## Offrir des accès : codes d'accès (administration)
 
-Gérés entièrement par Stripe : *Catalogue de produits → Coupons → Créer un coupon*.
-- **Offrir l'accès** : pourcentage de réduction **100 %**. Pour une simple réduction : un pourcentage ou un montant (ex. 5 €).
-- Cocher **« Utiliser des codes promotionnels destinés aux clients »** et choisir le code (ex. `J4L-OFFERT`).
-- **Nombre d'accès offerts** : « Limiter le nombre d'utilisations » (ex. 3 → trois équipages). Date limite possible.
+*Administration → Accès offerts → Générer un code* : une note (pour qui), un nombre d'utilisations (ex. 3 → trois
+équipages) et une date limite facultative. Le code (ex. `4L-K7QM-2XRP`, sans caractère ambigu) est à envoyer à la
+personne, qui le saisit dans *Mon compte* (« On vous a offert un code d'accès ? ») : l'accès est débloqué sans paiement
+ni passage par Stripe. La liste montre l'utilisation de chaque code et quel équipage l'a utilisé ; « Désactiver »
+bloque les prochaines utilisations. 10 essais ratés en une heure bloquent un compte pendant une heure.
+Pour un compte existant, *Offrir à un compte existant* (par email) marche aussi, sans code.
 
-Le client saisit le code sur la page de paiement Stripe. Avec 100 %, la commande est à 0 € (aucune carte demandée) et
-l'accès est débloqué comme un paiement (statut Stripe `no_payment_required`). Les commandes gratuites apparaissent dans
-*Administration → Paiements* (« Code promo (0 €) ») et dans l'onglet « Commandes gratuites » du Dashboard Stripe.
-Pour un seul ami, *Administration → Paiements → Offrir un accès* (par email) reste plus direct.
+## Codes promo Stripe (réductions)
+
+Pour une **réduction** (pas un accès offert) : Stripe, *Catalogue de produits → Coupons → Créer un coupon*, un
+pourcentage ou un montant, puis cocher **« Utiliser des codes promotionnels destinés aux clients »**. Le client le saisit
+sur la page de paiement Stripe. Un coupon à 100 % marche aussi (commande à 0 €, « Code promo Stripe (0 €) » dans
+*Administration → Paiements*), mais les codes d'accès ci-dessus sont plus simples pour ça.
 
 ## Mise en route (quand le SIRET est là)
 

@@ -9,6 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      access_codes: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          max_uses: number
+          note: string | null
+          revoked_at: string | null
+          uses: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          max_uses?: number
+          note?: string | null
+          revoked_at?: string | null
+          uses?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          max_uses?: number
+          note?: string | null
+          revoked_at?: string | null
+          uses?: number
+        }
+        Relationships: []
+      }
       crew_devices: {
         Row: {
           crew_id: string
@@ -78,6 +114,7 @@ export type Database = {
       }
       crew_purchases: {
         Row: {
+          access_code_id: string | null
           amount_cents: number
           created_at: string
           crew_id: string | null
@@ -97,6 +134,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          access_code_id?: string | null
           amount_cents: number
           created_at?: string
           crew_id?: string | null
@@ -116,6 +154,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          access_code_id?: string | null
           amount_cents?: number
           created_at?: string
           crew_id?: string | null
@@ -135,6 +174,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "crew_purchases_access_code_id_fkey"
+            columns: ["access_code_id"]
+            isOneToOne: false
+            referencedRelation: "access_codes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "crew_purchases_crew_id_fkey"
             columns: ["crew_id"]
@@ -577,7 +623,25 @@ export type Database = {
         Args: { p_crew: string; p_email: string }
         Returns: undefined
       }
+      admin_create_access_code: {
+        Args: { p_expires_at?: string; p_max_uses?: number; p_note?: string }
+        Returns: string
+      }
       admin_grant_crew_access: { Args: { p_email: string }; Returns: undefined }
+      admin_list_access_codes: {
+        Args: never
+        Returns: {
+          code: string
+          created_at: string
+          expires_at: string
+          id: string
+          max_uses: number
+          note: string
+          revoked_at: string
+          used_by: string[]
+          uses: number
+        }[]
+      }
       admin_list_crews: {
         Args: never
         Returns: {
@@ -595,6 +659,7 @@ export type Database = {
       admin_list_purchases: {
         Args: never
         Returns: {
+          access_code: string
           amount_cents: number
           created_at: string
           crew_name: string
@@ -619,6 +684,7 @@ export type Database = {
         }[]
       }
       admin_overview: { Args: never; Returns: Json }
+      admin_revoke_access_code: { Args: { p_id: string }; Returns: undefined }
       admin_set_role: {
         Args: { p_role: string; p_user: string }
         Returns: undefined
@@ -718,6 +784,7 @@ export type Database = {
           purchase_id: string
         }[]
       }
+      redeem_access_code: { Args: { p_code: string }; Returns: string }
       regenerate_device_key: { Args: { p_crew: string }; Returns: string }
       remove_crew_member: {
         Args: { p_crew: string; p_user: string }

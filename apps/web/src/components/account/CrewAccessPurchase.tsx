@@ -1,16 +1,19 @@
 /**
  * Achat de l'accès équipage (paiement unique) : ce qui est inclus, prix du jour,
  * les deux cases exigées par le Code de la consommation, puis redirection vers
- * la page de paiement Stripe (Edge Function create-checkout).
+ * la page de paiement Stripe (Edge Function create-checkout). Ou un code d'accès offert
+ * (généré dans l'administration), qui débloque l'accès sans paiement.
  */
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FunctionsHttpError } from '@supabase/supabase-js';
-import { Check, CreditCard } from 'lucide-react';
+import { Check, CreditCard, Gift } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { paymentsEnabled, supabase } from '@/lib/supabase';
+import { toastError, unwrap } from '@/lib/errors';
 import { CONTACT_HREF, currentPriceCents, euros, isLaunchPrice, PRICING } from '@/lib/legal';
 
 const INCLUDED = [
@@ -20,6 +23,52 @@ const INCLUDED = [
   'Photos, photos 360° et sponsors sur la carte',
   'Vos coéquipiers invités gratuitement',
 ];
+
+const CODE_REFUSED: Record<string, string> = {
+  invalid: 'Code inconnu : vérifiez qu’il est bien recopié.',
+  expired: 'Ce code a expiré.',
+  exhausted: 'Ce code a déjà été utilisé.',
+  already_used: 'Vous avez déjà utilisé ce code.',
+  too_many: 'Trop d’essais : réessayez dans une heure.',
+};
+
+/** « J'ai un code d'accès » : un code offert remplace le paiement. */
+function AccessCodeForm() {
+  const queryClient = useQueryClient();
+  const [code, setCode] = useState('');
+  const redeem = useMutation({
+    mutationFn: async () => unwrap(await supabase.rpc('redeem_access_code', { p_code: code })),
+    onSuccess: (result) => {
+      if (result !== 'ok') { toast.error(CODE_REFUSED[result] ?? 'Code refusé.'); return; }
+      toast.success('Code accepté : votre accès équipage est offert !');
+      void queryClient.invalidateQueries({ queryKey: ['crew-access'] });
+    },
+    onError: toastError,
+  });
+  return (
+    <form
+      onSubmit={(e) => { e.preventDefault(); redeem.mutate(); }}
+      className="mt-5 border-t border-cream/[0.1] pt-4"
+    >
+      <label htmlFor="access-code" className="flex items-center gap-2 text-xs font-semibold text-dust-200">
+        <Gift className="h-4 w-4 text-ochre" />On vous a offert un code d’accès ?
+      </label>
+      <div className="mt-2 flex gap-2">
+        <Input
+          id="access-code"
+          required
+          value={code}
+          onChange={(e) => setCode(e.target.value.toUpperCase())}
+          placeholder="4L-XXXX-XXXX"
+          autoComplete="off"
+          spellCheck={false}
+          className="font-mono uppercase tracking-[0.08em]"
+        />
+        <Button type="submit" variant="secondary" disabled={!code.trim() || redeem.isPending}>Utiliser</Button>
+      </div>
+    </form>
+  );
+}
 
 export function CrewAccessPurchase() {
   const [terms, setTerms] = useState(false);
@@ -92,9 +141,7 @@ export function CrewAccessPurchase() {
             <Button type="submit" className="w-full" disabled={!terms || !immediate || checkout.isPending}>
               <CreditCard />{checkout.isPending ? 'Redirection…' : `Payer ${euros(price)}`}
             </Button>
-            <p className="m-0 text-center text-[11px] text-dust-500">
-              Paiement sécurisé par carte bancaire (Stripe). Un code promo ? Saisissez-le sur la page de paiement.
-            </p>
+            <p className="m-0 text-center text-[11px] text-dust-500">Paiement sécurisé par carte bancaire (Stripe).</p>
           </form>
         ) : (
           <div className="mt-5 border-t border-cream/[0.1] pt-4">
@@ -104,6 +151,7 @@ export function CrewAccessPurchase() {
             </p>
           </div>
         )}
+        <AccessCodeForm />
       </div>
     </div>
   );
