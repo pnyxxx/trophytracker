@@ -27,7 +27,7 @@ export const BUSINESS: {
 export const VAT_MENTION = 'TVA non applicable, art. 293 B du CGI';
 
 /** Date de dernière mise à jour des pages légales (à changer à chaque modification de leur contenu). */
-export const LEGAL_UPDATED_AT = '27 septembre 2026';
+export const LEGAL_UPDATED_AT = '2 octobre 2026';
 
 /**
  * Tarif de l'accès équipage, pour l'affichage. Le montant réellement payé est

@@ -172,6 +172,31 @@
   object-fit: contain;
 }
 
+/* Photo placée sur la carte : vignette ronde */
+.tt-photo {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: #1a1612;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+.tt-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.tt-photo span {
+  position: absolute;
+  inset: auto 0 0 0;
+  background: #db4740;
+  color: #fff;
+  font: 700 8px 'JetBrains Mono', monospace;
+  text-align: center;
+}
+
 /* La 4L : point rouge cerclé de blanc, qui pulse quand l'équipage est en direct */
 .tt-car {
   position: relative;

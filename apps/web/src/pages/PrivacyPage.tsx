@@ -45,6 +45,11 @@ export default function PrivacyPage() {
           l’équipage coupe alors le suivi et peut supprimer la trace.
         </li>
         <li>
+          Tant que l’équipage n’a pas lancé le suivi sur le site (mode essai), seule la dernière position reçue est gardée, visible de
+          ses seuls membres, pour vérifier que le téléphone fonctionne. Le suivi se lance automatiquement le jour du départ officiel
+          du raid, sauf si l’équipage l’a arrêté lui-même.
+        </li>
+        <li>
           Elles sont visibles par tous si la page de l’équipage est publique, et uniquement par ses membres si elle est privée.
         </li>
         <li>
@@ -57,8 +62,10 @@ export default function PrivacyPage() {
       </p>
       <h3>Les photos</h3>
       <p>
-        Elles sont compressées sur votre appareil avant l’envoi et leurs métadonnées (dont la position GPS de la prise de vue) sont
-        supprimées. <em>Conservation : jusqu’à leur suppression par l’équipage.</em>
+        Elles sont compressées sur votre appareil avant l’envoi et le fichier publié ne garde aucune métadonnée. Pour placer une
+        photo sur la carte, le site lit sur votre appareil sa date et sa position de prise de vue (ou la retrouve grâce à la trace de
+        la 4L) : seule la position que l’équipage valide est publiée, et il peut la retirer à tout moment.{' '}
+        <em>Conservation : jusqu’à leur suppression par l’équipage.</em>
       </p>
       <h3>Les achats</h3>
       <p>
@@ -94,7 +101,10 @@ export default function PrivacyPage() {
       <p>
         Pour afficher les cartes, votre navigateur télécharge directement des images auprès d’
         <a href="https://openfreemap.org" target="_blank" rel="noopener noreferrer">OpenFreeMap</a>, d’Esri (imagerie satellite) et
-        d’Amazon Web Services (relief), qui voient donc votre adresse IP, comme pour n’importe quelle carte en ligne.
+        d’Amazon Web Services (relief), qui voient donc votre adresse IP, comme pour n’importe quelle carte en ligne. Quand un
+        équipage cherche une adresse (sponsor, lieu d’une photo), le texte tapé ou la position à nommer est envoyé à{' '}
+        <a href="https://photon.komoot.io" target="_blank" rel="noopener noreferrer">Photon</a> (komoot, Allemagne), un service de
+        recherche d’adresses basé sur OpenStreetMap.
       </p>
 
       <h2>Cookies</h2>
@@ -114,7 +124,7 @@ export default function PrivacyPage() {
       <p>
         Vous pouvez accéder à vos données, les corriger, les supprimer, les récupérer, vous opposer à leur traitement ou retirer votre
         consentement. La plupart se fait directement depuis « Mon compte » : la suppression du compte efface immédiatement vos données.
-        Un équipage peut supprimer sa page et ses photos ; pour effacer seulement la trace, écrivez-nous. Pour le reste, écrivez à{' '}
+        Un équipage peut supprimer sa page et ses photos, et effacer sa trace GPS (onglet GPS). Pour le reste, écrivez à{' '}
         <a href={CONTACT_HREF}>{EDITOR.email}</a> : réponse sous un mois au plus.
       </p>
       <p>

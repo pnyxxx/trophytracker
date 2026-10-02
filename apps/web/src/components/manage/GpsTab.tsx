@@ -2,16 +2,24 @@
  * Onglet GPS : guide pas à pas pour transformer un téléphone en balise avec
  * l'appli gratuite Traccar Client (réglage par QR code ou à la main), et suivi
  * en direct de la réception des positions.
+ *
+ * Suivi ARRÊTÉ = mode essai : le téléphone peut envoyer pour tester, seuls les membres
+ * voient la position ici, rien n'est publié. On le lance en partant de chez soi (il se
+ * lance tout seul le jour du départ officiel s'il a été oublié). La trace s'efface.
  */
 import { lazy, Suspense, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Check, Copy, KeyRound, QrCode as QrCodeIcon, ShieldOff, Smartphone } from 'lucide-react';
+import { Check, Copy, Eraser, FlaskConical, KeyRound, Play, QrCode as QrCodeIcon, ShieldOff, Smartphone, Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { QrCode } from '@/components/common/QrCode';
 import { LiveDot } from '@/components/common/Brand';
-import { keys } from '@/hooks/queries';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
+  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { keys, useEvent, useMyRole } from '@/hooks/queries';
 import { supabase, type Crew } from '@/lib/supabase';
 import { toastError, unwrap } from '@/lib/errors';
 import { formatDateTime, formatRelative, isLive } from '@/lib/format';
@@ -131,18 +139,62 @@ export function GpsTab({ crew }: { crew: Crew }) {
     queryFn: async () => unwrap(await supabase.rpc('get_crew_tracking', { p_crew: crew.id }))[0] ?? null,
   });
 
+  const { isOwner } = useMyRole(crew.id);
+  const { data: event } = useEvent();
+
   // Dernière position, rafraîchie toutes les 5 s : on voit le téléphone « répondre » en direct.
   const { data: status } = useQuery({
     queryKey: ['gps-status', crew.id],
     refetchInterval: 5_000,
     queryFn: async () =>
-      unwrap(await supabase.from('crews').select('last_fix_at, last_lat, last_lon, last_speed_kmh').eq('id', crew.id).single()),
+      unwrap(await supabase.from('crews')
+        .select('last_fix_at, last_lat, last_lon, last_speed_kmh, tracking_enabled, total_distance_m').eq('id', crew.id).single()),
   });
-  const lastFix = status?.last_fix_at ?? crew.last_fix_at;
-  const lastLat = status ? status.last_lat : crew.last_lat;
-  const lastLon = status ? status.last_lon : crew.last_lon;
-  const lastSpeed = status ? status.last_speed_kmh : crew.last_speed_kmh;
+  const enabled = status?.tracking_enabled ?? crew.tracking_enabled;
+  // Suivi arrêté : la position d'essai, visible des seuls membres.
+  const { data: testFix } = useQuery({
+    queryKey: ['gps-test', crew.id],
+    enabled: !enabled,
+    refetchInterval: 5_000,
+    queryFn: async () =>
+      unwrap(await supabase.from('gps_test_fixes').select('lat, lon, speed_kmh, recorded_at').eq('crew_id', crew.id).maybeSingle()),
+  });
+  const shown = enabled
+    ? {
+        at: status?.last_fix_at ?? crew.last_fix_at,
+        lat: status ? status.last_lat : crew.last_lat,
+        lon: status ? status.last_lon : crew.last_lon,
+        speed: status ? status.last_speed_kmh : crew.last_speed_kmh,
+      }
+    : { at: testFix?.recorded_at ?? null, lat: testFix?.lat ?? null, lon: testFix?.lon ?? null, speed: testFix?.speed_kmh ?? null };
+  const lastFix = shown.at;
+  const lastLat = shown.lat;
+  const lastLon = shown.lon;
+  const lastSpeed = shown.speed;
   const live = isLive(lastFix);
+  const hasTrace = !!(status?.last_fix_at ?? crew.last_fix_at) || (status?.total_distance_m ?? crew.total_distance_m) > 0;
+  const startLabel = event?.startDate
+    ? new Date(`${event.startDate}T12:00:00`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })
+    : null;
+  const refreshGps = () => {
+    void queryClient.invalidateQueries({ queryKey: ['gps-status', crew.id] });
+    void queryClient.invalidateQueries({ queryKey: ['gps-test', crew.id] });
+    void queryClient.invalidateQueries({ queryKey: keys.crew(crew.slug) });
+  };
+
+  const setTracking = useMutation({
+    mutationFn: async (on: boolean) => unwrap(await supabase.rpc('set_tracking', { p_crew: crew.id, p_enabled: on })),
+    onSuccess: (_, on) => {
+      toast.success(on ? 'Suivi lancé : bonne route !' : 'Suivi arrêté : mode essai');
+      refreshGps();
+    },
+    onError: toastError,
+  });
+  const resetTrack = useMutation({
+    mutationFn: async () => unwrap(await supabase.rpc('reset_track', { p_crew: crew.id })),
+    onSuccess: () => { toast.success('Trace effacée'); refreshGps(); },
+    onError: toastError,
+  });
 
   const fairPlayAccepted = !!tracking?.fair_play_accepted_at;
 
@@ -165,17 +217,95 @@ export function GpsTab({ crew }: { crew: Crew }) {
 
   return (
     <div className="space-y-6">
+      {/* ── Lancer / arrêter ───────────────────────────────────────────── */}
+      <section
+        className={cn(
+          'border-l-[3px] p-6 md:p-8',
+          enabled ? 'border-live bg-live/[0.06]' : 'border-ochre bg-black/30',
+        )}
+      >
+        <div className="flex flex-wrap items-start justify-between gap-5">
+          <div className="max-w-[560px]">
+            <p className={cn('tt-kicker m-0 flex items-center gap-2', enabled ? 'text-live' : 'text-ochre')}>
+              {enabled ? <><LiveDot className="h-2 w-2" />Suivi lancé</> : <><FlaskConical className="h-3.5 w-3.5" />Mode essai</>}
+            </p>
+            <h2 className="m-0 mt-2 font-display text-[32px] font-black uppercase leading-none text-cream md:text-[38px]">
+              {enabled ? 'Votre trace s’enregistre' : 'Suivi arrêté'}
+            </h2>
+            <p className="mb-0 mt-3 text-sm leading-relaxed text-dust-200">
+              {enabled ? (
+                <>Chaque position envoyée par le téléphone s’ajoute à la trace et apparaît sur la page de l’équipage.</>
+              ) : (
+                <>
+                  Testez votre téléphone tranquillement chez vous : vous seuls voyez sa position ici, rien n’apparaît sur la page de
+                  l’équipage. <strong className="text-cream">Lancez le suivi au moment de partir pour de bon.</strong>
+                  {startLabel && <> Un oubli ? Il se lancera tout seul le jour du départ officiel, le {startLabel}.</>}
+                </>
+              )}
+            </p>
+          </div>
+          <div className="flex flex-col gap-2">
+            {enabled ? (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" disabled={setTracking.isPending}><Square />Arrêter le suivi</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Arrêter le suivi ?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Les prochaines positions ne s’ajouteront plus à la trace (retour au mode essai). La trace déjà enregistrée reste
+                      visible. Arrêté pendant le raid, il ne se relancera pas tout seul.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Annuler</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => setTracking.mutate(false)}>Arrêter</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            ) : (
+              <Button onClick={() => setTracking.mutate(true)} disabled={setTracking.isPending}><Play />Lancer le suivi</Button>
+            )}
+            {isOwner && hasTrace && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" className="text-dust-300 hover:text-primary-light" disabled={resetTrack.isPending}>
+                    <Eraser />Effacer la trace
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Effacer toute la trace ?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Toutes les positions enregistrées, les kilomètres parcourus et la dernière position seront supprimés
+                      définitivement. Pratique après des essais ; à éviter pendant le raid.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Annuler</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => resetTrack.mutate()}>Effacer la trace</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* ── État en direct ─────────────────────────────────────────────── */}
       <Panel title="État du suivi">
         <div className="grid gap-px border border-cream/[0.14] bg-cream/[0.14] sm:grid-cols-3">
           <div className="flex flex-col gap-2 bg-ink p-5">
             <p className="tt-kicker m-0 text-dust-400">Statut</p>
             <p className="m-0 flex items-center gap-3 font-display text-3xl font-black uppercase leading-none text-cream">
-              {live ? <><LiveDot className="h-2.5 w-2.5" /><span className="text-live">En direct</span></> : lastFix ? 'En pause' : 'Jamais reçu'}
+              {!enabled
+                ? <span className="text-ochre">Essai</span>
+                : live ? <><LiveDot className="h-2.5 w-2.5" /><span className="text-live">En direct</span></> : lastFix ? 'En pause' : 'Jamais reçu'}
             </p>
           </div>
           <div className="flex flex-col gap-2 bg-ink p-5">
-            <p className="tt-kicker m-0 text-dust-400">Dernière position</p>
+            <p className="tt-kicker m-0 text-dust-400">{enabled ? 'Dernière position' : 'Dernière position d’essai'}</p>
             <p className="m-0 font-display text-3xl font-black uppercase leading-none text-cream">{formatRelative(lastFix)}</p>
             <p className="m-0 text-xs text-dust-500">{formatDateTime(lastFix)}</p>
           </div>
@@ -447,11 +577,13 @@ export function GpsTab({ crew }: { crew: Crew }) {
           {live ? <LiveDot className="h-3 w-3" /> : <span className="h-3 w-3 shrink-0 animate-pulse rounded-full bg-ochre" />}
           <div>
             <p className={cn('m-0 font-display text-2xl font-black uppercase leading-none', live ? 'text-live' : 'text-cream')}>
-              {live ? 'Position reçue !' : 'En attente d’une position…'}
+              {live ? (enabled ? 'Position reçue !' : 'Position d’essai reçue !') : 'En attente d’une position…'}
             </p>
             <p className="mb-0 mt-1 text-sm text-dust-300">
               {live
-                ? `Dernière position ${formatRelative(lastFix)}. Votre 4L apparaît sur la page de l’équipage.`
+                ? enabled
+                  ? `Dernière position ${formatRelative(lastFix)}. Votre 4L apparaît sur la page de l’équipage.`
+                  : `Dernière position ${formatRelative(lastFix)}. Tout fonctionne ! Elle n’est visible qu’ici : lancez le suivi en partant.`
                 : 'Rien après 2 minutes ? Vérifiez la clé (Device identifier), l’adresse (Server URL) et les autorisations.'}
             </p>
           </div>
@@ -489,8 +621,8 @@ export function GpsTab({ crew }: { crew: Crew }) {
           Le point n’est pas où est le téléphone ? Vérifiez que la localisation est en « Position exacte » et que l’appli n’envoie pas une ancienne position gardée en mémoire.
         </p>
         <p className="mb-0 mt-2 text-xs text-dust-400">
-          Si la page est publique, tout le monde voit la position : lancez le suivi pour de bon une fois partis de chez vous. Et pendant
-          la course, la carte n’est pas faite pour s’orienter : le règlement du 4L Trophy interdit le GPS.
+          Tant que le suivi est arrêté, rien n’est publié : testez sans crainte, puis lancez-le en partant de chez vous (en haut de
+          cet onglet). Et pendant la course, la carte n’est pas faite pour s’orienter : le règlement du 4L Trophy interdit le GPS.
         </p>
       </Step>
 

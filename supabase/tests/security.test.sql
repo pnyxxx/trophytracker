@@ -163,6 +163,8 @@ select is((select device_key_hash from public.crew_devices where crew_id = pg_te
   private.sha256_hex((select k from t_key)), 'seul le hash de la clé est stocké');
 
 -- ─── Ingestion GPS (rôle tracker) ───────────────────────────────────────────
+-- Suivi lancé (arrêté, c'est le mode essai : voir photos_tracking.test.sql).
+update public.crews set tracking_enabled = true where id = pg_temp.crew();
 grant tracker to postgres;  -- permet au test d'endosser le rôle (annulé au rollback)
 create temp table t_ingest (n int, result text);
 grant insert on t_ingest to tracker;

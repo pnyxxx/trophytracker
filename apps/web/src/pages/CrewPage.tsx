@@ -189,7 +189,7 @@ export default function CrewPage() {
         subtitle="Position en temps réel et trace complète depuis le départ."
       >
         <Suspense fallback={<div className="h-[600px] animate-pulse border border-cream/[0.14] bg-ink-900" />}>
-          <CrewMap crew={crew} points={points} waypoints={event?.waypoints ?? []} sponsors={sponsors} />
+          <CrewMap crew={crew} points={points} waypoints={event?.waypoints ?? []} sponsors={sponsors} photos={photos} />
         </Suspense>
       </Section>
 

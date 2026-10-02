@@ -8,7 +8,8 @@ import type { IncomingPoint } from './points.js';
 import type { AdminNotification } from './admin-emails.js';
 import type { CrewMeta } from './crew-page.js';
 
-export type IngestResult = 'stored' | 'skipped' | 'stale' | 'invalid' | 'glitch';
+/** « test » : suivi arrêté, position gardée comme essai (hors trace). */
+export type IngestResult = 'stored' | 'skipped' | 'stale' | 'invalid' | 'glitch' | 'test';
 
 export function createDb(url: string, opts: { minDistanceM: number; maxSilenceS: number }) {
   const sql = postgres(url, { max: 5, onnotice: () => {} });

@@ -10,34 +10,31 @@ import { supabase, type Crew, type Sponsor } from '@/lib/supabase';
 import { toastError } from '@/lib/errors';
 import { mediaUrl, removeCrewImages, uploadCrewImage } from '@/lib/media';
 import { Spinner } from '@/components/common/Spinner';
-import { Field, numOrNull, orNull, Panel } from './shared';
+import { Field, orNull, Panel } from './shared';
+import { LocationPicker, type Coords } from './LocationPicker';
 
-type Form = { name: string; website_url: string; city: string; lat: string; lon: string; sort_order: string };
+type Form = { name: string; website_url: string; city: string; sort_order: string };
 const toForm = (s?: Sponsor): Form => ({
-  name: s?.name ?? '', website_url: s?.website_url ?? '', city: s?.city ?? '',
-  lat: s?.lat?.toString() ?? '', lon: s?.lon?.toString() ?? '', sort_order: s?.sort_order.toString() ?? '0',
+  name: s?.name ?? '', website_url: s?.website_url ?? '', city: s?.city ?? '', sort_order: s?.sort_order.toString() ?? '0',
 });
 
-/** Accepte « 49.84, 3.28 » collé depuis Google Maps dans le champ latitude. */
-function splitCoords(form: Form): Form {
-  const m = form.lat.match(/^\s*(-?\d+(?:\.\d+)?)\s*[,;]\s*(-?\d+(?:\.\d+)?)\s*$/);
-  return m ? { ...form, lat: m[1]!, lon: m[2]! } : form;
-}
+/** « monsite.fr » → « https://monsite.fr » : personne ne tape le https://. */
+const normalizeUrl = (url: string) => {
+  const u = url.trim();
+  return !u || /^https?:\/\//i.test(u) ? u : `https://${u}`;
+};
 
 function SponsorDialog({ crew, sponsor, open, onClose }: { crew: Crew; sponsor?: Sponsor; open: boolean; onClose: () => void }) {
   const queryClient = useQueryClient();
   const [form, setForm] = useState<Form>(() => toForm(sponsor));
+  const [coords, setCoords] = useState<Coords | null>(() =>
+    sponsor?.lat != null && sponsor.lon != null ? { lat: sponsor.lat, lon: sponsor.lon } : null);
   const [logo, setLogo] = useState<File | null>(null);
   const set = (k: keyof Form) => (e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, [k]: e.target.value });
 
   const save = useMutation({
     mutationFn: async () => {
-      const f = splitCoords(form);
-      const lat = numOrNull(f.lat);
-      const lon = numOrNull(f.lon);
-      if ((lat === null) !== (lon === null)) throw new Error('Indiquez la latitude ET la longitude (ou aucune des deux)');
-      if (f.website_url && !/^https?:\/\//i.test(f.website_url)) throw new Error('Le site web doit commencer par https://');
-
+      const website = normalizeUrl(form.website_url);
       let logoPath = sponsor?.logo_path ?? null;
       let uploaded: string | null = null;
       if (logo) {
@@ -45,8 +42,8 @@ function SponsorDialog({ crew, sponsor, open, onClose }: { crew: Crew; sponsor?:
         logoPath = uploaded;
       }
       const row = {
-        name: f.name.trim(), website_url: orNull(f.website_url), city: orNull(f.city),
-        lat, lon, sort_order: Number(f.sort_order) || 0, logo_path: logoPath,
+        name: form.name.trim(), website_url: orNull(website), city: orNull(form.city),
+        lat: coords?.lat ?? null, lon: coords?.lon ?? null, sort_order: Number(form.sort_order) || 0, logo_path: logoPath,
       };
       const { error } = sponsor
         ? await supabase.from('sponsors').update(row).eq('id', sponsor.id)
@@ -67,21 +64,28 @@ function SponsorDialog({ crew, sponsor, open, onClose }: { crew: Crew; sponsor?:
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto">
+      <DialogContent>
         <DialogHeader><DialogTitle>{sponsor ? 'Modifier le sponsor' : 'Nouveau sponsor'}</DialogTitle></DialogHeader>
         <form onSubmit={(e: FormEvent) => { e.preventDefault(); save.mutate(); }} className="space-y-4">
           <Field id="s-name" label="Nom"><Input id="s-name" required maxLength={100} value={form.name} onChange={set('name')} /></Field>
           <Field id="s-logo" label="Logo" hint={sponsor?.logo_path ? 'Laissez vide pour garder le logo actuel.' : 'PNG avec fond transparent idéalement.'}>
             <Input id="s-logo" type="file" accept="image/*" onChange={(e) => setLogo(e.target.files?.[0] ?? null)} />
           </Field>
-          <Field id="s-web" label="Site web"><Input id="s-web" type="url" placeholder="https://…" value={form.website_url} onChange={set('website_url')} /></Field>
-          <Field id="s-city" label="Ville"><Input id="s-city" maxLength={80} value={form.city} onChange={set('city')} /></Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field id="s-lat" label="Latitude" hint="Astuce : collez « lat, lon » depuis Google Maps.">
-              <Input id="s-lat" inputMode="decimal" value={form.lat} onChange={set('lat')} placeholder="49.8466" />
-            </Field>
-            <Field id="s-lon" label="Longitude"><Input id="s-lon" inputMode="decimal" value={form.lon} onChange={set('lon')} placeholder="3.2875" /></Field>
-          </div>
+          <Field id="s-web" label="Site web"><Input id="s-web" inputMode="url" placeholder="monsponsor.fr" value={form.website_url} onChange={set('website_url')} /></Field>
+          <Field id="s-place" label="Adresse" hint="Pour placer le sponsor sur votre carte. Facultatif.">
+            <LocationPicker
+              id="s-place"
+              value={coords}
+              onChange={(c, place) => {
+                setCoords(c);
+                // La ville affichée se remplit toute seule (et reste modifiable).
+                if (place?.city) setForm((f) => ({ ...f, city: place.city! }));
+              }}
+            />
+          </Field>
+          <Field id="s-city" label="Ville affichée" hint="Remplie automatiquement à partir de l’adresse.">
+            <Input id="s-city" maxLength={80} value={form.city} onChange={set('city')} />
+          </Field>
           <Field id="s-order" label="Ordre d'affichage" hint="Les plus petits nombres apparaissent en premier.">
             <Input id="s-order" type="number" min={0} value={form.sort_order} onChange={set('sort_order')} />
           </Field>

@@ -1,18 +1,18 @@
 /**
  * Carte en direct d'un équipage : trace complète, position actuelle,
- * points du parcours prévu et sponsors.
+ * points du parcours prévu, sponsors et photos placées.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { MapContainer, Marker, Polyline, Popup, useMap } from 'react-leaflet';
 import { LatLngBounds } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Crosshair, Maximize } from 'lucide-react';
-import type { Crew, Sponsor, Waypoint } from '@/lib/supabase';
+import type { Crew, Photo, Sponsor, Waypoint } from '@/lib/supabase';
 import type { TrackPoint } from '@/hooks/useLiveTrack';
 import { formatDateTime, formatRelative, isLive } from '@/lib/format';
-import { mediaUrl } from '@/lib/media';
+import { mediaUrl, thumbUrl } from '@/lib/media';
 import { BaseMap } from './BaseMap';
-import { carIcon, sponsorIcon, waypointIcon, waypointStyle } from './mapIcons';
+import { carIcon, photoIcon, sponsorIcon, waypointIcon, waypointStyle } from './mapIcons';
 
 
 interface Props {
@@ -20,6 +20,7 @@ interface Props {
   points: TrackPoint[];
   waypoints: Waypoint[];
   sponsors: Sponsor[];
+  photos?: Photo[];
 }
 
 /** Recentre la carte : sur toute la trace au début, puis suit la voiture si demandé. */
@@ -51,7 +52,7 @@ function MapController({ car, points, waypoints, follow }: {
   return null;
 }
 
-export function CrewMap({ crew, points, waypoints: allWaypoints, sponsors }: Props) {
+export function CrewMap({ crew, points, waypoints: allWaypoints, sponsors, photos = [] }: Props) {
   // Les sous-étapes (boucles) sont au même endroit que leur étape : un seul repère sur la carte.
   const waypoints = useMemo(() => allWaypoints.filter((w) => !w.parent_id), [allWaypoints]);
   const [follow, setFollow] = useState(false);
@@ -72,6 +73,11 @@ export function CrewMap({ crew, points, waypoints: allWaypoints, sponsors }: Pro
   }, [points, car]);
 
   const mapSponsors = sponsors.filter((s) => s.lat != null && s.lon != null);
+  const mapPhotos = useMemo(() => photos.filter((p) => p.lat != null && p.lon != null), [photos]);
+  const photoIcons = useMemo(
+    () => new Map(mapPhotos.map((p) => [p.id, photoIcon(thumbUrl(p.storage_path, 96), p.kind === 'panorama')])),
+    [mapPhotos],
+  );
   // Icônes créées une seule fois par étape (la trace, elle, se met à jour en direct).
   const waypointIcons = useMemo(() => new Map(waypoints.map((w) => [w.id, waypointIcon(w)])), [waypoints]);
 
@@ -110,6 +116,19 @@ export function CrewMap({ crew, points, waypoints: allWaypoints, sponsors }: Pro
                   Site web
                 </a>
               )}
+            </Popup>
+          </Marker>
+        ))}
+
+        {mapPhotos.map((p) => (
+          <Marker key={p.id} position={[p.lat!, p.lon!]} icon={photoIcons.get(p.id)}>
+            <Popup>
+              <img src={thumbUrl(p.storage_path, 480) ?? ''} alt={p.title} className="mb-2 block aspect-[4/3] w-56 max-w-full object-cover" loading="lazy" />
+              <p className="font-bold text-black">{p.title}</p>
+              {(p.location || p.taken_label) && (
+                <p className="text-sm text-black/70">{[p.location, p.taken_label].filter(Boolean).join(' · ')}</p>
+              )}
+              <a href="#photos" className="text-sm text-primary underline">Voir les photos</a>
             </Popup>
           </Marker>
         ))}

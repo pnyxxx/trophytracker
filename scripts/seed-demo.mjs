@@ -108,6 +108,8 @@ for (const [i, [name, logo, lat, lon, city]] of sponsors.entries()) {
 
 // ── Traces GPS (via la même fonction d'ingestion que les vrais téléphones) ─────
 // Elles suivent le vrai tracé routier de la page d'accueil (scripts/lib-demo-trace.mjs).
+// Suivi lancé : sinon les positions resteraient en mode essai.
+sql(`update public.crews set tracking_enabled = true where id in ('${j4l}', '${ids['les-sables-mouvants']}');`);
 sql(`\\o /dev/null\n${traceSql(j4l, roadUntil(...MERZOUGA), 0.2, 60)}\n${traceSql(ids['les-sables-mouvants'], roadUntil(...SALAMANQUE), 150, 20)}`);
 
 console.log(`✅ Données de démo créées.

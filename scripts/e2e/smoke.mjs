@@ -134,6 +134,15 @@ check(!fairPlayErr, 'charte fair-play acceptée');
 const { data: key } = await alice.rpc('regenerate_device_key', { p_crew: crew.id });
 check(key?.startsWith('tt_'), 'clé GPS générée');
 
+// Suivi arrêté (par défaut) : mode essai, rien n'est publié.
+const tryNow = Math.floor(Date.now() / 1000);
+const tryRes = await fetch(`${SITE}/ingest/osmand?id=${key}&lat=48.85&lon=2.35&timestamp=${tryNow - 300}`);
+const { data: tryFix } = await alice.from('gps_test_fixes').select('lat').eq('crew_id', crew.id).maybeSingle();
+const { data: tryTrack } = await anon.rpc('get_track', { p_crew: crew.id });
+check(tryRes.ok && tryFix?.lat === 48.85 && tryTrack?.length === 0, 'suivi arrêté : la position d’essai est reçue, mais pas publiée');
+const { error: startErr } = await alice.rpc('set_tracking', { p_crew: crew.id, p_enabled: true });
+check(!startErr, 'suivi lancé');
+
 let realtimeHit = false;
 const channel = anon.channel('t').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'crews', filter: `id=eq.${crew.id}` }, () => { realtimeHit = true; });
 await new Promise((resolve) => channel.subscribe((s) => s === 'SUBSCRIBED' && resolve()));
@@ -155,6 +164,11 @@ const { data: track } = await anon.rpc('get_track', { p_crew: crew.id });
 check(track?.length === 3, `trace publique : ${track?.length} points`);
 const { data: stats } = await anon.rpc('get_crew_stats', { p_crew: crew.id });
 check(stats?.live && stats.total_distance_km > 2, `stats : en direct, ${stats?.total_distance_km} km, ${stats?.current_speed_kmh} km/h`);
+
+// Effacer la trace (après des essais, par exemple)
+const { error: resetErr } = await alice.rpc('reset_track', { p_crew: crew.id });
+const { data: emptyTrack } = await anon.rpc('get_track', { p_crew: crew.id });
+check(!resetErr && emptyTrack?.length === 0, 'le propriétaire efface la trace');
 
 // Page privée
 await alice.from('crews').update({ is_public: false }).eq('id', crew.id);

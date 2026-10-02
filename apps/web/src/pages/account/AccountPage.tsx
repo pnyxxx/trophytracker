@@ -206,6 +206,12 @@ export default function AccountPage() {
                 <p className="mb-0 mt-2 font-mono text-[11px] uppercase tracking-[0.1em] text-dust-400">
                   {myCrew.role === 'owner' ? 'Propriétaire' : 'Membre'} · {myCrew.crew.is_public ? 'Public' : 'Privé'} · GPS {myCrew.crew.last_fix_at ? formatRelative(myCrew.crew.last_fix_at) : 'jamais reçu'}
                 </p>
+                {!myCrew.crew.tracking_enabled && (
+                  <p className="mb-0 mt-2 text-xs text-dust-300">
+                    <span className="text-ochre">Suivi GPS arrêté (mode essai).</span>{' '}
+                    <Link to={`/mon-compte/equipages/${myCrew.crew.slug}?onglet=gps`} className="underline hover:text-cream">Le lancer en partant</Link>
+                  </p>
+                )}
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button asChild variant="outline">

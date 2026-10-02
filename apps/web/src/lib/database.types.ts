@@ -168,6 +168,8 @@ export type Database = {
           supplies_count: number | null
           tagline: string | null
           total_distance_m: number
+          tracking_enabled: boolean
+          tracking_stopped_at: string | null
           updated_at: string
           website_url: string | null
         }
@@ -194,6 +196,8 @@ export type Database = {
           supplies_count?: number | null
           tagline?: string | null
           total_distance_m?: number
+          tracking_enabled?: boolean
+          tracking_stopped_at?: string | null
           updated_at?: string
           website_url?: string | null
         }
@@ -220,6 +224,8 @@ export type Database = {
           supplies_count?: number | null
           tagline?: string | null
           total_distance_m?: number
+          tracking_enabled?: boolean
+          tracking_stopped_at?: string | null
           updated_at?: string
           website_url?: string | null
         }
@@ -251,6 +257,47 @@ export type Database = {
           },
         ]
       }
+      gps_test_fixes: {
+        Row: {
+          accuracy: number | null
+          battery: number | null
+          crew_id: string
+          lat: number
+          lon: number
+          received_at: string
+          recorded_at: string
+          speed_kmh: number | null
+        }
+        Insert: {
+          accuracy?: number | null
+          battery?: number | null
+          crew_id: string
+          lat: number
+          lon: number
+          received_at?: string
+          recorded_at: string
+          speed_kmh?: number | null
+        }
+        Update: {
+          accuracy?: number | null
+          battery?: number | null
+          crew_id?: string
+          lat?: number
+          lon?: number
+          received_at?: string
+          recorded_at?: string
+          speed_kmh?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gps_test_fixes_crew_id_fkey"
+            columns: ["crew_id"]
+            isOneToOne: true
+            referencedRelation: "crews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       photos: {
         Row: {
           created_at: string
@@ -260,8 +307,11 @@ export type Database = {
           height: number | null
           id: string
           kind: string
+          lat: number | null
           location: string | null
+          lon: number | null
           storage_path: string
+          taken_at: string | null
           taken_label: string | null
           title: string
           width: number | null
@@ -274,8 +324,11 @@ export type Database = {
           height?: number | null
           id?: string
           kind: string
+          lat?: number | null
           location?: string | null
+          lon?: number | null
           storage_path: string
+          taken_at?: string | null
           taken_label?: string | null
           title: string
           width?: number | null
@@ -288,8 +341,11 @@ export type Database = {
           height?: number | null
           id?: string
           kind?: string
+          lat?: number | null
           location?: string | null
+          lon?: number | null
           storage_path?: string
+          taken_at?: string | null
           taken_label?: string | null
           title?: string
           width?: number | null
@@ -596,6 +652,8 @@ export type Database = {
           supplies_count: number | null
           tagline: string | null
           total_distance_m: number
+          tracking_enabled: boolean
+          tracking_stopped_at: string | null
           updated_at: string
           website_url: string | null
         }
@@ -665,6 +723,7 @@ export type Database = {
         Args: { p_crew: string; p_user: string }
         Returns: undefined
       }
+      reset_track: { Args: { p_crew: string }; Returns: undefined }
       revoke_device_key: { Args: { p_crew: string }; Returns: undefined }
       search_crews: {
         Args: {
@@ -677,6 +736,10 @@ export type Database = {
       }
       set_crew_member_role: {
         Args: { p_crew: string; p_role: string; p_user: string }
+        Returns: undefined
+      }
+      set_tracking: {
+        Args: { p_crew: string; p_enabled: boolean }
         Returns: undefined
       }
     }

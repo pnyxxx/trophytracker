@@ -30,6 +30,17 @@ export function waypointIcon(w: Pick<Waypoint, 'kind' | 'name'>) {
   });
 }
 
+/** Photo : vignette ronde cerclée de blanc, à l'endroit de la prise de vue. */
+export function photoIcon(thumbUrl: string | null, panorama: boolean) {
+  return new DivIcon({
+    className: 'tt-marker',
+    html: `<div class="tt-photo">${thumbUrl ? `<img src="${escapeHtml(thumbUrl)}" alt="" loading="lazy" />` : ''}${panorama ? '<span>360°</span>' : ''}</div>`,
+    iconSize: [40, 40],
+    iconAnchor: [20, 20],
+    popupAnchor: [0, -20],
+  });
+}
+
 /** La 4L : point rouge cerclé de blanc, qui pulse quand l'équipage est en direct. */
 export function carIcon(live: boolean) {
   return new DivIcon({
