@@ -34,14 +34,9 @@ const GpsCheckMap = lazy(() => import('./GpsCheckMap'));
 /** Réglages conseillés pour le raid (repris dans le tableau ET dans le QR code). */
 const SETTINGS = { accuracy: 'high', distance: 50, heartbeat: 300, buffer: true, stopDetection: true };
 
-/**
- * Texte du QR code « Settings → icône QR » de Traccar Client (v10).
- * L'appli prend l'adresse sans ses paramètres comme « Server URL », puis applique
- * id, accuracy, distance, heartbeat, buffer et stop_detection (booléens en "true"/"false").
- * Le mot de passe, lui, ne peut pas être transmis par QR code.
- */
-function traccarConfigLink(serverUrl: string, key: string) {
-  const params = new URLSearchParams({
+/** Réglages transmis à Traccar Client (v10) : id, accuracy, distance… (booléens en "true"/"false"). */
+function traccarParams(key: string) {
+  return new URLSearchParams({
     id: key,
     accuracy: SETTINGS.accuracy,
     distance: String(SETTINGS.distance),
@@ -49,7 +44,26 @@ function traccarConfigLink(serverUrl: string, key: string) {
     buffer: String(SETTINGS.buffer),
     stop_detection: String(SETTINGS.stopDetection),
   });
-  return `${serverUrl}?${params.toString()}`;
+}
+
+/**
+ * Texte du QR code « Settings → icône QR » de Traccar Client.
+ * L'appli prend l'adresse sans ses paramètres comme « Server URL », puis applique les réglages.
+ * Le mot de passe, lui, ne peut pas être transmis par QR code.
+ */
+function traccarConfigLink(serverUrl: string, key: string) {
+  return `${serverUrl}?${traccarParams(key).toString()}`;
+}
+
+/**
+ * Même configuration en lien direct, pour le site ouvert SUR le téléphone à régler
+ * (impossible de scanner son propre écran). L'appli déclare le schéma « org.traccar.client » :
+ * elle demande « Apply new configuration? » puis lit l'adresse dans le paramètre url.
+ */
+function traccarAppLink(serverUrl: string, key: string) {
+  const params = traccarParams(key);
+  params.set('url', serverUrl);
+  return `org.traccar.client://config?${params.toString()}`;
 }
 
 const STORES = [
@@ -374,6 +388,15 @@ export function GpsTab({ crew }: { crew: Crew }) {
                 ⚠️ Elle ne sera plus jamais affichée : configurez le téléphone maintenant (étape 03). Ne la partagez pas, elle permet
                 d’envoyer des positions au nom de votre équipage.
               </p>
+              <div className="mt-1 flex flex-col items-start gap-1.5 border-t border-cream/[0.1] pt-4">
+                <Button asChild>
+                  <a href={traccarAppLink(address.url, newKey)}><Smartphone />Ouvrir dans Traccar Client</a>
+                </Button>
+                <p className="m-0 text-xs leading-relaxed text-dust-400">
+                  Site ouvert sur le téléphone de la 4L ? Ce bouton règle l’appli directement (répondez « OK » à « Apply new
+                  configuration? »). Sur un ordinateur, scannez plutôt le QR code.
+                </p>
+              </div>
             </div>
             <figure className="m-0 flex flex-col items-center gap-2">
               <QrCode value={traccarConfigLink(address.url, newKey)} label="QR code de configuration de Traccar Client" className="w-full max-w-[220px] rounded-[4px]" />
@@ -431,12 +454,19 @@ export function GpsTab({ crew }: { crew: Crew }) {
       {/* ── 03 Réglages ────────────────────────────────────────────────── */}
       <Step n="03" title="Régler l’appli">
         <div className="mb-6 border-l-[3px] border-live bg-live/[0.06] p-4">
-          <p className="m-0 font-mono text-xs font-bold uppercase tracking-[0.12em] text-live">Le plus rapide : le QR code</p>
+          <p className="m-0 font-mono text-xs font-bold uppercase tracking-[0.12em] text-live">Le plus rapide : réglage automatique</p>
           <p className="mb-0 mt-2 text-sm leading-relaxed text-dust-200">
-            Dans Traccar Client, ouvrez <strong className="text-cream">Settings</strong> (⚙), touchez l’icône{' '}
-            <strong className="text-cream">QR code en haut à droite</strong> et scannez le code affiché à l’étape 02.
+            <strong className="text-cream">Depuis un ordinateur :</strong> dans Traccar Client, ouvrez{' '}
+            <strong className="text-cream">Settings</strong> (⚙), touchez l’icône <strong className="text-cream">QR code en haut à droite</strong>{' '}
+            et scannez le code affiché à l’étape 02.
+          </p>
+          <p className="mb-0 mt-2 text-sm leading-relaxed text-dust-200">
+            <strong className="text-cream">Depuis le téléphone de la 4L :</strong> touchez « Ouvrir dans Traccar Client » à l’étape 02,
+            puis « OK ».
+          </p>
+          <p className="mb-0 mt-2 text-sm leading-relaxed text-dust-200">
             Tous les réglages ci-dessous sont remplis d’un coup, sauf le mot de passe (facultatif).
-            {!newKey && ' Le QR code apparaît à l’étape 02 quand vous cliquez sur « Générer la clé ».'}
+            {!newKey && ' Le QR code et le bouton apparaissent à l’étape 02 quand vous cliquez sur « Générer la clé ».'}
           </p>
         </div>
 
