@@ -1,6 +1,7 @@
 /**
  * Petit serveur HTTP :
  *   GET|POST /ingest/osmand   ← positions envoyées par les téléphones
+ *                                (ouverte dans un navigateur : page « Régler Traccar Client », cf. setup-page.ts)
  *   GET      /health          ← santé du service (Docker healthcheck)
  *   GET      /sitemap.xml     ← plan du site pour Google (équipages publics)
  *   GET      /equipages/:slug ← HTML d'une page équipage, avec son titre et son aperçu de partage
@@ -13,6 +14,7 @@ import type { Db } from './db.js';
 import { parseDeviceRequest } from './parse.js';
 import { buildSitemap } from './sitemap.js';
 import { CREW_SLUG, renderCrewPage } from './crew-page.js';
+import { isSetupRequest, renderSetupPage, traccarAppLink } from './setup-page.js';
 
 export async function buildHttp(db: Db, opts: { trustProxy: boolean; logger: boolean; siteUrl?: string; webUrl?: string; log?: (msg: string) => void }) {
   const log = opts.log ?? (() => {});
@@ -56,7 +58,20 @@ export async function buildHttp(db: Db, opts: { trustProxy: boolean; logger: boo
 
   // Seuls les refus sont journalisés (jamais la clé en entier ni les coordonnées) :
   // de quoi dépanner un équipage sans noyer les journaux sous les positions normales.
-  const ingest = async (req: { query: unknown; body: unknown; ip: string }, reply: import('fastify').FastifyReply) => {
+  const ingest = async (req: import('fastify').FastifyRequest, reply: import('fastify').FastifyReply) => {
+    // QR code de configuration scanné avec l'appareil photo : page avec un bouton qui ouvre l'appli.
+    if (req.method === 'GET' && isSetupRequest(req.query, req.headers.accept)) {
+      const host = req.headers.host ?? '';
+      const origin = opts.siteUrl && new URL(opts.siteUrl).host === host ? opts.siteUrl.replace(/\/$/, '') : `http://${host}`;
+      const keyKnown = !!(await db.crewForDeviceKey(req.query.id));
+      return reply
+        .header('Content-Type', 'text/html; charset=utf-8')
+        .header('Cache-Control', 'no-store')
+        .header('Referrer-Policy', 'no-referrer')
+        .header('X-Robots-Tag', 'noindex')
+        .send(renderSetupPage(traccarAppLink(`${origin}/ingest/osmand`, req.query), keyKnown));
+    }
+
     const parsed = parseDeviceRequest(req.query, req.body);
     if ('error' in parsed) {
       log(`position refusée (400 ${parsed.error}) depuis ${req.ip}`);

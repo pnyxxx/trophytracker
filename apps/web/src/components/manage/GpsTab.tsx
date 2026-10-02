@@ -1,6 +1,6 @@
 /**
  * Onglet GPS : guide pas à pas pour transformer un téléphone en balise avec
- * l'appli gratuite Traccar Client (réglage par QR code ou à la main), et suivi
+ * l'appli gratuite Traccar Client (réglage par QR code / bouton, ou à la main), et suivi
  * en direct de la réception des positions.
  *
  * Suivi ARRÊTÉ = mode essai : le téléphone peut envoyer pour tester, seuls les membres
@@ -11,7 +11,7 @@ import { lazy, Suspense, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Check, Copy, Eraser, FlaskConical, KeyRound, Play, QrCode as QrCodeIcon, ShieldOff, Smartphone, Square } from 'lucide-react';
+import { Check, ChevronDown, ChevronUp, Copy, Eraser, FlaskConical, KeyRound, Play, QrCode as QrCodeIcon, ShieldOff, Smartphone, Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { QrCode } from '@/components/common/QrCode';
 import { LiveDot } from '@/components/common/Brand';
@@ -49,6 +49,8 @@ function traccarParams(key: string) {
 /**
  * Texte du QR code « Settings → icône QR » de Traccar Client.
  * L'appli prend l'adresse sans ses paramètres comme « Server URL », puis applique les réglages.
+ * Scannée avec l'appareil photo, la même adresse ouvre une page du service GPS avec le bouton
+ * « Ouvrir dans Traccar Client » (apps/tracker/src/setup-page.ts) : un seul QR code pour les deux cas.
  * Le mot de passe, lui, ne peut pas être transmis par QR code.
  */
 function traccarConfigLink(serverUrl: string, key: string) {
@@ -64,6 +66,14 @@ function traccarAppLink(serverUrl: string, key: string) {
   const params = traccarParams(key);
   params.set('url', serverUrl);
   return `org.traccar.client://config?${params.toString()}`;
+}
+
+/**
+ * Téléphone (et pas tablette ni ordinateur) : écran tactile dont le petit côté fait moins de 600 px.
+ * Un iPad affiche donc le QR code, à scanner avec le téléphone de la 4L.
+ */
+function isPhone() {
+  return window.matchMedia('(pointer: coarse)').matches && Math.min(window.screen.width, window.screen.height) < 600;
 }
 
 const STORES = [
@@ -146,6 +156,10 @@ export function GpsTab({ crew }: { crew: Crew }) {
   const queryClient = useQueryClient();
   const [newKey, setNewKey] = useState<string | null>(null);
   const [charterChecked, setCharterChecked] = useState(false);
+  const [charterJustAccepted, setCharterJustAccepted] = useState(false);
+  const [showQr, setShowQr] = useState(false);
+  const [showManual, setShowManual] = useState(false);
+  const [onPhone] = useState(isPhone);
   const address = ingestAddress();
 
   const { data: tracking } = useQuery({
@@ -218,7 +232,11 @@ export function GpsTab({ crew }: { crew: Crew }) {
       if (!fairPlayAccepted) unwrap(await supabase.rpc('accept_fair_play', { p_crew: crew.id }));
       return unwrap(await supabase.rpc('regenerate_device_key', { p_crew: crew.id }));
     },
-    onSuccess: (key) => { setNewKey(key); void queryClient.invalidateQueries({ queryKey: keys.tracking(crew.id) }); },
+    onSuccess: (key) => {
+      if (!fairPlayAccepted) setCharterJustAccepted(true);
+      setNewKey(key);
+      void queryClient.invalidateQueries({ queryKey: keys.tracking(crew.id) });
+    },
     onError: toastError,
   });
   const revoke = useMutation({
@@ -354,7 +372,8 @@ export function GpsTab({ crew }: { crew: Crew }) {
           La clé identifie votre équipage : c’est elle que le téléphone envoie avec chaque position. Sans elle, les positions sont refusées.
         </p>
 
-        {!fairPlayAccepted && (
+        {/* La charte reste affichée (cochée) jusqu'au prochain chargement : la page ne saute pas. */}
+        {(!fairPlayAccepted || charterJustAccepted) && (
           <div className="mb-5 border-l-[3px] border-primary bg-black/30 p-5 md:p-6">
             <p className="tt-kicker m-0 text-ochre">Charte fair-play · à lire avant d’activer le suivi</p>
             <p className="mb-4 mt-3 text-dust-200">{FAIR_PLAY.spirit}</p>
@@ -367,63 +386,19 @@ export function GpsTab({ crew }: { crew: Crew }) {
                 </li>
               ))}
             </ol>
-            <label className="mt-5 flex cursor-pointer items-start gap-3 border-t border-cream/[0.1] pt-4 text-sm font-semibold text-cream">
+            <label className={cn(
+              'mt-5 flex items-start gap-3 border-t border-cream/[0.1] pt-4 text-sm font-semibold text-cream',
+              charterJustAccepted ? 'cursor-default' : 'cursor-pointer',
+            )}>
               <input
                 type="checkbox"
-                checked={charterChecked}
+                checked={charterChecked || charterJustAccepted}
+                disabled={charterJustAccepted}
                 onChange={(e) => setCharterChecked(e.target.checked)}
                 className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
               />
-              J’ai lu la charte et je l’accepte au nom de l’équipage.
+              {charterJustAccepted ? '✅ Charte acceptée au nom de l’équipage.' : 'J’ai lu la charte et je l’accepte au nom de l’équipage.'}
             </label>
-          </div>
-        )}
-
-        {newKey ? (
-          <div className="mb-5 grid gap-6 border border-primary/40 bg-black/30 p-5 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-start">
-            <div className="flex min-w-0 flex-col gap-3">
-              <p className="tt-kicker m-0 text-ochre">Votre clé secrète</p>
-              <Value tone="secret" copy={newKey} label="Clé">{newKey}</Value>
-              <p className="m-0 text-sm text-gold">
-                ⚠️ Elle ne sera plus jamais affichée : configurez le téléphone maintenant (étape 03). Ne la partagez pas, elle permet
-                d’envoyer des positions au nom de votre équipage.
-              </p>
-              <div className="mt-1 flex flex-col items-start gap-1.5 border-t border-cream/[0.1] pt-4">
-                <Button asChild>
-                  <a href={traccarAppLink(address.url, newKey)}><Smartphone />Ouvrir dans Traccar Client</a>
-                </Button>
-                <p className="m-0 text-xs leading-relaxed text-dust-400">
-                  Site ouvert sur le téléphone de la 4L ? Ce bouton règle l’appli directement (répondez « OK » à « Apply new
-                  configuration? »). Sur un ordinateur, scannez plutôt le QR code.
-                </p>
-              </div>
-            </div>
-            <figure className="m-0 flex flex-col items-center gap-2">
-              <QrCode value={traccarConfigLink(address.url, newKey)} label="QR code de configuration de Traccar Client" className="w-full max-w-[220px] rounded-[4px]" />
-              <figcaption className="text-center font-mono text-[10px] uppercase tracking-[0.12em] text-dust-400">
-                Configuration express · étape 03
-              </figcaption>
-            </figure>
-          </div>
-        ) : (
-          // Emplacement du QR code tant qu'aucune clé n'a été générée sur cette page.
-          <div className="mb-5 grid gap-6 border border-dashed border-cream/20 bg-black/20 p-5 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-center">
-            <p className="m-0 text-sm leading-relaxed text-dust-300">
-              {tracking?.has_device_key ? (
-                <>
-                  ✅ Une clé est déjà active. Pour configurer un téléphone (ou si la clé est perdue), générez-en une nouvelle :
-                  la clé et son <strong className="text-cream">QR code</strong> s’afficheront ici. L’ancienne clé cessera immédiatement de fonctionner.
-                </>
-              ) : (
-                <>
-                  Cliquez sur « Générer la clé » : la clé et son <strong className="text-cream">QR code de configuration</strong> s’afficheront ici.
-                </>
-              )}
-            </p>
-            <div className="flex aspect-square w-full max-w-[220px] flex-col items-center justify-center gap-2 justify-self-center border-2 border-dashed border-cream/20 p-4 text-center">
-              <QrCodeIcon className="h-10 w-10 text-dust-500" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-dust-500">Le QR code apparaîtra ici</span>
-            </div>
           </div>
         )}
 
@@ -442,7 +417,17 @@ export function GpsTab({ crew }: { crew: Crew }) {
             </Button>
           )}
         </div>
-        {fairPlayAccepted && (
+        {newKey ? (
+          <p className="mb-0 mt-4 border-l-[3px] border-live bg-live/[0.06] p-4 text-sm leading-relaxed text-dust-200">
+            <strong className="text-live">✅ Clé créée.</strong> Passez à l’étape 03 pour régler le téléphone de la 4L.
+          </p>
+        ) : tracking?.has_device_key ? (
+          <p className="mb-0 mt-4 text-sm leading-relaxed text-dust-300">
+            ✅ Une clé est déjà active. Téléphone pas encore réglé, ou un autre à régler ? Générez une nouvelle clé :
+            l’ancienne cessera immédiatement de fonctionner.
+          </p>
+        ) : null}
+        {fairPlayAccepted && !charterJustAccepted && (
           <p className="mb-0 mt-3 text-xs leading-relaxed text-dust-400">
             ✅ <Link to="/conditions-utilisation#fair-play" className="underline hover:text-cream">Charte fair-play</Link> acceptée
             le {formatDateTime(tracking?.fair_play_accepted_at)}
@@ -453,98 +438,129 @@ export function GpsTab({ crew }: { crew: Crew }) {
 
       {/* ── 03 Réglages ────────────────────────────────────────────────── */}
       <Step n="03" title="Régler l’appli">
-        <div className="mb-6 border-l-[3px] border-live bg-live/[0.06] p-4">
-          <p className="m-0 font-mono text-xs font-bold uppercase tracking-[0.12em] text-live">Le plus rapide : réglage automatique</p>
-          <p className="mb-0 mt-2 text-sm leading-relaxed text-dust-200">
-            <strong className="text-cream">Depuis un ordinateur :</strong> dans Traccar Client, ouvrez{' '}
-            <strong className="text-cream">Settings</strong> (⚙), touchez l’icône <strong className="text-cream">QR code en haut à droite</strong>{' '}
-            et scannez le code affiché à l’étape 02.
-          </p>
-          <p className="mb-0 mt-2 text-sm leading-relaxed text-dust-200">
-            <strong className="text-cream">Depuis le téléphone de la 4L :</strong> touchez « Ouvrir dans Traccar Client » à l’étape 02,
-            puis « OK ».
-          </p>
-          <p className="mb-0 mt-2 text-sm leading-relaxed text-dust-200">
-            Tous les réglages ci-dessous sont remplis d’un coup, sauf le mot de passe (facultatif).
-            {!newKey && ' Le QR code et le bouton apparaissent à l’étape 02 quand vous cliquez sur « Générer la clé ».'}
-          </p>
-        </div>
+        {!newKey ? (
+          <div className="flex flex-col items-center gap-3 border border-dashed border-cream/20 bg-black/20 p-6 text-center">
+            <QrCodeIcon className="h-10 w-10 text-dust-500" />
+            <p className="m-0 max-w-[460px] text-sm leading-relaxed text-dust-300">
+              Générez la clé à l’étape 02 : le <strong className="text-cream">QR code</strong> qui règle l’appli d’un coup apparaîtra ici.
+              {tracking?.has_device_key && ' (Une clé déjà active n’est jamais réaffichée : générez-en une nouvelle.)'}
+            </p>
+          </div>
+        ) : onPhone ? (
+          // Site ouvert sur un téléphone : impossible de scanner son propre écran, le bouton règle l'appli.
+          <div className="flex flex-col items-start gap-3">
+            <Button asChild size="lg">
+              <a href={traccarAppLink(address.url, newKey)}><Smartphone />Ouvrir dans Traccar Client</a>
+            </Button>
+            <p className="m-0 text-sm leading-relaxed text-dust-300">
+              Sur le téléphone de la 4L : touchez le bouton, puis <strong className="text-cream">OK</strong> à « Apply new configuration? ».
+              Tout est réglé d’un coup, sauf le mot de passe (facultatif).
+            </p>
+            <Button variant="ghost" size="sm" onClick={() => setShowQr(!showQr)}>
+              <QrCodeIcon />{showQr ? 'Masquer le QR code' : 'Afficher le QR code'}
+            </Button>
+            {showQr && (
+              <QrCode value={traccarConfigLink(address.url, newKey)} label="QR code de configuration de Traccar Client" className="w-full max-w-[220px] rounded-[4px]" />
+            )}
+          </div>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-[220px_minmax(0,1fr)] md:items-center">
+            <QrCode value={traccarConfigLink(address.url, newKey)} label="QR code de configuration de Traccar Client" className="w-full max-w-[220px] justify-self-center rounded-[4px]" />
+            <div className="flex flex-col gap-2 text-sm leading-relaxed text-dust-200">
+              <p className="m-0 text-base text-cream">
+                Scannez ce QR code avec <strong>l’appareil photo du téléphone de la 4L</strong>, puis touchez « Ouvrir dans Traccar Client » et{' '}
+                <strong>OK</strong>.
+              </p>
+              <p className="m-0 text-dust-300">Tout est réglé d’un coup, sauf le mot de passe (facultatif).</p>
+              <p className="m-0 text-xs text-dust-400">
+                Ça marche aussi depuis l’appli : <strong className="text-cream">Settings</strong> (⚙) → icône QR code en haut à droite.
+              </p>
+            </div>
+          </div>
+        )}
 
-        <p className="tt-kicker mb-1 mt-0 text-dust-400">Ou à la main · Settings</p>
-        <ul className="m-0 list-none p-0">
-          <SettingRow
-            name="Device identifier"
-            fr="Identifiant de l’appareil"
-            must
-            value={newKey ? <Value tone="secret" copy={newKey} label="Clé">{newKey}</Value> : <Value tone="muted">La clé de l’étape 02</Value>}
-            why="Effacez le numéro rempli par défaut et collez votre clé. C’est l’erreur la plus fréquente : avec le numéro par défaut, rien n’arrive."
-          />
-          <SettingRow
-            name="Server URL"
-            fr="Adresse du serveur"
-            must
-            value={<Value copy={address.known ? address.url : undefined} label="Adresse">{address.url}</Value>}
-            why={
-              address.local ? (
-                <>
-                  Adresse de ce PC sur votre réseau : le téléphone doit être <strong className="text-cream">sur le même Wi-Fi</strong>.
-                  {!address.known && <> Remplacez <code className="text-cream">IP-DE-VOTRE-PC</code> par l’IP du PC (commande <code className="text-cream">hostname -I</code>).</>}
-                  {' '}Si rien n’arrive, ouvrez le port dans le pare-feu du PC (<code className="text-cream">sudo ufw allow {window.__TT_CONFIG__?.lanPort ?? '80'}/tcp</code>).
-                </>
-              ) : (
-                'Copiez-la telle quelle, en entier (avec https:// et /ingest/osmand).'
-              )
-            }
-          />
-          <SettingRow
-            name="Location accuracy"
-            fr="Précision de la position"
-            must
-            value={<Value>High</Value>}
-            why="Par défaut l’appli est sur « Medium » : passez sur « High » pour une trace propre qui suit la route. Évitez « Highest », qui ignore le réglage de distance et vide la batterie."
-          />
-          <SettingRow
-            name="Distance"
-            fr="Distance entre deux positions (mètres)"
-            value={<Value>{SETTINGS.distance}</Value>}
-            why="Par défaut 75. Une position tous les 50 m quand la 4L roule (environ toutes les 2 secondes à 90 km/h) : une trace fidèle qui suit bien les virages, pour environ 20 Mo de forfait par journée de route."
-          />
-          <SettingRow
-            name="Stationary heartbeat"
-            fr="Signal de vie à l’arrêt (secondes)"
-            must
-            value={<Value>{SETTINGS.heartbeat}</Value>}
-            why="Désactivé par défaut ! À l’arrêt (pause, bivouac), il envoie une position toutes les 5 minutes pour que la page reste « En direct ». Le site considère l’équipage hors ligne après 10 minutes sans nouvelles : restez entre 60 et 600."
-          />
-        </ul>
+        <Button variant="outline" size="sm" className="mt-6" onClick={() => setShowManual(!showManual)} aria-expanded={showManual}>
+          {showManual ? <ChevronUp /> : <ChevronDown />}{showManual ? 'Masquer le réglage à la main' : 'Régler à la main'}
+        </Button>
+        {showManual && (
+          <div className="mt-4">
+            <p className="tt-kicker mb-1 mt-0 text-dust-400">Dans Traccar Client · Settings</p>
+            <ul className="m-0 list-none p-0">
+              <SettingRow
+                name="Device identifier"
+                fr="Identifiant de l’appareil"
+                must
+                value={newKey ? <Value tone="secret" copy={newKey} label="Clé">{newKey}</Value> : <Value tone="muted">La clé de l’étape 02</Value>}
+                why="Effacez le numéro rempli par défaut et collez votre clé. C’est l’erreur la plus fréquente : avec le numéro par défaut, rien n’arrive."
+              />
+              <SettingRow
+                name="Server URL"
+                fr="Adresse du serveur"
+                must
+                value={<Value copy={address.known ? address.url : undefined} label="Adresse">{address.url}</Value>}
+                why={
+                  address.local ? (
+                    <>
+                      Adresse de ce PC sur votre réseau : le téléphone doit être <strong className="text-cream">sur le même Wi-Fi</strong>.
+                      {!address.known && <> Remplacez <code className="text-cream">IP-DE-VOTRE-PC</code> par l’IP du PC (commande <code className="text-cream">hostname -I</code>).</>}
+                      {' '}Si rien n’arrive, ouvrez le port dans le pare-feu du PC (<code className="text-cream">sudo ufw allow {window.__TT_CONFIG__?.lanPort ?? '80'}/tcp</code>).
+                    </>
+                  ) : (
+                    'Copiez-la telle quelle, en entier (avec https:// et /ingest/osmand).'
+                  )
+                }
+              />
+              <SettingRow
+                name="Location accuracy"
+                fr="Précision de la position"
+                must
+                value={<Value>High</Value>}
+                why="Par défaut l’appli est sur « Medium » : passez sur « High » pour une trace propre qui suit la route. Évitez « Highest », qui ignore le réglage de distance et vide la batterie."
+              />
+              <SettingRow
+                name="Distance"
+                fr="Distance entre deux positions (mètres)"
+                value={<Value>{SETTINGS.distance}</Value>}
+                why="Par défaut 75. Une position tous les 50 m quand la 4L roule (environ toutes les 2 secondes à 90 km/h) : une trace fidèle qui suit bien les virages, pour environ 20 Mo de forfait par journée de route."
+              />
+              <SettingRow
+                name="Stationary heartbeat"
+                fr="Signal de vie à l’arrêt (secondes)"
+                must
+                value={<Value>{SETTINGS.heartbeat}</Value>}
+                why="Désactivé par défaut ! À l’arrêt (pause, bivouac), il envoie une position toutes les 5 minutes pour que la page reste « En direct ». Le site considère l’équipage hors ligne après 10 minutes sans nouvelles : restez entre 60 et 600."
+              />
+            </ul>
 
-        <p className="tt-kicker mb-1 mt-6 text-dust-400">Advanced settings</p>
-        <ul className="m-0 list-none p-0">
-          <SettingRow
-            name="Offline buffering"
-            fr="Mémoire hors ligne"
-            value={<Value tone="on">Activé</Value>}
-            why="Activé par défaut, à vérifier. Indispensable : sans réseau (Espagne rurale, désert marocain), les positions sont gardées dans le téléphone puis envoyées dès que ça capte. La trace se complète toute seule."
-          />
-          <SettingRow
-            name="Stop detection"
-            fr="Détection d’arrêt"
-            value={<Value tone="on">Activé</Value>}
-            why="Activé par défaut, à vérifier. Met le GPS en veille quand la 4L ne bouge plus pour économiser la batterie ; le suivi reprend dès qu’elle roule."
-          />
-          <SettingRow
-            name="Password"
-            fr="Mot de passe (facultatif)"
-            value={<Value tone="muted">Conseillé · au choix</Value>}
-            why={
-              <>
-                Un verrou <strong className="text-cream">sur le téléphone uniquement</strong> : il est demandé pour couper le suivi ou ouvrir
-                les réglages. Pratique pour qu’un équipier ne désactive pas le suivi par erreur. Il n’est jamais envoyé, n’a rien à voir avec
-                votre compte TrophyTracker, et le QR code ne le remplit pas : à saisir à la main si vous en voulez un.
-              </>
-            }
-          />
-        </ul>
+            <p className="tt-kicker mb-1 mt-6 text-dust-400">Advanced settings</p>
+            <ul className="m-0 list-none p-0">
+              <SettingRow
+                name="Offline buffering"
+                fr="Mémoire hors ligne"
+                value={<Value tone="on">Activé</Value>}
+                why="Activé par défaut, à vérifier. Indispensable : sans réseau (Espagne rurale, désert marocain), les positions sont gardées dans le téléphone puis envoyées dès que ça capte. La trace se complète toute seule."
+              />
+              <SettingRow
+                name="Stop detection"
+                fr="Détection d’arrêt"
+                value={<Value tone="on">Activé</Value>}
+                why="Activé par défaut, à vérifier. Met le GPS en veille quand la 4L ne bouge plus pour économiser la batterie ; le suivi reprend dès qu’elle roule."
+              />
+              <SettingRow
+                name="Password"
+                fr="Mot de passe (facultatif)"
+                value={<Value tone="muted">Conseillé · au choix</Value>}
+                why={
+                  <>
+                    Un verrou <strong className="text-cream">sur le téléphone uniquement</strong> : il est demandé pour couper le suivi ou ouvrir
+                    les réglages. Pratique pour qu’un équipier ne désactive pas le suivi par erreur. Il n’est jamais envoyé, n’a rien à voir avec
+                    votre compte TrophyTracker, et le QR code ne le remplit pas : à saisir à la main si vous en voulez un.
+                  </>
+                }
+              />
+            </ul>
+          </div>
+        )}
       </Step>
 
       {/* ── 04 Autorisations ───────────────────────────────────────────── */}
