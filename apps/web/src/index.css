@@ -123,6 +123,14 @@
   border: none !important;
 }
 
+/* Numéro d'un équipage à côté de sa 4L (carte de tous les équipages) */
+.tt-crew-label {
+  left: 24px;
+  background: #db4740;
+  color: #fff;
+  font-weight: 700;
+}
+
 /* Point du parcours : pastille + étiquette mono */
 .tt-wp {
   position: relative;

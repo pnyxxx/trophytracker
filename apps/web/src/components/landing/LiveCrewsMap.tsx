@@ -1,120 +1,105 @@
 /**
  * Carte « Où sont-ils ? » : parcours prévu et dernière position connue
- * de chaque équipage public. Un clic sur un équipage ouvre sa page.
+ * de chaque équipage public. Même rendu que la carte d'un équipage
+ * (fond OpenFreeMap réchauffé, repères d'étapes, 4L en point rouge).
  */
-import { useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import type { GeoJSONSource, Map as MlMap, Marker } from 'maplibre-gl';
+import { useEffect, useMemo, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { CircleMarker, MapContainer, Marker, Polyline, Popup, useMap } from 'react-leaflet';
+import { LatLngBounds } from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { Maximize } from 'lucide-react';
 import type { CrewSummary } from '@/hooks/queries';
-import { isLive } from '@/lib/format';
-import { maplibregl, POSITRON_STYLE, webglAvailable } from '@/lib/maplibre';
+import { formatRelative, isLive } from '@/lib/format';
+import { BaseMap } from '@/components/crew/BaseMap';
+import { crewIcon, waypointIcon, waypointStyle } from '@/components/crew/mapIcons';
 
-interface Point { name: string; lat: number; lon: number }
+export interface RoutePoint { name: string; kind: string; lat: number; lon: number }
+
+/** Cadre la carte sur tout le parcours, une seule fois. */
+function FitRoute({ coords }: { coords: [number, number][] }) {
+  const map = useMap();
+  const done = useRef(false);
+  useEffect(() => {
+    if (done.current || coords.length === 0) return;
+    done.current = true;
+    if (coords.length === 1) map.setView(coords[0]!, 8);
+    else map.fitBounds(new LatLngBounds(coords), { padding: [40, 40] });
+  }, [map, coords]);
+  return null;
+}
 
 /**
  * `route` : étapes nommées ; `line` : tracé [lon, lat] qui les relie ;
  * `passages` : lieux traversés sans nom affiché (villes floutées de l'étape marathon).
  */
 export default function LiveCrewsMap({ route, line, passages, crews }: {
-  route: Point[];
+  route: RoutePoint[];
   line: [number, number][];
   passages: { lat: number; lon: number }[];
   crews: CrewSummary[];
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<MlMap | null>(null);
-  // Actions en attente du chargement du style (on ne peut rien ajouter avant).
-  const loaded = useRef(false);
-  const pending = useRef<(() => void)[]>([]);
-  const whenLoaded = (fn: () => void) => (loaded.current ? fn() : pending.current.push(fn));
-  const crewMarkers = useRef<Marker[]>([]);
-  const routeMarkers = useRef<Marker[]>([]);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!ref.current || !webglAvailable()) return;
-    const map = new maplibregl.Map({
-      container: ref.current,
-      style: POSITRON_STYLE,
-      center: [-4.6, 37],
-      zoom: 4.2,
-      attributionControl: { compact: true },
-      cooperativeGestures: true,
-    });
-    mapRef.current = map;
-    map.on('load', () => {
-      loaded.current = true;
-      pending.current.splice(0).forEach((fn) => fn());
-    });
-    return () => {
-      loaded.current = false;
-      pending.current = [];
-      mapRef.current = null;
-      map.remove();
-    };
-  }, []);
-
-  // Parcours : trait pointillé, points des lieux traversés, étiquettes des étapes, cadrage sur l'ensemble.
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || line.length === 0) return;
-    const draw = () => {
-      const data = { type: 'Feature' as const, properties: {}, geometry: { type: 'LineString' as const, coordinates: line } };
-      // Un point exactement sur chaque étape (plein) et sur chaque lieu sans nom (creux).
-      const dots = {
-        type: 'FeatureCollection' as const,
-        features: [...route.map((p) => ({ ...p, named: true })), ...passages.map((p) => ({ ...p, named: false }))].map((p) => ({
-          type: 'Feature' as const,
-          properties: { named: p.named },
-          geometry: { type: 'Point' as const, coordinates: [p.lon, p.lat] },
-        })),
-      };
-      const src = map.getSource('route') as GeoJSONSource | undefined;
-      if (src) {
-        src.setData(data);
-        (map.getSource('passages') as GeoJSONSource).setData(dots);
-      } else {
-        map.addSource('route', { type: 'geojson', data });
-        map.addLayer({ id: 'route', type: 'line', source: 'route', layout: { 'line-join': 'round' }, paint: { 'line-color': '#1A1612', 'line-width': 2.5, 'line-dasharray': [2, 1.5] } });
-        map.addSource('passages', { type: 'geojson', data: dots });
-        map.addLayer({ id: 'passages', type: 'circle', source: 'passages', paint: { 'circle-radius': 4, 'circle-color': ['case', ['get', 'named'], '#1A1612', '#F4ECDF'], 'circle-stroke-color': '#1A1612', 'circle-stroke-width': 2 } });
-      }
-      routeMarkers.current.forEach((m) => m.remove());
-      routeMarkers.current = route.map((w) => {
-        const el = document.createElement('div');
-        el.style.cssText = "background:#1A1612;color:#F4ECDF;font:600 10px 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;padding:3px 6px;white-space:nowrap";
-        el.textContent = w.name;
-        return new maplibregl.Marker({ element: el, anchor: 'left', offset: [8, 0] }).setLngLat([w.lon, w.lat]).addTo(map);
-      });
-      const bounds = new maplibregl.LngLatBounds();
-      line.forEach((pt) => bounds.extend(pt));
-      map.fitBounds(bounds, { padding: 60, duration: 0 });
-    };
-    whenLoaded(draw);
-  }, [route, line, passages]);
-
-  // Équipages : pastille « #numéro », bord vert s'ils émettent en ce moment.
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-    crewMarkers.current.forEach((m) => m.remove());
-    crewMarkers.current = crews
+  const containerRef = useRef<HTMLDivElement>(null);
+  const path = useMemo(() => line.map(([lon, lat]) => [lat, lon] as [number, number]), [line]);
+  const routeIcons = useMemo(() => route.map((w) => waypointIcon(w)), [route]);
+  const placed = useMemo(
+    () => crews
       .filter((c) => c.last_lat != null && c.last_lon != null)
-      .map((c) => {
-        const el = document.createElement('button');
-        el.type = 'button';
-        el.style.cssText = `background:#DB4740;color:#fff;font:700 11px 'JetBrains Mono',monospace;padding:4px 7px;border-radius:3px;border:2px solid ${isLive(c.last_fix_at) ? '#3DD68C' : '#fff'};box-shadow:0 4px 12px rgba(0,0,0,.35);cursor:pointer`;
-        el.textContent = c.car_number ? `#${c.car_number}` : c.name;
-        el.title = c.name;
-        el.setAttribute('aria-label', `Voir l'équipage ${c.name}`);
-        el.addEventListener('click', () => navigate(`/equipages/${c.slug}`));
-        return new maplibregl.Marker({ element: el }).setLngLat([c.last_lon!, c.last_lat!]).addTo(map);
-      });
-  }, [crews, navigate]);
+      .map((c) => ({ crew: c, live: isLive(c.last_fix_at), icon: crewIcon(isLive(c.last_fix_at), c.car_number ? `#${c.car_number}` : c.name) })),
+    [crews],
+  );
 
   return (
-    <div className="tt-parchment absolute inset-0">
-      <div ref={ref} className="h-full w-full" />
+    <div ref={containerRef} className="absolute inset-0">
+      <MapContainer center={[37, -4.6]} zoom={5} preferCanvas scrollWheelZoom className="h-full w-full" style={{ zIndex: 0 }}>
+        <BaseMap />
+        <FitRoute coords={path} />
+
+        {path.length > 1 && (
+          // Parcours prévu en pointillés : la trace rouge, elle, est réservée à la page de chaque équipage.
+          <Polyline positions={path} pathOptions={{ color: '#1A1612', weight: 2.5, opacity: 0.8, dashArray: '6 6' }} />
+        )}
+
+        {passages.map((p) => (
+          <CircleMarker
+            key={`${p.lat},${p.lon}`}
+            center={[p.lat, p.lon]}
+            radius={4}
+            pathOptions={{ color: '#1A1612', weight: 2, fillColor: '#F4ECDF', fillOpacity: 1 }}
+          />
+        ))}
+
+        {route.map((w, i) => (
+          <Marker key={`${w.name}-${i}`} position={[w.lat, w.lon]} icon={routeIcons[i]}>
+            <Popup>
+              <p className="text-xs font-semibold uppercase text-black/50">{waypointStyle(w.kind).label}</p>
+              <p className="font-bold text-black">{w.name}</p>
+            </Popup>
+          </Marker>
+        ))}
+
+        {placed.map(({ crew, live, icon }) => (
+          <Marker key={crew.id} position={[crew.last_lat!, crew.last_lon!]} icon={icon} zIndexOffset={1000}>
+            <Popup>
+              <p className="font-bold text-black">{crew.name}</p>
+              <p className="text-sm text-black/70">
+                {live ? '● En direct' : `Dernière position ${formatRelative(crew.last_fix_at)}`}
+              </p>
+              <Link to={`/equipages/${crew.slug}`} className="text-sm text-primary underline">Suivre sa trace</Link>
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
+
+      <div className="absolute right-3 top-3 z-[500]">
+        <button
+          onClick={() => containerRef.current?.requestFullscreen?.()}
+          className="flex items-center justify-center gap-2 rounded-[4px] bg-ink px-3 py-2.5 text-cream shadow-lg hover:bg-primary"
+          aria-label="Carte en plein écran"
+        >
+          <Maximize className="h-4 w-4" />
+        </button>
+      </div>
     </div>
   );
 }

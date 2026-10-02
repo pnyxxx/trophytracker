@@ -11,7 +11,7 @@ import { fmtKm, PASSAGES, ROUTE_LINE, routeKmOf, STOPS, TOTAL_KM } from '@/compo
 import { useCrewSearch, useEvent } from '@/hooks/queries';
 import { useSeen } from '@/hooks/useInView';
 
-// La carte (MapLibre) est chargée à part : la liste s'affiche tout de suite.
+// La carte (Leaflet + MapLibre) est chargée à part : la liste s'affiche tout de suite.
 const LiveCrewsMap = lazy(() => import('@/components/landing/LiveCrewsMap'));
 
 const PAGE = 24;
@@ -54,7 +54,13 @@ export default function CrewsPage() {
     const named = event?.waypoints.length
       ? event.waypoints.filter((w) => !w.parent_id)
       : [...STOPS.filter((s) => s.sign === undefined), ...PASSAGES.filter((p) => !p.blurred)];
-    const points = named.map((w) => ({ name: w.name, lat: w.lat, lon: w.lon }));
+    // Type de repère (couleur de la pastille) : celui de l'administration, sinon départ / étapes / arrivée.
+    const points = named.map((w, i) => ({
+      name: w.name,
+      kind: 'parent_id' in w ? w.kind : i === 0 ? 'start' : i === named.length - 1 ? 'finish' : 'stage',
+      lat: w.lat,
+      lon: w.lon,
+    }));
     const onRoute = points.every((w) => routeKmOf(w.lat, w.lon) !== null);
     return {
       route: points,
@@ -82,13 +88,13 @@ export default function CrewsPage() {
             </p>
           </div>
 
-          <div ref={mapRef} className="relative min-h-[560px] overflow-hidden border border-cream/[0.14] bg-[#E8E2D8]">
+          <div ref={mapRef} className="relative h-[70vh] min-h-[420px] overflow-hidden border border-cream/[0.14] bg-[#E8E2D8] md:h-[600px]">
             {mapSeen && (
               <Suspense fallback={null}>
                 <LiveCrewsMap route={route} line={line} passages={passages} crews={all?.items ?? []} />
               </Suspense>
             )}
-            <div className="pointer-events-none absolute left-3.5 top-3.5 z-[2] bg-ink px-3 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-cream">
+            <div className="pointer-events-none absolute bottom-3.5 left-3.5 z-[500] bg-ink px-3 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-cream">
               {route[0]?.name ?? 'Biarritz'} → {route.at(-1)?.name ?? 'Marrakech'} · {totalKm} km
             </div>
           </div>
