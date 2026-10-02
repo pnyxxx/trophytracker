@@ -125,7 +125,10 @@ export default function CrewPage() {
 
       {/* ── En-tête ──────────────────────────────────────────────────────── */}
       <header className="relative overflow-hidden bg-[radial-gradient(120%_80%_at_80%_0%,#3A2215_0%,#1B1310_45%,#120F0C_75%)]">
-        {cover && <img src={cover} alt="" className="absolute inset-0 h-full w-full object-cover opacity-35" />}
+        {cover && (
+          <img src={cover} alt="" className="absolute inset-0 h-full w-full object-cover opacity-35"
+            style={{ objectPosition: `${crew.cover_focus_x}% ${crew.cover_focus_y}%` }} />
+        )}
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(18,15,12,.55)_0%,rgba(18,15,12,.3)_40%,#120F0C_100%)]" />
         <Container className="relative grid gap-10 pb-14 pt-32 md:pb-16 md:pt-40 lg:grid-cols-[1fr_auto] lg:items-end">
           <div className="flex min-w-0 flex-col gap-6">

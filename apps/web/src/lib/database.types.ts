@@ -196,6 +196,8 @@ export type Database = {
           car_number: string | null
           city: string | null
           contact_email: string | null
+          cover_focus_x: number
+          cover_focus_y: number
           cover_path: string | null
           created_at: string
           current_rank: number | null
@@ -224,6 +226,8 @@ export type Database = {
           car_number?: string | null
           city?: string | null
           contact_email?: string | null
+          cover_focus_x?: number
+          cover_focus_y?: number
           cover_path?: string | null
           created_at?: string
           current_rank?: number | null
@@ -252,6 +256,8 @@ export type Database = {
           car_number?: string | null
           city?: string | null
           contact_email?: string | null
+          cover_focus_x?: number
+          cover_focus_y?: number
           cover_path?: string | null
           created_at?: string
           current_rank?: number | null
@@ -700,6 +706,8 @@ export type Database = {
           car_number: string | null
           city: string | null
           contact_email: string | null
+          cover_focus_x: number
+          cover_focus_y: number
           cover_path: string | null
           created_at: string
           current_rank: number | null

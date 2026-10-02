@@ -1,16 +1,15 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { ImagePlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { supabase, type Crew } from '@/lib/supabase';
 import { toastError, unwrap } from '@/lib/errors';
-import { mediaUrl, removeCrewImages, uploadCrewImage } from '@/lib/media';
 import { keys } from '@/hooks/queries';
 import { Field, numOrNull, orNull, Panel, textareaClass } from './shared';
+import { AvatarPicker, CoverPicker } from './CrewImages';
 
 type Editable = Pick<Crew,
   'name' | 'car_number' | 'tagline' | 'story' | 'school' | 'city' | 'contact_email' |
@@ -23,52 +22,13 @@ const toForm = (c: Crew) => ({
   current_rank: c.current_rank?.toString() ?? '', supplies_count: c.supplies_count?.toString() ?? '',
 });
 
-function ImagePicker({ crew, kind }: { crew: Crew; kind: 'avatar' | 'cover' }) {
-  const queryClient = useQueryClient();
-  const column = kind === 'avatar' ? 'avatar_path' : 'cover_path';
-  const current = mediaUrl(crew[column]);
-
-  const upload = useMutation({
-    mutationFn: async (file: File) => {
-      const { path } = await uploadCrewImage(crew.id, kind, file, kind);
-      const { error } = await supabase
-        .from('crews')
-        .update(kind === 'avatar' ? { avatar_path: path } : { cover_path: path })
-        .eq('id', crew.id);
-      if (error) {
-        await removeCrewImages(path);
-        throw error;
-      }
-      await removeCrewImages(crew[column]);
-    },
-    onSuccess: () => {
-      toast.success(kind === 'avatar' ? 'Logo mis à jour' : 'Image de couverture mise à jour');
-      void queryClient.invalidateQueries({ queryKey: keys.crew(crew.slug) });
-      void queryClient.invalidateQueries({ queryKey: ['my-crews'] });
-    },
-    onError: toastError,
-  });
-
-  return (
-    <label className={`group relative flex cursor-pointer items-center justify-center overflow-hidden rounded-[4px] border-2 border-dashed border-cream/20 bg-cream/5 hover:border-primary ${kind === 'avatar' ? 'h-32 w-32' : 'h-32 w-full'}`}>
-      {current ? <img src={current} alt="" className="h-full w-full object-cover" /> : (
-        <span className="flex flex-col items-center gap-1 text-xs text-dust-400"><ImagePlus className="h-6 w-6" />{kind === 'avatar' ? 'Logo' : 'Couverture'}</span>
-      )}
-      {upload.isPending && <span className="absolute inset-0 flex items-center justify-center bg-black/70 text-sm text-cream">Envoi…</span>}
-      <input
-        type="file"
-        accept="image/*"
-        className="sr-only"
-        onChange={(e) => { const f = e.target.files?.[0]; if (f) upload.mutate(f); e.target.value = ''; }}
-      />
-    </label>
-  );
-}
-
 export function InfoTab({ crew }: { crew: Crew }) {
   const queryClient = useQueryClient();
   const [form, setForm] = useState(() => toForm(crew));
-  useEffect(() => setForm(toForm(crew)), [crew]);
+  // On ne recharge le formulaire que si ses champs ont changé côté serveur :
+  // changer une image ou le cadrage ne doit pas effacer une saisie en cours.
+  const serverForm = JSON.stringify(toForm(crew));
+  useEffect(() => setForm(JSON.parse(serverForm) as ReturnType<typeof toForm>), [serverForm]);
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm({ ...form, [k]: e.target.value });
 
@@ -98,10 +58,10 @@ export function InfoTab({ crew }: { crew: Crew }) {
 
   return (
     <form onSubmit={(e: FormEvent) => { e.preventDefault(); save.mutate(); }} className="space-y-6">
-      <Panel title="Images" description="Le logo apparaît sur la carte et dans la liste des équipages.">
+      <Panel title="Images" description="Le logo apparaît sur la carte et dans la liste des équipages ; la couverture en fond du haut de votre page.">
         <div className="flex flex-col gap-4 sm:flex-row">
-          <ImagePicker crew={crew} kind="avatar" />
-          <ImagePicker crew={crew} kind="cover" />
+          <AvatarPicker crew={crew} />
+          <CoverPicker crew={crew} />
         </div>
       </Panel>
 
