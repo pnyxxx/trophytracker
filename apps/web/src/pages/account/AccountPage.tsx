@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Plus, Settings } from 'lucide-react';
+import { ArrowRight, CircleCheck, Flag, Plus, Satellite, Settings, Share2, Users } from 'lucide-react';
 import { Container, PageHero } from '@/components/common/Brand';
 import { Panel } from '@/components/manage/shared';
 import { PageShell } from '@/components/layout/PageShell';
@@ -15,7 +15,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { CrewAvatar, CrewCard } from '@/components/crew/CrewBits';
 import { SecuritySection } from '@/components/account/SecuritySection';
 import { CrewAccessPurchase } from '@/components/account/CrewAccessPurchase';
@@ -25,8 +25,21 @@ import { supabase } from '@/lib/supabase';
 import { toastError, unwrap } from '@/lib/errors';
 import { formatRelative } from '@/lib/format';
 
-function CreateCrewDialog({ defaultOpen = false }: { defaultOpen?: boolean }) {
-  const [open, setOpen] = useState(defaultOpen);
+/** La suite après le paiement, montrée dans la fenêtre de bienvenue. */
+const NEXT_STEPS = [
+  { icon: Flag, title: 'Créer la page de l’équipage', text: 'Un nom, et c’est parti. Le reste se complète quand vous voulez.' },
+  { icon: Users, title: 'Inviter vos coéquipiers', text: 'Onglet « Membres » : ils rejoignent la page gratuitement.' },
+  { icon: Satellite, title: 'Brancher le GPS', text: 'Onglet « GPS » : un téléphone dans la 4L suffit, on vous guide pas à pas.' },
+  { icon: Share2, title: 'Partager avec vos proches', text: 'Onglet « QR code » : le lien à envoyer à la famille et aux sponsors.' },
+];
+
+/**
+ * Création de l'équipage. Au retour de Stripe (`welcome`), la fenêtre s'ouvre
+ * d'abord sur un remerciement et la suite en quelques étapes, puis le formulaire.
+ */
+function CreateCrewDialog({ welcome = false, onClose }: { welcome?: boolean; onClose?: () => void }) {
+  const [open, setOpen] = useState(welcome);
+  const [step, setStep] = useState<'welcome' | 'form'>(welcome ? 'welcome' : 'form');
   const [form, setForm] = useState({ name: '', car: '', tagline: '' });
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -44,30 +57,66 @@ function CreateCrewDialog({ defaultOpen = false }: { defaultOpen?: boolean }) {
   });
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) { setStep('form'); onClose?.(); }
+      }}
+    >
       <DialogTrigger asChild>
         <Button><Plus />Créer mon équipage</Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>Mon équipage</DialogTitle></DialogHeader>
-        <form
-          onSubmit={(e: FormEvent) => { e.preventDefault(); create.mutate(); }}
-          className="space-y-4"
-        >
-          <div className="space-y-2">
-            <Label htmlFor="crew-name">Nom de l'équipage</Label>
-            <Input id="crew-name" required minLength={2} maxLength={80} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="crew-car">Numéro d'équipage <span className="text-muted-foreground">(optionnel)</span></Label>
-            <Input id="crew-car" maxLength={10} value={form.car} onChange={(e) => setForm({ ...form, car: e.target.value })} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="crew-tagline">Slogan <span className="text-muted-foreground">(optionnel)</span></Label>
-            <Input id="crew-tagline" maxLength={140} value={form.tagline} onChange={(e) => setForm({ ...form, tagline: e.target.value })} />
-          </div>
-          <Button type="submit" className="w-full" disabled={create.isPending}>{create.isPending ? 'Création…' : 'Créer'}</Button>
-        </form>
+        {step === 'welcome' ? (
+          <>
+            <DialogHeader>
+              <p className="tt-kicker m-0 flex items-center justify-center gap-2 text-live sm:justify-start">
+                <CircleCheck className="h-4 w-4" />Paiement reçu
+              </p>
+              <DialogTitle className="font-display text-4xl font-black uppercase leading-none">Merci, et bienvenue&nbsp;!</DialogTitle>
+              <DialogDescription className="text-dust-300">
+                Votre accès équipage est activé. Stripe vous envoie le reçu par email. Voici la suite :
+              </DialogDescription>
+            </DialogHeader>
+            <ol className="m-0 list-none space-y-3 p-0">
+              {NEXT_STEPS.map(({ icon: Icon, title, text }, i) => (
+                <li key={title} className="flex gap-3">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center border border-cream/15 text-ochre">
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  <span className="min-w-0">
+                    <strong className="block text-sm text-cream">{i + 1}. {title}</strong>
+                    <span className="text-xs leading-relaxed text-dust-400">{text}</span>
+                  </span>
+                </li>
+              ))}
+            </ol>
+            <Button className="w-full" onClick={() => setStep('form')}>Créer mon équipage<ArrowRight /></Button>
+          </>
+        ) : (
+          <>
+            <DialogHeader><DialogTitle>Mon équipage</DialogTitle></DialogHeader>
+            <form
+              onSubmit={(e: FormEvent) => { e.preventDefault(); create.mutate(); }}
+              className="space-y-4"
+            >
+              <div className="space-y-2">
+                <Label htmlFor="crew-name">Nom de l'équipage</Label>
+                <Input id="crew-name" required minLength={2} maxLength={80} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="crew-car">Numéro d'équipage <span className="text-muted-foreground">(optionnel)</span></Label>
+                <Input id="crew-car" maxLength={10} value={form.car} onChange={(e) => setForm({ ...form, car: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="crew-tagline">Slogan <span className="text-muted-foreground">(optionnel)</span></Label>
+                <Input id="crew-tagline" maxLength={140} value={form.tagline} onChange={(e) => setForm({ ...form, tagline: e.target.value })} />
+              </div>
+              <Button type="submit" className="w-full" disabled={create.isPending}>{create.isPending ? 'Création…' : 'Créer'}</Button>
+            </form>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -138,7 +187,7 @@ export default function AccountPage() {
                 Votre accès équipage est prêt : créez la page de votre équipage. Vos coéquipiers la rejoindront ensuite par
                 invitation, gratuitement.
               </p>
-              <CreateCrewDialog defaultOpen={payment === 'ok'} />
+              <CreateCrewDialog welcome={payment === 'ok'} onClose={() => setParams({}, { replace: true })} />
             </div>
           ) : !myCrew && payment === 'ok' ? (
             <div className="flex items-center gap-3 text-dust-200">
