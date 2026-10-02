@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/auth';
 import { supabase } from '@/lib/supabase';
@@ -80,11 +81,11 @@ function PasswordForm() {
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="new-pw">Nouveau mot de passe</Label>
-          <Input id="new-pw" type="password" autoComplete="new-password" minLength={10} required value={pw.next} onChange={(e) => setPw({ ...pw, next: e.target.value })} />
+          <PasswordInput id="new-pw" autoComplete="new-password" minLength={10} required value={pw.next} onChange={(e) => setPw({ ...pw, next: e.target.value })} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="confirm-pw">Confirmer</Label>
-          <Input id="confirm-pw" type="password" autoComplete="new-password" required value={pw.confirm} onChange={(e) => setPw({ ...pw, confirm: e.target.value })} />
+          <PasswordInput id="confirm-pw" autoComplete="new-password" required value={pw.confirm} onChange={(e) => setPw({ ...pw, confirm: e.target.value })} />
         </div>
       </div>
       {code !== null && (

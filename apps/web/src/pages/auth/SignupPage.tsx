@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/auth';
 import { supabase } from '@/lib/supabase';
@@ -68,11 +69,11 @@ export default function SignupPage() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="password">Mot de passe <span className="text-dust-500">(10 caractères min.)</span></Label>
-          <Input id="password" type="password" autoComplete="new-password" required minLength={10} value={form.password} onChange={set('password')} />
+          <PasswordInput id="password" autoComplete="new-password" required minLength={10} value={form.password} onChange={set('password')} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="confirm">Confirmer le mot de passe</Label>
-          <Input id="confirm" type="password" autoComplete="new-password" required value={form.confirm} onChange={set('confirm')} />
+          <PasswordInput id="confirm" autoComplete="new-password" required value={form.confirm} onChange={set('confirm')} />
         </div>
         {error && <p role="alert" className="text-sm text-primary-light">{error}</p>}
         <Button type="submit" className="w-full" disabled={busy}>{busy ? 'Création…' : 'Créer mon compte'}</Button>

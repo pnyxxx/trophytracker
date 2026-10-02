@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import { PageLoader } from '@/components/common/Spinner';
 import { useAuth } from '@/hooks/auth';
@@ -73,11 +74,11 @@ export default function InvitationPage() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="password">Mot de passe <span className="text-dust-500">(10 caractères min.)</span></Label>
-          <Input id="password" type="password" autoComplete="new-password" required minLength={10} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+          <PasswordInput id="password" autoComplete="new-password" required minLength={10} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="confirm">Confirmer</Label>
-          <Input id="confirm" type="password" autoComplete="new-password" required value={form.confirm} onChange={(e) => setForm({ ...form, confirm: e.target.value })} />
+          <PasswordInput id="confirm" autoComplete="new-password" required value={form.confirm} onChange={(e) => setForm({ ...form, confirm: e.target.value })} />
         </div>
         {error && <p role="alert" className="text-sm text-primary-light">{error}</p>}
         <Button type="submit" className="w-full" disabled={busy}>{busy ? 'Activation…' : 'Activer mon compte'}</Button>
