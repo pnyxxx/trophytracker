@@ -1,6 +1,6 @@
 import { lazy, Suspense, useMemo, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Globe, Instagram, Mail, Settings } from 'lucide-react';
+import { Facebook, Instagram, Mail, Settings } from 'lucide-react';
 import { PageShell } from '@/components/layout/PageShell';
 import { Seo } from '@/components/common/Seo';
 import { Container, Kicker, LiveDot, SectionTitle } from '@/components/common/Brand';
@@ -81,7 +81,6 @@ export default function CrewPage() {
   const cover = mediaUrl(crew.cover_path);
   const live = isLive(crew.last_fix_at);
   const hasRoute = !!event && roadbook.stops.length > 1;
-  const hasContact = !!(crew.contact_email || crew.instagram_url || crew.website_url);
 
   const anchors = [
     { id: 'carte', label: 'Carte' },
@@ -108,7 +107,7 @@ export default function CrewPage() {
             sport: '4L Trophy',
             image: cover ?? mediaUrl(crew.avatar_path) ?? undefined,
             url: `${window.location.origin}/equipages/${crew.slug}`,
-            sameAs: [crew.instagram_url, crew.website_url].filter(Boolean),
+            sameAs: [crew.instagram_url, crew.facebook_url].filter(Boolean),
             athlete: members.map((m) => ({ '@type': 'Person', name: m.display_name })),
           },
           {
@@ -149,6 +148,20 @@ export default function CrewPage() {
               {(crew.school || crew.city) && <span>{[crew.school, crew.city].filter(Boolean).join(' · ')}</span>}
               {members.length > 0 && <span>Équipage : {members.map((m) => m.display_name).join(' & ')}</span>}
             </div>
+            {(crew.instagram_url || crew.facebook_url) && (
+              <div className="flex flex-wrap gap-3">
+                {crew.instagram_url && (
+                  <Button asChild size="lg" className="bg-[linear-gradient(45deg,#F58529_0%,#DD2A7B_55%,#8134AF_100%)] text-white shadow-lg hover:brightness-110">
+                    <a href={crew.instagram_url} target="_blank" rel="noopener noreferrer"><Instagram />Instagram</a>
+                  </Button>
+                )}
+                {crew.facebook_url && (
+                  <Button asChild size="lg" className="bg-[#1877F2] text-white shadow-lg hover:bg-[#1465D0]">
+                    <a href={crew.facebook_url} target="_blank" rel="noopener noreferrer"><Facebook />Facebook</a>
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col gap-5 lg:items-end">
@@ -247,20 +260,12 @@ export default function CrewPage() {
       )}
 
       {/* ── Contact ──────────────────────────────────────────────────────── */}
-      {hasContact && (
+      {crew.contact_email && (
         <section className="border-t border-cream/[0.12] bg-ink py-14">
           <Container className="flex flex-wrap items-center justify-between gap-6">
             <p className="m-0 font-display text-4xl font-black uppercase leading-none">Un message pour l’équipage ?</p>
             <div className="flex flex-wrap gap-3">
-              {crew.contact_email && (
-                <Button asChild variant="secondary"><a href={`mailto:${crew.contact_email}`}><Mail />Contacter l'équipage</a></Button>
-              )}
-              {crew.instagram_url && (
-                <Button asChild variant="secondary"><a href={crew.instagram_url} target="_blank" rel="noopener noreferrer"><Instagram />Instagram</a></Button>
-              )}
-              {crew.website_url && (
-                <Button asChild variant="secondary"><a href={crew.website_url} target="_blank" rel="noopener noreferrer"><Globe />Site web</a></Button>
-              )}
+              <Button asChild variant="secondary"><a href={`mailto:${crew.contact_email}`}><Mail />Contacter l'équipage</a></Button>
             </div>
           </Container>
         </section>

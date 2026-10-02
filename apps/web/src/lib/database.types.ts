@@ -201,6 +201,7 @@ export type Database = {
           cover_path: string | null
           created_at: string
           current_rank: number | null
+          facebook_url: string | null
           followers_count: number
           id: string
           instagram_url: string | null
@@ -231,6 +232,7 @@ export type Database = {
           cover_path?: string | null
           created_at?: string
           current_rank?: number | null
+          facebook_url?: string | null
           followers_count?: number
           id?: string
           instagram_url?: string | null
@@ -261,6 +263,7 @@ export type Database = {
           cover_path?: string | null
           created_at?: string
           current_rank?: number | null
+          facebook_url?: string | null
           followers_count?: number
           id?: string
           instagram_url?: string | null
@@ -711,6 +714,7 @@ export type Database = {
           cover_path: string | null
           created_at: string
           current_rank: number | null
+          facebook_url: string | null
           followers_count: number
           id: string
           instagram_url: string | null

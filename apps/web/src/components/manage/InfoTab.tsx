@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { supabase, type Crew } from '@/lib/supabase';
+import { socialUrl } from '@/lib/social';
 import { toastError, unwrap } from '@/lib/errors';
 import { keys } from '@/hooks/queries';
 import { Field, numOrNull, orNull, Panel, textareaClass } from './shared';
@@ -13,12 +14,12 @@ import { AvatarPicker, CoverPicker } from './CrewImages';
 
 type Editable = Pick<Crew,
   'name' | 'car_number' | 'tagline' | 'story' | 'school' | 'city' | 'contact_email' |
-  'instagram_url' | 'website_url' | 'is_public' | 'current_rank' | 'supplies_count'>;
+  'instagram_url' | 'facebook_url' | 'is_public' | 'current_rank' | 'supplies_count'>;
 
 const toForm = (c: Crew) => ({
   name: c.name, car_number: c.car_number ?? '', tagline: c.tagline ?? '', story: c.story ?? '',
   school: c.school ?? '', city: c.city ?? '', contact_email: c.contact_email ?? '',
-  instagram_url: c.instagram_url ?? '', website_url: c.website_url ?? '', is_public: c.is_public,
+  instagram_url: c.instagram_url ?? '', facebook_url: c.facebook_url ?? '', is_public: c.is_public,
   current_rank: c.current_rank?.toString() ?? '', supplies_count: c.supplies_count?.toString() ?? '',
 });
 
@@ -38,13 +39,10 @@ export function InfoTab({ crew }: { crew: Crew }) {
         name: form.name.trim(),
         car_number: orNull(form.car_number), tagline: orNull(form.tagline), story: orNull(form.story),
         school: orNull(form.school), city: orNull(form.city), contact_email: orNull(form.contact_email),
-        instagram_url: orNull(form.instagram_url), website_url: orNull(form.website_url),
+        instagram_url: socialUrl('instagram', form.instagram_url), facebook_url: socialUrl('facebook', form.facebook_url),
         is_public: form.is_public,
         current_rank: numOrNull(form.current_rank), supplies_count: numOrNull(form.supplies_count),
       };
-      for (const url of [patch.instagram_url, patch.website_url]) {
-        if (url && !/^https?:\/\//i.test(url)) throw new Error('Les liens doivent commencer par https://');
-      }
       unwrap(await supabase.from('crews').update(patch).eq('id', crew.id));
     },
     onSuccess: () => {
@@ -89,11 +87,11 @@ export function InfoTab({ crew }: { crew: Crew }) {
         </div>
       </Panel>
 
-      <Panel title="Contact & réseaux">
+      <Panel title="Contact & réseaux" description="Instagram et Facebook s’affichent en boutons bien visibles en haut de votre page ; l’email, en bas, dans « Un message pour l’équipage ? ».">
         <div className="grid gap-4 md:grid-cols-3">
           <Field id="email" label="Email de contact"><Input id="email" type="email" value={form.contact_email} onChange={set('contact_email')} /></Field>
-          <Field id="insta" label="Instagram"><Input id="insta" type="url" placeholder="https://instagram.com/…" value={form.instagram_url} onChange={set('instagram_url')} /></Field>
-          <Field id="web" label="Site web"><Input id="web" type="url" placeholder="https://…" value={form.website_url} onChange={set('website_url')} /></Field>
+          <Field id="insta" label="Instagram"><Input id="insta" inputMode="url" placeholder="@votre-compte ou lien" value={form.instagram_url} onChange={set('instagram_url')} /></Field>
+          <Field id="facebook" label="Facebook"><Input id="facebook" inputMode="url" placeholder="Lien de votre page" value={form.facebook_url} onChange={set('facebook_url')} /></Field>
         </div>
       </Panel>
 
