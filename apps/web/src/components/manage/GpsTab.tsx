@@ -578,6 +578,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
               items: [
                 'Réglages → Traccar Client → Position : « Toujours »',
                 'Position exacte : activée',
+                'Mouvements et forme : activé',
                 'Actualisation en arrière-plan : activée',
                 'Ne fermez pas l’appli en la balayant vers le haut',
               ],
