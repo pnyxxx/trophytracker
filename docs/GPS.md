@@ -9,7 +9,7 @@ son espace : *Mon compte → Gérer → onglet GPS*, qui guide pas à pas.
 
 **Configuration express** : quand l'équipage génère sa clé, l'onglet GPS affiche un QR code. Dans l'appli,
 *Settings* → icône QR en haut à droite → scanner : tous les réglages ci-dessous sont appliqués d'un coup.
-Le QR code contient `https://votre-domaine.fr/ingest/osmand?id=<clé>&accuracy=high&distance=50&heartbeat=300&buffer=true&stop_detection=true`
+Le QR code contient `https://votre-domaine.fr/ingest/osmand?id=<clé>&accuracy=high&distance=50&heartbeat=300&buffer=true&stop_detection=false`
 (l'appli prend l'adresse sans ses paramètres comme *Server URL*). Il contient la clé : ne pas le partager.
 
 | Réglage de l'appli (en anglais) | Valeur | Défaut de l'appli |
@@ -20,7 +20,7 @@ Le QR code contient `https://votre-domaine.fr/ingest/osmand?id=<clé>&accuracy=h
 | Distance | 50 m (une position toutes les ~2 s à 90 km/h : trace qui suit les virages) | 75 |
 | Stationary heartbeat | 300 s (le site affiche « En direct » jusqu'à 10 min sans nouvelles) | 0 = désactivé → **à changer** |
 | Advanced → Offline buffering | activé (indispensable dans le désert) | activé |
-| Advanced → Stop detection | activé (économise la batterie à l'arrêt) | activé |
+| Advanced → Stop detection | **désactivé** : activé, l'appli coupe le GPS à l'arrêt et compte sur iOS pour la réveiller au départ, ce qui échoue parfois (trace perdue pendant des heures, vu le 2026-10-03). Le serveur écarte lui-même les points à l'arrêt | activé → **à changer** |
 | Advanced → Password | facultatif : verrou local de l'interrupteur de suivi et des réglages, jamais envoyé, non transmis par QR code | vide |
 
 **En local**, `localhost` ne fonctionne pas depuis un téléphone : l'onglet GPS affiche l'IP du PC sur le Wi-Fi
@@ -68,7 +68,8 @@ Chaque position passe par `private.ingest_position()` (dans la base) :
 | plus ancienne que la dernière position stockée, ou doublon | ignorée (`stale`) |
 | saut impossible (> 400 km/h) | ignorée (`glitch`) : bug GPS classique — mais gardée en attente |
 | saut **confirmé** par le point suivant au même endroit | stockée : vrai changement de lieu (clé reprise sur un autre téléphone, trace de test…), sans compter le saut dans la distance |
-| moins de 15 m depuis le dernier point et moins de 5 min écoulées | non stockée (`skipped`) mais « dernière position » mise à jour |
+| **à l'arrêt** — moins de 15 m du dernier point stocké, ou dérive GPS (moins de 2 × la précision annoncée, 100 m au plus, à moins de 10 km/h) — et moins de 30 min écoulées | non stockée (`skipped`) mais « dernière position » mise à jour |
+| à l'arrêt depuis 30 min | stockée (point « toujours là »), hors distance parcourue |
 | sinon | stockée (`stored`), distance cumulée |
 
 Résultat : une trace propre, pas de milliers de points quand la voiture est garée, et une distance

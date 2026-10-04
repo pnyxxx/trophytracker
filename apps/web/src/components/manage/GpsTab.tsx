@@ -32,7 +32,7 @@ import { Panel } from './shared';
 const GpsCheckMap = lazy(() => import('./GpsCheckMap'));
 
 /** Réglages conseillés pour le raid (repris dans le tableau ET dans le QR code). */
-const SETTINGS = { accuracy: 'high', distance: 50, heartbeat: 300, buffer: true, stopDetection: true };
+const SETTINGS = { accuracy: 'high', distance: 50, heartbeat: 300, buffer: true, stopDetection: false };
 
 /** Réglages transmis à Traccar Client (v10) : id, accuracy, distance… (booléens en "true"/"false"). */
 function traccarParams(key: string) {
@@ -546,8 +546,8 @@ export function GpsTab({ crew }: { crew: Crew }) {
               <SettingRow
                 name="Stop detection"
                 fr="Détection d’arrêt"
-                value={<Value tone="on">Activé</Value>}
-                why="Activé par défaut, à vérifier. Met le GPS en veille quand la 4L ne bouge plus pour économiser la batterie ; le suivi reprend dès qu’elle roule."
+                value={<Value>Désactivé</Value>}
+                why="Activé par défaut dans l’appli : à désactiver. Sinon le GPS se met en veille quand la 4L est garée, et l’iPhone ne le réveille pas toujours quand elle repart."
               />
               <SettingRow
                 name="Password"
@@ -578,7 +578,6 @@ export function GpsTab({ crew }: { crew: Crew }) {
               items: [
                 'Réglages → Traccar Client → Position : « Toujours »',
                 'Position exacte : activée',
-                'Mouvements et forme : activé (pour la détection d’arrêt)',
                 'Actualisation en arrière-plan : activée',
                 'Ne fermez pas l’appli en la balayant vers le haut',
               ],

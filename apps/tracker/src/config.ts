@@ -27,9 +27,9 @@ const schema = z.object({
   WEB_INTERNAL_URL: z.string().optional().transform((v) => v || 'http://web'),
   NOTIFY_POLL_SECONDS: z.coerce.number().int().min(5).default(30),
 
-  /** Seuils de stockage : distance minimale (m) et silence maximal (s) entre deux points. */
+  /** Seuils de stockage : distance minimale (m) et silence maximal (s) entre deux points à l'arrêt. */
   TRACK_MIN_DISTANCE_M: z.coerce.number().min(0).default(15),
-  TRACK_MAX_SILENCE_S: z.coerce.number().min(0).default(300),
+  TRACK_MAX_SILENCE_S: z.coerce.number().min(0).default(1800),
 });
 
 export type Config = z.infer<typeof schema>;
