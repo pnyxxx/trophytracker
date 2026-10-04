@@ -29,6 +29,6 @@ Les SVG d'origine contiennent un manifeste C2PA (provenance). Les copies utilis�
 - Composants `LogoMark` (symbole, variantes `dark` / `light`) et `Wordmark` (nom) :
   `apps/web/src/components/common/Logo.tsx` → en-tête, pied de page, pages de connexion.
 - `apps/web/public/favicon.svg` (onglet), `apple-touch-icon.png` (écran d'accueil iPhone),
-  `og-image.png` (aperçu des liens partagés), `email-logo.png` (en-tête des emails, `public/email-templates/`).
+  `og-image.png` (aperçu des liens partagés), `email-logo.png` (en-tête des emails, `src/lib/email-templates.ts`).
 - Les PNG sont générés depuis `logo/symbole-sombre.svg` avec les polices du site (captures Playwright) :
   à régénérer si le logo change.

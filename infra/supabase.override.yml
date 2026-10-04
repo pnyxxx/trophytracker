@@ -26,7 +26,7 @@ services:
     environment:
       # Mots de passe : 10 caractères minimum.
       GOTRUE_PASSWORD_MIN_LENGTH: "10"
-      # Emails en français, servis par notre conteneur `web` (apps/web/email-templates).
+      # Emails en français, servis par notre conteneur `web` (générés depuis apps/web/src/lib/email-templates.ts).
       GOTRUE_MAILER_SUBJECTS_CONFIRMATION: "Confirmez votre inscription sur TrophyTracker"
       GOTRUE_MAILER_SUBJECTS_RECOVERY: "Réinitialisation de votre mot de passe TrophyTracker"
       GOTRUE_MAILER_SUBJECTS_MAGIC_LINK: "Votre lien de connexion TrophyTracker"

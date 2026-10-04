@@ -19,5 +19,5 @@
     "noFallthroughCasesInSwitch": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo"
   },
-  "include": ["vite.config.ts", "vitest.config.ts", "seo-plugin.ts", "src/lib/seo-pages.ts"]
+  "include": ["vite.config.ts", "vitest.config.ts", "seo-plugin.ts", "email-plugin.ts", "src/lib/seo-pages.ts", "src/lib/email-templates.ts"]
 }

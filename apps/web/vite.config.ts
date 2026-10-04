@@ -4,6 +4,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { execSync } from 'node:child_process';
 import { seoPages } from './seo-plugin';
+import { emailTemplates } from './email-plugin';
 
 /**
  * En développement, le site tourne sur http://localhost:5173 et Vite relaie les
@@ -72,7 +73,7 @@ export default defineConfig(({ mode }) => {
   const proxy = { target: SUPABASE_GATEWAY, changeOrigin: false };
 
   return {
-    plugins: [react(), devRuntimeConfig(env), seoPages()],
+    plugins: [react(), devRuntimeConfig(env), seoPages(), emailTemplates()],
     resolve: { alias: { '@': path.resolve(import.meta.dirname, './src') } },
     server: {
       port: 5173,

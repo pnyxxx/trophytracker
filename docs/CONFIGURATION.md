@@ -15,7 +15,7 @@ Après une modification : `docker compose up -d` (les conteneurs concernés red�
 
 ## Emails (SMTP)
 
-Supabase Auth envoie **tous** les emails, en français (modèles dans `apps/web/public/email-templates/`) :
+Supabase Auth envoie **tous** les emails, en français (modèles dans `apps/web/src/lib/email-templates.ts`) :
 
 | Email | Déclencheur |
 |---|---|

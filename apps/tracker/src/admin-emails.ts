@@ -3,6 +3,7 @@
  * Les noms viennent des utilisateurs : ils sont échappés dans le HTML et
  * débarrassés des retours à la ligne dans le sujet.
  */
+import { button, emailLayout, paragraph, rows } from './email-layout.js';
 
 export type AdminNotification = {
   id: number;
@@ -21,18 +22,17 @@ const esc = (s: string) =>
 const when = (d: Date) =>
   d.toLocaleString('fr-FR', { timeZone: 'Europe/Paris', dateStyle: 'long', timeStyle: 'short' });
 
-/** Mise en page commune, dans le style des emails du site. */
-function layout(title: string, lines: string[], link: { href: string; label: string }) {
-  return `<!doctype html><html lang="fr"><body style="margin:0;padding:24px 12px;background:#f4efe8;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#1a1a1a">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden">
-<tr><td style="background:#120F0C;padding:16px 28px;color:#F4ECDF;font-size:18px;font-weight:800;letter-spacing:.02em">TROPHY<span style="color:#DB4740">TRACKER</span> · admin</td></tr>
-<tr><td style="padding:28px">
-<h1 style="margin:0 0 16px;font-size:20px">${esc(title)}</h1>
-${lines.map((l) => `<p style="margin:0 0 10px;line-height:1.5;color:#444">${l}</p>`).join('\n')}
-<p style="margin:20px 0 0"><a href="${esc(link.href)}" style="display:inline-block;background:#DB4740;color:#fff;text-decoration:none;font-weight:700;padding:12px 22px;border-radius:10px">${esc(link.label)}</a></p>
-</td></tr></table>
-<p style="text-align:center;font-size:12px;color:#999;margin-top:14px">Vous recevez cet email parce que vous êtes administrateur de TrophyTracker.</p>
-</body></html>`;
+const FOOTER = 'Vous recevez cet email parce que vous êtes administrateur de TrophyTracker.';
+
+/** Mise en page commune : celle des emails du site, avec les détails en lignes « étiquette : valeur ». */
+function layout(siteUrl: string, kicker: string, title: string, intro: string, details: [string, string][], href: string, label: string) {
+  return emailLayout({
+    siteUrl: esc(siteUrl),
+    kicker,
+    title: esc(title),
+    body: paragraph(intro) + rows(details.map(([k, v]) => [k, esc(v)])) + button(esc(href), esc(label)),
+    footer: FOOTER,
+  });
 }
 
 export function buildAdminEmail(n: AdminNotification, siteUrl: string): Email {
@@ -48,11 +48,11 @@ export function buildAdminEmail(n: AdminNotification, siteUrl: string): Email {
     return {
       subject: oneLine(`👤 ${title}`),
       text: `${name} (${email}) vient de créer un compte sur TrophyTracker.\n${detail}\nLe ${when(n.created_at)}.\n\n${siteUrl}/admin`,
-      html: layout(title, [
-        `<strong>${esc(name)}</strong> (${esc(email)}) vient de créer un compte.`,
-        esc(detail),
-        `Le ${esc(when(n.created_at))}.`,
-      ], { href: `${siteUrl}/admin`, label: 'Ouvrir l’administration' }),
+      html: layout(siteUrl, 'Admin · Nouveau compte', title, `<strong>${esc(name)}</strong> vient de créer un compte.`, [
+        ['Email', email],
+        ['Origine', detail],
+        ['Date', when(n.created_at)],
+      ], `${siteUrl}/admin`, 'Ouvrir l’administration'),
     };
   }
 
@@ -64,10 +64,10 @@ export function buildAdminEmail(n: AdminNotification, siteUrl: string): Email {
   return {
     subject: oneLine(`⭐ ${title}`),
     text: `${name} (${email}) suit maintenant l’équipage « ${crew} ».\n${count}\nLe ${when(n.created_at)}.\n\n${crewUrl}`,
-    html: layout(title, [
-      `<strong>${esc(name)}</strong> (${esc(email)}) suit maintenant l’équipage « ${esc(crew)} ».`,
-      ...(count ? [esc(count)] : []),
-      `Le ${esc(when(n.created_at))}.`,
-    ], { href: crewUrl, label: 'Voir l’équipage' }),
+    html: layout(siteUrl, 'Admin · Nouvel abonné', title, `<strong>${esc(name)}</strong> suit maintenant l’équipage « ${esc(crew)} ».`, [
+      ['Email', email],
+      ...(followers === null ? [] : [['Abonnés', String(followers)] as [string, string]]),
+      ['Date', when(n.created_at)],
+    ], crewUrl, 'Voir l’équipage'),
   };
 }

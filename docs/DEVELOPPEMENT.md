@@ -52,7 +52,7 @@ make check                # types + lint + unitaires (rapide, avant chaque commi
 - Textes de l'interface et commentaires en **français**.
 - Accès aux données : hooks React Query dans `src/hooks/queries.ts` ; erreurs affichées via `toastError`.
 - Aucun secret dans le code : tout passe par `.env` (jamais commité).
-- Emails : modèles HTML dans `apps/web/public/email-templates/` (variables Go : `{{ .ConfirmationURL }}`…).
+- Emails : une seule mise en page « roadbook » dans `apps/web/src/lib/email-templates.ts`, écrite dans `dist/email-templates/` à la compilation (`email-plugin.ts`) ; variables Go : `{{ .ConfirmationURL }}`… Les emails admin (`apps/tracker/src/email-layout.ts`) en gardent une copie, vérifiée par un test.
 
 ## Edge Functions
 

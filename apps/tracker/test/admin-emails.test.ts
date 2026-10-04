@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { buildAdminEmail } from '../src/admin-emails.js';
 
 const at = new Date('2026-10-02T14:30:00Z');
@@ -26,8 +27,18 @@ describe('emails aux admins', () => {
 
   it('un nom piégé ne peut ni injecter du HTML ni casser le sujet', () => {
     const e = buildAdminEmail({ id: 4, kind: 'new_account', payload: { name: '<img src=x onerror=alert(1)>\r\nBcc: x@y.z', email: 'a@b.c' }, created_at: at }, 'https://site.fr');
-    expect(e.html).not.toContain('<img');
+    expect(e.html).not.toContain('<img src=x');
     expect(e.html).toContain('&lt;img');
     expect(e.subject).not.toMatch(/[\r\n]/);
+  });
+});
+
+describe('mise en page des emails', () => {
+  it('reste identique à celle des emails du site', () => {
+    const block = (s: string) => s.slice(s.indexOf('const C = {'), s.indexOf('</html>'));
+    const web = readFileSync(new URL('../../web/src/lib/email-templates.ts', import.meta.url), 'utf8');
+    const tracker = readFileSync(new URL('../src/email-layout.ts', import.meta.url), 'utf8');
+    expect(block(tracker).length).toBeGreaterThan(1000);
+    expect(block(tracker)).toBe(block(web));
   });
 });
