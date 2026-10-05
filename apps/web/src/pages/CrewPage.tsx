@@ -54,6 +54,12 @@ function Section({ id, kicker, title, subtitle, tone = 'dark', children }: {
 const NO_WAYPOINTS: never[] = [];
 
 /** « 31.085°N · 4.023°O » */
+/** Même texte, sans tenir compte des accents ni des majuscules (« Breizh en sablés » = « BREIZH EN SABLES »). */
+const sameText = (a: string, b: string) => {
+  const norm = (s: string) => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/\s+/g, ' ').trim();
+  return norm(a) === norm(b);
+};
+
 const coords = (lat: number, lon: number) =>
   `${Math.abs(lat).toFixed(3)}°${lat >= 0 ? 'N' : 'S'} · ${Math.abs(lon).toFixed(3)}°${lon < 0 ? 'O' : 'E'}`;
 
@@ -83,6 +89,7 @@ export default function CrewPage() {
   const live = isLive(crew.last_fix_at);
   const hasRoute = !!event && roadbook.stops.length > 1;
 
+  const memberNames = members.map((m) => m.display_name).filter(Boolean).join(' & ');
   const anchors = [
     { id: 'carte', label: 'Carte' },
     { id: 'stats', label: 'Stats' },
@@ -123,15 +130,15 @@ export default function CrewPage() {
         ]}
       />
 
-      {/* ── En-tête ──────────────────────────────────────────────────────── */}
-      <header className="relative overflow-hidden bg-[radial-gradient(120%_80%_at_80%_0%,#3A2215_0%,#1B1310_45%,#120F0C_75%)]">
+      {/* ── En-tête : remplit l'écran, le sommaire (≈ 42 px) arrive juste en bas ── */}
+      <header className="relative flex min-h-[calc(100svh-42px)] flex-col justify-end overflow-hidden bg-[radial-gradient(120%_80%_at_80%_0%,#3A2215_0%,#1B1310_45%,#120F0C_75%)]">
         {cover && (
           <img src={cover} alt="" className="absolute inset-0 h-full w-full object-cover opacity-35"
             style={{ objectPosition: `${crew.cover_focus_x}% ${crew.cover_focus_y}%` }} />
         )}
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(18,15,12,.55)_0%,rgba(18,15,12,.3)_40%,#120F0C_100%)]" />
-        <Container className="relative grid gap-10 pb-14 pt-32 md:pb-16 md:pt-40 lg:grid-cols-[1fr_auto] lg:items-end">
-          <div className="flex min-w-0 flex-col gap-6">
+        <Container className="relative grid w-full gap-10 pb-14 pt-32 md:pb-16 md:pt-40 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div className="flex min-w-0 flex-col gap-7">
             <Kicker className="flex-wrap gap-x-4 gap-y-2">
               {crew.car_number && (
                 <span className="rounded-[3px] bg-primary px-2 py-1 font-mono text-xs font-bold tracking-normal text-white">#{crew.car_number}</span>
@@ -141,14 +148,19 @@ export default function CrewPage() {
               {!live && crew.last_fix_at && <span className="text-dust-400">Dernière position {formatRelative(crew.last_fix_at)}</span>}
               {!crew.is_public && <span className="border border-cream/25 px-2 py-1 text-dust-100">Page privée</span>}
             </Kicker>
-            <h1 className="m-0 break-words font-display text-[clamp(56px,9vw,152px)] font-black uppercase leading-[0.92] text-cream">
-              {crew.name}
-            </h1>
-            {crew.tagline && <p className="m-0 max-w-[640px] text-pretty text-xl leading-snug text-dust-100">{crew.tagline}</p>}
-            <div className="flex flex-col gap-1.5 font-mono text-xs uppercase tracking-[0.12em] text-dust-400">
-              {(crew.school || crew.city) && <span>{[crew.school, crew.city].filter(Boolean).join(' · ')}</span>}
-              {members.length > 0 && <span>Équipage : {members.map((m) => m.display_name).join(' & ')}</span>}
+            <div className="flex flex-col gap-3">
+              <h1 className="m-0 break-words font-display text-[clamp(56px,9vw,152px)] font-black uppercase leading-[0.92] text-cream">
+                {crew.name}
+              </h1>
+              {(crew.school || crew.city) && (
+                <span className="font-mono text-xs uppercase tracking-[0.12em] text-dust-400">{[crew.school, crew.city].filter(Boolean).join(' · ')}</span>
+              )}
             </div>
+            {crew.tagline && <p className="m-0 max-w-[640px] text-pretty text-xl leading-snug text-dust-100">{crew.tagline}</p>}
+            {/* Les noms des membres, sauf s'ils ne font que répéter le nom de l'équipage */}
+            {memberNames && !sameText(memberNames, crew.name) && (
+              <span className="font-mono text-xs uppercase tracking-[0.12em] text-dust-400">Équipage : {memberNames}</span>
+            )}
             {(crew.instagram_url || crew.facebook_url) && (
               <div className="flex flex-wrap gap-3">
                 {crew.instagram_url && (
