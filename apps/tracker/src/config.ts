@@ -13,7 +13,7 @@ const schema = z.object({
   TRACCAR_PASSWORD: z.string().optional(),
   TRACCAR_POLL_SECONDS: z.coerce.number().int().min(5).default(10),
 
-  /** Emails aux admins (nouveau compte, nouvel abonnement, accès payé) : même SMTP que le site. Vide = désactivé. */
+  /** Emails aux admins (nouveau compte, abonné, accès payé, relance GPS) et relances GPS aux équipages : même SMTP que le site. Vide = désactivé. */
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.coerce.number().int().positive().default(587),
   SMTP_USER: z.string().optional(),

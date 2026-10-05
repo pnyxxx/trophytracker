@@ -7,7 +7,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
 
-select plan(6);
+select plan(7);
 
 insert into auth.users (id, email, raw_user_meta_data, aud, role) values
   ('00000000-0000-0000-0000-0000000000e1', 'owner@test.local', '{}', 'authenticated', 'authenticated'),
@@ -27,12 +27,13 @@ create function pg_temp.as_user(p uuid) returns void language sql as $$
 $$;
 
 select pg_temp.as_user('00000000-0000-0000-0000-0000000000e2');
-update public.crews set start_city = 'Ailleurs', start_lat = 1, start_lon = 1 where id = pg_temp.crew();
+update public.crews set city = 'Ailleurs', start_lat = 1, start_lon = 1, start_region = 'Ailleurs' where id = pg_temp.crew();
 reset role;
-select is((select start_city from public.crews where id = pg_temp.crew()), null, 'un inconnu ne change pas la ville de départ');
+select is((select city from public.crews where id = pg_temp.crew()), null, 'un inconnu ne change pas la ville de départ');
+select is((select start_region from public.crews where id = pg_temp.crew()), null, '… ni sa région');
 
 select pg_temp.as_user('00000000-0000-0000-0000-0000000000e1');
-select lives_ok($$ update public.crews set start_city = 'Pédernec', start_lat = 48.596, start_lon = -3.27 where id = pg_temp.crew() $$,
+select lives_ok($$ update public.crews set city = 'Pédernec', start_lat = 48.596, start_lon = -3.27, start_region = 'Bretagne' where id = pg_temp.crew() $$,
   'un membre choisit sa ville de départ');
 select throws_ok($$ update public.crews set start_lat = 123 where id = pg_temp.crew() $$, '23514', null,
   'la latitude doit être valide');
@@ -40,12 +41,12 @@ select throws_ok($$ update public.crews set start_lat = null where id = pg_temp.
   'latitude et longitude vont par deux');
 reset role;
 
-create temp table t_res (start_city text, start_lat double precision);
+create temp table t_res (city text, start_lat double precision);
 grant insert on t_res to anon;
 set local role anon;
-insert into t_res select start_city, start_lat from public.crews where slug = 'depart';
+insert into t_res select city, start_lat from public.crews where slug = 'depart';
 reset role;
-select is((select start_city from t_res), 'Pédernec', 'les visiteurs voient la ville de départ');
+select is((select city from t_res), 'Pédernec', 'les visiteurs voient la ville de départ');
 select is((select start_lat from t_res), 48.596::double precision, '… et sa position');
 
 select * from finish();

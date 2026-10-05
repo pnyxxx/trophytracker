@@ -1,12 +1,16 @@
 /**
- * Envoi des emails aux admins : relève la file private.admin_notifications
- * toutes les `pollSeconds` et envoie chaque notification par SMTP (le même
- * serveur que les emails du site). Un échec est retenté au tour suivant
- * (5 essais au plus, compté par la base) ; les tours ne se chevauchent jamais.
+ * Envoi des emails automatiques, toutes les `pollSeconds`, par SMTP (le même
+ * serveur que les emails du site) :
+ *   - relances « configurez votre GPS » aux équipages (private.pending_gps_reminders),
+ *     dont l'envoi ajoute une notification pour les admins ;
+ *   - emails aux admins (file private.admin_notifications).
+ * Un échec est retenté au tour suivant (5 essais au plus, compté par la base) ;
+ * les tours ne se chevauchent jamais.
  */
 import nodemailer from 'nodemailer';
 import type { Db } from './db.js';
 import { buildAdminEmail } from './admin-emails.js';
+import { buildGpsReminderEmail } from './crew-emails.js';
 
 export type SmtpConfig = {
   host: string;
@@ -28,6 +32,29 @@ export function startAdminNotifier(db: Db, smtp: SmtpConfig, siteUrl: string, po
   let stopped = false;
 
   async function tick() {
+    // Les relances d'abord : leur envoi crée la notification admin, envoyée dans la foulée.
+    try {
+      for (const r of await db.pendingGpsReminders()) {
+        const email = buildGpsReminderEmail(r, siteUrl);
+        try {
+          await transport.sendMail({
+            from: { name: smtp.fromName, address: smtp.from },
+            to: r.recipients,
+            replyTo: r.reply_to ?? undefined,
+            subject: email.subject,
+            text: email.text,
+            html: email.html,
+          });
+          await db.gpsReminderDone(r.crew_id, null);
+          log(`relance GPS envoyée (équipage ${r.crew_id.slice(0, 8)})`);
+        } catch (e) {
+          await db.gpsReminderDone(r.crew_id, (e as Error).message);
+          log(`relance GPS ${r.crew_id.slice(0, 8)} non envoyée : ${(e as Error).message}`);
+        }
+      }
+    } catch (e) {
+      log(`relances GPS illisibles : ${(e as Error).message}`);
+    }
     try {
       for (const n of await db.pendingAdminNotifications()) {
         const email = buildAdminEmail(n, siteUrl);

@@ -30,13 +30,42 @@ export function waypointIcon(w: Pick<Waypoint, 'kind' | 'name'>) {
   });
 }
 
-/** Ville de départ de l'équipage : drapeau planté (le pied du mât est sur la ville) + nom de la ville. */
-export function startIcon(city: string | null) {
-  const flag =
+/** Drapeau rouge à queue d'aronde, sur son mât (le pied du mât est sur la ville). */
+const RED_FLAG =
+  '<svg class="tt-start-flag" viewBox="0 0 24 30" aria-hidden="true">' +
+  '<path d="M4 2v27" stroke="#1a1612" stroke-width="2.5" stroke-linecap="round"/>' +
+  '<path d="M5 3h15l-4 5.5 4 5.5H5z" fill="#DB4740" stroke="#f4ecdf" stroke-width="1.5" stroke-linejoin="round"/>' +
+  '</svg>';
+
+/**
+ * Gwenn-ha-du, sur le même mât : 9 bandes (5 noires, 4 blanches), canton blanc
+ * sur les 5 premières bandes, semé de mouchetures d'hermine.
+ */
+const BRETON_FLAG = (() => {
+  const [x, y, w, h] = [5, 3, 18, 12];
+  const band = h / 9;
+  const stripes = [0, 2, 4, 6, 8]
+    .map((i) => `<rect x="${x}" y="${(y + i * band).toFixed(2)}" width="${w}" height="${band.toFixed(2)}" fill="#111"/>`)
+    .join('');
+  const [cw, ch] = [w * 4 / 9, band * 5];
+  const ermines = [[0.25, 0.22], [0.5, 0.22], [0.75, 0.22], [0.375, 0.5], [0.625, 0.5], [0.25, 0.78], [0.5, 0.78], [0.75, 0.78]]
+    .map(([u, v]) => `<path d="M${(x + u * cw).toFixed(2)} ${(y + v * ch - 0.9).toFixed(2)}l0.55 1.6h-1.1z" fill="#111"/>`)
+    .join('');
+  return (
     '<svg class="tt-start-flag" viewBox="0 0 24 30" aria-hidden="true">' +
     '<path d="M4 2v27" stroke="#1a1612" stroke-width="2.5" stroke-linecap="round"/>' +
-    '<path d="M5 3h15l-4 5.5 4 5.5H5z" fill="#DB4740" stroke="#f4ecdf" stroke-width="1.5" stroke-linejoin="round"/>' +
-    '</svg>';
+    `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#fff"/>` +
+    stripes +
+    `<rect x="${x}" y="${y}" width="${cw.toFixed(2)}" height="${ch.toFixed(2)}" fill="#fff"/>` +
+    ermines +
+    `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="#1a1612" stroke-width="0.8"/>` +
+    '</svg>'
+  );
+})();
+
+/** Ville de départ de l'équipage : drapeau planté (breton si on part de Bretagne) + nom de la ville. */
+export function startIcon(city: string | null, region: string | null) {
+  const flag = region === 'Bretagne' ? BRETON_FLAG : RED_FLAG;
   return new DivIcon({
     className: 'tt-marker',
     html: `<div class="tt-start">${flag}<span class="tt-wp-label tt-start-label">${escapeHtml(city || 'Départ')}</span></div>`,

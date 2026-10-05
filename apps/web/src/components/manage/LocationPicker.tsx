@@ -78,7 +78,13 @@ export function LocationPicker({ id, value, onChange, placeholder = 'Adresse, vi
             if (e.key === 'Enter') { e.preventDefault(); if (results[0]) pick(results[0]); }
           }}
         />
-        {searching && <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-dust-400" />}
+        {/* Centrage sur le conteneur, rotation sur l'icône : animate-spin remplace tout le transform
+            de l'élément animé, il effacerait le -translate-y (l'icône sauterait de haut en bas). */}
+        {searching && (
+          <span className="pointer-events-none absolute right-3 top-1/2 flex -translate-y-1/2">
+            <Loader2 className="h-4 w-4 animate-spin text-dust-400" />
+          </span>
+        )}
       </div>
 
       {results.length > 0 && (

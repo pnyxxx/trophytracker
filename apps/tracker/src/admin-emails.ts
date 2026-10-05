@@ -1,6 +1,6 @@
 /**
  * Contenu des emails envoyés aux admins (nouveau compte, nouvel abonnement,
- * accès équipage payé ou obtenu avec un code).
+ * accès équipage payé ou obtenu avec un code, relance GPS envoyée à un équipage).
  * Les noms viennent des utilisateurs : ils sont échappés dans le HTML et
  * débarrassés des retours à la ligne dans le sujet.
  */
@@ -8,7 +8,7 @@ import { button, emailLayout, paragraph, rows } from './email-layout.js';
 
 export type AdminNotification = {
   id: number;
-  kind: 'new_account' | 'new_follow' | 'new_purchase';
+  kind: 'new_account' | 'new_follow' | 'new_purchase' | 'gps_reminder';
   payload: Record<string, unknown>;
   created_at: Date;
 };
@@ -79,6 +79,23 @@ export function buildAdminEmail(n: AdminNotification, siteUrl: string): Email {
       text: [`${name} (${email}) ${intro}`, code && `Code : ${code}`, total, `Le ${when(n.created_at)}.`, '', `${siteUrl}/admin`]
         .filter((l) => l !== null).join('\n'),
       html: layout(siteUrl, byCode ? 'Admin · Code d’accès' : 'Admin · Paiement', title, `<strong>${esc(name)}</strong> ${esc(intro)}`, details, `${siteUrl}/admin`, 'Voir les achats'),
+    };
+  }
+
+  if (n.kind === 'gps_reminder') {
+    const crew = str(p.crew_name, 'Un équipage');
+    const members = str(p.members);
+    const created = typeof p.crew_created_at === 'string' ? when(new Date(p.crew_created_at)) : '—';
+    const title = `Relance GPS envoyée : ${crew}`;
+    const crewUrl = `${siteUrl}/equipages/${encodeURIComponent(str(p.crew_slug, ''))}`;
+    return {
+      subject: oneLine(`📡 ${title}`),
+      text: `« ${crew} » n’a envoyé aucune position GPS depuis la création de sa page (${created}) : un rappel vient d’être envoyé à ${members}.\nLe ${when(n.created_at)}.\n\n${crewUrl}`,
+      html: layout(siteUrl, 'Admin · Relance GPS', title, `L’équipage « ${esc(crew)} » n’a encore envoyé aucune position : un rappel vient de partir à ses membres.`, [
+        ['Membres', members],
+        ['Page créée', created],
+        ['Relancé le', when(n.created_at)],
+      ], crewUrl, 'Voir l’équipage'),
     };
   }
 

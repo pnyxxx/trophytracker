@@ -36,9 +36,9 @@ if (config.SMTP_HOST) {
     config.NOTIFY_POLL_SECONDS,
     log,
   );
-  log(`emails aux admins activés (${config.SMTP_HOST}:${config.SMTP_PORT}, toutes les ${config.NOTIFY_POLL_SECONDS}s)`);
+  log(`emails aux admins et relances GPS activés (${config.SMTP_HOST}:${config.SMTP_PORT}, toutes les ${config.NOTIFY_POLL_SECONDS}s)`);
 } else {
-  log('SMTP non configuré : pas d’emails aux admins');
+  log('SMTP non configuré : pas d’emails aux admins ni de relances GPS');
 }
 
 // Arrêt propre (docker stop).

@@ -15,6 +15,8 @@ export interface Place {
   subtitle: string;
   /** Ville (ou à défaut le lieu) : ce qu'on affiche à côté d'un sponsor ou sous une photo. */
   city: string | null;
+  /** Région (ex. « Bretagne ») : choisit le drapeau de la ville de départ. */
+  region: string | null;
 }
 
 interface PhotonFeature {
@@ -45,7 +47,7 @@ function toPlace(f: PhotonFeature): Place {
     [p.postcode, city !== title ? city : null].filter(Boolean).join(' '),
     p.country,
   ].filter(Boolean).join(', ');
-  return { lat, lon, title, subtitle, city: city ?? null };
+  return { lat, lon, title, subtitle, city: city ?? null, region: p.state ?? null };
 }
 
 /** Lieux correspondant au texte tapé (adresse, ville, commerce…), les plus pertinents d'abord. */
@@ -82,3 +84,20 @@ export function parseCoords(text: string): { lat: number; lon: number } | null {
 
 export const isValidCoords = (lat: number, lon: number) =>
   Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180 && !(lat === 0 && lon === 0);
+
+/** Position et région d'une ville de départ (drapeau sur la carte d'un équipage). */
+export interface CitySpot {
+  lat: number;
+  lon: number;
+  region: string | null;
+}
+
+/** Première ville trouvée pour ce nom (null si rien, ou si la recherche est indisponible). */
+export async function findCity(name: string): Promise<CitySpot | null> {
+  try {
+    const [p] = await searchPlaces(name);
+    return p ? { lat: p.lat, lon: p.lon, region: p.region } : null;
+  } catch {
+    return null;
+  }
+}

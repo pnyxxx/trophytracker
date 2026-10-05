@@ -63,7 +63,7 @@ const sameText = (a: string, b: string) => {
 };
 
 /**
- * « Défiler » en bas au centre de l'écran, tant que la page n'a pas bougé. Masqué s'il
+ * « Défilez » en bas au centre de l'écran, tant que la page n'a pas bougé. Masqué s'il
  * recouvrirait un bouton : sur téléphone, l'en-tête dépasse souvent l'écran.
  */
 function ScrollHint({ target }: { target: string }) {
@@ -100,12 +100,12 @@ function ScrollHint({ target }: { target: string }) {
       aria-hidden={!visible}
       tabIndex={visible ? 0 : -1}
       className={cn(
-        'fixed bottom-2 left-1/2 z-[850] flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-ink/60 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-dust-300 backdrop-blur-sm transition-opacity duration-500 hover:text-cream',
+        'fixed bottom-3 left-1/2 z-[850] flex -translate-x-1/2 items-center gap-2 rounded-full bg-ink/70 px-4 py-2 font-mono text-sm font-semibold uppercase tracking-[0.2em] text-cream backdrop-blur-sm transition-opacity duration-500 hover:text-cream',
         visible ? 'opacity-100' : 'pointer-events-none opacity-0',
       )}
     >
-      Défiler
-      <ChevronDown className="h-4 w-4 text-primary motion-safe:animate-bounce" />
+      Défilez
+      <ChevronDown className="h-5 w-5 text-primary motion-safe:animate-bounce" />
     </a>
   );
 }
@@ -180,7 +180,7 @@ export default function CrewPage() {
             style={{ objectPosition: `${crew.cover_focus_x}% ${crew.cover_focus_y}%` }} />
         )}
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(18,15,12,.55)_0%,rgba(18,15,12,.3)_40%,#120F0C_100%)]" />
-        <Container className="relative flex w-full flex-1 flex-col justify-between gap-10 pb-14 pt-28 md:pb-16 md:pt-32">
+        <Container className="relative flex w-full flex-1 flex-col justify-between gap-10 pb-14 pt-24 md:pb-16 md:pt-32">
           <div className="flex min-w-0 flex-col gap-7">
             <Kicker className="flex-wrap gap-x-4 gap-y-2">
               {crew.car_number && (

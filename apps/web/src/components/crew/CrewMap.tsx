@@ -14,6 +14,9 @@ import { mediaUrl, thumbUrl } from '@/lib/media';
 import { BaseMap } from './BaseMap';
 import { carIcon, photoIcon, sponsorIcon, startIcon, waypointIcon, waypointStyle } from './mapIcons';
 
+/** Zoom de « Suivre la 4L » : on voit les rues autour de la voiture. */
+const FOLLOW_ZOOM = 14;
+
 
 interface Props {
   crew: Crew;
@@ -47,8 +50,15 @@ function MapController({ car, start, points, waypoints, follow }: {
     else map.fitBounds(new LatLngBounds(coords), { padding: [40, 40], maxZoom: 13 });
   }, [map, car, start, points, waypoints]);
 
+  // « Suivre la 4L » : on zoome sur la voiture à l'activation (sans dézoomer si on est déjà
+  // plus près), puis la carte la garde au centre à chaque nouvelle position.
+  const wasFollowing = useRef(false);
   useEffect(() => {
-    if (follow && car && initialized.current) map.panTo(car, { animate: true, duration: 0.8 });
+    const justStarted = follow && !wasFollowing.current;
+    wasFollowing.current = follow;
+    if (!follow || !car || !initialized.current) return;
+    if (justStarted) map.flyTo(car, Math.max(map.getZoom(), FOLLOW_ZOOM), { duration: 1.2 });
+    else map.panTo(car, { animate: true, duration: 0.8 });
   }, [map, car, follow]);
 
   return null;
@@ -71,7 +81,7 @@ export function CrewMap({ crew, points, waypoints: allWaypoints, sponsors, photo
     () => (crew.start_lat != null && crew.start_lon != null ? [crew.start_lat, crew.start_lon] : null),
     [crew.start_lat, crew.start_lon],
   );
-  const startMarker = useMemo(() => startIcon(crew.start_city), [crew.start_city]);
+  const startMarker = useMemo(() => startIcon(crew.city, crew.start_region), [crew.city, crew.start_region]);
 
   const line = useMemo(() => {
     const coords = points.map((p) => [p[0], p[1]] as [number, number]);
@@ -117,7 +127,7 @@ export function CrewMap({ crew, points, waypoints: allWaypoints, sponsors, photo
           <Marker position={start} icon={startMarker} zIndexOffset={500}>
             <Popup>
               <p className="text-xs font-semibold uppercase text-black/50">Ville de départ</p>
-              <p className="font-bold text-black">{crew.start_city || crew.name}</p>
+              <p className="font-bold text-black">{crew.city || 'Départ'}</p>
               <p className="text-sm text-black/70">C’est d’ici que part {crew.name}.</p>
             </Popup>
           </Marker>

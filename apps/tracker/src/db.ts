@@ -1,11 +1,12 @@
 /**
  * Accès à la base. Le rôle `tracker` ne peut appeler QUE ces fonctions (GPS,
- * file des emails admin, liste et aperçu des équipages publics) : même en cas de faille dans ce service, il ne peut rien
+ * files des emails admin et des relances GPS, liste et aperçu des équipages publics) : même en cas de faille dans ce service, il ne peut rien
  * lire ni modifier d'autre.
  */
 import postgres from 'postgres';
 import type { IncomingPoint } from './points.js';
 import type { AdminNotification } from './admin-emails.js';
+import type { GpsReminder } from './crew-emails.js';
 import type { CrewMeta } from './crew-page.js';
 
 /** « test » : suivi arrêté, position gardée comme essai (hors trace). */
@@ -45,6 +46,15 @@ export function createDb(url: string, opts: { minDistanceM: number; maxSilenceS:
 
     async adminNotificationDone(id: number, error: string | null) {
       await sql`select private.admin_notification_done(${id}, ${error})`;
+    },
+
+    /** Équipages à relancer (« configurez votre GPS »), avec leurs membres et les admins. */
+    pendingGpsReminders() {
+      return sql<GpsReminder[]>`select * from private.pending_gps_reminders(10)`;
+    },
+
+    async gpsReminderDone(crewId: string, error: string | null) {
+      await sql`select private.gps_reminder_done(${crewId}::uuid, ${error})`;
     },
 
     /** Équipages publics (plan du site). */
