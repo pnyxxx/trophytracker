@@ -1,17 +1,18 @@
 import { lazy, Suspense, useMemo, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Facebook, Instagram, Mail, Settings } from 'lucide-react';
+import { Mail, Settings } from 'lucide-react';
 import { PageShell } from '@/components/layout/PageShell';
+import { FacebookIcon, InstagramIcon } from '@/components/common/SocialIcons';
 import { Seo } from '@/components/common/Seo';
 import { Container, Kicker, LiveDot, SectionTitle } from '@/components/common/Brand';
 import { PageLoader } from '@/components/common/Spinner';
 import { Button } from '@/components/ui/button';
-import { CrewAvatar, FollowButton, LiveBadge, ShareButton } from '@/components/crew/CrewBits';
+import { CrewAvatar, FollowButton, LiveBadge } from '@/components/crew/CrewBits';
 import { CrewStats } from '@/components/crew/CrewStats';
 import { CrewGallery } from '@/components/crew/CrewGallery';
 import { CrewSponsors } from '@/components/crew/CrewSponsors';
 import { CrewRoadbook } from '@/components/crew/CrewRoadbook';
-import { CrewQrButton } from '@/components/crew/CrewQr';
+import { CrewShareButton } from '@/components/crew/CrewQr';
 import { useRoadbook } from '@/components/crew/roadbook';
 import { useCrew, useCrewMembers, useCrewStats, useEvent, useMyRole, usePhotos, useSponsors } from '@/hooks/queries';
 import { useLiveTrack } from '@/hooks/useLiveTrack';
@@ -151,13 +152,13 @@ export default function CrewPage() {
             {(crew.instagram_url || crew.facebook_url) && (
               <div className="flex flex-wrap gap-3">
                 {crew.instagram_url && (
-                  <Button asChild size="lg" className="bg-[linear-gradient(45deg,#F58529_0%,#DD2A7B_55%,#8134AF_100%)] text-white shadow-lg hover:brightness-110">
-                    <a href={crew.instagram_url} target="_blank" rel="noopener noreferrer"><Instagram />Instagram</a>
+                  <Button asChild variant="outline">
+                    <a href={crew.instagram_url} target="_blank" rel="noopener noreferrer"><InstagramIcon />Instagram</a>
                   </Button>
                 )}
                 {crew.facebook_url && (
-                  <Button asChild size="lg" className="bg-[#1877F2] text-white shadow-lg hover:bg-[#1465D0]">
-                    <a href={crew.facebook_url} target="_blank" rel="noopener noreferrer"><Facebook />Facebook</a>
+                  <Button asChild variant="outline">
+                    <a href={crew.facebook_url} target="_blank" rel="noopener noreferrer"><FacebookIcon />Facebook</a>
                   </Button>
                 )}
               </div>
@@ -174,8 +175,7 @@ export default function CrewPage() {
             )}
             <div className="flex flex-wrap gap-2">
               <FollowButton crewId={crew.id} slug={crew.slug} count={crew.followers_count} />
-              <ShareButton title={crew.name} />
-              <CrewQrButton crew={crew} />
+              <CrewShareButton crew={crew} />
               {canEdit && (
                 <Button asChild variant="secondary">
                   <Link to={`/mon-compte/equipages/${crew.slug}`}><Settings />Gérer</Link>

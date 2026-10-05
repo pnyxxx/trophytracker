@@ -25,6 +25,22 @@ describe('emails aux admins', () => {
     expect(e.html).toContain('href="https://site.fr/equipages/j4l-club"');
   });
 
+  it('paiement Stripe : montant, total des ventes, lien vers l’administration', () => {
+    const e = buildAdminEmail({ id: 5, kind: 'new_purchase', payload: { name: 'Camille', email: 'c@exemple.fr', source: 'stripe', amount_cents: 1500, currency: 'eur', paid_count: 3 }, created_at: at }, 'https://site.fr');
+    expect(e.subject).toMatch(/^💶 Paiement reçu : 15,00\s€$/); // Intl met une espace insécable fine
+    expect(e.text).toMatch(/Camille \(c@exemple\.fr\) a payé 15,00\s€/);
+    expect(e.text).toContain('3 accès payés au total.');
+    expect(e.text).not.toContain('Code :');
+    expect(e.html).toContain('href="https://site.fr/admin"');
+  });
+
+  it('code d’accès utilisé : le code et sa note', () => {
+    const e = buildAdminEmail({ id: 6, kind: 'new_purchase', payload: { name: 'Léo', email: 'leo@exemple.fr', source: 'code', amount_cents: 0, currency: 'eur', code: '4L-K7QM-2XRP', code_note: 'Partenaire', paid_count: 1 }, created_at: at }, 'https://site.fr');
+    expect(e.subject).toBe('🎟️ Code d’accès utilisé : Léo');
+    expect(e.text).toContain('Code : 4L-K7QM-2XRP (Partenaire)');
+    expect(e.text).toContain('1 accès obtenu par code au total.');
+  });
+
   it('un nom piégé ne peut ni injecter du HTML ni casser le sujet', () => {
     const e = buildAdminEmail({ id: 4, kind: 'new_account', payload: { name: '<img src=x onerror=alert(1)>\r\nBcc: x@y.z', email: 'a@b.c' }, created_at: at }, 'https://site.fr');
     expect(e.html).not.toContain('<img src=x');

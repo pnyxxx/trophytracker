@@ -1,7 +1,7 @@
 /** Petits composants réutilisés pour afficher un équipage. */
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Heart, Share2 } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { LiveDot } from '@/components/common/Brand';
@@ -81,26 +81,6 @@ export function FollowButton({ crewId, slug, count, className }: { crewId: strin
       <Heart className={cn(isFollowed && 'fill-current')} />
       {isFollowed ? 'Suivi' : 'Suivre'}
       {count != null && <span className="opacity-70">{count}</span>}
-    </Button>
-  );
-}
-
-export function ShareButton({ title, className }: { title: string; className?: string }) {
-  const share = async () => {
-    const url = window.location.href;
-    try {
-      if (navigator.share) await navigator.share({ title, text: `Suivez ${title} en direct sur le 4L Trophy !`, url });
-      else {
-        await navigator.clipboard.writeText(url);
-        toast.success('Lien copié ! Partagez-le à vos proches et sponsors.');
-      }
-    } catch {
-      /* partage annulé par l'utilisateur */
-    }
-  };
-  return (
-    <Button variant="outline" onClick={share} className={className}>
-      <Share2 /> Partager
     </Button>
   );
 }

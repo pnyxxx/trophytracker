@@ -1,5 +1,6 @@
 /**
- * Contenu des emails envoyés aux admins (nouveau compte, nouvel abonnement).
+ * Contenu des emails envoyés aux admins (nouveau compte, nouvel abonnement,
+ * accès équipage payé ou obtenu avec un code).
  * Les noms viennent des utilisateurs : ils sont échappés dans le HTML et
  * débarrassés des retours à la ligne dans le sujet.
  */
@@ -7,7 +8,7 @@ import { button, emailLayout, paragraph, rows } from './email-layout.js';
 
 export type AdminNotification = {
   id: number;
-  kind: 'new_account' | 'new_follow';
+  kind: 'new_account' | 'new_follow' | 'new_purchase';
   payload: Record<string, unknown>;
   created_at: Date;
 };
@@ -21,6 +22,9 @@ const esc = (s: string) =>
 
 const when = (d: Date) =>
   d.toLocaleString('fr-FR', { timeZone: 'Europe/Paris', dateStyle: 'long', timeStyle: 'short' });
+
+const money = (cents: number, currency: string) =>
+  new Intl.NumberFormat('fr-FR', { style: 'currency', currency: currency.toUpperCase() }).format(cents / 100);
 
 const FOOTER = 'Vous recevez cet email parce que vous êtes administrateur de TrophyTracker.';
 
@@ -53,6 +57,28 @@ export function buildAdminEmail(n: AdminNotification, siteUrl: string): Email {
         ['Origine', detail],
         ['Date', when(n.created_at)],
       ], `${siteUrl}/admin`, 'Ouvrir l’administration'),
+    };
+  }
+
+  if (n.kind === 'new_purchase') {
+    const byCode = p.source === 'code';
+    const amount = money(typeof p.amount_cents === 'number' ? p.amount_cents : 0, str(p.currency, 'eur'));
+    const count = typeof p.paid_count === 'number' ? p.paid_count : null;
+    const code = byCode ? `${str(p.code)}${typeof p.code_note === 'string' && p.code_note.trim() ? ` (${p.code_note.trim()})` : ''}` : null;
+    const title = byCode ? `Code d’accès utilisé : ${name}` : `Paiement reçu : ${amount}`;
+    const intro = byCode ? 'a obtenu un accès équipage avec un code.' : `a payé ${amount} pour créer la page de son équipage.`;
+    const total = count === null ? null : byCode ? `${count} accès obtenu${count > 1 ? 's' : ''} par code au total.` : `${count} accès payé${count > 1 ? 's' : ''} au total.`;
+    const details: [string, string][] = [
+      ['Email', email],
+      byCode ? ['Code', code!] : ['Montant', amount],
+      ...(total === null ? [] : [['Total', total] as [string, string]]),
+      ['Date', when(n.created_at)],
+    ];
+    return {
+      subject: oneLine(`${byCode ? '🎟️' : '💶'} ${title}`),
+      text: [`${name} (${email}) ${intro}`, code && `Code : ${code}`, total, `Le ${when(n.created_at)}.`, '', `${siteUrl}/admin`]
+        .filter((l) => l !== null).join('\n'),
+      html: layout(siteUrl, byCode ? 'Admin · Code d’accès' : 'Admin · Paiement', title, `<strong>${esc(name)}</strong> ${esc(intro)}`, details, `${siteUrl}/admin`, 'Voir les achats'),
     };
   }
 

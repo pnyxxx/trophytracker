@@ -1,9 +1,11 @@
 /**
  * QR code de l'équipage, aux couleurs de TrophyTracker : aperçu, téléchargement PNG et partage.
- * Proposé sur la page publique (bouton « QR code ») et dans l'espace équipage (onglet « QR code »).
+ * Proposé sur la page publique (dans la fenêtre « Partager », avec le lien de la page)
+ * et dans l'espace équipage (onglet « QR code »).
  */
 import { useEffect, useState } from 'react';
-import { Download, QrCode, Share2 } from 'lucide-react';
+import { Copy, Download, Send, Share2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useEvent } from '@/hooks/queries';
@@ -19,7 +21,7 @@ const FORMATS: { id: PosterFormat; label: string; hint: string }[] = [
 
 type CrewForQr = Pick<Crew, 'slug' | 'name' | 'car_number' | 'avatar_path' | 'is_public'>;
 
-export function CrewQrPanel({ crew }: { crew: CrewForQr }) {
+export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl?: boolean }) {
   const { data: event } = useEvent();
   const [format, setFormat] = useState<PosterFormat>('sticker');
   const [image, setImage] = useState<{ blob: Blob; url: string } | null>(null);
@@ -66,17 +68,18 @@ export function CrewQrPanel({ crew }: { crew: CrewForQr }) {
 
   return (
     <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] md:items-start">
-      <div
-        className="flex items-center justify-center rounded-md bg-[repeating-conic-gradient(#2A221B_0%_25%,#1B1713_0%_50%)] bg-[length:20px_20px] p-4"
-        style={{ aspectRatio: '1 / 1' }}
-      >
-        {image ? (
-          <img src={image.url} alt={`QR code de ${crew.name}`} className="max-h-full max-w-full drop-shadow-xl" style={{ aspectRatio: `${w} / ${h}` }} />
-        ) : error ? (
-          <p className="m-0 text-center text-sm text-dust-300">Impossible de créer l’image dans ce navigateur.</p>
-        ) : (
-          <div className="h-2/3 animate-pulse rounded-xl bg-ink-700" style={{ aspectRatio: `${w} / ${h}` }} />
-        )}
+      {/* Cadre de taille fixe, image en absolu : Safari (iPhone) ignore sinon le max-height
+          d'une image dans un bloc à aspect-ratio et affiche la story à 1080 px de large. */}
+      <div className="relative aspect-square rounded-md bg-[repeating-conic-gradient(#2A221B_0%_25%,#1B1713_0%_50%)] bg-[length:20px_20px]">
+        <div className="absolute inset-4 flex items-center justify-center">
+          {image ? (
+            <img src={image.url} alt={`QR code de ${crew.name}`} className="h-full w-full object-contain drop-shadow-xl" />
+          ) : error ? (
+            <p className="m-0 text-center text-sm text-dust-300">Impossible de créer l’image dans ce navigateur.</p>
+          ) : (
+            <div className="h-full animate-pulse rounded-xl bg-ink-700" style={{ aspectRatio: `${w} / ${h}` }} />
+          )}
+        </div>
       </div>
 
       <div className="flex flex-col gap-5">
@@ -99,7 +102,7 @@ export function CrewQrPanel({ crew }: { crew: CrewForQr }) {
           ))}
         </div>
 
-        <p className="m-0 break-all font-mono text-xs text-dust-400">Le QR code ouvre : {pageUrl}</p>
+        {showUrl && <p className="m-0 break-all font-mono text-xs text-dust-400">Le QR code ouvre : {pageUrl}</p>}
         {!crew.is_public && (
           <p className="m-0 rounded-md border border-gold/40 bg-gold/10 px-3 py-2 text-sm text-gold">
             Votre page est privée : le QR code ne marchera que pour les membres de l’équipage. Rendez-la publique dans « Infos » avant de l’imprimer.
@@ -126,22 +129,58 @@ export function CrewQrPanel({ crew }: { crew: CrewForQr }) {
   );
 }
 
-/** Bouton « QR code » de la page publique, qui ouvre le panneau dans une fenêtre. */
-export function CrewQrButton({ crew, className }: { crew: CrewForQr; className?: string }) {
+/**
+ * Bouton « Partager » de la page publique : une seule fenêtre pour envoyer le lien
+ * (partage du téléphone ou copie) et créer l'image avec QR code (autocollant, story).
+ */
+export function CrewShareButton({ crew, className }: { crew: CrewForQr; className?: string }) {
   const [open, setOpen] = useState(false);
+  const pageUrl = `${window.location.origin}/equipages/${crew.slug}`;
+  const canShare = typeof navigator.share === 'function';
+
+  const send = async () => {
+    try {
+      await navigator.share({ title: crew.name, text: `Suivez ${crew.name} en direct sur le 4L Trophy !`, url: pageUrl });
+    } catch {
+      /* partage annulé */
+    }
+  };
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(pageUrl);
+      toast.success('Lien copié ! Partagez-le à vos proches et sponsors.');
+    } catch {
+      toast.error('Copie impossible : sélectionnez le lien à la main.');
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" className={className}>
-          <QrCode /> QR code
+          <Share2 /> Partager
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[92vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>QR code de {crew.name}</DialogTitle>
-          <DialogDescription>À coller sur la 4L, à imprimer ou à partager : il ouvre la page de suivi en direct.</DialogDescription>
+          <DialogTitle>Partager {crew.name}</DialogTitle>
+          <DialogDescription>Envoyez le lien de la page, ou créez une image avec QR code à coller sur la 4L ou à poster en story.</DialogDescription>
         </DialogHeader>
-        {open && <CrewQrPanel crew={crew} />}
+        <div className="flex flex-col gap-3 rounded-md border border-cream/15 p-4">
+          <p className="m-0 select-all break-all font-mono text-sm text-cream">{pageUrl}</p>
+          <div className="flex flex-wrap gap-2">
+            {canShare && (
+              <Button onClick={send}>
+                <Send /> Envoyer le lien
+              </Button>
+            )}
+            <Button variant={canShare ? 'outline' : 'default'} onClick={copy}>
+              <Copy /> Copier le lien
+            </Button>
+          </div>
+        </div>
+        <h3 className="m-0 mt-2 font-display text-2xl font-extrabold uppercase text-cream">Image avec QR code</h3>
+        {open && <CrewQrPanel crew={crew} showUrl={false} />}
       </DialogContent>
     </Dialog>
   );

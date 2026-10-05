@@ -6,7 +6,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
 
-select plan(12);
+select plan(19);
 
 grant tracker to postgres;  -- permet au test d'endosser le rôle (annulé au rollback)
 
@@ -62,6 +62,29 @@ select is((select last_error from private.admin_notifications where id = (select
   'le tracker note un échec');
 select is((select n from t_res where label = 'après'), 2, 'l''envoyée sort de la file, l''échouée y reste');
 select ok(not has_table_privilege('tracker', 'private.admin_notifications', 'select'), 'le tracker ne lit pas la table directement');
+
+-- Accès équipage : paiement Stripe (une seule fois, même si Stripe renvoie l'événement), code, offert par un admin
+delete from private.admin_notifications;
+insert into public.crew_purchases (id, user_id, customer_email, source, amount_cents, stripe_session_id)
+values ('00000000-0000-0000-0000-0000000000b1', '00000000-0000-0000-0000-0000000000f1', 'fanny@test.local', 'stripe', 1500, 'cs_test_notif');
+select is((select count(*)::int from private.admin_notifications), 0, 'un achat commencé ne notifie pas');
+select is(public.purchase_paid('cs_test_notif', 'pi_test_notif', 1500, 'fanny@stripe.local'), 'paid', 'Stripe confirme le paiement');
+select is(public.purchase_paid('cs_test_notif', 'pi_test_notif', 1500, 'fanny@stripe.local'), 'already', 'Stripe renvoie l''événement');
+select is((select count(*)::int from private.admin_notifications where kind = 'new_purchase'), 1,
+  'un paiement confirmé notifie une seule fois');
+select is((select payload ->> 'amount_cents' || ' ' || (payload ->> 'email') || ' ' || (payload ->> 'name') from private.admin_notifications where kind = 'new_purchase'),
+  '1500 fanny@stripe.local Fanny', 'la notification contient le montant, l''email Stripe et le nom');
+
+insert into public.access_codes (id, code, note) values ('00000000-0000-0000-0000-0000000000c1', '4L-TEST-NOTI', 'Partenaire');
+insert into public.crew_purchases (user_id, customer_email, source, status, amount_cents, paid_at, access_code_id)
+values ('00000000-0000-0000-0000-0000000000ad', 'admin@test.local', 'code', 'paid', 0, now(), '00000000-0000-0000-0000-0000000000c1');
+select is((select payload ->> 'code' || ' ' || (payload ->> 'code_note') from private.admin_notifications where payload ->> 'source' = 'code'),
+  '4L-TEST-NOTI Partenaire', 'un code utilisé notifie avec le code et sa note');
+
+insert into public.crew_purchases (user_id, customer_email, source, status, amount_cents, paid_at)
+values ('00000000-0000-0000-0000-0000000000ad', 'admin@test.local', 'admin', 'paid', 0, now());
+select is((select count(*)::int from private.admin_notifications where kind = 'new_purchase'), 2,
+  'un accès offert par un admin ne notifie pas');
 
 -- Personne d'autre n'y a accès
 select ok(not has_function_privilege('authenticated', 'private.pending_admin_notifications(integer)', 'execute'),
