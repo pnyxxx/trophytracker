@@ -1,6 +1,6 @@
-import { lazy, Suspense, useMemo, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Mail, Settings } from 'lucide-react';
+import { ChevronDown, Mail, Settings } from 'lucide-react';
 import { PageShell } from '@/components/layout/PageShell';
 import { FacebookIcon, InstagramIcon } from '@/components/common/SocialIcons';
 import { Seo } from '@/components/common/Seo';
@@ -59,6 +59,61 @@ const sameText = (a: string, b: string) => {
   const norm = (s: string) => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/\s+/g, ' ').trim();
   return norm(a) === norm(b);
 };
+
+/**
+ * « Défiler » en bas au centre de l'écran, tant que la page n'a pas bougé (juste au-dessus du
+ * sommaire quand on le voit). Masqué s'il recouvrirait un bouton : sur téléphone, l'en-tête dépasse
+ * souvent l'écran.
+ */
+function ScrollHint({ target }: { target: string }) {
+  const ref = useRef<HTMLAnchorElement>(null);
+  const [atTop, setAtTop] = useState(() => window.scrollY < 40);
+  const [covers, setCovers] = useState(false);
+  const [bottom, setBottom] = useState(8);
+  useEffect(() => {
+    const onScroll = () => setAtTop(window.scrollY < 40);
+    const check = () => {
+      const navTop = document.querySelector('nav[aria-label="Sections de la page"]')?.getBoundingClientRect().top ?? Infinity;
+      const nextBottom = navTop < window.innerHeight ? window.innerHeight - navTop + 10 : 8;
+      setBottom(nextBottom);
+      if (ref.current) ref.current.style.bottom = `${nextBottom}px`; // mesure ci-dessous à la bonne place
+      const hint = ref.current?.getBoundingClientRect();
+      const header = ref.current?.closest('header');
+      if (!hint || !header) return;
+      setCovers([...header.querySelectorAll('a[href], button')].some((el) => {
+        if (el === ref.current) return false;
+        const r = el.getBoundingClientRect();
+        return r.left < hint.right && r.right > hint.left && r.top < hint.bottom && r.bottom > hint.top;
+      }));
+    };
+    const late = setTimeout(check, 800); // après le chargement des polices et des images
+    check();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', check);
+    return () => {
+      clearTimeout(late);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', check);
+    };
+  }, []);
+  const visible = atTop && !covers;
+  return (
+    <a
+      ref={ref}
+      href={`#${target}`}
+      aria-hidden={!visible}
+      tabIndex={visible ? 0 : -1}
+      style={{ bottom }}
+      className={cn(
+        'fixed left-1/2 z-[850] flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-ink/60 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-dust-300 backdrop-blur-sm transition-opacity duration-500 hover:text-cream',
+        visible ? 'opacity-100' : 'pointer-events-none opacity-0',
+      )}
+    >
+      Défiler
+      <ChevronDown className="h-4 w-4 text-primary motion-safe:animate-bounce" />
+    </a>
+  );
+}
 
 const coords = (lat: number, lon: number) =>
   `${Math.abs(lat).toFixed(3)}°${lat >= 0 ? 'N' : 'S'} · ${Math.abs(lon).toFixed(3)}°${lon < 0 ? 'O' : 'E'}`;
@@ -130,14 +185,15 @@ export default function CrewPage() {
         ]}
       />
 
-      {/* ── En-tête : remplit l'écran, le sommaire (≈ 42 px) arrive juste en bas ── */}
-      <header className="relative flex min-h-[calc(100svh-42px)] flex-col justify-end overflow-hidden bg-[radial-gradient(120%_80%_at_80%_0%,#3A2215_0%,#1B1310_45%,#120F0C_75%)]">
+      {/* ── En-tête : remplit l'écran, le sommaire (≈ 42 px) arrive juste en bas.
+          Numéro, nom et ville en haut ; le reste en bas, au-dessus du sommaire. ── */}
+      <header className="relative flex min-h-[calc(100svh-42px)] flex-col overflow-hidden bg-[radial-gradient(120%_80%_at_80%_0%,#3A2215_0%,#1B1310_45%,#120F0C_75%)]">
         {cover && (
           <img src={cover} alt="" className="absolute inset-0 h-full w-full object-cover opacity-35"
             style={{ objectPosition: `${crew.cover_focus_x}% ${crew.cover_focus_y}%` }} />
         )}
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(18,15,12,.55)_0%,rgba(18,15,12,.3)_40%,#120F0C_100%)]" />
-        <Container className="relative grid w-full gap-10 pb-14 pt-32 md:pb-16 md:pt-40 lg:grid-cols-[1fr_auto] lg:items-end">
+        <Container className="relative flex w-full flex-1 flex-col justify-between gap-10 pb-14 pt-28 md:pb-16 md:pt-32">
           <div className="flex min-w-0 flex-col gap-7">
             <Kicker className="flex-wrap gap-x-4 gap-y-2">
               {crew.car_number && (
@@ -156,46 +212,52 @@ export default function CrewPage() {
                 <span className="font-mono text-xs uppercase tracking-[0.12em] text-dust-400">{[crew.school, crew.city].filter(Boolean).join(' · ')}</span>
               )}
             </div>
-            {crew.tagline && <p className="m-0 max-w-[640px] text-pretty text-xl leading-snug text-dust-100">{crew.tagline}</p>}
-            {/* Les noms des membres, sauf s'ils ne font que répéter le nom de l'équipage */}
-            {memberNames && !sameText(memberNames, crew.name) && (
-              <span className="font-mono text-xs uppercase tracking-[0.12em] text-dust-400">Équipage : {memberNames}</span>
-            )}
-            {(crew.instagram_url || crew.facebook_url) && (
-              <div className="flex flex-wrap gap-3">
-                {crew.instagram_url && (
-                  <Button asChild variant="outline">
-                    <a href={crew.instagram_url} target="_blank" rel="noopener noreferrer"><InstagramIcon />Instagram</a>
-                  </Button>
-                )}
-                {crew.facebook_url && (
-                  <Button asChild variant="outline">
-                    <a href={crew.facebook_url} target="_blank" rel="noopener noreferrer"><FacebookIcon />Facebook</a>
+          </div>
+
+          <div className="grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end">
+            <div className="flex min-w-0 flex-col gap-7">
+              {crew.tagline && <p className="m-0 max-w-[640px] text-pretty text-xl leading-snug text-dust-100">{crew.tagline}</p>}
+              {/* Les noms des membres, sauf s'ils ne font que répéter le nom de l'équipage */}
+              {memberNames && !sameText(memberNames, crew.name) && (
+                <span className="font-mono text-xs uppercase tracking-[0.12em] text-dust-400">Équipage : {memberNames}</span>
+              )}
+              {(crew.instagram_url || crew.facebook_url) && (
+                <div className="flex flex-wrap gap-3">
+                  {crew.instagram_url && (
+                    <Button asChild variant="outline">
+                      <a href={crew.instagram_url} target="_blank" rel="noopener noreferrer"><InstagramIcon />Instagram</a>
+                    </Button>
+                  )}
+                  {crew.facebook_url && (
+                    <Button asChild variant="outline">
+                      <a href={crew.facebook_url} target="_blank" rel="noopener noreferrer"><FacebookIcon />Facebook</a>
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-5 lg:items-end">
+              <CrewAvatar name={crew.name} path={crew.avatar_path} className="h-24 w-24 border-2 border-cream/20 text-4xl md:h-32 md:w-32 md:text-5xl" />
+              {crew.last_lat != null && crew.last_lon != null && (
+                <span className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.12em] text-cream">
+                  <span className="h-[7px] w-[7px] rounded-full bg-primary shadow-[0_0_10px_#DB4740]" />
+                  {coords(crew.last_lat, crew.last_lon)}
+                </span>
+              )}
+              <div className="flex flex-wrap gap-2">
+                <FollowButton crewId={crew.id} slug={crew.slug} count={crew.followers_count} />
+                <CrewShareButton crew={crew} />
+                {canEdit && (
+                  <Button asChild variant="secondary">
+                    <Link to={`/mon-compte/equipages/${crew.slug}`}><Settings />Gérer</Link>
                   </Button>
                 )}
               </div>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-5 lg:items-end">
-            <CrewAvatar name={crew.name} path={crew.avatar_path} className="h-24 w-24 border-2 border-cream/20 text-4xl md:h-32 md:w-32 md:text-5xl" />
-            {crew.last_lat != null && crew.last_lon != null && (
-              <span className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.12em] text-cream">
-                <span className="h-[7px] w-[7px] rounded-full bg-primary shadow-[0_0_10px_#DB4740]" />
-                {coords(crew.last_lat, crew.last_lon)}
-              </span>
-            )}
-            <div className="flex flex-wrap gap-2">
-              <FollowButton crewId={crew.id} slug={crew.slug} count={crew.followers_count} />
-              <CrewShareButton crew={crew} />
-              {canEdit && (
-                <Button asChild variant="secondary">
-                  <Link to={`/mon-compte/equipages/${crew.slug}`}><Settings />Gérer</Link>
-                </Button>
-              )}
             </div>
           </div>
         </Container>
+        <ScrollHint target="carte" />
       </header>
 
       {/* Sommaire de la page, collé sous l'en-tête du site */}
