@@ -213,6 +213,9 @@ export type Database = {
           name: string
           school: string | null
           slug: string
+          start_city: string | null
+          start_lat: number | null
+          start_lon: number | null
           story: string | null
           supplies_count: number | null
           tagline: string | null
@@ -244,6 +247,9 @@ export type Database = {
           name: string
           school?: string | null
           slug: string
+          start_city?: string | null
+          start_lat?: number | null
+          start_lon?: number | null
           story?: string | null
           supplies_count?: number | null
           tagline?: string | null
@@ -275,6 +281,9 @@ export type Database = {
           name?: string
           school?: string | null
           slug?: string
+          start_city?: string | null
+          start_lat?: number | null
+          start_lon?: number | null
           story?: string | null
           supplies_count?: number | null
           tagline?: string | null
@@ -726,6 +735,9 @@ export type Database = {
           name: string
           school: string | null
           slug: string
+          start_city: string | null
+          start_lat: number | null
+          start_lon: number | null
           story: string | null
           supplies_count: number | null
           tagline: string | null

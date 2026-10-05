@@ -31,12 +31,14 @@ const TONES = {
   cream: 'bg-cream text-coal',
 };
 
-function Section({ id, kicker, title, subtitle, tone = 'dark', children }: {
-  id: string; kicker?: ReactNode; title: ReactNode; subtitle?: string; tone?: keyof typeof TONES; children: ReactNode;
+function Section({ id, kicker, title, subtitle, tone = 'dark', first = false, children }: {
+  id: string; kicker?: ReactNode; title: ReactNode; subtitle?: string; tone?: keyof typeof TONES;
+  /** Première section, juste sous l'en-tête plein écran : moins d'espace au-dessus. */
+  first?: boolean; children: ReactNode;
 }) {
   const dark = tone === 'dark';
   return (
-    <section id={id} className={cn('scroll-mt-[120px] py-20 md:py-[120px]', TONES[tone])}>
+    <section id={id} className={cn('scroll-mt-[84px] pb-20 md:pb-[120px]', first ? 'pt-8 md:pt-10' : 'pt-20 md:pt-[120px]', TONES[tone])}>
       <Container className="flex flex-col gap-10 md:gap-14">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div className="flex flex-col gap-3.5">
@@ -61,22 +63,16 @@ const sameText = (a: string, b: string) => {
 };
 
 /**
- * « Défiler » en bas au centre de l'écran, tant que la page n'a pas bougé (juste au-dessus du
- * sommaire quand on le voit). Masqué s'il recouvrirait un bouton : sur téléphone, l'en-tête dépasse
- * souvent l'écran.
+ * « Défiler » en bas au centre de l'écran, tant que la page n'a pas bougé. Masqué s'il
+ * recouvrirait un bouton : sur téléphone, l'en-tête dépasse souvent l'écran.
  */
 function ScrollHint({ target }: { target: string }) {
   const ref = useRef<HTMLAnchorElement>(null);
   const [atTop, setAtTop] = useState(() => window.scrollY < 40);
   const [covers, setCovers] = useState(false);
-  const [bottom, setBottom] = useState(8);
   useEffect(() => {
     const onScroll = () => setAtTop(window.scrollY < 40);
     const check = () => {
-      const navTop = document.querySelector('nav[aria-label="Sections de la page"]')?.getBoundingClientRect().top ?? Infinity;
-      const nextBottom = navTop < window.innerHeight ? window.innerHeight - navTop + 10 : 8;
-      setBottom(nextBottom);
-      if (ref.current) ref.current.style.bottom = `${nextBottom}px`; // mesure ci-dessous à la bonne place
       const hint = ref.current?.getBoundingClientRect();
       const header = ref.current?.closest('header');
       if (!hint || !header) return;
@@ -103,9 +99,8 @@ function ScrollHint({ target }: { target: string }) {
       href={`#${target}`}
       aria-hidden={!visible}
       tabIndex={visible ? 0 : -1}
-      style={{ bottom }}
       className={cn(
-        'fixed left-1/2 z-[850] flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-ink/60 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-dust-300 backdrop-blur-sm transition-opacity duration-500 hover:text-cream',
+        'fixed bottom-2 left-1/2 z-[850] flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-ink/60 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-dust-300 backdrop-blur-sm transition-opacity duration-500 hover:text-cream',
         visible ? 'opacity-100' : 'pointer-events-none opacity-0',
       )}
     >
@@ -145,14 +140,6 @@ export default function CrewPage() {
   const hasRoute = !!event && roadbook.stops.length > 1;
 
   const memberNames = members.map((m) => m.display_name).filter(Boolean).join(' & ');
-  const anchors = [
-    { id: 'carte', label: 'Carte' },
-    { id: 'stats', label: 'Stats' },
-    hasRoute && { id: 'route', label: 'La route' },
-    crew.story && { id: 'histoire', label: 'L’aventure' },
-    photos.length > 0 && { id: 'photos', label: 'Photos' },
-    sponsors.length > 0 && { id: 'sponsors', label: 'Sponsors' },
-  ].filter(Boolean) as { id: string; label: string }[];
 
   return (
     <PageShell padTop={false}>
@@ -185,9 +172,9 @@ export default function CrewPage() {
         ]}
       />
 
-      {/* ── En-tête : remplit l'écran, le sommaire (≈ 42 px) arrive juste en bas.
-          Numéro, nom et ville en haut ; le reste en bas, au-dessus du sommaire. ── */}
-      <header className="relative flex min-h-[calc(100svh-42px)] flex-col overflow-hidden bg-[radial-gradient(120%_80%_at_80%_0%,#3A2215_0%,#1B1310_45%,#120F0C_75%)]">
+      {/* ── En-tête : remplit l'écran, la carte arrive juste en dessous.
+          Numéro, nom et ville en haut ; le reste en bas. ── */}
+      <header className="relative flex min-h-[100svh] flex-col overflow-hidden bg-[radial-gradient(120%_80%_at_80%_0%,#3A2215_0%,#1B1310_45%,#120F0C_75%)]">
         {cover && (
           <img src={cover} alt="" className="absolute inset-0 h-full w-full object-cover opacity-35"
             style={{ objectPosition: `${crew.cover_focus_x}% ${crew.cover_focus_y}%` }} />
@@ -260,20 +247,10 @@ export default function CrewPage() {
         <ScrollHint target="carte" />
       </header>
 
-      {/* Sommaire de la page, collé sous l'en-tête du site */}
-      <nav aria-label="Sections de la page" className="sticky top-[68px] z-[900] border-y border-cream/[0.12] bg-ink/90 backdrop-blur-md">
-        <Container className="flex gap-6 overflow-x-auto py-3 font-mono text-xs uppercase tracking-[0.14em]">
-          {anchors.map((a) => (
-            <a key={a.id} href={`#${a.id}`} className="shrink-0 text-dust-300 hover:text-cream">
-              <span className="text-primary">◆</span> {a.label}
-            </a>
-          ))}
-        </Container>
-      </nav>
-
       {/* ── Carte ────────────────────────────────────────────────────────── */}
       <Section
         id="carte"
+        first
         kicker={live ? <><LiveDot />Suivi en direct</> : 'Suivi GPS'}
         title="Où est la 4L ?"
         subtitle="Position en temps réel et trace complète depuis le départ."
@@ -284,7 +261,7 @@ export default function CrewPage() {
       </Section>
 
       {/* ── Statistiques ─────────────────────────────────────────────────── */}
-      <section id="stats" className="scroll-mt-[120px] border-t border-cream/[0.12] bg-ink pb-20 pt-16 md:pb-[120px]">
+      <section id="stats" className="scroll-mt-[84px] border-t border-cream/[0.12] bg-ink pb-20 pt-16 md:pb-[120px]">
         <Container className="flex flex-col gap-10">
           <div className="flex flex-wrap items-end justify-between gap-6">
             <div className="flex flex-col gap-3.5">

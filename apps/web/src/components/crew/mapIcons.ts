@@ -30,6 +30,22 @@ export function waypointIcon(w: Pick<Waypoint, 'kind' | 'name'>) {
   });
 }
 
+/** Ville de départ de l'équipage : drapeau planté (le pied du mât est sur la ville) + nom de la ville. */
+export function startIcon(city: string | null) {
+  const flag =
+    '<svg class="tt-start-flag" viewBox="0 0 24 30" aria-hidden="true">' +
+    '<path d="M4 2v27" stroke="#1a1612" stroke-width="2.5" stroke-linecap="round"/>' +
+    '<path d="M5 3h15l-4 5.5 4 5.5H5z" fill="#DB4740" stroke="#f4ecdf" stroke-width="1.5" stroke-linejoin="round"/>' +
+    '</svg>';
+  return new DivIcon({
+    className: 'tt-marker',
+    html: `<div class="tt-start">${flag}<span class="tt-wp-label tt-start-label">${escapeHtml(city || 'Départ')}</span></div>`,
+    iconSize: [24, 30],
+    iconAnchor: [4, 29],
+    popupAnchor: [6, -28],
+  });
+}
+
 /** Photo : vignette carrée encadrée de blanc, à l'endroit de la prise de vue. */
 export function photoIcon(thumbUrl: string | null, panorama: boolean) {
   return new DivIcon({

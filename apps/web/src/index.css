@@ -158,6 +158,23 @@
   white-space: nowrap;
 }
 
+/* Ville de départ : drapeau rouge + nom de la ville */
+.tt-start {
+  position: relative;
+  width: 24px;
+  height: 30px;
+}
+.tt-start-flag {
+  display: block;
+  width: 24px;
+  height: 30px;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.45));
+}
+.tt-start-label {
+  left: 24px;
+  top: 9px;
+}
+
 .tt-sponsor {
   display: flex;
   align-items: center;

@@ -11,16 +11,20 @@ import { toastError, unwrap } from '@/lib/errors';
 import { keys } from '@/hooks/queries';
 import { Field, numOrNull, orNull, Panel, textareaClass } from './shared';
 import { AvatarPicker, CoverPicker } from './CrewImages';
+import { LocationPicker } from './LocationPicker';
 
 type Editable = Pick<Crew,
   'name' | 'car_number' | 'tagline' | 'story' | 'school' | 'city' | 'contact_email' |
-  'instagram_url' | 'facebook_url' | 'is_public' | 'current_rank' | 'supplies_count'>;
+  'instagram_url' | 'facebook_url' | 'is_public' | 'current_rank' | 'supplies_count' |
+  'start_city' | 'start_lat' | 'start_lon'>;
 
 const toForm = (c: Crew) => ({
   name: c.name, car_number: c.car_number ?? '', tagline: c.tagline ?? '', story: c.story ?? '',
   school: c.school ?? '', city: c.city ?? '', contact_email: c.contact_email ?? '',
   instagram_url: c.instagram_url ?? '', facebook_url: c.facebook_url ?? '', is_public: c.is_public,
   current_rank: c.current_rank?.toString() ?? '', supplies_count: c.supplies_count?.toString() ?? '',
+  start_city: c.start_city ?? '',
+  start: c.start_lat != null && c.start_lon != null ? { lat: c.start_lat, lon: c.start_lon } : null,
 });
 
 export function InfoTab({ crew }: { crew: Crew }) {
@@ -42,6 +46,8 @@ export function InfoTab({ crew }: { crew: Crew }) {
         instagram_url: socialUrl('instagram', form.instagram_url), facebook_url: socialUrl('facebook', form.facebook_url),
         is_public: form.is_public,
         current_rank: numOrNull(form.current_rank), supplies_count: numOrNull(form.supplies_count),
+        start_city: form.start ? orNull(form.start_city) : null,
+        start_lat: form.start?.lat ?? null, start_lon: form.start?.lon ?? null,
       };
       unwrap(await supabase.from('crews').update(patch).eq('id', crew.id));
     },
@@ -77,6 +83,27 @@ export function InfoTab({ crew }: { crew: Crew }) {
               <textarea id="story" maxLength={5000} className={textareaClass} value={form.story} onChange={set('story')} />
             </Field>
           </div>
+        </div>
+      </Panel>
+
+      <Panel title="Ville de départ" description="D’où partez-vous ? Un drapeau et le nom de la ville s’affichent à cet endroit sur la carte de votre page.">
+        <div className="grid gap-4 md:grid-cols-2">
+          <Field id="start-place" label="Ville">
+            <LocationPicker
+              id="start-place"
+              value={form.start}
+              placeholder="Pédernec, Rennes, Lyon…"
+              onChange={(start, place) =>
+                // Le nom affiché se remplit tout seul au choix d'une suggestion (et reste modifiable).
+                setForm((f) => ({ ...f, start, start_city: start ? place?.city ?? place?.title ?? f.start_city : '' }))
+              }
+            />
+          </Field>
+          {form.start && (
+            <Field id="start-city" label="Nom affiché sur la carte">
+              <Input id="start-city" maxLength={80} value={form.start_city} onChange={set('start_city')} />
+            </Field>
+          )}
         </div>
       </Panel>
 

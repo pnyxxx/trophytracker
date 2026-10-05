@@ -1,5 +1,5 @@
 /**
- * Carte en direct d'un équipage : trace complète, position actuelle,
+ * Carte en direct d'un équipage : trace complète, position actuelle, ville de départ,
  * points du parcours prévu, sponsors et photos placées.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -12,7 +12,7 @@ import type { TrackPoint } from '@/hooks/useLiveTrack';
 import { formatDateTime, formatRelative, isLive } from '@/lib/format';
 import { mediaUrl, thumbUrl } from '@/lib/media';
 import { BaseMap } from './BaseMap';
-import { carIcon, photoIcon, sponsorIcon, waypointIcon, waypointStyle } from './mapIcons';
+import { carIcon, photoIcon, sponsorIcon, startIcon, waypointIcon, waypointStyle } from './mapIcons';
 
 
 interface Props {
@@ -24,8 +24,9 @@ interface Props {
 }
 
 /** Recentre la carte : sur toute la trace au début, puis suit la voiture si demandé. */
-function MapController({ car, points, waypoints, follow }: {
+function MapController({ car, start, points, waypoints, follow }: {
   car: [number, number] | null;
+  start: [number, number] | null;
   points: TrackPoint[];
   waypoints: Waypoint[];
   follow: boolean;
@@ -39,11 +40,12 @@ function MapController({ car, points, waypoints, follow }: {
       ? points.map((p) => [p[0], p[1]])
       : waypoints.map((w) => [w.lat, w.lon]);
     if (car) coords.push(car);
+    if (start) coords.push(start); // la ville de départ fait partie du voyage
     if (coords.length === 0) return;
     initialized.current = true;
     if (coords.length === 1) map.setView(coords[0]!, 12);
     else map.fitBounds(new LatLngBounds(coords), { padding: [40, 40], maxZoom: 13 });
-  }, [map, car, points, waypoints]);
+  }, [map, car, start, points, waypoints]);
 
   useEffect(() => {
     if (follow && car && initialized.current) map.panTo(car, { animate: true, duration: 0.8 });
@@ -65,6 +67,12 @@ export function CrewMap({ crew, points, waypoints: allWaypoints, sponsors, photo
     return last ? [last[0], last[1]] : null;
   }, [crew.last_lat, crew.last_lon, points]);
 
+  const start = useMemo<[number, number] | null>(
+    () => (crew.start_lat != null && crew.start_lon != null ? [crew.start_lat, crew.start_lon] : null),
+    [crew.start_lat, crew.start_lon],
+  );
+  const startMarker = useMemo(() => startIcon(crew.start_city), [crew.start_city]);
+
   const line = useMemo(() => {
     const coords = points.map((p) => [p[0], p[1]] as [number, number]);
     // Relie la trace stockée à la toute dernière position connue.
@@ -85,7 +93,7 @@ export function CrewMap({ crew, points, waypoints: allWaypoints, sponsors, photo
     <div ref={containerRef} className="relative h-[70vh] min-h-[420px] w-full overflow-hidden border border-cream/[0.14] bg-[#E8E2D8] md:h-[600px]">
       <MapContainer center={[40, -3]} zoom={5} preferCanvas scrollWheelZoom className="h-full w-full" style={{ zIndex: 0 }}>
         <BaseMap />
-        <MapController car={car} points={points} waypoints={waypoints} follow={follow} />
+        <MapController car={car} start={start} points={points} waypoints={waypoints} follow={follow} />
 
         {line.length > 1 && (
           <>
@@ -104,6 +112,16 @@ export function CrewMap({ crew, points, waypoints: allWaypoints, sponsors, photo
             </Popup>
           </Marker>
         ))}
+
+        {start && (
+          <Marker position={start} icon={startMarker} zIndexOffset={500}>
+            <Popup>
+              <p className="text-xs font-semibold uppercase text-black/50">Ville de départ</p>
+              <p className="font-bold text-black">{crew.start_city || crew.name}</p>
+              <p className="text-sm text-black/70">C’est d’ici que part {crew.name}.</p>
+            </Popup>
+          </Marker>
+        )}
 
         {mapSponsors.map((s) => (
           <Marker key={s.id} position={[s.lat!, s.lon!]} icon={sponsorIcon(mediaUrl(s.logo_path), s.name)}>
