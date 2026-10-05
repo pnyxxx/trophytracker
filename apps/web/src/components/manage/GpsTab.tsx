@@ -11,7 +11,7 @@ import { lazy, Suspense, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Check, ChevronDown, ChevronUp, Copy, Eraser, FlaskConical, KeyRound, Play, QrCode as QrCodeIcon, ShieldOff, Smartphone, Square } from 'lucide-react';
+import { Check, ChevronDown, ChevronUp, Copy, Eraser, FlaskConical, KeyRound, Play, QrCode as QrCodeIcon, RefreshCw, Smartphone, Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { QrCode } from '@/components/common/QrCode';
 import { LiveDot } from '@/components/common/Brand';
@@ -241,12 +241,6 @@ export function GpsTab({ crew }: { crew: Crew }) {
     },
     onError: toastError,
   });
-  const revoke = useMutation({
-    mutationFn: async () => unwrap(await supabase.rpc('revoke_device_key', { p_crew: crew.id })),
-    onSuccess: () => { setNewKey(null); toast.success('Clé désactivée'); void queryClient.invalidateQueries({ queryKey: keys.tracking(crew.id) }); },
-    onError: toastError,
-  });
-
   const hasKey = !!newKey || !!tracking?.has_device_key;
 
   return (
@@ -404,18 +398,20 @@ export function GpsTab({ crew }: { crew: Crew }) {
           </div>
         )}
 
-        {/* Un seul bouton : « Générer la clé » sans clé, « Désactiver » avec (puis on peut en regénérer une). */}
+        {/* Un seul bouton. La clé est stockée hachée : le serveur la vérifie mais ne peut pas la relire,
+            donc une clé active ne se réaffiche jamais. Pour revoir le QR code, on en génère une nouvelle
+            (regenerate_device_key remplace l'ancienne, qui cesse aussitôt de marcher). */}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
           {hasKey ? (
             <>
               <Button
                 variant="outline"
-                disabled={revoke.isPending}
+                disabled={generate.isPending}
                 onClick={() => {
-                  if (confirm('Désactiver la clé ? Le téléphone ne pourra plus envoyer de position tant que vous n’en aurez pas généré une nouvelle et réglé l’appli avec.')) revoke.mutate();
+                  if (newKey || confirm('Générer un nouveau QR code ? L’ancien réglage ne marchera plus : le téléphone de la 4L devra scanner le nouveau QR code pour continuer à envoyer sa position.')) generate.mutate();
                 }}
               >
-                <ShieldOff />Désactiver la clé
+                <RefreshCw />Générer un nouveau QR code
               </Button>
               <span className="text-sm font-semibold text-live">✅ Clé active</span>
             </>
@@ -427,7 +423,8 @@ export function GpsTab({ crew }: { crew: Crew }) {
         </div>
         {hasKey && !newKey && (
           <p className="mb-0 mt-3 text-sm leading-relaxed text-dust-300">
-            La clé n’est affichée qu’une fois. Pour régler un téléphone (nouveau ou à refaire), désactivez-la puis générez-en une nouvelle.
+            Par sécurité, le QR code n’est affiché qu’une fois. Pour régler un téléphone (nouveau ou à refaire), générez-en un nouveau :
+            l’ancien réglage cessera de fonctionner.
           </p>
         )}
         {fairPlayAccepted && !charterJustAccepted && (
@@ -446,7 +443,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
             <QrCodeIcon className="h-10 w-10 text-dust-500" />
             <p className="m-0 max-w-[460px] text-sm leading-relaxed text-dust-300">
               Générez la clé à l’étape 02 : le <strong className="text-cream">QR code</strong> qui règle l’appli d’un coup apparaîtra ici.
-              {tracking?.has_device_key && ' (Une clé déjà active n’est jamais réaffichée : désactivez-la, puis générez-en une nouvelle.)'}
+              {tracking?.has_device_key && ' (Par sécurité, une clé déjà active n’est jamais réaffichée : générez un nouveau QR code à l’étape 02.)'}
             </p>
           </div>
         ) : onPhone ? (
