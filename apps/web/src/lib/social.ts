@@ -31,3 +31,23 @@ export function socialUrl(network: Network, input: string): string | null {
   url.protocol = 'https:';
   return url.toString();
 }
+
+/**
+ * Lien vers n'importe quel site (cagnotte Leetchi, HelloAsso, Lydia…) : on
+ * ajoute « https:// » s'il manque. Null si vide ; erreur lisible sinon.
+ */
+export function webUrl(label: string, input: string): string | null {
+  const v = input.trim();
+  if (!v) return null;
+  let url: URL;
+  try {
+    url = new URL(/^https?:\/\//i.test(v) ? v : `https://${v}`);
+  } catch {
+    throw new Error(`Lien ${label} invalide`);
+  }
+  // Un vrai nom de domaine (« leetchi.com »), pas un mot isolé.
+  if (!/^https?:$/.test(url.protocol) || !/\.[a-z]{2,}$/i.test(url.hostname) || url.toString().length > 300) {
+    throw new Error(`Le lien ${label} doit ressembler à https://www.leetchi.com/…`);
+  }
+  return url.toString();
+}

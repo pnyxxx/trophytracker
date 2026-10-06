@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { socialUrl } from './social';
+import { socialUrl, webUrl } from './social';
 
 describe('socialUrl', () => {
   it('laisse vide un champ vide', () => {
@@ -21,5 +21,22 @@ describe('socialUrl', () => {
     expect(() => socialUrl('facebook', 'monsite.fr/equipage')).toThrow(/Facebook/);
     expect(() => socialUrl('facebook', 'https://www.facebook.com/')).toThrow(/Facebook/);
     expect(() => socialUrl('instagram', 'instagram.com')).toThrow(/Instagram/);
+  });
+});
+
+describe('webUrl', () => {
+  it('laisse vide un champ vide', () => {
+    expect(webUrl('de la cagnotte', ' ')).toBeNull();
+  });
+
+  it('ajoute https:// et garde un lien complet', () => {
+    expect(webUrl('de la cagnotte', 'leetchi.com/fr/c/4l-j4l')).toBe('https://leetchi.com/fr/c/4l-j4l');
+    expect(webUrl('de la cagnotte', 'https://www.helloasso.com/associations/x')).toBe('https://www.helloasso.com/associations/x');
+  });
+
+  it('refuse ce qui n’est pas une adresse web', () => {
+    expect(() => webUrl('de la cagnotte', 'cagnotte')).toThrow(/cagnotte/);
+    expect(() => webUrl('de la cagnotte', 'javascript:alert(1)')).toThrow(/cagnotte/);
+    expect(() => webUrl('de la cagnotte', 'ma cagnotte.fr')).toThrow(/cagnotte/);
   });
 });

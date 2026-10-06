@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ChevronDown, Mail, Settings } from 'lucide-react';
+import { ChevronDown, HandHeart, Mail, Settings } from 'lucide-react';
 import { PageShell } from '@/components/layout/PageShell';
 import { FacebookIcon, InstagramIcon } from '@/components/common/SocialIcons';
 import { Seo } from '@/components/common/Seo';
@@ -208,8 +208,13 @@ export default function CrewPage() {
               {memberNames && !sameText(memberNames, crew.name) && (
                 <span className="font-mono text-xs uppercase tracking-[0.12em] text-dust-400">Équipage : {memberNames}</span>
               )}
-              {(crew.instagram_url || crew.facebook_url) && (
+              {(crew.fundraiser_url || crew.instagram_url || crew.facebook_url) && (
                 <div className="flex flex-wrap gap-3">
+                  {crew.fundraiser_url && (
+                    <Button asChild>
+                      <a href={crew.fundraiser_url} target="_blank" rel="noopener noreferrer"><HandHeart />Participer à la cagnotte</a>
+                    </Button>
+                  )}
                   {crew.instagram_url && (
                     <Button asChild variant="outline">
                       <a href={crew.instagram_url} target="_blank" rel="noopener noreferrer"><InstagramIcon />Instagram</a>

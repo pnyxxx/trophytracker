@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { supabase, type Crew } from '@/lib/supabase';
-import { socialUrl } from '@/lib/social';
+import { socialUrl, webUrl } from '@/lib/social';
 import { findCity } from '@/lib/geocode';
 import { toastError, unwrap } from '@/lib/errors';
 import { keys } from '@/hooks/queries';
@@ -16,13 +16,14 @@ import { CityInput } from './CityInput';
 
 type Editable = Pick<Crew,
   'name' | 'car_number' | 'tagline' | 'story' | 'school' | 'city' | 'contact_email' |
-  'instagram_url' | 'facebook_url' | 'is_public' | 'current_rank' | 'supplies_count' |
+  'instagram_url' | 'facebook_url' | 'fundraiser_url' | 'is_public' | 'current_rank' | 'supplies_count' |
   'start_lat' | 'start_lon' | 'start_region'>;
 
 const toForm = (c: Crew) => ({
   name: c.name, car_number: c.car_number ?? '', tagline: c.tagline ?? '', story: c.story ?? '',
   school: c.school ?? '', city: c.city ?? '', contact_email: c.contact_email ?? '',
-  instagram_url: c.instagram_url ?? '', facebook_url: c.facebook_url ?? '', is_public: c.is_public,
+  instagram_url: c.instagram_url ?? '', facebook_url: c.facebook_url ?? '',
+  fundraiser_url: c.fundraiser_url ?? '', is_public: c.is_public,
   current_rank: c.current_rank?.toString() ?? '', supplies_count: c.supplies_count?.toString() ?? '',
   // Position de la ville de départ (drapeau sur la carte), retenue au choix d'une suggestion.
   spot: c.start_lat != null && c.start_lon != null ? { lat: c.start_lat, lon: c.start_lon, region: c.start_region } : null,
@@ -48,6 +49,7 @@ export function InfoTab({ crew }: { crew: Crew }) {
         car_number: orNull(form.car_number), tagline: orNull(form.tagline), story: orNull(form.story),
         school: orNull(form.school), city, contact_email: orNull(form.contact_email),
         instagram_url: socialUrl('instagram', form.instagram_url), facebook_url: socialUrl('facebook', form.facebook_url),
+        fundraiser_url: webUrl('de la cagnotte', form.fundraiser_url),
         is_public: form.is_public,
         current_rank: numOrNull(form.current_rank), supplies_count: numOrNull(form.supplies_count),
         start_lat: spot?.lat ?? null, start_lon: spot?.lon ?? null, start_region: spot?.region ?? null,
@@ -104,6 +106,12 @@ export function InfoTab({ crew }: { crew: Crew }) {
           <Field id="insta" label="Instagram"><Input id="insta" inputMode="url" placeholder="@votre-compte ou lien" value={form.instagram_url} onChange={set('instagram_url')} /></Field>
           <Field id="facebook" label="Facebook"><Input id="facebook" inputMode="url" placeholder="Lien de votre page" value={form.facebook_url} onChange={set('facebook_url')} /></Field>
         </div>
+      </Panel>
+
+      <Panel title="Cagnotte" description="Le lien de votre cagnotte en ligne (Leetchi, HelloAsso, Lydia…) : un bouton « Participer à la cagnotte » s’affiche en haut de votre page.">
+        <Field id="fundraiser" label="Lien de la cagnotte">
+          <Input id="fundraiser" inputMode="url" maxLength={300} placeholder="https://www.leetchi.com/…" value={form.fundraiser_url} onChange={set('fundraiser_url')} />
+        </Field>
       </Panel>
 
       <Panel title="Visibilité">

@@ -203,6 +203,7 @@ export type Database = {
           current_rank: number | null
           facebook_url: string | null
           followers_count: number
+          fundraiser_url: string | null
           id: string
           instagram_url: string | null
           is_public: boolean
@@ -237,6 +238,7 @@ export type Database = {
           current_rank?: number | null
           facebook_url?: string | null
           followers_count?: number
+          fundraiser_url?: string | null
           id?: string
           instagram_url?: string | null
           is_public?: boolean
@@ -271,6 +273,7 @@ export type Database = {
           current_rank?: number | null
           facebook_url?: string | null
           followers_count?: number
+          fundraiser_url?: string | null
           id?: string
           instagram_url?: string | null
           is_public?: boolean
@@ -725,6 +728,7 @@ export type Database = {
           current_rank: number | null
           facebook_url: string | null
           followers_count: number
+          fundraiser_url: string | null
           id: string
           instagram_url: string | null
           is_public: boolean
