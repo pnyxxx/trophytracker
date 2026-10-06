@@ -14,7 +14,7 @@ import { CrewSponsors } from '@/components/crew/CrewSponsors';
 import { CrewRoadbook } from '@/components/crew/CrewRoadbook';
 import { CrewShareButton } from '@/components/crew/CrewQr';
 import { useRoadbook } from '@/components/crew/roadbook';
-import { useCrew, useCrewMembers, useCrewStats, useEvent, useMyRole, usePhotos, useSponsors } from '@/hooks/queries';
+import { useCrew, useCrewStats, useEvent, useMyRole, usePhotos, useSponsors } from '@/hooks/queries';
 import { useLiveTrack } from '@/hooks/useLiveTrack';
 import { formatRelative, isLive } from '@/lib/format';
 import { raidDay } from '@/lib/stages';
@@ -55,13 +55,6 @@ function Section({ id, kicker, title, subtitle, tone = 'dark', first = false, ch
 }
 
 const NO_WAYPOINTS: never[] = [];
-
-/** « 31.085°N · 4.023°O » */
-/** Même texte, sans tenir compte des accents ni des majuscules (« Breizh en sablés » = « BREIZH EN SABLES »). */
-const sameText = (a: string, b: string) => {
-  const norm = (s: string) => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/\s+/g, ' ').trim();
-  return norm(a) === norm(b);
-};
 
 /**
  * « Défilez » en bas au centre de l'écran, tant que la page n'a pas bougé. Masqué s'il
@@ -111,6 +104,7 @@ function ScrollHint({ target }: { target: string }) {
   );
 }
 
+/** « 31.085°N · 4.023°O » */
 const coords = (lat: number, lon: number) =>
   `${Math.abs(lat).toFixed(3)}°${lat >= 0 ? 'N' : 'S'} · ${Math.abs(lon).toFixed(3)}°${lon < 0 ? 'O' : 'E'}`;
 
@@ -121,7 +115,6 @@ export default function CrewPage() {
   const { data: stats } = useCrewStats(crew?.id);
   const { data: photos = [] } = usePhotos(crew?.id);
   const { data: sponsors = [] } = useSponsors(crew?.id);
-  const { data: members = [] } = useCrewMembers(crew?.id);
   const { canEdit } = useMyRole(crew?.id);
   const { points } = useLiveTrack(crew);
   const startDate = event?.startDate ?? null;
@@ -147,8 +140,6 @@ export default function CrewPage() {
   const live = isLive(crew.last_fix_at);
   const hasRoute = !!event && roadbook.stops.length > 1;
 
-  const memberNames = members.map((m) => m.display_name).filter(Boolean).join(' & ');
-
   return (
     <PageShell padTop={false}>
       <Seo
@@ -166,7 +157,6 @@ export default function CrewPage() {
             image: cover ?? mediaUrl(crew.avatar_path) ?? undefined,
             url: `${window.location.origin}/equipages/${crew.slug}`,
             sameAs: [crew.instagram_url, crew.facebook_url].filter(Boolean),
-            athlete: members.map((m) => ({ '@type': 'Person', name: m.display_name })),
           },
           {
             '@context': 'https://schema.org',
@@ -213,10 +203,6 @@ export default function CrewPage() {
           <div className="grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end">
             <div className="flex min-w-0 flex-col gap-7">
               {crew.tagline && <p className="m-0 max-w-[640px] text-pretty text-xl leading-snug text-dust-100">{crew.tagline}</p>}
-              {/* Les noms des membres, sauf s'ils ne font que répéter le nom de l'équipage */}
-              {memberNames && !sameText(memberNames, crew.name) && (
-                <span className="font-mono text-xs uppercase tracking-[0.12em] text-dust-400">Équipage : {memberNames}</span>
-              )}
               {(crew.fundraiser_url || crew.instagram_url || crew.facebook_url) && (
                 <div className="flex flex-wrap gap-3">
                   {crew.fundraiser_url && (
@@ -239,9 +225,10 @@ export default function CrewPage() {
             </div>
 
             <div className="flex flex-col gap-5 lg:items-end">
-              <CrewAvatar name={crew.name} path={crew.avatar_path} className="h-24 w-24 border-2 border-cream/20 text-4xl md:h-32 md:w-32 md:text-5xl" />
+              {/* Logo et position à droite, même sur téléphone : l'en-tête ne s'empile pas tout à gauche. */}
+              <CrewAvatar name={crew.name} path={crew.avatar_path} className="h-24 w-24 self-end border-2 border-cream/20 text-4xl md:h-32 md:w-32 md:text-5xl" />
               {crew.last_lat != null && crew.last_lon != null && (
-                <span className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.12em] text-cream">
+                <span className="flex items-center gap-2 self-end font-mono text-[11px] uppercase tracking-[0.12em] text-cream">
                   <span className="h-[7px] w-[7px] rounded-full bg-primary shadow-[0_0_10px_#DB4740]" />
                   {coords(crew.last_lat, crew.last_lon)}
                 </span>
