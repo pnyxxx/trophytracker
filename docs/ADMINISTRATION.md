@@ -75,6 +75,26 @@ where slug = 'nom-equipage';
 `make seed` crée trois équipages d'exemple, chacun avec son compte (un compte ne peut faire partie que d'un seul équipage) : `demo@trophytracker.local` pour « J4L Club », `demo-<slug>@trophytracker.local` pour les autres.
 **À ne pas lancer en production.**
 
+### L'équipage de démo roule en continu
+
+« J4L Club » est **l'équipage de démonstration** (colonne `crews.is_demo`, un seul possible) : sa page doit
+toujours vivre. Le service `tracker` lui fait rejouer **en boucle et en temps réel** son vrai trajet
+(Saint-Quentin → Le Mans → Royan → Bayonne → Biarritz → Salamanque → Algésiras → ferry → Boulajoul → Merzouga),
+une position toutes les 15 s, par les mêmes fonctions que les vrais téléphones (`apps/tracker/src/demo.ts`) :
+
+- vraies routes et vraies vitesses d'une 4L (≤ 100 km/h), pause déjeuner, embarquement au port ;
+- les nuits (20 min) et le village départ (45 min) sont raccourcis ; un tour dure environ deux jours, puis la
+  trace est effacée et la 4L repart de Saint-Quentin ;
+- sa page affiche le raid à l'heure du raid simulé (« J4 / 12 », étape en cours, dénivelé) et un badge
+  « Équipage de démonstration » (`apps/web/src/lib/demo-clock.ts`).
+
+Le trajet est généré une fois et commité : `node scripts/build-demo-route.mjs` (routes OSRM, altitude Open-Meteo)
+écrit `apps/tracker/demo/route.json` et `apps/web/src/lib/demo-clock.json` ; horaires et étapes en tête du script.
+Le texte de la page (« Notre aventure »…) est dans `scripts/lib-demo-crew.mjs` ; `node scripts/demo-refresh.mjs`
+l'applique à l'équipage existant (production comprise) sans toucher aux photos ni aux sponsors.
+Le tracker ne peut effacer **que** la trace de l'équipage marqué `is_demo` (fonctions `private.demo_crew` et
+`private.demo_restart`).
+
 ## Emails aux administrateurs
 
 Chaque admin reçoit un email à chaque **nouveau compte** et à chaque **nouvel abonnement** à un équipage.

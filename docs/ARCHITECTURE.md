@@ -7,7 +7,7 @@
 | Service | Rôle | Image |
 |---|---|---|
 | `web` | Caddy : sert le site, HTTPS automatique, relaie vers Supabase et `tracker`, en-têtes de sécurité (CSP…) | construite depuis `apps/web` |
-| `tracker` | Reçoit les positions des téléphones (`/ingest/osmand`) et interroge Traccar | construite depuis `apps/tracker` |
+| `tracker` | Reçoit les positions des téléphones (`/ingest/osmand`), interroge Traccar et fait rouler l'équipage de démo | construite depuis `apps/tracker` |
 | `migrate` | Applique les migrations SQL au démarrage puis s'arrête | `postgres:17-alpine` |
 | `db` | PostgreSQL 17 (image Supabase) | Supabase |
 | `api-gw` | Passerelle API Supabase (Envoy) : vérifie les clés, route vers les services | Supabase |
@@ -43,7 +43,7 @@ Avantages : pas de CORS, cookies/sessions simples, un seul certificat HTTPS, et 
 - **droits par colonne** : un membre peut modifier le slogan de son équipage, mais jamais sa distance parcourue ;
 - **fonctions SQL** (`…_functions.sql`) pour les opérations sensibles ou composées : créer un équipage, générer une clé GPS, ajouter un membre, statistiques, trace, administration.
 
-Le service `tracker` se connecte avec un rôle Postgres dédié qui ne peut **que** appeler 3 fonctions (`private.ingest_position`, `private.crew_for_device_key`, `private.traccar_links`).
+Le service `tracker` se connecte avec un rôle Postgres dédié qui ne peut **qu'**appeler quelques fonctions (`private.ingest_position`, `private.crew_for_device_key`, `private.traccar_links`, les files d'emails, le plan du site, et `private.demo_crew` / `private.demo_restart` qui ne touchent que l'équipage de démo).
 
 ## Modèle de données
 

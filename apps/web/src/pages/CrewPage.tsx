@@ -18,6 +18,7 @@ import { useCrew, useCrewMembers, useCrewStats, useEvent, useMyRole, usePhotos, 
 import { useLiveTrack } from '@/hooks/useLiveTrack';
 import { formatRelative, isLive } from '@/lib/format';
 import { raidDay } from '@/lib/stages';
+import { demoRaidTime, demoTrack } from '@/lib/demo-clock';
 import { altitudeProfile } from '@/lib/elevation';
 import { mediaUrl } from '@/lib/media';
 import { cn } from '@/lib/utils';
@@ -123,11 +124,18 @@ export default function CrewPage() {
   const { data: members = [] } = useCrewMembers(crew?.id);
   const { canEdit } = useMyRole(crew?.id);
   const { points } = useLiveTrack(crew);
-  // Jour du raid (recalculé à chaque nouvelle position, donc aussi après minuit pendant le raid).
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- points.length : recalcul voulu à chaque position
-  const cal = useMemo(() => raidDay(event?.startDate ?? null, event?.endDate ?? null), [event?.startDate, event?.endDate, points.length]);
-  const profile = useMemo(() => altitudeProfile(points, event?.startDate ?? null), [points, event?.startDate]);
-  const roadbook = useRoadbook(event?.waypoints ?? NO_WAYPOINTS, event?.totalKm ?? null, points, cal, event?.startDate ?? null);
+  const startDate = event?.startDate ?? null;
+  // Équipage de démo : son trajet est rejoué en boucle, on le montre à l'heure DU RAID (lib/demo-clock.ts).
+  const demo = !!crew?.is_demo && !!startDate;
+  const raidPoints = useMemo(() => (demo ? demoTrack(points, startDate!) : points), [demo, points, startDate]);
+  // Jour du raid (recalculé à chaque position reçue, donc aussi après minuit pendant le raid).
+  const cal = useMemo(
+    () => raidDay(startDate, event?.endDate ?? null, new Date(demo ? demoRaidTime(startDate!, Date.now()) : Date.now())),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- last_fix_at : recalcul voulu à chaque position
+    [startDate, event?.endDate, demo, crew?.last_fix_at],
+  );
+  const profile = useMemo(() => altitudeProfile(raidPoints, startDate), [raidPoints, startDate]);
+  const roadbook = useRoadbook(event?.waypoints ?? NO_WAYPOINTS, event?.totalKm ?? null, raidPoints, cal, startDate);
   const plannedStop = roadbook.stops[roadbook.planned.index];
   const plannedSub = plannedStop?.subs[roadbook.planned.sub];
   const planned = plannedStop ? (plannedSub ? `${plannedSub.name} · ${plannedStop.name}` : plannedStop.name) : null;
@@ -190,6 +198,7 @@ export default function CrewPage() {
               <LiveBadge lastFixAt={crew.last_fix_at} />
               {!live && crew.last_fix_at && <span className="text-dust-400">Dernière position {formatRelative(crew.last_fix_at)}</span>}
               {!crew.is_public && <span className="border border-cream/25 px-2 py-1 text-dust-100">Page privée</span>}
+              {crew.is_demo && <span className="border border-ochre/60 px-2 py-1 text-ochre">Équipage de démonstration</span>}
             </Kicker>
             <div className="flex flex-col gap-3">
               <h1 className="m-0 break-words font-display text-[clamp(56px,9vw,152px)] font-black uppercase leading-[0.92] text-cream">
@@ -258,7 +267,9 @@ export default function CrewPage() {
         first
         kicker={live ? <><LiveDot />Suivi en direct</> : 'Suivi GPS'}
         title="Où est la 4L ?"
-        subtitle="Position en temps réel et trace complète depuis le départ."
+        subtitle={crew.is_demo
+          ? 'Démonstration : le vrai trajet de l’équipage, de Saint-Quentin au désert, rejoué en boucle et en temps réel.'
+          : 'Position en temps réel et trace complète depuis le départ.'}
       >
         <Suspense fallback={<div className="h-[600px] animate-pulse border border-cream/[0.14] bg-ink-900" />}>
           <CrewMap crew={crew} points={points} waypoints={event?.waypoints ?? []} sponsors={sponsors} photos={photos} />

@@ -3,8 +3,8 @@
  *   node scripts/seed-demo.mjs
  *
  * Crée 3 équipages d'exemple, chacun avec son propre compte (un seul équipage par
- * compte), dont « J4L Club » avec ses vrais sponsors, et une trace GPS réaliste
- * de Biarritz jusqu'au Maroc.
+ * compte), dont « J4L Club », l'équipage de démonstration, avec ses vrais sponsors : sa trace
+ * est rejouée en boucle par le service tracker (apps/tracker/src/demo.ts).
  * Relancer le script remplace les équipages de démo existants.
  */
 import { execFileSync } from 'node:child_process';
@@ -12,7 +12,8 @@ import { readFileSync } from 'node:fs';
 import { randomBytes } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 import { loadEnv } from './lib-env.mjs';
-import { MERZOUGA, roadUntil, SALAMANQUE, traceSql } from './lib-demo-trace.mjs';
+import { roadUntil, SALAMANQUE, traceSql } from './lib-demo-trace.mjs';
+import { DEMO_CREW, DEMO_SLUG } from './lib-demo-crew.mjs';
 
 const env = loadEnv();
 const admin = createClient(env.SITE_URL, env.SERVICE_ROLE_KEY, { auth: { persistSession: false } });
@@ -46,13 +47,7 @@ const demo = await demoAccount(DEMO_EMAIL, 'Julien', DEMO_PASSWORD);
 
 // ── Équipages ────────────────────────────────────────────────────────────────
 const crews = [
-  {
-    slug: 'j4l-club', name: 'J4L Club', car_number: '1234', city: 'Saint-Quentin',
-    tagline: 'Deux étudiants, une 4L, 6 000 km de solidarité.',
-    school: 'Epitech Lille',
-    story: "Exemple d'équipage de démonstration.\n\nNous partons de Biarritz pour rejoindre Marrakech à bord de notre fidèle 4L, avec des fournitures scolaires pour les enfants du Maroc.",
-    current_rank: 214, supplies_count: 68, logo: 'j4l-club',
-  },
+  { slug: DEMO_SLUG, ...DEMO_CREW, logo: 'j4l-club' },
   { slug: 'les-sables-mouvants', name: 'Les Sables Mouvants', car_number: '0421', city: 'Lyon', tagline: 'On ne s’ensable jamais (presque).', school: 'INSA Lyon' },
   { slug: 'la-4l-du-nord', name: 'La 4L du Nord', car_number: '0877', city: 'Lille', tagline: 'Des Ch’tis dans le désert.' },
 ];
@@ -106,11 +101,12 @@ for (const [i, [name, logo, lat, lon, city]] of sponsors.entries()) {
   await admin.from('sponsors').insert({ crew_id: j4l, name, city, lat, lon, sort_order: i, logo_path: await upload(j4l, 'sponsors', logo) });
 }
 
-// ── Traces GPS (via la même fonction d'ingestion que les vrais téléphones) ─────
-// Elles suivent le vrai tracé routier de la page d'accueil (scripts/lib-demo-trace.mjs).
+// ── Trace GPS d'un second équipage (via la même fonction d'ingestion que les vrais téléphones) ──
+// Elle suit le vrai tracé routier de la page d'accueil (scripts/lib-demo-trace.mjs). Celle de
+// J4L Club est rejouée en continu par le tracker, qui la commence dans les 15 secondes.
 // Suivi lancé : sinon les positions resteraient en mode essai.
-sql(`update public.crews set tracking_enabled = true where id in ('${j4l}', '${ids['les-sables-mouvants']}');`);
-sql(`\\o /dev/null\n${traceSql(j4l, roadUntil(...MERZOUGA), 0.2, 60)}\n${traceSql(ids['les-sables-mouvants'], roadUntil(...SALAMANQUE), 150, 20)}`);
+sql(`update public.crews set tracking_enabled = true where id = '${ids['les-sables-mouvants']}';`);
+sql(`\\o /dev/null\n${traceSql(ids['les-sables-mouvants'], roadUntil(...SALAMANQUE), 150, 20)}`);
 
 console.log(`✅ Données de démo créées.
    Compte démo : ${DEMO_EMAIL} / ${DEMO_PASSWORD}

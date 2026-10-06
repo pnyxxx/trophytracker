@@ -17,6 +17,8 @@ ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=build /repo/node_modules ./node_modules
 COPY --from=build /repo/apps/tracker/dist ./dist
+# Trajet rejoué par l'équipage de démo (src/demo.ts)
+COPY apps/tracker/demo ./demo
 COPY apps/tracker/package.json ./
 # Ne jamais tourner en root dans un conteneur.
 USER node

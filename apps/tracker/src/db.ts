@@ -1,7 +1,7 @@
 /**
  * Accès à la base. Le rôle `tracker` ne peut appeler QUE ces fonctions (GPS,
- * files des emails admin et des relances GPS, liste et aperçu des équipages publics) : même en cas de faille dans ce service, il ne peut rien
- * lire ni modifier d'autre.
+ * files des emails admin et des relances GPS, liste et aperçu des équipages publics, équipage de
+ * démo) : même en cas de faille dans ce service, il ne peut rien lire ni modifier d'autre.
  */
 import postgres from 'postgres';
 import type { IncomingPoint } from './points.js';
@@ -66,6 +66,17 @@ export function createDb(url: string, opts: { minDistanceM: number; maxSilenceS:
     async crewPageMeta(slug: string): Promise<CrewMeta | null> {
       const [row] = await sql<CrewMeta[]>`select * from private.crew_page_meta(${slug})`;
       return row ?? null;
+    },
+
+    /** L'équipage de démonstration et l'heure de sa dernière position (null s'il n'y en a pas). */
+    async demoCrew(): Promise<{ id: string; last_fix_at: Date | null } | null> {
+      const [row] = await sql<{ id: string; last_fix_at: Date | null }[]>`select * from private.demo_crew()`;
+      return row ?? null;
+    },
+
+    /** Efface la trace de l'équipage de démo (et lui seul) pour un nouveau tour. */
+    async demoRestart() {
+      await sql`select private.demo_restart()`;
     },
 
     async ping() {

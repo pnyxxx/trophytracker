@@ -5,6 +5,7 @@ import { buildHttp } from './http.js';
 import { TraccarClient } from './traccar.js';
 import { startTraccarSync } from './traccar-sync.js';
 import { startAdminNotifier } from './notifier.js';
+import { loadDemoRoute, startDemoDriver } from './demo.js';
 
 const config = loadConfig();
 const log = (msg: string) => console.log(`[tracker] ${new Date().toISOString()} ${msg}`);
@@ -41,12 +42,16 @@ if (config.SMTP_HOST) {
   log('SMTP non configuré : pas d’emails aux admins ni de relances GPS');
 }
 
+// Équipage de démo : rejoue son trajet en boucle (rien à faire s'il n'y en a pas en base).
+const stopDemo = startDemoDriver(db, loadDemoRoute(), log);
+
 // Arrêt propre (docker stop).
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.once(signal, async () => {
     log(`${signal} reçu, arrêt`);
     stopSync();
     stopNotifier();
+    stopDemo();
     await app.close();
     await db.close();
     process.exit(0);

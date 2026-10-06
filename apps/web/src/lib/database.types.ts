@@ -206,6 +206,7 @@ export type Database = {
           fundraiser_url: string | null
           id: string
           instagram_url: string | null
+          is_demo: boolean
           is_public: boolean
           last_fix_at: string | null
           last_lat: number | null
@@ -241,6 +242,7 @@ export type Database = {
           fundraiser_url?: string | null
           id?: string
           instagram_url?: string | null
+          is_demo?: boolean
           is_public?: boolean
           last_fix_at?: string | null
           last_lat?: number | null
@@ -276,6 +278,7 @@ export type Database = {
           fundraiser_url?: string | null
           id?: string
           instagram_url?: string | null
+          is_demo?: boolean
           is_public?: boolean
           last_fix_at?: string | null
           last_lat?: number | null
@@ -731,6 +734,7 @@ export type Database = {
           fundraiser_url: string | null
           id: string
           instagram_url: string | null
+          is_demo: boolean
           is_public: boolean
           last_fix_at: string | null
           last_lat: number | null

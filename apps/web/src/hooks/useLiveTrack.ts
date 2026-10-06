@@ -62,6 +62,13 @@ export function useLiveTrack(crew: Crew | null | undefined) {
         { event: 'UPDATE', schema: 'public', table: 'crews', filter: `id=eq.${crewId}` },
         (payload) => {
           const updated = payload.new as Crew;
+          // Trace effacée (remise à zéro par l'équipage, nouveau tour de l'équipage de démo) :
+          // on repart de zéro au lieu de relier l'ancienne trace à la nouvelle.
+          const before = queryClient.getQueryData<Crew | null>(keys.crew(updated.slug));
+          if (before && updated.total_distance_m < before.total_distance_m) {
+            pointsRef.current = [];
+            setPoints([]);
+          }
           // Met à jour la position « en direct » partout sur la page, sans recharger.
           queryClient.setQueryData(keys.crew(updated.slug), (old: Crew | null | undefined) =>
             old ? { ...old, ...updated } : old,

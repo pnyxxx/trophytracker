@@ -1,7 +1,7 @@
 /**
  * Trace GPS de démonstration qui suit le vrai tracé routier de la page d'accueil
  * (apps/web/src/components/landing/road-path.json, points [lon, lat]).
- * Utilisé par seed-demo.mjs et demo-trace.mjs.
+ * Utilisé par seed-demo.mjs (l'équipage de démo, lui, roule en continu : apps/tracker/src/demo.ts).
  */
 import { readFileSync } from 'node:fs';
 
@@ -16,7 +16,6 @@ export function roadUntil(lon, lat) {
   if (i < 0) throw new Error(`Point ${lon},${lat} absent du tracé`);
   return ROAD_PATH.slice(0, i + 1);
 }
-export const MERZOUGA = [-3.99763, 31.21516];
 export const SALAMANQUE = [-5.66642, 40.96821];
 
 const toRad = (d) => (d * Math.PI) / 180;
@@ -45,11 +44,4 @@ export function traceSql(crewId, path, endAgoMin, hours) {
       return `select private.ingest_position('${crewId}', '${at}', ${lat.toFixed(6)}, ${lon.toFixed(6)}, ${60 + (i % 30)}, null, null, 10, 80, 'device');`;
     })
     .join('\n');
-}
-
-/** SQL qui efface la trace d'un équipage et remet ses compteurs à zéro. */
-export function clearTraceSql(crewId) {
-  return `delete from public.positions where crew_id = '${crewId}';
-delete from private.gps_pending_jumps where crew_id = '${crewId}';
-update public.crews set last_lat = null, last_lon = null, last_speed_kmh = null, last_fix_at = null, total_distance_m = 0 where id = '${crewId}';`;
 }
