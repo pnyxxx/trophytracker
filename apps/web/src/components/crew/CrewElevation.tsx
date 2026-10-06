@@ -199,17 +199,20 @@ export function CrewElevation({ profile, stops, cal }: { profile: AltPoint[]; st
         )}
       </div>
 
-      {/* Version tableau (lecteurs d'écran) */}
-      <table className="sr-only">
-        <caption>Dénivelé par jour</caption>
-        <thead><tr><th>Jour</th><th>Distance (km)</th><th>Montée (m)</th><th>Descente (m)</th><th>Altitude max (m)</th></tr></thead>
-        <tbody>
-          {days.map((d) => {
-            const c = climbOf(profile.filter((p) => p.day === d));
-            return c && <tr key={d}><td>{dayLabel(d)}</td><td>{c.km}</td><td>{c.up}</td><td>{c.down}</td><td>{c.max}</td></tr>;
-          })}
-        </tbody>
-      </table>
+      {/* Version tableau (lecteurs d'écran). Masquée par un div : un tableau ne rétrécit pas sous la
+          largeur de son contenu, et en sr-only il élargissait la page sur téléphone (dézoom possible). */}
+      <div className="sr-only">
+        <table>
+          <caption>Dénivelé par jour</caption>
+          <thead><tr><th>Jour</th><th>Distance (km)</th><th>Montée (m)</th><th>Descente (m)</th><th>Altitude max (m)</th></tr></thead>
+          <tbody>
+            {days.map((d) => {
+              const c = climbOf(profile.filter((p) => p.day === d));
+              return c && <tr key={d}><td>{dayLabel(d)}</td><td>{c.km}</td><td>{c.up}</td><td>{c.down}</td><td>{c.max}</td></tr>;
+            })}
+          </tbody>
+        </table>
+      </div>
 
       <p className="m-0 border-t border-coal/15 px-4 py-2 font-mono text-[10px] text-dust-600 md:px-5">
         Altitude mesurée par le GPS du téléphone de l’équipage (lissée) : quelques mètres de marge.
