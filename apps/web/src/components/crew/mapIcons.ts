@@ -1,29 +1,27 @@
 import { DivIcon } from 'leaflet';
-import type { Waypoint } from '@/lib/supabase';
+import type { TripStage } from '@/lib/supabase';
 
 const escapeHtml = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
-export type WaypointKind = 'start' | 'stage' | 'night' | 'boat' | 'bivouac' | 'finish' | 'loop';
+export type StageKind = TripStage['kind'];
 
-export const WAYPOINT_STYLE: Record<WaypointKind, { emoji: string; color: string; label: string }> = {
+export const STAGE_STYLE: Record<string, { emoji: string; color: string; label: string }> = {
   start: { emoji: '🏁', color: '#DB4740', label: 'Départ' },
-  stage: { emoji: '📍', color: '#D98A3D', label: 'Étape' },
-  night: { emoji: '🛏️', color: '#1A1612', label: 'Étape de nuit' },
-  boat: { emoji: '🚢', color: '#3E7C8C', label: 'Traversée' },
-  bivouac: { emoji: '⛺', color: '#F2B45A', label: 'Bivouac' },
+  stop: { emoji: '📍', color: '#D98A3D', label: 'Étape' },
+  night: { emoji: '🌙', color: '#3E5C8C', label: 'Nuit' },
+  highlight: { emoji: '⭐', color: '#F2B45A', label: 'Coup de cœur' },
   finish: { emoji: '🏆', color: '#DB4740', label: 'Arrivée' },
-  loop: { emoji: '🔁', color: '#D98A3D', label: 'Boucle' },
 };
 
-/** Style d'un type de point (repli sur « étape » si le type est inconnu). */
-export const waypointStyle = (kind: Waypoint['kind']) => WAYPOINT_STYLE[kind as WaypointKind] ?? WAYPOINT_STYLE.stage;
+/** Style d'un type d'étape (repli sur « étape » si le type est inconnu). */
+export const stageStyle = (kind: string) => STAGE_STYLE[kind] ?? STAGE_STYLE.stop!;
 
-/** Point du parcours : pastille de couleur + nom de l'étape en étiquette mono. */
-export function waypointIcon(w: Pick<Waypoint, 'kind' | 'name'>) {
+/** Étape du road trip : pastille de couleur + nom de l'étape en étiquette mono. */
+export function stageIcon(w: Pick<TripStage, 'kind' | 'name'>) {
   return new DivIcon({
     className: 'tt-marker',
-    html: `<div class="tt-wp"><span class="tt-wp-dot" style="background:${waypointStyle(w.kind).color}"></span><span class="tt-wp-label">${escapeHtml(w.name)}</span></div>`,
+    html: `<div class="tt-wp"><span class="tt-wp-dot" style="background:${stageStyle(w.kind).color}"></span><span class="tt-wp-label">${escapeHtml(w.name)}</span></div>`,
     iconSize: [12, 12],
     iconAnchor: [6, 6],
     popupAnchor: [0, -8],

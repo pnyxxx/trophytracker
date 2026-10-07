@@ -19,7 +19,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { keys, useEvent, useMyRole } from '@/hooks/queries';
+import { keys, useMyRole } from '@/hooks/queries';
 import { supabase, type Crew } from '@/lib/supabase';
 import { toastError, unwrap } from '@/lib/errors';
 import { formatDateTime, formatRelative, isLive } from '@/lib/format';
@@ -168,7 +168,6 @@ export function GpsTab({ crew }: { crew: Crew }) {
   });
 
   const { isOwner } = useMyRole(crew.id);
-  const { data: event } = useEvent();
 
   // Dernière position, rafraîchie toutes les 5 s : on voit le téléphone « répondre » en direct.
   const { data: status } = useQuery({
@@ -201,8 +200,8 @@ export function GpsTab({ crew }: { crew: Crew }) {
   const lastSpeed = shown.speed;
   const live = isLive(lastFix);
   const hasTrace = !!(status?.last_fix_at ?? crew.last_fix_at) || (status?.total_distance_m ?? crew.total_distance_m) > 0;
-  const startLabel = event?.startDate
-    ? new Date(`${event.startDate}T12:00:00`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })
+  const startLabel = crew.starts_on
+    ? new Date(`${crew.starts_on}T12:00:00`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })
     : null;
   const refreshGps = () => {
     void queryClient.invalidateQueries({ queryKey: ['gps-status', crew.id] });

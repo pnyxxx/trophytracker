@@ -8,46 +8,17 @@ import { unwrap } from '@/lib/errors';
 import { useAuth } from './auth';
 
 export const keys = {
-  event: ['event'] as const,
   crews: (q: string, live: boolean, limit: number) => ['crews', q, live, limit] as const,
   crew: (slug: string) => ['crew', slug] as const,
   stats: (crewId: string) => ['stats', crewId] as const,
   photos: (crewId: string) => ['photos', crewId] as const,
   sponsors: (crewId: string) => ['sponsors', crewId] as const,
+  stages: (crewId: string) => ['stages', crewId] as const,
   members: (crewId: string) => ['members', crewId] as const,
   tracking: (crewId: string) => ['tracking', crewId] as const,
   follows: (userId: string) => ['follows', userId] as const,
   myCrews: (userId: string) => ['my-crews', userId] as const,
 };
-
-export interface EventInfo {
-  name: string;
-  startDate: string | null;
-  endDate: string | null;
-  totalKm: number | null;
-  waypoints: import('@/lib/supabase').Waypoint[];
-}
-
-export function useEvent() {
-  return useQuery({
-    queryKey: keys.event,
-    staleTime: 5 * 60_000,
-    queryFn: async (): Promise<EventInfo> => {
-      const [settings, waypoints] = await Promise.all([
-        supabase.from('settings').select('key, value').then(unwrap),
-        supabase.from('waypoints').select('*').order('sort_order').then(unwrap),
-      ]);
-      const s = Object.fromEntries(settings.map((r) => [r.key, r.value]));
-      return {
-        name: s.event_name ?? 'Départ',
-        startDate: s.event_start_date ?? null,
-        endDate: s.event_end_date ?? null,
-        totalKm: s.event_total_km ? Number(s.event_total_km) : null,
-        waypoints,
-      };
-    },
-  });
-}
 
 export type CrewSummary = Pick<
   Crew,
@@ -99,6 +70,18 @@ export function useSponsors(crewId: string | undefined) {
     enabled: !!crewId,
     queryFn: async () =>
       unwrap(await supabase.from('sponsors').select('*').eq('crew_id', crewId!).order('sort_order').order('name')),
+  });
+}
+
+/** Étapes du road trip, dans l'ordre du voyage (les étapes sans date à la fin, dans l'ordre d'ajout). */
+export function useStages(crewId: string | undefined) {
+  return useQuery({
+    queryKey: keys.stages(crewId ?? ''),
+    enabled: !!crewId,
+    refetchInterval: 60_000,
+    queryFn: async () =>
+      unwrap(await supabase.from('trip_stages').select('*').eq('crew_id', crewId!)
+        .order('arrived_at', { ascending: true, nullsFirst: false }).order('created_at')),
   });
 }
 

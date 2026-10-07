@@ -79,7 +79,7 @@ const anon = client();
 
 // Inscription payante : sans accès payé, pas d'équipage ; le paiement est confirmé par Stripe (webhook signé).
 const { error: unpaid } = await alice.rpc('create_crew', { p_name: `Sans paiement ${run}` });
-check(unpaid?.message?.includes('Paiement requis'), 'alice ne peut pas créer d’équipage sans payer');
+check(unpaid?.message?.includes('Un accès est nécessaire'), 'alice ne peut pas créer de road trip sans payer');
 const { data: aliceUser } = await alice.auth.getUser();
 const service = createClient(SITE, env.SERVICE_ROLE_KEY, { auth: { persistSession: false } });
 const { data: started } = await service.rpc('purchase_start', { p_user: aliceUser.user.id, p_email: aliceUser.user.email });
@@ -96,10 +96,10 @@ check(forged.status === 400, 'un faux événement Stripe (mauvaise signature) es
 const webhook = await stripeEvent(paidEvent);
 check(webhook.status === 200 && (await webhook.json()).result === 'paid', 'Stripe confirme le paiement d’alice (webhook signé)');
 
-const { data: crew, error: ce } = await alice.rpc('create_crew', { p_name: `Les Dunes ${run}`, p_car_number: '42' });
-check(!ce && crew?.slug, `alice crée l'équipage « ${crew?.name} »`);
+const { data: crew, error: ce } = await alice.rpc('create_crew', { p_name: `Les Dunes ${run}`, p_starts_on: '2027-07-01' });
+check(!ce && crew?.slug, `alice crée le road trip « ${crew?.name} »`);
 
-const { error: ue } = await alice.from('crews').update({ tagline: 'On roule !', current_rank: 12 }).eq('id', crew.id);
+const { error: ue } = await alice.from('crews').update({ tagline: 'On roule !', ends_on: '2027-07-14' }).eq('id', crew.id);
 check(!ue, 'alice modifie sa page');
 
 const { data: hijack } = await bob.from('crews').update({ name: 'Piraté' }).eq('id', crew.id).select();
@@ -124,13 +124,13 @@ check((await fetch(thumb)).status === 200, 'la miniature est générée à la vo
 
 // Suivi
 const { data: followErr } = await bob.from('follows').insert({ crew_id: crew.id }).then((r) => ({ data: r.error }));
-check(!followErr, 'bob suit l’équipage');
-const { data: found } = await anon.rpc('search_crews', { p_query: `dunes ${run}` });
-check(found?.total === 1 && found.items[0].followers_count === 1, 'un visiteur trouve l’équipage (1 abonné)');
+check(!followErr, 'bob suit le road trip');
+const { data: seen } = await anon.from('crews').select('followers_count').eq('slug', crew.slug).maybeSingle();
+check(seen?.followers_count === 1, 'un visiteur qui a le lien voit le road trip (1 abonné)');
 
 // GPS + temps réel
 const { error: fairPlayErr } = await alice.rpc('accept_fair_play', { p_crew: crew.id });
-check(!fairPlayErr, 'charte fair-play acceptée');
+check(!fairPlayErr, 'charte du voyageur acceptée');
 const { data: key } = await alice.rpc('regenerate_device_key', { p_crew: crew.id });
 check(key?.startsWith('tt_'), 'clé GPS générée');
 

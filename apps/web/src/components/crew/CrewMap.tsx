@@ -1,18 +1,18 @@
 /**
  * Carte en direct d'un road trip : trace complète, position actuelle, ville de départ,
- * points du parcours prévu, sponsors et photos placées.
+ * étapes ajoutées par les voyageurs, sponsors et photos placées.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { MapContainer, Marker, Polyline, Popup, useMap } from 'react-leaflet';
 import { LatLngBounds } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Crosshair, Maximize } from 'lucide-react';
-import type { Crew, Photo, Sponsor, Waypoint } from '@/lib/supabase';
+import type { Crew, Photo, Sponsor, TripStage } from '@/lib/supabase';
 import type { TrackPoint } from '@/hooks/useLiveTrack';
 import { formatDateTime, formatRelative, isLive } from '@/lib/format';
 import { mediaUrl, thumbUrl } from '@/lib/media';
 import { BaseMap } from './BaseMap';
-import { carIcon, photoIcon, sponsorIcon, startIcon, waypointIcon, waypointStyle } from './mapIcons';
+import { carIcon, photoIcon, sponsorIcon, stageIcon, stageStyle, startIcon } from './mapIcons';
 
 /** Zoom de « Suivre » : on voit les rues autour du véhicule. */
 const FOLLOW_ZOOM = 14;
@@ -21,17 +21,17 @@ const FOLLOW_ZOOM = 14;
 interface Props {
   crew: Crew;
   points: TrackPoint[];
-  waypoints: Waypoint[];
+  stages: TripStage[];
   sponsors: Sponsor[];
   photos?: Photo[];
 }
 
 /** Recentre la carte : sur toute la trace au début, puis suit la voiture si demandé. */
-function MapController({ car, start, points, waypoints, follow }: {
+function MapController({ car, start, points, stages, follow }: {
   car: [number, number] | null;
   start: [number, number] | null;
   points: TrackPoint[];
-  waypoints: Waypoint[];
+  stages: TripStage[];
   follow: boolean;
 }) {
   const map = useMap();
@@ -41,14 +41,14 @@ function MapController({ car, start, points, waypoints, follow }: {
     if (initialized.current) return;
     const coords: [number, number][] = points.length
       ? points.map((p) => [p[0], p[1]])
-      : waypoints.map((w) => [w.lat, w.lon]);
+      : stages.map((w) => [w.lat, w.lon]);
     if (car) coords.push(car);
     if (start) coords.push(start); // la ville de départ fait partie du road trip
     if (coords.length === 0) return;
     initialized.current = true;
     if (coords.length === 1) map.setView(coords[0]!, 12);
     else map.fitBounds(new LatLngBounds(coords), { padding: [40, 40], maxZoom: 13 });
-  }, [map, car, start, points, waypoints]);
+  }, [map, car, start, points, stages]);
 
   // « Suivre » : on zoome sur le véhicule à l'activation (sans dézoomer si on est déjà
   // plus près), puis la carte la garde au centre à chaque nouvelle position.
@@ -64,9 +64,7 @@ function MapController({ car, start, points, waypoints, follow }: {
   return null;
 }
 
-export function CrewMap({ crew, points, waypoints: allWaypoints, sponsors, photos = [] }: Props) {
-  // Les sous-étapes (boucles) sont au même endroit que leur étape : un seul repère sur la carte.
-  const waypoints = useMemo(() => allWaypoints.filter((w) => !w.parent_id), [allWaypoints]);
+export function CrewMap({ crew, points, stages, sponsors, photos = [] }: Props) {
   const [follow, setFollow] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const live = isLive(crew.last_fix_at);
@@ -97,13 +95,13 @@ export function CrewMap({ crew, points, waypoints: allWaypoints, sponsors, photo
     [mapPhotos],
   );
   // Icônes créées une seule fois par étape (la trace, elle, se met à jour en direct).
-  const waypointIcons = useMemo(() => new Map(waypoints.map((w) => [w.id, waypointIcon(w)])), [waypoints]);
+  const stageIcons = useMemo(() => new Map(stages.map((w) => [w.id, stageIcon(w)])), [stages]);
 
   return (
     <div ref={containerRef} className="relative h-[70vh] min-h-[420px] w-full overflow-hidden border border-cream/[0.14] bg-[#E8E2D8] md:h-[600px]">
       <MapContainer center={[40, -3]} zoom={5} preferCanvas scrollWheelZoom className="h-full w-full" style={{ zIndex: 0 }}>
         <BaseMap />
-        <MapController car={car} start={start} points={points} waypoints={waypoints} follow={follow} />
+        <MapController car={car} start={start} points={points} stages={stages} follow={follow} />
 
         {line.length > 1 && (
           <>
@@ -113,12 +111,14 @@ export function CrewMap({ crew, points, waypoints: allWaypoints, sponsors, photo
           </>
         )}
 
-        {waypoints.map((w) => (
-          <Marker key={w.id} position={[w.lat, w.lon]} icon={waypointIcons.get(w.id)}>
+        {stages.map((w) => (
+          <Marker key={w.id} position={[w.lat, w.lon]} icon={stageIcons.get(w.id)}>
             <Popup>
-              <p className="text-xs font-semibold uppercase text-black/50">{waypointStyle(w.kind).label}</p>
+              <p className="text-xs font-semibold uppercase text-black/50">{stageStyle(w.kind).emoji} {stageStyle(w.kind).label}</p>
               <p className="font-bold text-black">{w.name}</p>
-              {w.description && <p className="text-sm text-black/70">{w.description}</p>}
+              {w.place && w.place !== w.name && <p className="text-sm text-black/50">{w.place}</p>}
+              {w.note && <p className="text-sm text-black/70">{w.note}</p>}
+              <a href="#carnet" className="text-sm text-primary underline">Voir le carnet de route</a>
             </Popup>
           </Marker>
         ))}

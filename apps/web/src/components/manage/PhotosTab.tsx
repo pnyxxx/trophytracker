@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAuth } from '@/hooks/auth';
-import { keys, useEvent, usePhotos } from '@/hooks/queries';
+import { keys, usePhotos } from '@/hooks/queries';
 import type { TrackPoint } from '@/hooks/useLiveTrack';
 import { supabase, type Crew, type Photo } from '@/lib/supabase';
 import { toastError } from '@/lib/errors';
@@ -56,7 +56,7 @@ const SOURCE_LABEL: Record<Source, string> = {
 const shortDate = (d: Date) => d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
 const shortTime = (d: Date) => d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
-/** « Jour 5 · 21 févr. » pendant le raid, sinon « 3 janv. ». */
+/** « Jour 5 · 21 févr. » pendant le road trip (dates réglées dans « Infos »), sinon « 3 janv. 2027 ». */
 function dateLabel(d: Date | null, start: string | null, end: string | null): string | null {
   if (!d) return null;
   if (start) {
@@ -136,13 +136,12 @@ export function PhotosTab({ crew }: { crew: Crew }) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { data: photos = [], isLoading } = usePhotos(crew.id);
-  const { data: event } = useEvent();
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [editing, setEditing] = useState<{ draft: string } | { photo: Photo } | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const refresh = () => queryClient.invalidateQueries({ queryKey: keys.photos(crew.id) });
-  const start = event?.startDate ?? null;
-  const end = event?.endDate ?? null;
+  const start = crew.starts_on;
+  const end = crew.ends_on;
 
   // Libère les aperçus en quittant l'onglet.
   const draftsRef = useRef(drafts);

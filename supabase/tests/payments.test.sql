@@ -32,8 +32,8 @@ select is((select regular_cents from public.crew_price()), 1900, 'le tarif norma
 
 -- ─── Sans paiement, pas d'équipage ──────────────────────────────────────────
 select pg_temp.as_user('00000000-0000-0000-0000-0000000000d1');
-select throws_ok($$ select public.create_crew('Dora Team') $$, 'P0001', 'Paiement requis pour créer la page d''un équipage',
-  'dora ne peut pas créer d''équipage sans avoir payé');
+select throws_ok($$ select public.create_crew('Dora Team') $$, 'P0001', 'Un accès est nécessaire pour créer un road trip (paiement ou code offert)',
+  'dora ne peut pas créer de road trip sans avoir payé');
 
 -- Le navigateur ne peut ni écrire un achat, ni appeler les fonctions réservées à Stripe.
 select throws_ok($$ insert into public.crew_purchases (user_id, source, status, amount_cents) values (auth.uid(), 'stripe', 'paid', 0) $$,
@@ -65,21 +65,22 @@ select is((select count(*)::int from public.crew_purchases), 1, 'dora voit son a
 select lives_ok($$ select public.create_crew('Dora Team') $$, 'avec un accès payé, dora crée son équipage');
 reset role;
 select is((select c.slug from public.crew_purchases p join public.crews c on c.id = p.crew_id
-           where p.stripe_session_id = 'cs_test_dora'), 'dora-team', 'l''accès est consommé par cet équipage');
+           where p.stripe_session_id = 'cs_test_dora'), (select slug from public.crews where name = 'Dora Team'),
+  'l''accès est consommé par ce road trip');
 
 select pg_temp.as_user('00000000-0000-0000-0000-0000000000e1');
 select is((select count(*)::int from public.crew_purchases), 0, 'eve ne voit pas les achats de dora');
 
 -- ─── Remboursement ──────────────────────────────────────────────────────────
 reset role;
-update public.crews set is_public = true where slug = 'dora-team';
-update public.crew_devices set device_key_hash = 'x' where crew_id = (select id from public.crews where slug = 'dora-team');
+update public.crews set is_public = true where name = 'Dora Team';
+update public.crew_devices set device_key_hash = 'x' where crew_id = (select id from public.crews where name = 'Dora Team');
 select pg_temp.as_service();
 select is(public.purchase_refunded('pi_test_dora', 500), 'partial', 'un remboursement partiel est seulement noté');
 select is(public.purchase_refunded('pi_test_dora', 1500), 'refunded', 'un remboursement total met fin à l''accès');
 reset role;
-select ok(not (select is_public from public.crews where slug = 'dora-team'), 'après remboursement total, la page est dépubliée');
-select is((select device_key_hash from public.crew_devices where crew_id = (select id from public.crews where slug = 'dora-team')),
+select ok(not (select is_public from public.crews where name = 'Dora Team'), 'après remboursement total, la page est dépubliée');
+select is((select device_key_hash from public.crew_devices where crew_id = (select id from public.crews where name = 'Dora Team')),
   null, 'après remboursement total, la clé GPS est désactivée');
 
 -- ─── Admin : offrir un accès ────────────────────────────────────────────────

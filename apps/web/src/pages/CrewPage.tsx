@@ -12,7 +12,7 @@ import { CrewStats } from '@/components/crew/CrewStats';
 import { CrewGallery } from '@/components/crew/CrewGallery';
 import { CrewSponsors } from '@/components/crew/CrewSponsors';
 import { CrewShareButton } from '@/components/crew/CrewQr';
-import { useCrew, useCrewStats, useMyRole, usePhotos, useSponsors } from '@/hooks/queries';
+import { useCrew, useCrewStats, useMyRole, usePhotos, useSponsors, useStages } from '@/hooks/queries';
 import { useLiveTrack } from '@/hooks/useLiveTrack';
 import { formatRelative, isLive } from '@/lib/format';
 import { localDate } from '@/lib/days';
@@ -110,6 +110,7 @@ export default function CrewPage() {
   const { data: stats } = useCrewStats(crew?.id);
   const { data: photos = [] } = usePhotos(crew?.id);
   const { data: sponsors = [] } = useSponsors(crew?.id);
+  const { data: stages = [] } = useStages(crew?.id);
   const { canEdit } = useMyRole(crew?.id);
   const { points } = useLiveTrack(crew);
   // Jour 1 du road trip = jour du premier point de la trace.
@@ -228,7 +229,7 @@ export default function CrewPage() {
           : 'Position en temps réel et trace complète depuis le départ. Pas de nouvelle position ? Souvent, il n’y a simplement pas de réseau.'}
       >
         <Suspense fallback={<div className="h-[600px] animate-pulse border border-cream/[0.14] bg-ink-900" />}>
-          <CrewMap crew={crew} points={points} waypoints={[]} sponsors={sponsors} photos={photos} />
+          <CrewMap crew={crew} points={points} stages={stages} sponsors={sponsors} photos={photos} />
         </Suspense>
       </Section>
 

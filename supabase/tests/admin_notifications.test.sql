@@ -75,11 +75,11 @@ select is((select count(*)::int from private.admin_notifications where kind = 'n
 select is((select payload ->> 'amount_cents' || ' ' || (payload ->> 'email') || ' ' || (payload ->> 'name') from private.admin_notifications where kind = 'new_purchase'),
   '1500 fanny@stripe.local Fanny', 'la notification contient le montant, l''email Stripe et le nom');
 
-insert into public.access_codes (id, code, note) values ('00000000-0000-0000-0000-0000000000c1', '4L-TEST-NOTI', 'Partenaire');
+insert into public.access_codes (id, code, note) values ('00000000-0000-0000-0000-0000000000c1', 'TT-TEST-NOTI', 'Partenaire');
 insert into public.crew_purchases (user_id, customer_email, source, status, amount_cents, paid_at, access_code_id)
 values ('00000000-0000-0000-0000-0000000000ad', 'admin@test.local', 'code', 'paid', 0, now(), '00000000-0000-0000-0000-0000000000c1');
 select is((select payload ->> 'code' || ' ' || (payload ->> 'code_note') from private.admin_notifications where payload ->> 'source' = 'code'),
-  '4L-TEST-NOTI Partenaire', 'un code utilisé notifie avec le code et sa note');
+  'TT-TEST-NOTI Partenaire', 'un code utilisé notifie avec le code et sa note');
 
 insert into public.crew_purchases (user_id, customer_email, source, status, amount_cents, paid_at)
 values ('00000000-0000-0000-0000-0000000000ad', 'admin@test.local', 'admin', 'paid', 0, now());

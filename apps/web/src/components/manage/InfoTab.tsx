@@ -3,28 +3,35 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 import { supabase, type Crew } from '@/lib/supabase';
 import { socialUrl, webUrl } from '@/lib/social';
 import { findCity } from '@/lib/geocode';
 import { toastError, unwrap } from '@/lib/errors';
 import { keys } from '@/hooks/queries';
-import { Field, numOrNull, orNull, Panel, textareaClass } from './shared';
+import { Field, orNull, Panel, textareaClass } from './shared';
 import { AvatarPicker, CoverPicker } from './CrewImages';
 import { CityInput } from './CityInput';
 
 type Editable = Pick<Crew,
   'name' | 'car_number' | 'tagline' | 'story' | 'school' | 'city' | 'contact_email' |
-  'instagram_url' | 'facebook_url' | 'fundraiser_url' | 'is_public' | 'current_rank' | 'supplies_count' |
+  'instagram_url' | 'facebook_url' | 'fundraiser_url' | 'is_public' | 'is_listed' | 'starts_on' | 'ends_on' |
   'start_lat' | 'start_lon' | 'start_region'>;
+
+type Visibility = 'private' | 'link' | 'public';
+const visibilityOf = (c: Pick<Crew, 'is_public' | 'is_listed'>): Visibility => (!c.is_public ? 'private' : c.is_listed ? 'public' : 'link');
+
+const VISIBILITY: { value: Visibility; title: string; text: string }[] = [
+  { value: 'private', title: 'Privé', text: 'Seuls les voyageurs du road trip voient la page et la position.' },
+  { value: 'link', title: 'Par lien', text: 'Toute personne qui a le lien voit la page. Elle n’apparaît nulle part ailleurs, ni sur Google. Recommandé.' },
+  { value: 'public', title: 'Public', text: 'Comme « par lien », et la page peut apparaître dans les moteurs de recherche.' },
+];
 
 const toForm = (c: Crew) => ({
   name: c.name, car_number: c.car_number ?? '', tagline: c.tagline ?? '', story: c.story ?? '',
   school: c.school ?? '', city: c.city ?? '', contact_email: c.contact_email ?? '',
   instagram_url: c.instagram_url ?? '', facebook_url: c.facebook_url ?? '',
-  fundraiser_url: c.fundraiser_url ?? '', is_public: c.is_public,
-  current_rank: c.current_rank?.toString() ?? '', supplies_count: c.supplies_count?.toString() ?? '',
+  fundraiser_url: c.fundraiser_url ?? '', visibility: visibilityOf(c),
+  starts_on: c.starts_on ?? '', ends_on: c.ends_on ?? '',
   // Position de la ville de départ (drapeau sur la carte), retenue au choix d'une suggestion.
   spot: c.start_lat != null && c.start_lon != null ? { lat: c.start_lat, lon: c.start_lon, region: c.start_region } : null,
 });
@@ -50,8 +57,8 @@ export function InfoTab({ crew }: { crew: Crew }) {
         school: orNull(form.school), city, contact_email: orNull(form.contact_email),
         instagram_url: socialUrl('instagram', form.instagram_url), facebook_url: socialUrl('facebook', form.facebook_url),
         fundraiser_url: webUrl('de la cagnotte', form.fundraiser_url),
-        is_public: form.is_public,
-        current_rank: numOrNull(form.current_rank), supplies_count: numOrNull(form.supplies_count),
+        is_public: form.visibility !== 'private', is_listed: form.visibility === 'public',
+        starts_on: orNull(form.starts_on), ends_on: orNull(form.ends_on),
         start_lat: spot?.lat ?? null, start_lon: spot?.lon ?? null, start_region: spot?.region ?? null,
       };
       unwrap(await supabase.from('crews').update(patch).eq('id', crew.id));
@@ -67,7 +74,7 @@ export function InfoTab({ crew }: { crew: Crew }) {
 
   return (
     <form onSubmit={(e: FormEvent) => { e.preventDefault(); save.mutate(); }} className="space-y-6">
-      <Panel title="Images" description="Le logo apparaît sur la carte et dans la liste des road trips ; la couverture en fond du haut de votre page.">
+      <Panel title="Images" description="Le logo apparaît sur la carte et dans vos road trips ; la couverture en fond du haut de votre page.">
         <div className="flex flex-col gap-4 sm:flex-row">
           <AvatarPicker crew={crew} />
           <CoverPicker crew={crew} />
@@ -77,26 +84,26 @@ export function InfoTab({ crew }: { crew: Crew }) {
       <Panel title="Présentation">
         <div className="grid gap-4 md:grid-cols-2">
           <Field id="name" label="Nom du road trip"><Input id="name" required minLength={2} maxLength={80} value={form.name} onChange={set('name')} /></Field>
-          <Field id="car" label="Numéro du road trip"><Input id="car" maxLength={10} value={form.car_number} onChange={set('car_number')} /></Field>
+          <Field id="car" label="Numéro de course" hint="Facultatif : votre numéro si vous participez à un rallye."><Input id="car" maxLength={10} value={form.car_number} onChange={set('car_number')} /></Field>
           <div className="md:col-span-2">
             <Field id="tagline" label="Slogan" hint="Une phrase courte affichée sous le nom."><Input id="tagline" maxLength={140} value={form.tagline} onChange={set('tagline')} /></Field>
           </div>
-          <Field id="school" label="École / association"><Input id="school" maxLength={120} value={form.school} onChange={set('school')} /></Field>
+          <Field id="school" label="École, association ou club" hint="Facultatif."><Input id="school" maxLength={120} value={form.school} onChange={set('school')} /></Field>
           <Field id="city" label="Ville de départ" hint="Un drapeau la marque sur la carte de votre page (le drapeau breton si vous partez de Bretagne).">
             <CityInput id="city" value={form.city} spot={form.spot} onChange={(city, spot) => setForm((f) => ({ ...f, city, spot }))} />
           </Field>
           <div className="md:col-span-2">
-            <Field id="story" label="Votre aventure" hint="Qui êtes-vous, pourquoi ce raid, votre projet solidaire…">
+            <Field id="story" label="Votre aventure" hint="Qui êtes-vous, où allez-vous, pourquoi ce voyage, votre projet solidaire…">
               <textarea id="story" maxLength={5000} className={textareaClass} value={form.story} onChange={set('story')} />
             </Field>
           </div>
         </div>
       </Panel>
 
-      <Panel title="Pendant la course" description="Mettez ces chiffres à jour au fil du raid.">
+      <Panel title="Dates" description="Le jour du départ, le suivi GPS se lance tout seul si vous avez oublié de le faire. Les photos sont datées « Jour 3 », « Jour 4 »…">
         <div className="grid gap-4 md:grid-cols-2">
-          <Field id="rank" label="Classement actuel"><Input id="rank" type="number" min={1} value={form.current_rank} onChange={set('current_rank')} /></Field>
-          <Field id="supplies" label="Fournitures à livrer"><Input id="supplies" type="number" min={0} value={form.supplies_count} onChange={set('supplies_count')} /></Field>
+          <Field id="starts" label="Départ"><Input id="starts" type="date" value={form.starts_on} onChange={set('starts_on')} /></Field>
+          <Field id="ends" label="Retour" hint="Facultatif."><Input id="ends" type="date" min={form.starts_on || undefined} value={form.ends_on} onChange={set('ends_on')} /></Field>
         </div>
       </Panel>
 
@@ -114,17 +121,21 @@ export function InfoTab({ crew }: { crew: Crew }) {
         </Field>
       </Panel>
 
-      <Panel title="Visibilité">
-        <div className="flex items-start gap-3">
-          <Switch id="public" checked={form.is_public} onCheckedChange={(v) => setForm({ ...form, is_public: v })} />
-          <div>
-            <Label htmlFor="public" className="text-cream">Page publique</Label>
-            <p className="text-sm text-dust-400">
-              {form.is_public
-                ? 'Tout le monde peut voir la page et la position GPS avec le lien.'
-                : 'Seuls les membres du road trip voient la page (y compris la position).'}
-            </p>
-          </div>
+      <Panel title="Visibilité" description="Qui peut voir la page et la position GPS. Vous pouvez changer d’avis à tout moment.">
+        <div role="radiogroup" aria-label="Visibilité" className="grid gap-3 md:grid-cols-3">
+          {VISIBILITY.map((v) => (
+            <button
+              key={v.value}
+              type="button"
+              role="radio"
+              aria-checked={form.visibility === v.value}
+              onClick={() => setForm({ ...form, visibility: v.value })}
+              className={`flex flex-col gap-1.5 border p-4 text-left transition ${form.visibility === v.value ? 'border-primary bg-primary/10' : 'border-cream/15 hover:border-cream/40'}`}
+            >
+              <span className="font-mono text-xs font-bold uppercase tracking-[0.14em] text-cream">{form.visibility === v.value ? '● ' : '○ '}{v.title}</span>
+              <span className="text-sm text-dust-300">{v.text}</span>
+            </button>
+          ))}
         </div>
       </Panel>
 

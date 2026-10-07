@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from 'react';
-import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/hooks/auth';
@@ -39,13 +39,6 @@ function ScrollToTop() {
   return null;
 }
 
-/** Ancienne adresse /equipages/<nom> → nouvelle adresse, en gardant la suite (?onglet=gps…). */
-function LegacyRedirect({ to }: { to: string }) {
-  const { slug } = useParams();
-  const { search, hash } = useLocation();
-  return <Navigate to={`${to}/${slug}${search}${hash}`} replace />;
-}
-
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -56,8 +49,6 @@ export default function App() {
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/road-trips/:slug" element={<CrewPage />} />
-              {/* Anciennes adresses (QR codes déjà imprimés) : Caddy redirige aussi en 301. */}
-              <Route path="/equipages/:slug" element={<LegacyRedirect to="/road-trips" />} />
               <Route path="/connexion" element={<LoginPage />} />
               <Route path="/inscription" element={<SignupPage />} />
               <Route path="/mot-de-passe-oublie" element={<ForgotPasswordPage />} />
@@ -69,7 +60,6 @@ export default function App() {
               <Route path="/conditions-vente" element={<SalesTermsPage />} />
               <Route path="/mon-compte" element={<RequireAuth><AccountPage /></RequireAuth>} />
               <Route path="/mon-compte/road-trips/:slug" element={<RequireAuth><ManageCrewPage /></RequireAuth>} />
-              <Route path="/mon-compte/equipages/:slug" element={<LegacyRedirect to="/mon-compte/road-trips" />} />
               <Route path="/admin" element={<RequireAuth admin><AdminPage /></RequireAuth>} />
               <Route path="*" element={<NotFound />} />
             </Routes>

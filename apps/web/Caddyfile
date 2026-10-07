@@ -90,10 +90,6 @@ http://web {
 		@immutable path /assets/*
 		header @immutable Cache-Control "public, max-age=31536000, immutable"
 
-		# Anciennes adresses (QR codes déjà imprimés) : /equipages/<nom> → /road-trips/<nom>, définitivement.
-		@legacy path_regexp legacy ^/equipages/(.+)$
-		redir @legacy /road-trips/{re.legacy.1}{?query} 301
-
 		# /road-trips/nom/ → /road-trips/nom : une seule adresse par page.
 		@trailing path_regexp trailing ^(.+)/$
 		redir @trailing {re.trailing.1}{?query} 301

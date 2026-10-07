@@ -39,43 +39,44 @@ create function pg_temp.as_anon() returns void language sql as $$
   set local role anon;
 $$;
 
--- ─── Création d'équipage ────────────────────────────────────────────────────
+-- ─── Création de road trips ─────────────────────────────────────────────────
 select pg_temp.as_anon();
 select throws_ok($$ select public.create_crew('Pirates') $$, '42501', null,
-  'un visiteur ne peut pas créer d''équipage');
+  'un visiteur ne peut pas créer de road trip');
 
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
-select lives_ok($$ select public.create_crew('Les Écureuils du Désert', '1234') $$, 'alice crée un équipage');
-select is((select slug from public.crews where name = 'Les Écureuils du Désert'), 'les-ecureuils-du-desert',
-  'le slug est généré sans accents');
+select lives_ok($$ select public.create_crew('Les Écureuils du Désert', '2027-07-01') $$, 'alice crée un road trip');
+select matches((select slug from public.crews where name = 'Les Écureuils du Désert' and starts_on = '2027-07-01'),
+  '^les-ecureuils-du-desert-[a-km-np-z2-9]{6}$', 'l''adresse est sans accents, avec un suffixe impossible à deviner');
 select is((select role from public.crew_members where user_id = '00000000-0000-0000-0000-00000000000a'), 'owner',
   'la créatrice devient propriétaire');
 select throws_ok($$ select public.create_crew('Deuxième') $$, 'P0001', null,
-  'un compte ne peut créer qu''un seul équipage');
+  'chaque road trip demande son propre accès');
 
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000b');
 select lives_ok($$ select public.create_crew('Les Écureuils du Désert') $$, 'un nom en double est accepté…');
-select ok(exists(select 1 from public.crews where slug = 'les-ecureuils-du-desert-2'), '… avec un slug unique');
+select is((select count(distinct slug)::int from public.crews where name = 'Les Écureuils du Désert'), 2, '… avec une adresse unique');
 
 reset role;
-create temp table t_ids as select id from public.crews where slug = 'les-ecureuils-du-desert';
+create temp table t_ids as
+  select c.id from public.crews c join public.crew_members m on m.crew_id = c.id
+  where m.user_id = '00000000-0000-0000-0000-00000000000a' and m.role = 'owner';
 grant select on t_ids to anon, authenticated;
 create function pg_temp.crew() returns uuid language sql as $$ select id from t_ids $$;
 
--- ─── Un seul équipage par compte ────────────────────────────────────────────
-select throws_ok(
-  $$ insert into public.crew_members (crew_id, user_id) values (pg_temp.crew(), '00000000-0000-0000-0000-00000000000b') $$,
-  '23505', null, 'la base refuse un deuxième équipage pour un même compte');
-
+-- ─── Compagnons de route : une personne peut être de plusieurs road trips ───
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
-select throws_ok($$ select public.add_crew_member(pg_temp.crew(), 'bob@test.local') $$, 'P0001', null,
-  'alice ne peut pas ajouter bob, qui a déjà son équipage');
-select lives_ok($$ select public.add_crew_member(pg_temp.crew(), 'carol@test.local') $$,
-  'alice ajoute carol, qui n''a pas d''équipage');
+select lives_ok($$ select public.add_crew_member(pg_temp.crew(), 'carol@test.local') $$, 'alice ajoute carol');
+select throws_ok($$ select public.add_crew_member(pg_temp.crew(), 'carol@test.local') $$, '23505', null,
+  'carol n''est pas ajoutée deux fois');
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000b');
+select lives_ok($$ select public.add_crew_member((select c.id from public.crews c join public.crew_members m on m.crew_id = c.id
+                   where m.user_id = '00000000-0000-0000-0000-00000000000b'), 'carol@test.local') $$,
+  'bob ajoute aussi carol : elle fait partie de deux road trips');
 
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000c');
 select throws_ok($$ select public.create_crew('Carol Team') $$, 'P0001', null,
-  'carol, désormais membre, ne peut plus créer d''équipage');
+  'sans accès, carol ne peut pas créer son propre road trip');
 reset role;
 
 -- ─── Visibilité ─────────────────────────────────────────────────────────────
@@ -116,7 +117,7 @@ select throws_ok($$ update public.crews set slug = 'autre' where id = pg_temp.cr
   'ni changer le slug');
 select throws_ok($$ update public.profiles set role = 'admin' where id = '00000000-0000-0000-0000-00000000000a' $$,
   '42501', null, 'personne ne peut se nommer admin soi-même');
-select lives_ok($$ update public.crews set tagline = 'On roule !' , current_rank = 42 where id = pg_temp.crew() $$,
+select lives_ok($$ update public.crews set tagline = 'On roule !', starts_on = '2027-07-02', is_listed = true where id = pg_temp.crew() $$,
   'un membre modifie les champs éditoriaux');
 select throws_ok($$ update public.crews set avatar_path = 'autre-dossier/x.webp' where id = pg_temp.crew() $$,
   '23514', null, 'une image doit être dans le dossier de l''équipage');

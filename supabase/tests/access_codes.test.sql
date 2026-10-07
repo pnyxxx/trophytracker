@@ -6,7 +6,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
 
-select plan(26);
+select plan(25);
 
 insert into auth.users (id, email, raw_user_meta_data, aud, role) values
   ('00000000-0000-0000-0000-0000000000a1', 'anna@test.local', '{"display_name":"Anna"}', 'authenticated', 'authenticated'),
@@ -59,13 +59,6 @@ select is(public.redeem_access_code((select code from t_codes where name = 'solo
 select is(public.redeem_access_code((select code from t_codes where name = 'duo')), 'ok', 'bob utilise le code à 2 utilisations');
 reset role;
 
--- Un ancien code « 4L- » déjà distribué reste valable, même saisi sans préfixe.
-insert into auth.users (id, email, raw_user_meta_data, aud, role) values
-  ('00000000-0000-0000-0000-0000000000d1', 'dina@test.local', '{"display_name":"Dina"}', 'authenticated', 'authenticated');
-insert into public.access_codes (code, note) values ('4L-OLDC-ODE2', 'Ancien format');
-select pg_temp.as_user('00000000-0000-0000-0000-0000000000d1');
-select is(public.redeem_access_code('oldc ode2'), 'ok', 'un ancien code 4L- marche encore');
-reset role;
 
 -- ─── Désactivation, expiration, essais répétés ──────────────────────────────
 select pg_temp.as_user('00000000-0000-0000-0000-0000000000ad');
@@ -88,7 +81,7 @@ insert into private.access_code_failures (user_id) select '00000000-0000-0000-00
 select pg_temp.as_user('00000000-0000-0000-0000-0000000000c1');
 select is(public.redeem_access_code((select code from t_codes where name = 'solo')), 'exhausted',
   'en dessous de 10 essais ratés, on peut encore essayer');
-select is(public.redeem_access_code('4L-AAAA-AAAA'), 'invalid', '10e essai raté');
+select is(public.redeem_access_code('TT-AAAA-AAAA'), 'invalid', '10e essai raté');
 select is(public.redeem_access_code((select code from t_codes where name = 'solo')), 'too_many',
   'après 10 essais ratés en une heure, les essais sont bloqués');
 reset role;

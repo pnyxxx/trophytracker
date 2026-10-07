@@ -46,5 +46,5 @@ export type Tables<T extends keyof Database['public']['Tables']> = Database['pub
 export type Crew = Tables<'crews'>;
 export type Photo = Tables<'photos'>;
 export type Sponsor = Tables<'sponsors'>;
-export type Waypoint = Tables<'waypoints'>;
+export type TripStage = Tables<'trip_stages'>;
 export type Profile = Tables<'profiles'>;

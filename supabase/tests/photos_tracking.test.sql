@@ -32,9 +32,8 @@ create function pg_temp.ingest(p_crew uuid, p_ago interval, p_lat float8) return
   select private.ingest_position(p_crew, now() - p_ago, p_lat, -1.0, 40, null, null, null, null, 'device');
 $$;
 
--- Départ officiel dans un mois : on est avant le raid.
-insert into public.settings (key, value) values ('event_start_date', (current_date + 30)::text)
-  on conflict (key) do update set value = excluded.value;
+-- Départ prévu dans un mois : on est avant le road trip.
+update public.crews set starts_on = current_date + 30 where id in (pg_temp.crew(), pg_temp.crew2());
 
 -- ─── Mode essai ─────────────────────────────────────────────────────────────
 select is((select tracking_enabled from public.crews where id = pg_temp.crew()), false, 'un nouvel équipage démarre avec le suivi arrêté');
@@ -77,8 +76,8 @@ select ok((select last_fix_at is null and last_lat is null and total_distance_m 
   'dernière position et kilomètres remis à zéro');
 
 -- ─── Lancement automatique le jour du départ ────────────────────────────────
-update public.settings set value = (current_date - 1)::text where key = 'event_start_date';
-select is(pg_temp.ingest(pg_temp.crew2(), '2 min', 31.0), 'stored', 'un suivi oublié se lance tout seul une fois le raid commencé');
+update public.crews set starts_on = current_date - 1 where id in (pg_temp.crew(), pg_temp.crew2());
+select is(pg_temp.ingest(pg_temp.crew2(), '2 min', 31.0), 'stored', 'un suivi oublié se lance tout seul le jour du départ prévu');
 select is((select tracking_enabled from public.crews where id = pg_temp.crew2()), true, 'et reste lancé');
 select pg_temp.as_user('00000000-0000-0000-0000-0000000000f1');
 select public.set_tracking(pg_temp.crew(), false);

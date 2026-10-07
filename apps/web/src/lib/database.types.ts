@@ -200,13 +200,14 @@ export type Database = {
           cover_focus_y: number
           cover_path: string | null
           created_at: string
-          current_rank: number | null
+          ends_on: string | null
           facebook_url: string | null
           followers_count: number
           fundraiser_url: string | null
           id: string
           instagram_url: string | null
           is_demo: boolean
+          is_listed: boolean
           is_public: boolean
           last_fix_at: string | null
           last_lat: number | null
@@ -214,12 +215,13 @@ export type Database = {
           last_speed_kmh: number | null
           name: string
           school: string | null
+          shared_at: string | null
           slug: string
           start_lat: number | null
           start_lon: number | null
           start_region: string | null
+          starts_on: string | null
           story: string | null
-          supplies_count: number | null
           tagline: string | null
           total_distance_m: number
           tracking_enabled: boolean
@@ -236,13 +238,14 @@ export type Database = {
           cover_focus_y?: number
           cover_path?: string | null
           created_at?: string
-          current_rank?: number | null
+          ends_on?: string | null
           facebook_url?: string | null
           followers_count?: number
           fundraiser_url?: string | null
           id?: string
           instagram_url?: string | null
           is_demo?: boolean
+          is_listed?: boolean
           is_public?: boolean
           last_fix_at?: string | null
           last_lat?: number | null
@@ -250,12 +253,13 @@ export type Database = {
           last_speed_kmh?: number | null
           name: string
           school?: string | null
+          shared_at?: string | null
           slug: string
           start_lat?: number | null
           start_lon?: number | null
           start_region?: string | null
+          starts_on?: string | null
           story?: string | null
-          supplies_count?: number | null
           tagline?: string | null
           total_distance_m?: number
           tracking_enabled?: boolean
@@ -272,13 +276,14 @@ export type Database = {
           cover_focus_y?: number
           cover_path?: string | null
           created_at?: string
-          current_rank?: number | null
+          ends_on?: string | null
           facebook_url?: string | null
           followers_count?: number
           fundraiser_url?: string | null
           id?: string
           instagram_url?: string | null
           is_demo?: boolean
+          is_listed?: boolean
           is_public?: boolean
           last_fix_at?: string | null
           last_lat?: number | null
@@ -286,12 +291,13 @@ export type Database = {
           last_speed_kmh?: number | null
           name?: string
           school?: string | null
+          shared_at?: string | null
           slug?: string
           start_lat?: number | null
           start_lon?: number | null
           start_region?: string | null
+          starts_on?: string | null
           story?: string | null
-          supplies_count?: number | null
           tagline?: string | null
           total_distance_m?: number
           tracking_enabled?: boolean
@@ -578,61 +584,61 @@ export type Database = {
           },
         ]
       }
-      waypoints: {
+      trip_stages: {
         Row: {
-          country: string | null
+          arrived_at: string | null
           created_at: string
-          day_end: number | null
-          day_start: number | null
-          description: string | null
+          created_by: string | null
+          crew_id: string
           id: string
           kind: string
           lat: number
+          left_at: string | null
           lon: number
           name: string
-          parent_id: string | null
-          planned_at: string | null
-          sort_order: number
+          note: string | null
+          place: string | null
+          source: string
           updated_at: string
         }
         Insert: {
-          country?: string | null
+          arrived_at?: string | null
           created_at?: string
-          day_end?: number | null
-          day_start?: number | null
-          description?: string | null
+          created_by?: string | null
+          crew_id: string
           id?: string
-          kind: string
+          kind?: string
           lat: number
+          left_at?: string | null
           lon: number
           name: string
-          parent_id?: string | null
-          planned_at?: string | null
-          sort_order?: number
+          note?: string | null
+          place?: string | null
+          source?: string
           updated_at?: string
         }
         Update: {
-          country?: string | null
+          arrived_at?: string | null
           created_at?: string
-          day_end?: number | null
-          day_start?: number | null
-          description?: string | null
+          created_by?: string | null
+          crew_id?: string
           id?: string
           kind?: string
           lat?: number
+          left_at?: string | null
           lon?: number
           name?: string
-          parent_id?: string | null
-          planned_at?: string | null
-          sort_order?: number
+          note?: string | null
+          place?: string | null
+          source?: string
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "waypoints_parent_id_fkey"
-            columns: ["parent_id"]
+            foreignKeyName: "trip_stages_crew_id_fkey"
+            columns: ["crew_id"]
             isOneToOne: false
-            referencedRelation: "waypoints"
+            referencedRelation: "crews"
             referencedColumns: ["id"]
           },
         ]
@@ -718,7 +724,7 @@ export type Database = {
         Returns: undefined
       }
       create_crew: {
-        Args: { p_car_number?: string; p_name: string; p_tagline?: string }
+        Args: { p_name: string; p_starts_on?: string; p_tagline?: string }
         Returns: {
           avatar_path: string | null
           car_number: string | null
@@ -728,13 +734,14 @@ export type Database = {
           cover_focus_y: number
           cover_path: string | null
           created_at: string
-          current_rank: number | null
+          ends_on: string | null
           facebook_url: string | null
           followers_count: number
           fundraiser_url: string | null
           id: string
           instagram_url: string | null
           is_demo: boolean
+          is_listed: boolean
           is_public: boolean
           last_fix_at: string | null
           last_lat: number | null
@@ -742,12 +749,13 @@ export type Database = {
           last_speed_kmh: number | null
           name: string
           school: string | null
+          shared_at: string | null
           slug: string
           start_lat: number | null
           start_lon: number | null
           start_region: string | null
+          starts_on: string | null
           story: string | null
-          supplies_count: number | null
           tagline: string | null
           total_distance_m: number
           tracking_enabled: boolean
@@ -824,15 +832,6 @@ export type Database = {
       }
       reset_track: { Args: { p_crew: string }; Returns: undefined }
       revoke_device_key: { Args: { p_crew: string }; Returns: undefined }
-      search_crews: {
-        Args: {
-          p_limit?: number
-          p_live_only?: boolean
-          p_offset?: number
-          p_query?: string
-        }
-        Returns: Json
-      }
       set_crew_member_role: {
         Args: { p_crew: string; p_role: string; p_user: string }
         Returns: undefined

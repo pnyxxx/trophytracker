@@ -40,13 +40,13 @@ const NEXT_STEPS = [
 function CreateCrewDialog({ welcome = false, onClose }: { welcome?: boolean; onClose?: () => void }) {
   const [open, setOpen] = useState(welcome);
   const [step, setStep] = useState<'welcome' | 'form'>(welcome ? 'welcome' : 'form');
-  const [form, setForm] = useState({ name: '', car: '', tagline: '' });
+  const [form, setForm] = useState({ name: '', starts: '', tagline: '' });
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const create = useMutation({
     mutationFn: async () =>
-      unwrap(await supabase.rpc('create_crew', { p_name: form.name.trim(), p_car_number: form.car.trim(), p_tagline: form.tagline.trim() })),
+      unwrap(await supabase.rpc('create_crew', { p_name: form.name.trim(), p_starts_on: form.starts || undefined, p_tagline: form.tagline.trim() })),
     onSuccess: (crew) => {
       toast.success('Road trip créé ! Complétez maintenant sa page.');
       void queryClient.invalidateQueries({ queryKey: ['my-crews'] });
@@ -96,18 +96,18 @@ function CreateCrewDialog({ welcome = false, onClose }: { welcome?: boolean; onC
           </>
         ) : (
           <>
-            <DialogHeader><DialogTitle>Mon road trip</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>Nouveau road trip</DialogTitle></DialogHeader>
             <form
               onSubmit={(e: FormEvent) => { e.preventDefault(); create.mutate(); }}
               className="space-y-4"
             >
               <div className="space-y-2">
                 <Label htmlFor="crew-name">Nom du road trip</Label>
-                <Input id="crew-name" required minLength={2} maxLength={80} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                <Input id="crew-name" required minLength={2} maxLength={80} placeholder="ex. Les Alpes en van" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="crew-car">Numéro du road trip <span className="text-muted-foreground">(optionnel)</span></Label>
-                <Input id="crew-car" maxLength={10} value={form.car} onChange={(e) => setForm({ ...form, car: e.target.value })} />
+                <Label htmlFor="crew-starts">Date de départ <span className="text-muted-foreground">(optionnel)</span></Label>
+                <Input id="crew-starts" type="date" value={form.starts} onChange={(e) => setForm({ ...form, starts: e.target.value })} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="crew-tagline">Slogan <span className="text-muted-foreground">(optionnel)</span></Label>
@@ -128,7 +128,7 @@ export default function AccountPage() {
   const navigate = useNavigate();
   const { data: followed, isLoading: loadingFollowed } = useFollowedCrews();
   const { data: myCrews, isLoading: loadingMine } = useMyCrews();
-  const myCrew = myCrews?.[0];
+  const [showNew, setShowNew] = useState(false);
   const [name, setName] = useState<string | null>(null);
 
   // Accès road trip payé et pas encore utilisé ? Au retour de Stripe (?paiement=ok), on
@@ -178,49 +178,51 @@ export default function AccountPage() {
       <PageHero kicker={<>Mon compte · <span className="normal-case tracking-normal text-dust-300">{user?.email}</span></>} title={<>Bonjour<br />{profile?.display_name ?? ''}</>} />
       <Container className="max-w-5xl space-y-6 border-t border-cream/[0.12] py-12 md:py-16">
 
-        {/* Un compte = un seul équipage (règle garantie par la base) */}
-        <Panel title="Mon road trip">
-          {loadingMine || loadingAccess ? <Spinner /> : !myCrew && (hasAccess || profile?.role === 'admin') ? (
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <p className="m-0 max-w-[520px] text-dust-300">
-                {payment === 'ok' ? <><strong className="text-cream">Paiement reçu, merci !</strong> </> : null}
-                Votre accès road trip est prêt : créez la page de votre road trip. Vos compagnons de route la rejoindront ensuite par
-                invitation, gratuitement.
-              </p>
-              <CreateCrewDialog welcome={payment === 'ok'} onClose={() => setParams({}, { replace: true })} />
-            </div>
-          ) : !myCrew && payment === 'ok' ? (
-            <div className="flex items-center gap-3 text-dust-200">
-              <Spinner />
-              Paiement en cours de confirmation… Cela prend quelques secondes. Si rien ne se passe, rechargez la page.
-            </div>
-          ) : !myCrew ? (
-            <CrewAccessPurchase />
-          ) : (
-            <div className="flex flex-wrap items-center gap-5">
-              <CrewAvatar name={myCrew.crew.name} path={myCrew.crew.avatar_path} className="h-16 w-16 text-2xl" />
-              <div className="min-w-0 flex-1">
-                <Link to={`/road-trips/${myCrew.crew.slug}`} className="font-display text-3xl font-black uppercase leading-none text-cream hover:text-primary">
-                  {myCrew.crew.name}
-                </Link>
-                <p className="mb-0 mt-2 font-mono text-[11px] uppercase tracking-[0.1em] text-dust-400">
-                  {myCrew.role === 'owner' ? 'Propriétaire' : 'Membre'} · {myCrew.crew.is_public ? 'Public' : 'Privé'} · GPS {myCrew.crew.last_fix_at ? formatRelative(myCrew.crew.last_fix_at) : 'jamais reçu'}
-                </p>
-                {!myCrew.crew.tracking_enabled && (
-                  <p className="mb-0 mt-2 text-xs text-dust-300">
-                    <span className="text-ochre">Suivi GPS arrêté (mode essai).</span>{' '}
-                    <Link to={`/mon-compte/road-trips/${myCrew.crew.slug}?onglet=gps`} className="underline hover:text-cream">Le lancer en partant</Link>
+        <Panel title="Mes road trips" description="Un accès (paiement unique ou code offert) par road trip. Vos compagnons de route les rejoignent gratuitement.">
+          {loadingMine || loadingAccess ? <Spinner /> : (
+            <div className="space-y-4">
+              {myCrews?.map((m) => (
+                <div key={m.crew.id} className="flex flex-wrap items-center gap-5 border border-cream/[0.12] p-4">
+                  <CrewAvatar name={m.crew.name} path={m.crew.avatar_path} className="h-16 w-16 text-2xl" />
+                  <div className="min-w-0 flex-1">
+                    <Link to={`/road-trips/${m.crew.slug}`} className="font-display text-3xl font-black uppercase leading-none text-cream hover:text-primary">
+                      {m.crew.name}
+                    </Link>
+                    <p className="mb-0 mt-2 font-mono text-[11px] uppercase tracking-[0.1em] text-dust-400">
+                      {m.role === 'owner' ? 'Propriétaire' : 'Compagnon de route'} · {!m.crew.is_public ? 'Privé' : m.crew.is_listed ? 'Public' : 'Par lien'} · GPS {m.crew.last_fix_at ? formatRelative(m.crew.last_fix_at) : 'jamais reçu'}
+                    </p>
+                    {!m.crew.tracking_enabled && (
+                      <p className="mb-0 mt-2 text-xs text-dust-300">
+                        <span className="text-ochre">Suivi GPS arrêté (mode essai).</span>{' '}
+                        <Link to={`/mon-compte/road-trips/${m.crew.slug}?onglet=gps`} className="underline hover:text-cream">Le lancer en partant</Link>
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button asChild variant="outline"><Link to={`/road-trips/${m.crew.slug}`}>Voir la page</Link></Button>
+                    <Button asChild><Link to={`/mon-compte/road-trips/${m.crew.slug}`}><Settings />Gérer</Link></Button>
+                  </div>
+                </div>
+              ))}
+
+              {hasAccess || profile?.role === 'admin' ? (
+                <div className="flex flex-wrap items-center justify-between gap-4 border border-primary/40 bg-primary/5 p-4">
+                  <p className="m-0 max-w-[520px] text-dust-300">
+                    {payment === 'ok' ? <><strong className="text-cream">Paiement reçu, merci !</strong> </> : null}
+                    Votre accès est prêt : créez votre {myCrews?.length ? 'nouveau ' : ''}road trip.
                   </p>
-                )}
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Button asChild variant="outline">
-                  <Link to={`/road-trips/${myCrew.crew.slug}`}>Voir la page</Link>
-                </Button>
-                <Button asChild>
-                  <Link to={`/mon-compte/road-trips/${myCrew.crew.slug}`}><Settings />Gérer</Link>
-                </Button>
-              </div>
+                  <CreateCrewDialog welcome={payment === 'ok'} onClose={() => setParams({}, { replace: true })} />
+                </div>
+              ) : payment === 'ok' ? (
+                <div className="flex items-center gap-3 text-dust-200">
+                  <Spinner />
+                  Paiement en cours de confirmation… Cela prend quelques secondes. Si rien ne se passe, rechargez la page.
+                </div>
+              ) : !myCrews?.length || showNew ? (
+                <CrewAccessPurchase />
+              ) : (
+                <Button variant="outline" onClick={() => setShowNew(true)}><Plus />Préparer un nouveau road trip</Button>
+              )}
             </div>
           )}
         </Panel>

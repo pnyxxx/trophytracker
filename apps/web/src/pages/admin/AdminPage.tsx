@@ -11,8 +11,7 @@ import { Container, PageHero } from '@/components/common/Brand';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Field, Panel, selectClass } from '@/components/manage/shared';
-import { WAYPOINT_STYLE, waypointStyle, type WaypointKind } from '@/components/crew/mapIcons';
-import { keys, useEvent } from '@/hooks/queries';
+import { keys } from '@/hooks/queries';
 import { useAuth } from '@/hooks/auth';
 import { supabase } from '@/lib/supabase';
 import { toastError, unwrap } from '@/lib/errors';
@@ -314,118 +313,6 @@ function UsersAdmin() {
   );
 }
 
-const emptyWaypoint = { kind: 'stage' as WaypointKind, name: '', description: '', country: '', lat: '', lon: '', sort_order: '', day_start: '', day_end: '', parent_id: '' };
-
-const dayOrNull = (v: string) => (v.trim() ? Number(v) : null);
-
-function RouteAdmin() {
-  const { data: event } = useEvent();
-  const queryClient = useQueryClient();
-  const [form, setForm] = useState(emptyWaypoint);
-  const refresh = () => queryClient.invalidateQueries({ queryKey: keys.event });
-
-  const parents = event?.waypoints.filter((w) => !w.parent_id) ?? [];
-  const parent = parents.find((w) => w.id === form.parent_id);
-  // Une sous-étape est au même endroit que son étape : coordonnées reprises si non saisies.
-  const add = useMutation({
-    mutationFn: async () => {
-      const lat = form.lat.trim() ? Number(form.lat) : parent?.lat ?? NaN;
-      const lon = form.lon.trim() ? Number(form.lon) : parent?.lon ?? NaN;
-      if (!Number.isFinite(lat) || !Number.isFinite(lon)) throw new Error('Coordonnées invalides');
-      const siblings = event?.waypoints.filter((w) => (parent ? w.parent_id === parent.id || w.id === parent.id : true)) ?? [];
-      unwrap(await supabase.from('waypoints').insert({
-        kind: form.kind, name: form.name.trim(), description: form.description.trim() || null,
-        country: form.country.trim() || parent?.country || null, lat, lon,
-        sort_order: form.sort_order ? Number(form.sort_order) : ((siblings.at(-1)?.sort_order ?? 0) + (parent ? 1 : 10)),
-        day_start: dayOrNull(form.day_start), day_end: dayOrNull(form.day_end) ?? dayOrNull(form.day_start),
-        parent_id: parent?.id ?? null,
-      }));
-    },
-    onSuccess: () => { toast.success('Point ajouté'); setForm(emptyWaypoint); void refresh(); },
-    onError: toastError,
-  });
-  const remove = useMutation({
-    mutationFn: async (id: string) => unwrap(await supabase.from('waypoints').delete().eq('id', id)),
-    onSuccess: () => { void refresh(); },
-    onError: toastError,
-  });
-
-  return (
-    <Panel title="Parcours prévu" description="Points affichés sur toutes les cartes et dans « La route », dans l’ordre croissant. Les jours (J1 = jour du départ) relient le calendrier aux étapes : tant que le programme dit qu’un road trip est à une étape et qu’il reste dans les environs (boucles…), elle reste « en cours ».">
-      <ul className="mb-6 divide-y divide-cream/10">
-        {event?.waypoints.map((w) => (
-          <li key={w.id} className={`flex items-center gap-3 py-2 ${w.parent_id ? 'pl-8' : ''}`}>
-            <span className="w-10 text-xs text-dust-500">{w.sort_order}</span>
-            <span className="text-xl">{waypointStyle(w.kind).emoji}</span>
-            <span className="w-14 font-mono text-xs text-gold">{w.day_start ? (w.day_end && w.day_end !== w.day_start ? `J${w.day_start}–${w.day_end}` : `J${w.day_start}`) : '—'}</span>
-            <span className="flex-1 text-cream">{w.name} <span className="text-xs text-dust-500">{w.country} · {w.lat.toFixed(3)}, {w.lon.toFixed(3)}</span></span>
-            <Button size="icon" variant="ghost" className="hover:text-primary-light" aria-label={`Supprimer ${w.name}`}
-              onClick={() => { if (confirm(`Supprimer ${w.name} ?`)) remove.mutate(w.id); }}><Trash2 className="h-4 w-4" /></Button>
-          </li>
-        ))}
-      </ul>
-      <form onSubmit={(e: FormEvent) => { e.preventDefault(); add.mutate(); }} className="grid gap-3 md:grid-cols-4">
-        <Field id="w-kind" label="Type">
-          <select id="w-kind" className={selectClass} value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value as WaypointKind })}>
-            {Object.entries(WAYPOINT_STYLE).map(([k, s]) => <option key={k} value={k}>{s.emoji} {s.label}</option>)}
-          </select>
-        </Field>
-        <Field id="w-name" label="Nom"><Input id="w-name" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></Field>
-        <Field id="w-parent" label="Sous-étape de">
-          <select id="w-parent" className={selectClass} value={form.parent_id} onChange={(e) => setForm({ ...form, parent_id: e.target.value, kind: e.target.value ? 'loop' : form.kind })}>
-            <option value="">— (étape principale)</option>
-            {parents.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
-          </select>
-        </Field>
-        <Field id="w-lat" label="Latitude"><Input id="w-lat" required={!parent} inputMode="decimal" value={form.lat} placeholder={parent ? String(parent.lat) : undefined} onChange={(e) => setForm({ ...form, lat: e.target.value })} /></Field>
-        <Field id="w-lon" label="Longitude"><Input id="w-lon" required={!parent} inputMode="decimal" value={form.lon} placeholder={parent ? String(parent.lon) : undefined} onChange={(e) => setForm({ ...form, lon: e.target.value })} /></Field>
-        <Field id="w-d1" label="Premier jour (J)"><Input id="w-d1" type="number" min={1} max={60} value={form.day_start} onChange={(e) => setForm({ ...form, day_start: e.target.value })} placeholder="ex. 6" /></Field>
-        <Field id="w-d2" label="Dernier jour (J)"><Input id="w-d2" type="number" min={1} max={60} value={form.day_end} onChange={(e) => setForm({ ...form, day_end: e.target.value })} placeholder="ex. 8" /></Field>
-        <Field id="w-country" label="Pays"><Input id="w-country" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} /></Field>
-        <Field id="w-desc" label="Description"><Input id="w-desc" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></Field>
-        <Field id="w-order" label="Ordre"><Input id="w-order" type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: e.target.value })} placeholder="auto" /></Field>
-        <div className="flex items-end"><Button type="submit" className="w-full" disabled={add.isPending}>Ajouter</Button></div>
-      </form>
-    </Panel>
-  );
-}
-
-function SettingsAdmin() {
-  const { data: event } = useEvent();
-  const queryClient = useQueryClient();
-  const [form, setForm] = useState({ event_name: '', event_start_date: '', event_end_date: '', event_total_km: '' });
-  useEffect(() => {
-    if (event) setForm({
-      event_name: event.name, event_start_date: event.startDate ?? '', event_end_date: event.endDate ?? '',
-      event_total_km: event.totalKm?.toString() ?? '',
-    });
-  }, [event]);
-
-  const save = useMutation({
-    mutationFn: async () => {
-      const entries = Object.entries(form) as [keyof typeof form, string][];
-      const toUpsert = entries.filter(([, v]) => v.trim()).map(([key, value]) => ({ key, value: value.trim() }));
-      const toDelete = entries.filter(([, v]) => !v.trim()).map(([key]) => key);
-      if (toUpsert.length) unwrap(await supabase.from('settings').upsert(toUpsert));
-      if (toDelete.length) unwrap(await supabase.from('settings').delete().in('key', toDelete));
-    },
-    onSuccess: () => { toast.success('Réglages enregistrés'); void queryClient.invalidateQueries({ queryKey: keys.event }); },
-    onError: toastError,
-  });
-
-  return (
-    <Panel title="Édition en cours">
-      <form onSubmit={(e: FormEvent) => { e.preventDefault(); save.mutate(); }} className="grid gap-4 md:grid-cols-2">
-        <Field id="e-name" label="Nom de l’événement"><Input id="e-name" value={form.event_name} onChange={(e) => setForm({ ...form, event_name: e.target.value })} placeholder="Départ 2027" /></Field>
-        <Field id="e-km" label="Distance totale (km)"><Input id="e-km" type="number" value={form.event_total_km} onChange={(e) => setForm({ ...form, event_total_km: e.target.value })} /></Field>
-        <Field id="e-start" label="Date de départ" hint="Active le compte à rebours et le compteur de jours."><Input id="e-start" type="date" value={form.event_start_date} onChange={(e) => setForm({ ...form, event_start_date: e.target.value })} /></Field>
-        <Field id="e-end" label="Date d’arrivée"><Input id="e-end" type="date" value={form.event_end_date} onChange={(e) => setForm({ ...form, event_end_date: e.target.value })} /></Field>
-        <div className="md:col-span-2"><Button type="submit" disabled={save.isPending}>Enregistrer</Button></div>
-      </form>
-    </Panel>
-  );
-}
-
 export default function AdminPage() {
   return (
     <PageShell padTop={false}>
@@ -441,15 +328,11 @@ export default function AdminPage() {
             <TabsTrigger value="purchases">Paiements</TabsTrigger>
             <TabsTrigger value="codes">Accès offerts</TabsTrigger>
             <TabsTrigger value="users">Comptes</TabsTrigger>
-            <TabsTrigger value="route">Parcours</TabsTrigger>
-            <TabsTrigger value="settings">Réglages</TabsTrigger>
           </TabsList>
           <TabsContent value="crews"><CrewsAdmin /></TabsContent>
           <TabsContent value="purchases"><PurchasesAdmin /></TabsContent>
           <TabsContent value="codes"><AccessCodesAdmin /></TabsContent>
           <TabsContent value="users"><UsersAdmin /></TabsContent>
-          <TabsContent value="route"><RouteAdmin /></TabsContent>
-          <TabsContent value="settings"><SettingsAdmin /></TabsContent>
         </Tabs>
       </Container>
     </PageShell>

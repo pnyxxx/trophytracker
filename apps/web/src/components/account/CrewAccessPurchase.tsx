@@ -94,7 +94,7 @@ export function CrewAccessPurchase() {
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)]">
       <div>
         <p className="m-0 max-w-[520px] text-dust-300">
-          Vous participez au raid ? Créez la page de votre road trip pour la partager à vos proches et sponsors. Vos compagnons de route la
+          Vous partez bientôt ? Créez la page de votre road trip pour la partager à vos proches et sponsors. Vos compagnons de route la
           rejoindront ensuite par invitation, gratuitement.
         </p>
         <ul className="m-0 mt-5 list-none space-y-2 p-0">
