@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>TrophyTracker fait une pause</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <!-- Page affichée au public quand SITE_PAUSED=true (voir apps/web/Caddyfile). Autonome : aucun script, aucune ressource externe. -->
+  <style>
+    :root { --bg: #f4ecdf; --fg: #2a211b; --muted: #6b5d52; --accent: #db4740; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #1d1814; --fg: #f4ecdf; --muted: #b3a597; } }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px 16px;
+      background: var(--bg); color: var(--fg); font: 17px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
+    main { max-width: 34rem; }
+    h1 { margin: 0 0 16px; font-size: clamp(28px, 7vw, 40px); line-height: 1.1; }
+    h1 span { color: var(--accent); }
+    p { margin: 0 0 12px; color: var(--muted); }
+    a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Trophy<span>Tracker</span> fait une pause</h1>
+    <p>Le site est temporairement indisponible. Les comptes et les données sont conservés.</p>
+    <p>Une question ? Écrivez à <a href="mailto:julien.plomion2006@gmail.com">julien.plomion2006@gmail.com</a>.</p>
+  </main>
+</body>
+</html>

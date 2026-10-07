@@ -46,6 +46,17 @@ http://web {
 		-Server
 	}
 
+	# Pause du service (SITE_PAUSED=true) : toute requête venue d'Internet (par le tunnel Cloudflare, qui ajoute
+	# Cf-Connecting-IP) reçoit la page « pause », API et réception GPS comprises. Un accès direct au serveur
+	# (tunnel SSH) voit toujours le vrai site, pour l'administration.
+	@paused {
+		expression `"{$SITE_PAUSED:false}" == "true"`
+		header Cf-Connecting-IP *
+		not path /pause.html /favicon.svg
+	}
+	rewrite @paused /pause.html
+	header @paused X-Robots-Tag "noindex"
+
 	# Configuration publique lue par le site (clé ANON = publique par conception).
 	handle /config.js {
 		header Content-Type "application/javascript; charset=utf-8"

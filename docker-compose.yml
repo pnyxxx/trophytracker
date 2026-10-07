@@ -64,6 +64,8 @@ services:
       SMTP_ADMIN_EMAIL: ${SMTP_ADMIN_EMAIL:-}
       SMTP_SENDER_NAME: ${SMTP_SENDER_NAME:-TrophyTracker}
       SITE_URL: ${SITE_URL:-}
+      # Pause du service : démo, relances et synchronisation Traccar arrêtées (voir aussi le service web).
+      SITE_PAUSED: ${SITE_PAUSED:-false}
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
       interval: 15s
@@ -91,6 +93,8 @@ services:
       # En local uniquement (rempli par `make up`) : adresse joignable depuis un téléphone.
       HOST_LAN_IP: ${HOST_LAN_IP:-}
       WEB_HTTP_PORT: ${WEB_HTTP_PORT:-80}
+      # « true » : le public ne voit plus qu'une page « pause » (apps/web/public/pause.html).
+      SITE_PAUSED: ${SITE_PAUSED:-false}
     ports:
       - "${WEB_HTTP_PORT:-80}:80"
       - "${WEB_HTTPS_PORT:-443}:443"

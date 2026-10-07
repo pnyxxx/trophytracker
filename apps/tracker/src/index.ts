@@ -20,7 +20,9 @@ await app.listen({ port: config.PORT, host: '0.0.0.0' });
 log(`réception GPS prête sur le port ${config.PORT} (/ingest/osmand)`);
 
 let stopSync = () => {};
-if (config.TRACCAR_URL && config.TRACCAR_EMAIL && config.TRACCAR_PASSWORD) {
+if (config.SITE_PAUSED) {
+  log('service en pause : ni synchronisation Traccar, ni emails, ni démo');
+} else if (config.TRACCAR_URL && config.TRACCAR_EMAIL && config.TRACCAR_PASSWORD) {
   const client = new TraccarClient(config.TRACCAR_URL, config.TRACCAR_EMAIL, config.TRACCAR_PASSWORD);
   stopSync = startTraccarSync(db, client, config.TRACCAR_POLL_SECONDS, log);
   log(`synchronisation Traccar activée (${config.TRACCAR_URL}, toutes les ${config.TRACCAR_POLL_SECONDS}s)`);
@@ -29,7 +31,7 @@ if (config.TRACCAR_URL && config.TRACCAR_EMAIL && config.TRACCAR_PASSWORD) {
 }
 
 let stopNotifier = () => {};
-if (config.SMTP_HOST) {
+if (config.SMTP_HOST && !config.SITE_PAUSED) {
   stopNotifier = startAdminNotifier(
     db,
     { host: config.SMTP_HOST, port: config.SMTP_PORT, user: config.SMTP_USER || undefined, pass: config.SMTP_PASS, from: config.SMTP_ADMIN_EMAIL, fromName: config.SMTP_SENDER_NAME },
@@ -38,12 +40,12 @@ if (config.SMTP_HOST) {
     log,
   );
   log(`emails aux admins et relances GPS activés (${config.SMTP_HOST}:${config.SMTP_PORT}, toutes les ${config.NOTIFY_POLL_SECONDS}s)`);
-} else {
+} else if (!config.SITE_PAUSED) {
   log('SMTP non configuré : pas d’emails aux admins ni de relances GPS');
 }
 
 // Équipage de démo : rejoue son trajet en boucle (rien à faire s'il n'y en a pas en base).
-const stopDemo = startDemoDriver(db, loadDemoRoute(), log);
+const stopDemo = config.SITE_PAUSED ? () => {} : startDemoDriver(db, loadDemoRoute(), log);
 
 // Arrêt propre (docker stop).
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {

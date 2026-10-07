@@ -7,6 +7,8 @@ const schema = z.object({
   DATABASE_URL: z.url(),
   /** Derrière Caddy : lire la vraie IP du client dans X-Forwarded-For. */
   TRUST_PROXY: z.enum(['true', 'false']).default('false').transform((v) => v === 'true'),
+  /** Pause du service : ni démo, ni synchronisation Traccar, ni emails (le site public n'affiche qu'une page « pause »). */
+  SITE_PAUSED: z.enum(['true', 'false']).default('false').transform((v) => v === 'true'),
 
   TRACCAR_URL: z.union([z.url(), z.literal('')]).optional(),
   TRACCAR_EMAIL: z.string().optional(),
