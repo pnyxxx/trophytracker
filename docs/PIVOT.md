@@ -61,6 +61,8 @@ produit centré sur cet événement sans son accord n'est pas viable, même s'il
   référencées** ; lieux d'arrêt de nuit floutés ; message clair « pas de position = pas de réseau, contactez le
   voyageur ».
 - Le **suivi GPS** du voyageur reste le cœur du produit.
+- Vocabulaire : un compte crée des **voyages** (plusieurs par compte), chacun avec ses voyageurs. Chaque voyage
+  garde **sa** trace GPS sur **sa** page ; plus jamais de carte qui mélange les traces de plusieurs voyages.
 - Nom **TrophyTracker gardé pour l'instant** (« trophy » est un mot générique), identité visuelle et nom à revoir ;
   aucun dépôt INPI avant. Protéger le code par une enveloppe Soleau avant de montrer des détails techniques.
 
