@@ -71,7 +71,7 @@ function StageCard({ stage, photos }: { stage: TripStage; photos: Photo[] }) {
         {[style.label, stage.place !== stage.name ? stage.place : null, stage.arrived_at ? hour(stage.arrived_at) : null,
           duration && duration >= 600 ? formatDuration(duration) : null].filter(Boolean).join(' · ')}
       </p>
-      <h3 className="m-0 mt-1 font-display text-3xl font-black uppercase leading-none text-coal md:text-4xl">{stage.name}</h3>
+      <h3 className="m-0 mt-1 font-display text-3xl font-extrabold leading-none text-coal md:text-4xl">{stage.name}</h3>
       {stage.note && <p className="mb-0 mt-3 max-w-2xl whitespace-pre-line text-base leading-relaxed text-dust-800">{stage.note}</p>}
       {photos.length > 0 && (
         <div className="mt-4 flex gap-2 overflow-x-auto">
@@ -91,7 +91,7 @@ function JournalCard({ entry }: { entry: JournalItem }) {
     <article className="relative border-2 border-coal bg-cream p-5 md:p-6">
       <span className="absolute -left-[33px] top-5 flex h-6 w-6 items-center justify-center rounded-full border-2 border-cream bg-coal text-xs md:-left-[49px]" aria-hidden="true">✍️</span>
       <p className="tt-kicker m-0 text-ochre">Journal de bord</p>
-      <h3 className="m-0 mt-1 font-display text-2xl font-black uppercase leading-none text-coal md:text-3xl">{entry.title}</h3>
+      <h3 className="m-0 mt-1 font-display text-2xl font-extrabold leading-none text-coal md:text-3xl">{entry.title}</h3>
       <p className="mb-0 mt-3 whitespace-pre-line text-base leading-relaxed text-dust-800">{entry.body}</p>
     </article>
   );

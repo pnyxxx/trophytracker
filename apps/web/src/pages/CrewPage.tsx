@@ -158,7 +158,7 @@ export default function CrewPage() {
           <div className="flex min-w-0 flex-col gap-7">
             <Kicker className="flex-wrap gap-x-4 gap-y-2">
               {crew.car_number && (
-                <span className="rounded-[3px] bg-primary px-2 py-1 font-mono text-xs font-bold tracking-normal text-white">#{crew.car_number}</span>
+                <span className="rounded-full bg-primary px-2 py-1 font-mono text-xs font-bold tracking-normal text-white">#{crew.car_number}</span>
               )}
               <span>Road trip</span>
               <LiveBadge lastFixAt={crew.last_fix_at} />
@@ -167,7 +167,7 @@ export default function CrewPage() {
               {crew.is_demo && <span className="border border-ochre/60 px-2 py-1 text-ochre">Road trip de démonstration</span>}
             </Kicker>
             <div className="flex flex-col gap-3">
-              <h1 className="m-0 break-words font-display text-[clamp(56px,9vw,152px)] font-black uppercase leading-[0.92] text-cream">
+              <h1 className="m-0 break-words font-display text-[clamp(56px,9vw,152px)] font-extrabold leading-[0.92] text-cream">
                 {crew.name}
               </h1>
               {(crew.school || crew.city) && (
@@ -308,7 +308,7 @@ export default function CrewPage() {
       {crew.contact_email && (
         <section className="border-t border-cream/[0.12] bg-ink py-14">
           <Container className="flex flex-wrap items-center justify-between gap-6">
-            <p className="m-0 font-display text-4xl font-black uppercase leading-none">Un message pour les voyageurs ?</p>
+            <p className="m-0 font-display text-4xl font-extrabold leading-none">Un message pour les voyageurs ?</p>
             <div className="flex flex-wrap gap-3">
               <Button asChild variant="secondary"><a href={`mailto:${crew.contact_email}`}><Mail />Leur écrire</a></Button>
             </div>

@@ -24,7 +24,7 @@ export function CrewStats({ stats, startedAt }: {
             <span className="font-mono text-[11px] tracking-[0.14em] text-ochre">{s.tag}</span>
             <span className="text-sm text-dust-400">{s.label}</span>
           </dt>
-          <dd className="m-0 font-display text-[44px] font-black leading-none text-cream md:text-[64px]">
+          <dd className="m-0 font-display text-[44px] font-extrabold leading-none text-cream md:text-[64px]">
             {s.value}
             {s.unit && <span className="ml-1.5 font-mono text-sm font-normal text-dust-400 md:text-base">{s.unit}</span>}
           </dd>

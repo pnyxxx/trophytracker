@@ -94,7 +94,7 @@ export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl
                 format === f.id ? 'border-primary bg-primary/10' : 'border-cream/15 hover:border-cream/40',
               )}
             >
-              <span className="font-display text-xl font-extrabold uppercase text-cream">{f.label}</span>
+              <span className="font-display text-xl font-extrabold text-cream">{f.label}</span>
               <span className="text-sm text-dust-300">{f.hint}</span>
             </button>
           ))}
@@ -179,7 +179,7 @@ export function CrewShareButton({ crew, className }: { crew: CrewForQr; classNam
             </Button>
           </div>
         </div>
-        <h3 className="m-0 mt-2 font-display text-2xl font-extrabold uppercase text-cream">Image avec QR code</h3>
+        <h3 className="m-0 mt-2 font-display text-2xl font-extrabold text-cream">Image avec QR code</h3>
         {open && <CrewQrPanel crew={crew} showUrl={false} />}
       </DialogContent>
     </Dialog>

@@ -4,27 +4,24 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
-// Boutons « roadbook » : capitales mono, angles vifs.
+// Boutons « Balise » : pilules, texte en gras, zone tactile de 48 px minimum.
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[4px] font-mono text-xs font-bold uppercase tracking-[0.12em] ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-sans font-bold transition-colors focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-[3px] focus-visible:outline-cream disabled:pointer-events-none disabled:bg-ink-700 disabled:text-dust-500 disabled:border-transparent [&_svg]:pointer-events-none [&_svg]:size-[18px] [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary-dark",
-        destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/85",
-        outline:
-          "border border-cream/25 bg-transparent text-cream hover:border-primary hover:text-cream",
-        secondary:
-          "border border-cream bg-transparent text-cream hover:bg-cream hover:text-ink",
-        ghost: "text-cream/75 hover:bg-cream/5 hover:text-cream",
-        link: "text-primary underline-offset-4 hover:underline",
+        default: "bg-signal text-white hover:bg-signal-hover hover:text-white active:bg-signal-press",
+        destructive: "bg-signal text-white hover:bg-signal-hover hover:text-white",
+        outline: "border-[1.5px] border-cream/45 bg-transparent text-cream hover:bg-cream/10 hover:text-cream",
+        secondary: "bg-cream text-ink hover:bg-white hover:text-ink",
+        ghost: "text-dust-100 hover:bg-cream/10 hover:text-cream",
+        link: "text-signal-text underline underline-offset-[3px] hover:text-cream",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 px-3",
-        lg: "h-12 px-7 text-[13px]",
-        icon: "h-10 w-10",
+        default: "min-h-12 px-[22px] text-[17px]",
+        sm: "min-h-11 px-4 text-[15px]",
+        lg: "min-h-14 px-7 text-[18px]",
+        icon: "h-12 w-12",
       },
     },
     defaultVariants: {

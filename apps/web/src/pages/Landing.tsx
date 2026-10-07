@@ -92,12 +92,12 @@ export default function Landing() {
               <span>Carnet de route · suivi GPS en direct</span>
             </Kicker>
             {/* Une ligne par segment ; la taille suit la largeur ET la hauteur : tout le hero tient sur un écran. */}
-            <h1 className="m-0 font-display text-[clamp(44px,min(13vw,calc((100svh_-_540px)/2.85)),200px)] font-black lg:text-[clamp(64px,min(calc((min(100vw,1400px)_-_496px)/6.55),calc((100svh_-_260px)/2.85)),200px)] uppercase leading-[0.95] tracking-[-0.01em] text-cream sm:whitespace-nowrap">
+            <h1 className="m-0 font-display text-[clamp(44px,min(13vw,calc((100svh_-_540px)/2.85)),200px)] font-extrabold lg:text-[clamp(64px,min(calc((min(100vw,1400px)_-_496px)/6.55),calc((100svh_-_260px)/2.85)),200px)] leading-[0.95] tracking-[-0.01em] text-cream sm:whitespace-nowrap">
               Suivez
               <br />
               leur aventure
               <br />
-              en <span className="font-stencil text-primary">direct.</span>
+              en <span className="font-display text-primary">direct.</span>
             </h1>
           </div>
 
@@ -109,13 +109,13 @@ export default function Landing() {
             <div className="flex flex-wrap gap-3">
               <Link
                 to="/inscription"
-                className="rounded-[4px] bg-primary px-6 py-4 font-mono text-sm font-bold uppercase tracking-[0.12em] text-white shadow-[0_10px_40px_rgba(219,71,64,.35)] hover:bg-primary-dark hover:text-white"
+                className="rounded-full bg-primary px-6 py-4 font-mono text-sm font-bold uppercase tracking-[0.12em] text-white shadow-[0_10px_40px_rgba(219,71,64,.35)] hover:bg-primary-dark hover:text-white"
               >
                 Créer mon road trip →
               </Link>
               <a
                 href="#comment"
-                className="rounded-[4px] border border-cream/25 px-6 py-4 font-mono text-sm font-bold uppercase tracking-[0.12em] text-cream hover:border-cream hover:text-cream"
+                className="rounded-full border border-cream/25 px-6 py-4 font-mono text-sm font-bold uppercase tracking-[0.12em] text-cream hover:border-cream hover:text-cream"
               >
                 Comment ça marche
               </a>
@@ -194,11 +194,11 @@ export default function Landing() {
             {audiences.map((a) => (
               <div key={a.n} className="flex flex-wrap border-b-2 border-coal transition-colors last:border-b-0 hover:bg-paper">
                 <div className="flex flex-[0_0_150px] flex-col gap-1.5 border-r-2 border-coal px-5 py-7">
-                  <span className="font-stencil text-[64px] font-black leading-[0.9] text-primary">{a.n}</span>
+                  <span className="font-display text-[64px] font-extrabold leading-[0.9] text-primary">{a.n}</span>
                   <span className="font-mono text-[11px] text-dust-700">{a.km}</span>
                 </div>
                 <div className="flex flex-[1_1_220px] items-center px-5 py-7">
-                  <h3 className="m-0 font-display text-[40px] font-black uppercase leading-[0.95]">{a.title}</h3>
+                  <h3 className="m-0 font-display text-[40px] font-extrabold leading-[0.95]">{a.title}</h3>
                 </div>
                 <div className="flex flex-[2_1_320px] items-center px-5 pb-7 sm:py-7">
                   <p className="m-0 text-pretty text-[17px] leading-relaxed text-dust-800">{a.text}</p>
@@ -221,10 +221,10 @@ export default function Landing() {
             {steps.map((s) => (
               <li key={s.n} className="flex flex-col gap-4 border-b-2 border-coal py-8 pr-7">
                 <div className="flex items-baseline gap-3">
-                  <span className="font-stencil text-[120px] font-black leading-[0.8] text-primary">{s.n}</span>
+                  <span className="font-display text-[120px] font-extrabold leading-[0.8] text-primary">{s.n}</span>
                   <span className="tt-kicker text-dust-700">Étape</span>
                 </div>
-                <h3 className="m-0 font-display text-[34px] font-black uppercase leading-[0.95]">{s.title}</h3>
+                <h3 className="m-0 font-display text-[34px] font-extrabold leading-[0.95]">{s.title}</h3>
                 <p className="m-0 max-w-[340px] text-base leading-relaxed text-dust-800">{s.text}</p>
               </li>
             ))}
@@ -233,7 +233,7 @@ export default function Landing() {
             {features.map((f) => (
               <div key={f.tag} className="flex flex-col gap-2.5 bg-coal p-6 text-cream">
                 <span className="font-mono text-[11px] tracking-[0.14em] text-ochre">{f.tag}</span>
-                <span className="font-display text-[26px] font-extrabold uppercase leading-none">{f.title}</span>
+                <span className="font-display text-[26px] font-extrabold leading-none">{f.title}</span>
                 <span className="text-sm leading-[1.55] text-dust-300">{f.text}</span>
               </div>
             ))}
@@ -260,8 +260,8 @@ export default function Landing() {
           <ol className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(min(100%,260px),1fr))] border-t-2 border-coal p-0">
             {FAIR_PLAY.rules.map((r, i) => (
               <li key={r.title} className="flex flex-col gap-3 border-b-2 border-coal py-8 pr-7">
-                <span className="font-stencil text-[64px] font-black leading-[0.85] text-primary">{i + 1}</span>
-                <h3 className="m-0 font-display text-[28px] font-black uppercase leading-[0.95]">{r.title}</h3>
+                <span className="font-display text-[64px] font-extrabold leading-[0.85] text-primary">{i + 1}</span>
+                <h3 className="m-0 font-display text-[28px] font-extrabold leading-[0.95]">{r.title}</h3>
                 <p className="m-0 max-w-[340px] text-base leading-relaxed text-dust-800">{r.text}</p>
               </li>
             ))}
@@ -298,7 +298,7 @@ export default function Landing() {
       <section id="inscription" className="relative overflow-hidden bg-[radial-gradient(90%_80%_at_50%_100%,#3A2215_0%,#1B1310_50%,#0A0806_100%)] px-4 py-[140px] sm:px-7">
         <div className="relative mx-auto flex max-w-[1240px] flex-col items-center gap-[22px] text-center">
           <Kicker className="text-gold">Prochain départ · le vôtre</Kicker>
-          <h2 className="m-0 w-full font-display text-[clamp(56px,8vw,128px)] font-black uppercase leading-[0.96] text-cream">
+          <h2 className="m-0 w-full font-display text-[clamp(56px,8vw,128px)] font-extrabold leading-[0.96] text-cream">
             Vous partez
             <br />
             à l’aventure&nbsp;?
@@ -309,7 +309,7 @@ export default function Landing() {
           <p className="m-0 font-mono text-xs uppercase tracking-[0.14em] text-gold">{priceSentence()} · paiement unique</p>
           <Link
             to="/inscription"
-            className="rounded-[4px] bg-primary px-8 py-[18px] font-mono text-sm font-bold uppercase tracking-[0.12em] text-white shadow-[0_10px_40px_rgba(219,71,64,.45)] hover:bg-primary-dark hover:text-white"
+            className="rounded-full bg-primary px-8 py-[18px] font-mono text-sm font-bold uppercase tracking-[0.12em] text-white shadow-[0_10px_40px_rgba(219,71,64,.45)] hover:bg-primary-dark hover:text-white"
           >
             Créer mon road trip →
           </Link>

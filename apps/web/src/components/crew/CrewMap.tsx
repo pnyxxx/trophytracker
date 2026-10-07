@@ -181,7 +181,7 @@ export function CrewMap({ crew, points, stages, sponsors, photos = [] }: Props) 
         {car && (
           <button
             onClick={() => setFollow((f) => !f)}
-            className={`flex items-center gap-2 rounded-[4px] px-3 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.12em] shadow-lg transition ${
+            className={`flex items-center gap-2 rounded-full px-3 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.12em] shadow-lg transition ${
               follow ? 'bg-primary text-white' : 'bg-ink text-cream hover:bg-primary'
             }`}
             aria-pressed={follow}
@@ -192,7 +192,7 @@ export function CrewMap({ crew, points, stages, sponsors, photos = [] }: Props) 
         )}
         <button
           onClick={() => containerRef.current?.requestFullscreen?.()}
-          className="flex items-center justify-center gap-2 rounded-[4px] bg-ink px-3 py-2.5 text-cream shadow-lg hover:bg-primary"
+          className="flex items-center justify-center gap-2 rounded-full bg-ink px-3 py-2.5 text-cream shadow-lg hover:bg-primary"
           aria-label="Carte en plein écran"
         >
           <Maximize className="h-4 w-4" />

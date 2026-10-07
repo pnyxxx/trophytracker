@@ -1,18 +1,13 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 // Polices auto-hébergées (aucune requête vers Google Fonts : voir la CSP du Caddyfile).
-import '@fontsource/archivo/latin-400';
-import '@fontsource/archivo/latin-500';
-import '@fontsource/archivo/latin-600';
-import '@fontsource/archivo/latin-700';
-import '@fontsource/big-shoulders-display/latin-600';
-import '@fontsource/big-shoulders-display/latin-800';
-import '@fontsource/big-shoulders-display/latin-900';
-import '@fontsource/big-shoulders-stencil-display/latin-800';
-import '@fontsource/big-shoulders-stencil-display/latin-900';
-import '@fontsource/jetbrains-mono/latin-400';
-import '@fontsource/jetbrains-mono/latin-600';
-import '@fontsource/jetbrains-mono/latin-700';
+// Titres : Bricolage Grotesque (axes graisse + taille optique) · Texte : Atkinson Hyperlegible · Données : DM Mono.
+import '@fontsource-variable/bricolage-grotesque/opsz.css';
+import '@fontsource/atkinson-hyperlegible/latin-400.css';
+import '@fontsource/atkinson-hyperlegible/latin-700.css';
+import '@fontsource/atkinson-hyperlegible/latin-400-italic.css';
+import '@fontsource/dm-mono/latin-400.css';
+import '@fontsource/dm-mono/latin-500.css';
 import App from './App';
 import './index.css';
 

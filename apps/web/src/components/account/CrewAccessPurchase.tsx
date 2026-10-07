@@ -110,7 +110,7 @@ export function CrewAccessPurchase() {
       <div className="border border-cream/[0.14] bg-black/30 p-5">
         <p className="tt-kicker m-0 text-ochre">Accès road trip · paiement unique</p>
         <p className="m-0 mt-3 flex items-baseline gap-3">
-          <span className="font-display text-6xl font-black leading-none text-cream">{euros(price)}</span>
+          <span className="font-display text-6xl font-extrabold leading-none text-cream">{euros(price)}</span>
           {isLaunchPrice() && <span className="text-lg text-dust-500 line-through">{euros(PRICING.regularCents)}</span>}
         </p>
         <p className="mb-0 mt-2 text-xs text-dust-400">

@@ -13,10 +13,10 @@ export function CrewSponsors({ sponsors }: { sponsors: Sponsor[] }) {
               {logo ? (
                 <img src={logo} alt={s.name} loading="lazy" className="max-h-20 max-w-full object-contain" />
               ) : (
-                <span className="text-center font-display text-2xl font-black uppercase text-coal">{s.name}</span>
+                <span className="text-center font-display text-2xl font-extrabold text-coal">{s.name}</span>
               )}
             </div>
-            <p className="mt-4 truncate text-center font-display text-lg font-extrabold uppercase text-coal">{s.name}</p>
+            <p className="mt-4 truncate text-center font-display text-lg font-extrabold text-coal">{s.name}</p>
             {s.city && <p className="truncate text-center font-mono text-[11px] uppercase tracking-[0.12em] text-dust-700">{s.city}</p>}
           </>
         );

@@ -121,11 +121,11 @@ export function SponsorsTab({ crew }: { crew: Crew }) {
         <ul className="divide-y divide-cream/10">
           {sponsors.map((s) => (
             <li key={s.id} className="flex items-center gap-4 py-3">
-              <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-[4px] bg-white">
+              <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-white">
                 {s.logo_path ? <img src={mediaUrl(s.logo_path)!} alt="" className="max-h-full max-w-full object-contain" /> : <span className="text-xs font-bold text-black">{s.name.slice(0, 2)}</span>}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate font-display text-xl font-extrabold uppercase leading-tight text-cream">{s.name}</p>
+                <p className="truncate font-display text-xl font-extrabold leading-tight text-cream">{s.name}</p>
                 <p className="text-xs text-dust-500">{[s.city, s.lat != null ? '📍 sur la carte' : null].filter(Boolean).join(' · ')}</p>
               </div>
               <Button size="icon" variant="ghost" onClick={() => setEditing(s)} aria-label={`Modifier ${s.name}`}><Pencil className="h-4 w-4" /></Button>

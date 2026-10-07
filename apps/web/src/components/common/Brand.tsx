@@ -1,13 +1,13 @@
 /**
- * Briques visuelles de la charte « roadbook » réutilisées sur toutes les pages :
- * étiquettes mono, pastille « en direct », grands titres et en-tête de page.
+ * Briques visuelles du système « Balise » réutilisées sur toutes les pages :
+ * étiquettes DM Mono, pastille « en direct », grands titres et en-tête de page.
  */
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
-/** Petite étiquette en capitales mono (ocre par défaut). */
+/** Petite étiquette de données DM Mono (rouge « texte » par défaut). */
 export function Kicker({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('tt-kicker flex items-center gap-3 text-xs text-ochre', className)}>{children}</div>;
+  return <div className={cn('tt-kicker flex items-center gap-2 text-signal-text', className)}>{children}</div>;
 }
 
 /** Pastille verte qui pulse : l'équipage émet en ce moment. */
@@ -20,14 +20,13 @@ export function LiveDot({ className }: { className?: string }) {
   );
 }
 
-/** Grand titre de section (h2), condensé et en capitales. */
+/** Grand titre de section (h2), Bricolage Grotesque 800. */
 export function SectionTitle({ children, className }: { children: ReactNode; className?: string }) {
-  return <h2 className={cn('tt-display m-0 text-[clamp(48px,6vw,96px)]', className)}>{children}</h2>;
+  return <h2 className={cn('tt-display m-0 text-[clamp(36px,4.6vw,64px)]', className)}>{children}</h2>;
 }
 
 /**
- * En-tête des pages intérieures : dégradé chaud du hero de l'accueil,
- * étiquette, très grand titre, texte d'introduction et actions à droite.
+ * En-tête des pages intérieures : étiquette, grand titre, texte d'introduction et actions à droite.
  */
 export function PageHero({ kicker, title, children, aside, className }: {
   kicker?: ReactNode;
@@ -37,12 +36,12 @@ export function PageHero({ kicker, title, children, aside, className }: {
   className?: string;
 }) {
   return (
-    <section className={cn('relative overflow-hidden bg-[radial-gradient(120%_80%_at_80%_0%,#3A2215_0%,#1B1310_45%,#120F0C_75%)]', className)}>
-      <div className="mx-auto flex max-w-[1400px] flex-col gap-8 px-4 pb-14 pt-32 sm:px-7 md:flex-row md:items-end md:justify-between md:pb-16 md:pt-40">
-        <div className="flex min-w-0 flex-col gap-5">
-          {kicker && <Kicker>{kicker}</Kicker>}
-          <h1 className="tt-display m-0 break-words text-[clamp(52px,8vw,128px)] text-cream">{title}</h1>
-          {children && <div className="max-w-[620px] text-lg leading-relaxed text-dust-200">{children}</div>}
+    <section className={cn('relative', className)}>
+      <div className="mx-auto flex max-w-[1440px] flex-col gap-6 px-5 pb-10 pt-12 md:flex-row md:items-end md:justify-between md:pb-12 md:pt-16">
+        <div className="flex min-w-0 flex-col gap-4">
+          {kicker && <Kicker className="text-dust-400">{kicker}</Kicker>}
+          <h1 className="tt-display m-0 break-words text-[clamp(40px,6vw,88px)] text-cream">{title}</h1>
+          {children && <div className="max-w-[620px] text-[19px] leading-relaxed text-dust-100">{children}</div>}
         </div>
         {aside && <div className="flex shrink-0 flex-col gap-3 md:items-end">{aside}</div>}
       </div>
@@ -52,5 +51,5 @@ export function PageHero({ kicker, title, children, aside, className }: {
 
 /** Conteneur standard des pages (largeur max + gouttières). */
 export function Container({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('mx-auto w-full max-w-[1400px] px-4 sm:px-7', className)}>{children}</div>;
+  return <div className={cn('mx-auto w-full max-w-[1440px] px-5', className)}>{children}</div>;
 }

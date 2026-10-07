@@ -11,7 +11,7 @@ const links = [
 ];
 
 const cta =
-  'inline-flex items-center gap-2 rounded-[4px] bg-primary px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-[0.08em] text-white hover:bg-primary-dark hover:text-white';
+  'inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-[0.08em] text-white hover:bg-primary-dark hover:text-white';
 
 export function SiteHeader() {
   const { user, profile, isAdmin, signOut } = useAuth();
@@ -68,7 +68,7 @@ export function SiteHeader() {
                 <User className="h-4 w-4" />
                 {profile?.display_name ?? 'Mon compte'}
               </Link>
-              <button onClick={logout} title="Se déconnecter" aria-label="Se déconnecter" className="rounded-[4px] p-2.5 text-dust-100 hover:bg-cream/5 hover:text-white">
+              <button onClick={logout} title="Se déconnecter" aria-label="Se déconnecter" className="rounded-full p-2.5 text-dust-100 hover:bg-cream/5 hover:text-white">
                 <LogOut className="h-4 w-4" />
               </button>
             </div>
@@ -81,7 +81,7 @@ export function SiteHeader() {
         </nav>
 
         <button
-          className="rounded-[4px] p-2 text-cream md:hidden"
+          className="rounded-full p-2 text-cream md:hidden"
           onClick={() => setOpen((o) => !o)}
           aria-label={open ? 'Fermer le menu' : 'Ouvrir le menu'}
           aria-expanded={open}
@@ -105,7 +105,7 @@ export function SiteHeader() {
                   key={l.to}
                   to={l.to}
                   onClick={() => setOpen(false)}
-                  className="border-b border-cream/[0.08] py-4 font-display text-3xl font-black uppercase text-cream hover:text-primary"
+                  className="border-b border-cream/[0.08] py-4 font-display text-3xl font-extrabold text-cream hover:text-primary"
                 >
                   {l.label}
                 </Link>

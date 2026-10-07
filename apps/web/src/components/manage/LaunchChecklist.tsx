@@ -79,7 +79,7 @@ export function LaunchChecklist({ crew, onGo }: { crew: Crew; onGo: (tab: string
         </span>
         <span className="min-w-0 flex-1">
           <span className="tt-kicker block text-ochre">Guide de départ · {doneCount}/{steps.length}</span>
-          <span className="block font-display text-2xl font-black uppercase leading-tight text-cream md:text-3xl">
+          <span className="block font-display text-2xl font-extrabold leading-tight text-cream md:text-3xl">
             {ready ? 'Prêts au départ !' : `Prêts à ${pct} %`}
           </span>
           {!ready && next && <span className="block text-sm text-dust-300">Prochaine étape : {next.title.toLowerCase()}.</span>}

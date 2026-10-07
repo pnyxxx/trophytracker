@@ -61,7 +61,7 @@ function useCrewImage(crew: Crew, kind: Kind) {
 /** Zone cliquable qui ouvre le sélecteur de fichier. */
 function FileZone({ onFile, className, children }: { onFile: (f: File) => void; className?: string; children: React.ReactNode }) {
   return (
-    <label className={`group relative flex cursor-pointer items-center justify-center overflow-hidden rounded-[4px] border-2 border-dashed border-cream/20 bg-cream/5 hover:border-primary ${className ?? ''}`}>
+    <label className={`group relative flex cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-cream/20 bg-cream/5 hover:border-primary ${className ?? ''}`}>
       {children}
       <input
         type="file"
@@ -181,7 +181,7 @@ function FocusFrame({ src, focus, onMove, onRelease, label, className }: {
       tabIndex={0}
       aria-label={label}
       aria-valuetext={`${focus.x} % horizontal, ${focus.y} % vertical`}
-      className={`relative cursor-grab touch-none select-none overflow-hidden rounded-[4px] border border-cream/20 bg-black active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${className ?? ''}`}
+      className={`relative cursor-grab touch-none select-none overflow-hidden rounded-full border border-cream/20 bg-black active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${className ?? ''}`}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={end}

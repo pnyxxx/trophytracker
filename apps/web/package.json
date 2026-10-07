@@ -13,10 +13,9 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@fontsource/archivo": "^5.3.0",
-    "@fontsource/big-shoulders-display": "^5.3.0",
-    "@fontsource/big-shoulders-stencil-display": "^5.3.0",
-    "@fontsource/jetbrains-mono": "^5.3.0",
+    "@fontsource-variable/bricolage-grotesque": "^5.3.0",
+    "@fontsource/atkinson-hyperlegible": "^5.3.0",
+    "@fontsource/dm-mono": "^5.3.0",
     "@maplibre/maplibre-gl-leaflet": "^0.1.4",
     "@photo-sphere-viewer/core": "^5.14.1",
     "@radix-ui/react-accordion": "^1.2.11",

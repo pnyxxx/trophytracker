@@ -162,7 +162,7 @@ function MfaForm() {
     return (
       <form onSubmit={(e: FormEvent) => { e.preventDefault(); verify.mutate(); }} className="space-y-4">
         <p className="text-sm text-dust-200">Scannez ce QR code avec votre application (Google Authenticator, 1Password, Bitwarden…), puis saisissez le code affiché.</p>
-        <img src={enrolling.qr} alt="QR code de double authentification" className="h-48 w-48 rounded-[4px] bg-white p-2" />
+        <img src={enrolling.qr} alt="QR code de double authentification" className="h-48 w-48 rounded-full bg-white p-2" />
         <p className="text-xs text-dust-500">Ou saisissez cette clé : <code className="break-all">{enrolling.secret}</code></p>
         <div className="flex gap-3">
           <Input inputMode="numeric" maxLength={6} required value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} aria-label="Code à 6 chiffres" className="max-w-[160px] text-center font-mono tracking-widest" />

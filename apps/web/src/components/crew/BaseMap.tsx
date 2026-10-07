@@ -17,7 +17,7 @@ export function BaseMap() {
   useEffect(() => {
     const layer = maplibreGL({ style: LIBERTY_STYLE, attributionControl: false });
     layer.addTo(map);
-    map.getContainer().classList.add('tt-map-warm');
+
     map.attributionControl?.addAttribution(MAP_ATTRIBUTION);
     return () => {
       map.attributionControl?.removeAttribution(MAP_ATTRIBUTION);

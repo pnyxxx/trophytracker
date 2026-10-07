@@ -10,7 +10,7 @@ export function Toaster(props: ToasterProps) {
       className="toaster group"
       toastOptions={{
         classNames: {
-          toast: 'group toast !rounded-[4px] !font-sans group-[.toaster]:shadow-2xl',
+          toast: 'group toast !rounded-full !font-sans group-[.toaster]:shadow-2xl',
           description: 'group-[.toast]:text-dust-300',
         },
       }}

@@ -29,11 +29,11 @@ export function CrewGallery({ photos }: { photos: Photo[] }) {
               className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-transparent to-transparent opacity-0 transition group-hover:opacity-100" />
-            <p className="absolute bottom-2 left-3 right-3 truncate font-display text-xl font-extrabold uppercase text-cream opacity-0 transition group-hover:opacity-100">
+            <p className="absolute bottom-2 left-3 right-3 truncate font-display text-xl font-extrabold text-cream opacity-0 transition group-hover:opacity-100">
               {p.title}
             </p>
             {p.kind === 'panorama' && (
-              <span className="absolute right-2 top-2 rounded-[3px] bg-primary px-1.5 py-0.5 font-mono text-[11px] font-bold text-white">360°</span>
+              <span className="absolute right-2 top-2 rounded-full bg-primary px-1.5 py-0.5 font-mono text-[11px] font-bold text-white">360°</span>
             )}
           </button>
         ))}
@@ -55,14 +55,14 @@ export function CrewGallery({ photos }: { photos: Photo[] }) {
         >
           <div className="flex items-start justify-between gap-4 border-b border-cream/[0.12] pb-4 text-cream">
             <div>
-              <p className="font-display text-3xl font-black uppercase leading-none md:text-4xl">{current.title}</p>
+              <p className="font-display text-3xl font-extrabold leading-none md:text-4xl">{current.title}</p>
               <p className="mt-2 flex flex-wrap gap-4 font-mono text-[11px] uppercase tracking-[0.12em] text-ochre">
                 {current.location && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{current.location}</span>}
                 {current.taken_label && <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{current.taken_label}</span>}
               </p>
               {current.description && <p className="mt-2 max-w-2xl text-sm text-dust-100">{current.description}</p>}
             </div>
-            <button onClick={() => setIndex(null)} className="rounded-[4px] border border-cream/25 p-2 hover:border-primary hover:bg-primary" aria-label="Fermer">
+            <button onClick={() => setIndex(null)} className="rounded-full border border-cream/25 p-2 hover:border-primary hover:bg-primary" aria-label="Fermer">
               <X className="h-6 w-6" />
             </button>
           </div>
@@ -79,10 +79,10 @@ export function CrewGallery({ photos }: { photos: Photo[] }) {
             )}
             {photos.length > 1 && (
               <>
-                <button onClick={() => go(-1)} className="absolute left-2 rounded-[4px] bg-ink p-3 text-cream shadow-lg hover:bg-primary" aria-label="Photo précédente">
+                <button onClick={() => go(-1)} className="absolute left-2 rounded-full bg-ink p-3 text-cream shadow-lg hover:bg-primary" aria-label="Photo précédente">
                   <ChevronLeft className="h-6 w-6" />
                 </button>
-                <button onClick={() => go(1)} className="absolute right-2 rounded-[4px] bg-ink p-3 text-cream shadow-lg hover:bg-primary" aria-label="Photo suivante">
+                <button onClick={() => go(1)} className="absolute right-2 rounded-full bg-ink p-3 text-cream shadow-lg hover:bg-primary" aria-label="Photo suivante">
                   <ChevronRight className="h-6 w-6" />
                 </button>
               </>

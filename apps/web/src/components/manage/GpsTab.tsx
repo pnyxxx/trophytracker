@@ -93,7 +93,7 @@ function CopyButton({ value, label }: { value: string; label: string }) {
         toast.success(`${label} copié`);
         setTimeout(() => setDone(false), 1500);
       }}
-      className="shrink-0 rounded-[3px] p-1.5 text-dust-300 hover:bg-cream/10 hover:text-cream"
+      className="shrink-0 rounded-full p-1.5 text-dust-300 hover:bg-cream/10 hover:text-cream"
     >
       {done ? <Check className="h-4 w-4 text-live" /> : <Copy className="h-4 w-4" />}
     </button>
@@ -105,7 +105,7 @@ function Value({ children, copy, label, tone = 'plain' }: { children: ReactNode;
   return (
     <span
       className={cn(
-        'inline-flex max-w-full items-center gap-1 rounded-[4px] border px-2.5 py-1.5 font-mono text-[13px]',
+        'inline-flex max-w-full items-center gap-1 rounded-full border px-2.5 py-1.5 font-mono text-[13px]',
         tone === 'secret' && 'border-primary/60 bg-primary/10 text-cream',
         tone === 'plain' && 'border-cream/15 bg-black/30 text-cream',
         tone === 'on' && 'border-live/40 bg-live/10 font-bold text-live',
@@ -126,7 +126,7 @@ function SettingRow({ name, fr, value, why, must }: { name: string; fr: string; 
         <p className="m-0 font-mono text-[13px] font-bold text-cream">{name}</p>
         <p className="m-0 mt-0.5 text-xs text-dust-400">{fr}</p>
         {must && (
-          <span className="mt-1.5 inline-block rounded-[3px] bg-primary px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.1em] text-white">
+          <span className="mt-1.5 inline-block rounded-full bg-primary px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.1em] text-white">
             À changer
           </span>
         )}
@@ -143,9 +143,9 @@ function SettingRow({ name, fr, value, why, must }: { name: string; fr: string; 
 function Step({ n, title, id, children }: { n: string; title: string; id?: string; children: ReactNode }) {
   return (
     <section id={id} className="scroll-mt-24 grid gap-5 border border-cream/[0.14] bg-ink-800 p-6 md:grid-cols-[88px_minmax(0,1fr)] md:p-8">
-      <span className="font-stencil text-[64px] font-black leading-[0.85] text-primary md:text-[80px]">{n}</span>
+      <span className="font-display text-[64px] font-extrabold leading-[0.85] text-primary md:text-[80px]">{n}</span>
       <div className="min-w-0">
-        <h2 className="m-0 mb-4 font-display text-[32px] font-black uppercase leading-none text-cream md:text-[38px]">{title}</h2>
+        <h2 className="m-0 mb-4 font-display text-[32px] font-extrabold leading-none text-cream md:text-[38px]">{title}</h2>
         {children}
       </div>
     </section>
@@ -256,7 +256,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
             <p className={cn('tt-kicker m-0 flex items-center gap-2', enabled ? 'text-live' : 'text-ochre')}>
               {enabled ? <><LiveDot className="h-2 w-2" />Suivi lancé</> : <><FlaskConical className="h-3.5 w-3.5" />Mode essai</>}
             </p>
-            <h2 className="m-0 mt-2 font-display text-[32px] font-black uppercase leading-none text-cream md:text-[38px]">
+            <h2 className="m-0 mt-2 font-display text-[32px] font-extrabold leading-none text-cream md:text-[38px]">
               {enabled ? 'Votre trace s’enregistre' : 'Suivi arrêté'}
             </h2>
             <p className="mb-0 mt-3 text-sm leading-relaxed text-dust-200">
@@ -325,7 +325,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
         <div className="grid gap-px border border-cream/[0.14] bg-cream/[0.14] sm:grid-cols-3">
           <div className="flex flex-col gap-2 bg-ink p-5">
             <p className="tt-kicker m-0 text-dust-400">Statut</p>
-            <p className="m-0 flex items-center gap-3 font-display text-3xl font-black uppercase leading-none text-cream">
+            <p className="m-0 flex items-center gap-3 font-display text-3xl font-extrabold leading-none text-cream">
               {!enabled
                 ? <span className="text-ochre">Essai</span>
                 : live ? <><LiveDot className="h-2.5 w-2.5" /><span className="text-live">En direct</span></> : lastFix ? 'En pause' : 'Jamais reçu'}
@@ -333,12 +333,12 @@ export function GpsTab({ crew }: { crew: Crew }) {
           </div>
           <div className="flex flex-col gap-2 bg-ink p-5">
             <p className="tt-kicker m-0 text-dust-400">{enabled ? 'Dernière position' : 'Dernière position d’essai'}</p>
-            <p className="m-0 font-display text-3xl font-black uppercase leading-none text-cream">{formatRelative(lastFix)}</p>
+            <p className="m-0 font-display text-3xl font-extrabold leading-none text-cream">{formatRelative(lastFix)}</p>
             <p className="m-0 text-xs text-dust-500">{formatDateTime(lastFix)}</p>
           </div>
           <div className="flex flex-col gap-2 bg-ink p-5">
             <p className="tt-kicker m-0 text-dust-400">Source</p>
-            <p className="m-0 font-display text-3xl font-black uppercase leading-none text-cream">
+            <p className="m-0 font-display text-3xl font-extrabold leading-none text-cream">
               {tracking?.traccar_device_id ? 'Serveur Traccar' : tracking?.has_device_key ? 'Téléphone' : 'Non configurée'}
             </p>
           </div>
@@ -376,7 +376,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
             <ol className="m-0 grid list-none gap-3 p-0 md:grid-cols-2">
               {FAIR_PLAY.rules.map((r, i) => (
                 <li key={r.title} className="flex gap-3 text-sm leading-relaxed text-dust-200">
-                  <span className="font-stencil text-2xl font-black leading-none text-primary">{i + 1}</span>
+                  <span className="font-display text-2xl font-extrabold leading-none text-primary">{i + 1}</span>
                   <span><strong className="text-cream">{r.title}.</strong> {r.text}</span>
                 </li>
               ))}
@@ -459,12 +459,12 @@ export function GpsTab({ crew }: { crew: Crew }) {
               <QrCodeIcon />{showQr ? 'Masquer le QR code' : 'Afficher le QR code'}
             </Button>
             {showQr && (
-              <QrCode value={traccarConfigLink(address.url, newKey)} label="QR code de configuration de Traccar Client" className="w-full max-w-[220px] rounded-[4px]" />
+              <QrCode value={traccarConfigLink(address.url, newKey)} label="QR code de configuration de Traccar Client" className="w-full max-w-[220px] rounded-full" />
             )}
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-[220px_minmax(0,1fr)] md:items-center">
-            <QrCode value={traccarConfigLink(address.url, newKey)} label="QR code de configuration de Traccar Client" className="w-full max-w-[220px] justify-self-center rounded-[4px]" />
+            <QrCode value={traccarConfigLink(address.url, newKey)} label="QR code de configuration de Traccar Client" className="w-full max-w-[220px] justify-self-center rounded-full" />
             <div className="flex flex-col gap-2 text-sm leading-relaxed text-dust-200">
               <p className="m-0 text-base text-cream">
                 Scannez ce QR code avec <strong>l’appareil photo du téléphone du road trip</strong>, puis touchez « Ouvrir dans Traccar Client » et{' '}
@@ -591,7 +591,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
             },
           ].map((b) => (
             <div key={b.os} className="border border-cream/[0.14] bg-black/20 p-5">
-              <p className="m-0 mb-3 font-display text-2xl font-black uppercase text-cream">{b.os}</p>
+              <p className="m-0 mb-3 font-display text-2xl font-extrabold text-cream">{b.os}</p>
               <ul className="m-0 list-none space-y-2 p-0">
                 {b.items.map((it) => (
                   <li key={it} className="flex gap-2 text-sm leading-snug text-dust-200">
@@ -621,7 +621,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
         >
           {live ? <LiveDot className="h-3 w-3" /> : <span className="h-3 w-3 shrink-0 animate-pulse rounded-full bg-ochre" />}
           <div>
-            <p className={cn('m-0 font-display text-2xl font-black uppercase leading-none', live ? 'text-live' : 'text-cream')}>
+            <p className={cn('m-0 font-display text-2xl font-extrabold leading-none', live ? 'text-live' : 'text-cream')}>
               {live ? (enabled ? 'Position reçue !' : 'Position d’essai reçue !') : 'En attente d’une position…'}
             </p>
             <p className="mb-0 mt-1 text-sm text-dust-300">

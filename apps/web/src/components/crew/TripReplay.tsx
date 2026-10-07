@@ -133,10 +133,10 @@ export default function TripReplay({ name, slug, points, stages, onClose }: {
         const hud = hudAt(progressRef.current);
         const s = w / 1280;
         ctx.fillStyle = '#F4ECDF';
-        ctx.font = `900 ${Math.round(56 * s * (formatRef.current === 'story' ? 1.6 : 1))}px "Big Shoulders Display", sans-serif`;
+        ctx.font = `800 ${Math.round(56 * s * (formatRef.current === 'story' ? 1.6 : 1))}px "Bricolage Grotesque Variable", sans-serif`;
         ctx.fillText(name.toUpperCase(), 40 * s, 90 * s * (formatRef.current === 'story' ? 1.4 : 1));
         ctx.fillStyle = '#D98A3D';
-        ctx.font = `600 ${Math.round(22 * s * (formatRef.current === 'story' ? 1.6 : 1))}px "JetBrains Mono", monospace`;
+        ctx.font = `500 ${Math.round(22 * s * (formatRef.current === 'story' ? 1.6 : 1))}px "DM Mono", monospace`;
         ctx.fillText(`${hud.date.toUpperCase()} · ${hud.km} KM`, 40 * s, 130 * s * (formatRef.current === 'story' ? 1.55 : 1));
         ctx.fillStyle = 'rgba(244,236,223,.8)';
         ctx.fillText('trophytracker.fr', 40 * s, h - 36 * s);
@@ -216,7 +216,7 @@ export default function TripReplay({ name, slug, points, stages, onClose }: {
   return (
     <div className="fixed inset-0 z-[2000] flex flex-col bg-ink-900" role="dialog" aria-modal="true" aria-label={`Revivre ${name} en 3D`}>
       <div className="flex flex-wrap items-center gap-3 border-b border-cream/10 px-4 py-3">
-        <p className="m-0 flex-1 font-display text-2xl font-black uppercase leading-none text-cream">Revivre {name}</p>
+        <p className="m-0 flex-1 font-display text-2xl font-extrabold leading-none text-cream">Revivre {name}</p>
         <div className="flex gap-1" role="group" aria-label="Format">
           {(['wide', 'story'] as const).map((f) => (
             <Button key={f} size="sm" variant={format === f ? 'default' : 'ghost'} disabled={recording} onClick={() => setFormat(f)}>

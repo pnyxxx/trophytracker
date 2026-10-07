@@ -29,7 +29,7 @@ function Overview() {
     <dl className="m-0 grid grid-cols-2 gap-px border border-cream/[0.14] bg-cream/[0.14] md:grid-cols-5">
       {Object.entries(labels).map(([k, label]) => (
         <div key={k} className="flex flex-col-reverse gap-2 bg-ink p-5">
-          <dd className="m-0 font-display text-5xl font-black leading-none text-cream">{data?.[k] ?? '…'}</dd>
+          <dd className="m-0 font-display text-5xl font-extrabold leading-none text-cream">{data?.[k] ?? '…'}</dd>
           <dt className="tt-kicker text-dust-400">{label}</dt>
         </div>
       ))}
@@ -64,7 +64,7 @@ function CrewsAdmin() {
             {data.map((c) => (
               <tr key={c.id}>
                 <td className="py-3 pr-4">
-                  <Link to={`/road-trips/${c.slug}`} className="font-display text-xl font-extrabold uppercase text-cream hover:text-primary">{c.name}</Link>
+                  <Link to={`/road-trips/${c.slug}`} className="font-display text-xl font-extrabold text-cream hover:text-primary">{c.name}</Link>
                   <p className="text-xs text-dust-500">{c.car_number ? `#${c.car_number} · ` : ''}{c.is_public ? 'Public' : 'Privé'}</p>
                 </td>
                 <td className="pr-4 text-dust-200">{c.followers_count}</td>
@@ -294,7 +294,7 @@ function UsersAdmin() {
           {data.map((u) => (
             <li key={u.id} className="flex flex-wrap items-center gap-3 py-3">
               <div className="min-w-0 flex-1">
-                <p className="font-display text-xl font-extrabold uppercase leading-tight text-cream">{u.display_name} {u.role === 'admin' && <span className="ml-1 rounded-[3px] bg-primary px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.1em] text-white">admin</span>}</p>
+                <p className="font-display text-xl font-extrabold leading-tight text-cream">{u.display_name} {u.role === 'admin' && <span className="ml-1 rounded-full bg-primary px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.1em] text-white">admin</span>}</p>
                 <p className="truncate text-xs text-dust-400">{u.email} · inscrit {formatRelative(u.created_at)} · vu {formatRelative(u.last_sign_in_at)}</p>
               </div>
               {u.id !== user?.id && (

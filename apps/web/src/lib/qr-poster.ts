@@ -23,8 +23,8 @@ export interface PosterCrew {
 }
 
 const C = { ink: '#120F0C', cream: '#F4ECDF', red: '#DB4740', gold: '#F2B45A', ochre: '#D98A3D', dust: '#9E9282' };
-const DISPLAY = '"Big Shoulders Display", Impact, sans-serif';
-const MONO = '"JetBrains Mono", ui-monospace, monospace';
+const DISPLAY = '"Bricolage Grotesque Variable", sans-serif';
+const MONO = '"DM Mono", ui-monospace, monospace';
 
 export const POSTER_SIZE: Record<PosterFormat, [number, number]> = { sticker: [1600, 1600], story: [1080, 1920] };
 
@@ -122,7 +122,7 @@ async function drawQr(ctx: CanvasRenderingContext2D, value: string, x: number, y
   }
 
   // Logo au centre (≈ 22 % de la largeur : bien en dessous des 30 % que la correction H rattrape).
-  const logo = await svgImage(logoMarkSvg('light'));
+  const logo = await svgImage(logoMarkSvg('signal'));
   const box = Math.round((n * m * 0.22) / m) * m;
   const bx = ox + (n * m - box) / 2;
   const by = oy + (n * m - box) / 2;
@@ -135,7 +135,7 @@ async function drawQr(ctx: CanvasRenderingContext2D, value: string, x: number, y
 
 /** Symbole + « TROPHYTRACKER » (Tracker en rouge), centré sur x. */
 async function drawBrand(ctx: CanvasRenderingContext2D, cx: number, baseline: number, px: number) {
-  const mark = await svgImage(logoMarkSvg('dark'));
+  const mark = await svgImage(logoMarkSvg('signal'));
   ctx.font = `900 ${px}px ${DISPLAY}`;
   const wTrophy = ctx.measureText('TROPHY').width;
   const wTracker = ctx.measureText('TRACKER').width;

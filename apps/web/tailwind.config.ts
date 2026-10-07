@@ -2,8 +2,9 @@ import type { Config } from "tailwindcss";
 import animate from "tailwindcss-animate";
 
 /**
- * Charte « roadbook de rallye » : fond brun nuit, crème, rouge,
- * titres Big Shoulders, texte Archivo, données en JetBrains Mono.
+ * Système d'identité « Balise » : nuit #15161A, surfaces « tableau de bord » #1F2026, crème #F5F1EA,
+ * rouge « signal » #E1262C (actions, trace), vert « en direct » #3DBE7A (statut seulement), ambre « hors réseau ».
+ * Titres Bricolage Grotesque, texte Atkinson Hyperlegible (17 px), données DM Mono.
  */
 export default {
 	darkMode: ["class"],
@@ -24,37 +25,39 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				sans: ['Archivo', 'system-ui', 'sans-serif'],
-				display: ['"Big Shoulders Display"', 'Impact', 'sans-serif'],
-				stencil: ['"Big Shoulders Stencil Display"', '"Big Shoulders Display"', 'Impact', 'sans-serif'],
-				mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+				sans: ['"Atkinson Hyperlegible"', 'system-ui', 'sans-serif'],
+				display: ['"Bricolage Grotesque Variable"', '"Bricolage Grotesque"', 'system-ui', 'sans-serif'],
+				mono: ['"DM Mono"', 'ui-monospace', 'monospace'],
 			},
 			colors: {
-				// Palette du design
+				// Palette « Balise »
 				ink: {
-					DEFAULT: '#120F0C', // fond principal
-					950: '#0A0806', // pied de page
-					900: '#1A1510', // fond des cartes
-					800: '#1B1713', // cartes / panneaux
-					700: '#2A221B', // avatars, surfaces
-					600: '#3A322A', // bordures fortes
+					DEFAULT: '#15161A', // nuit : fond
+					950: '#0E0F12', // le plus sombre (aperçus, barres latérales)
+					900: '#111215', // barres latérales
+					800: '#1F2026', // tableau de bord : surfaces, cartes
+					700: '#2B2C33', // bordures, surfaces secondaires
+					600: '#3A3B42', // bordures de champs
 				},
-				coal: '#1A1612', // texte sur fond clair
-				cream: '#F4ECDF',
-				sand: '#E9DCC8',
-				paper: '#FFF8EC',
-				ochre: '#D98A3D',
-				gold: '#F2B45A',
-				live: '#3DD68C',
+				coal: '#15161A', // texte sur fond clair
+				cream: '#F5F1EA', // texte principal, cartes claires
+				sand: '#ECE7DE', // fond clair secondaire
+				paper: '#FFFFFF',
+				ochre: '#FF6B6B', // rouge « texte » (étiquettes, liens sur fond sombre)
+				gold: '#E8A33D', // hors réseau
+				'gold-text': '#F2C27A',
+				live: '#3DBE7A', // en direct (statut uniquement)
+				'live-text': '#7FE0AC',
+				signal: { DEFAULT: '#E1262C', hover: '#F0484D', press: '#B81B20', text: '#FF6B6B', light: '#C41E24' },
 				dust: {
-					100: '#D9CDBD',
-					200: '#C9BDAC',
-					300: '#B3A796',
-					400: '#9E9282',
-					500: '#8C8176',
-					600: '#6B6157',
-					700: '#5A4E42',
-					800: '#3A3027',
+					100: '#E4DFD6',
+					200: '#D8D4CC',
+					300: '#C9C5BD',
+					400: '#A9A59D',
+					500: '#8E8A83',
+					600: '#6E6B65',
+					700: '#5C5850',
+					800: '#3A3832',
 				},
 				// Jetons shadcn/ui
 				border: 'hsl(var(--border))',
@@ -65,8 +68,8 @@ export default {
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))',
-					dark: '#C23A33',
-					light: '#F07A6E',
+					dark: '#B81B20',
+					light: '#F0484D',
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',

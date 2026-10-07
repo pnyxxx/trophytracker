@@ -284,7 +284,7 @@ export function PhotosTab({ crew }: { crew: Crew }) {
           }`}
         >
           <ImagePlus className="h-7 w-7 text-primary" />
-          <span className="font-display text-xl font-extrabold uppercase text-cream">Choisir des photos</span>
+          <span className="font-display text-xl font-extrabold text-cream">Choisir des photos</span>
           <span className="text-xs text-dust-400">ou glissez-les ici · photos classiques et 360°</span>
           <input
             type="file"
@@ -378,7 +378,7 @@ export function PhotosTab({ crew }: { crew: Crew }) {
         {isLoading ? <Spinner /> : photos.length === 0 ? <p className="text-dust-400">Aucune photo pour l’instant.</p> : (
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
             {photos.map((p) => (
-              <div key={p.id} className="overflow-hidden rounded-[4px] border border-cream/10">
+              <div key={p.id} className="overflow-hidden rounded-full border border-cream/10">
                 <img src={thumbUrl(p.storage_path, 480) ?? ''} alt={p.title} className="aspect-[4/3] w-full object-cover" loading="lazy" />
                 <div className="flex items-center gap-2 p-3">
                   <div className="min-w-0 flex-1">

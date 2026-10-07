@@ -16,12 +16,12 @@ export function AuthLayout({ title, subtitle, children, footer }: {
           <Link to="/" className="flex items-center gap-3.5 text-cream hover:text-cream" aria-label="Accueil TrophyTracker">
             <LogoMark className="h-14 w-14" /> <Wordmark className="text-[40px]" />
           </Link>
-          <p className="m-0 font-display text-[clamp(64px,7vw,120px)] font-black uppercase leading-[0.95] text-cream">
+          <p className="m-0 font-display text-[clamp(64px,7vw,120px)] font-extrabold leading-[0.95] text-cream">
             Suivez
             <br />
             leur aventure
             <br />
-            en <span className="font-stencil text-primary">direct.</span>
+            en <span className="font-display text-primary">direct.</span>
           </p>
           <div className="flex flex-wrap gap-x-10 gap-y-2 font-mono text-[11px] uppercase tracking-[0.16em] text-dust-400">
             <span>Raids · Road trips</span>
@@ -35,7 +35,7 @@ export function AuthLayout({ title, subtitle, children, footer }: {
           </Link>
           <div className="border border-cream/[0.14] border-t-[3px] border-t-primary bg-ink-800/95 p-5 shadow-[0_20px_50px_rgba(0,0,0,.45)] sm:p-7 md:p-9">
             <Kicker className="mb-4">Espace membre</Kicker>
-            <h1 className="m-0 font-display text-[clamp(32px,10vw,44px)] font-black uppercase leading-[0.95] text-cream [overflow-wrap:anywhere] md:text-[52px]">{title}</h1>
+            <h1 className="m-0 font-display text-[clamp(32px,10vw,44px)] font-extrabold leading-[0.95] text-cream [overflow-wrap:anywhere] md:text-[52px]">{title}</h1>
             {subtitle && <p className="mb-0 mt-3 text-sm leading-relaxed text-dust-300">{subtitle}</p>}
             <div className="mt-7">{children}</div>
           </div>

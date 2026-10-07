@@ -47,7 +47,7 @@ export default function GpsCheckMap({ lat, lon, live }: { lat: number; lon: numb
 
   // Le conteneur MapLibre reçoit « position: relative » de sa feuille de style : on l'enveloppe.
   return (
-    <div className="tt-parchment absolute inset-0">
+    <div className="absolute inset-0">
       <div ref={ref} className="h-full w-full" />
     </div>
   );

@@ -42,7 +42,7 @@ function Tile({ tag, label, children, className }: { tag: string; label: string;
 }
 
 const Big = ({ value, unit }: { value: string; unit?: string }) => (
-  <span className="font-display text-[44px] font-black leading-none text-cream md:text-[52px]">
+  <span className="font-display text-[44px] font-extrabold leading-none text-cream md:text-[52px]">
     {value}{unit && <span className="ml-1.5 font-mono text-sm font-normal text-dust-400">{unit}</span>}
   </span>
 );
@@ -113,7 +113,7 @@ export function CrewTelemetry({ crew }: { crew: Crew }) {
             <span className="flex h-12 w-12 items-center justify-center rounded-full border border-cream/20">
               <Navigation2 className="h-6 w-6 text-primary transition-transform duration-700" style={{ transform: `rotate(${t.course ?? 0}deg)` }} />
             </span>
-            <span className="font-display text-2xl font-black uppercase leading-none text-cream">{live ? compassLabel(t.course) ?? '—' : 'À l’arrêt'}</span>
+            <span className="font-display text-2xl font-extrabold leading-none text-cream">{live ? compassLabel(t.course) ?? '—' : 'À l’arrêt'}</span>
           </span>
         </Tile>
 

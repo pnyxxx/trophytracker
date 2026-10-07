@@ -98,7 +98,7 @@ export function CrewElevation({ profile }: { profile: AltPoint[] }) {
               aria-pressed={day === d}
               onClick={() => { setDay(d); setHover(null); }}
               className={cn(
-                'shrink-0 rounded-[3px] border px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.08em] transition-colors',
+                'shrink-0 rounded-full border px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.08em] transition-colors',
                 day === d ? 'border-coal bg-coal text-cream' : 'border-coal/25 text-dust-700 hover:border-coal hover:text-coal',
               )}
             >
@@ -118,7 +118,7 @@ export function CrewElevation({ profile }: { profile: AltPoint[] }) {
         ].map((s) => (
           <div key={s.k} className="flex flex-col gap-1 bg-cream px-4 py-3 md:px-5">
             <dt className="font-mono text-[10px] uppercase tracking-[0.14em] text-dust-700">{s.k}</dt>
-            <dd className="m-0 font-display text-2xl font-black leading-none text-coal md:text-3xl">
+            <dd className="m-0 font-display text-2xl font-extrabold leading-none text-coal md:text-3xl">
               {s.v}<span className="ml-1 font-mono text-xs font-normal text-dust-700">{s.u}</span>
             </dd>
           </div>
@@ -177,7 +177,7 @@ export function CrewElevation({ profile }: { profile: AltPoint[] }) {
         </svg>
         {hovered && (
           <div
-            className="pointer-events-none absolute top-1 -translate-x-1/2 whitespace-nowrap rounded-[3px] bg-coal px-2 py-1 font-mono text-[11px] text-cream shadow"
+            className="pointer-events-none absolute top-1 -translate-x-1/2 whitespace-nowrap rounded-full bg-coal px-2 py-1 font-mono text-[11px] text-cream shadow"
             style={{ left: Math.max(70, Math.min(w - 70, x(hovered.km))) }}
             aria-live="polite"
           >

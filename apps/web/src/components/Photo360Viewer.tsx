@@ -145,7 +145,7 @@ export const Photo360Viewer = ({ imageUrl, title, description, onClose }: Photo3
       <div className="absolute top-0 left-0 right-0 z-20 p-4 bg-gradient-to-b from-black/60 to-transparent">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-display text-2xl font-black uppercase text-cream md:text-3xl">{title}</h3>
+            <h3 className="font-display text-2xl font-extrabold text-cream md:text-3xl">{title}</h3>
             {description && (
               <p className="text-dust-200 text-sm mt-1 hidden md:block">{description}</p>
             )}

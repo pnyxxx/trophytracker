@@ -1,45 +1,41 @@
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { LOGO_TONES as TONES } from './logo-svg';
 
 /**
- * Logo validé « La trace dessine la 4L » (docs/branding/) : la trace part du sol,
- * dessine le profil de la 4L d'un seul trait et s'arrête sur le point rouge en direct.
- * `tone` : « dark » sur fond sombre (le site), « light » sur fond clair.
+ * Logo « Balise » : une balise qui émet, le point « je suis là » et ses ondes. C'est aussi le
+ * marqueur de position sur les cartes : le logo et l'interface parlent la même langue.
+ * Règles : toujours en minuscules, « tracker » en rouge, jamais de véhicule.
  */
-export function LogoMark({ className, tone = 'dark' }: { className?: string; tone?: keyof typeof TONES }) {
-  const c = TONES[tone];
+export function LogoMark({ className, tone = 'signal' }: { className?: string; tone?: 'signal' | 'cream' }) {
+  const cream = tone === 'cream';
   return (
-    <svg viewBox="0 0 64 64" className={cn('h-11 w-11 shrink-0', className)} aria-hidden="true">
-      <g transform="translate(1 2.5) scale(0.93)">
-        <path d="M5 51 H12 V24 Q12 21 15 21 H38 L46 29 H54 Q58 29 58 33" fill="none" stroke={c.trace} strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
-        <circle cx="20" cy="46" r="5.5" fill={c.wheelFill} stroke={c.ink} strokeWidth="3" />
-        <circle cx="47" cy="46" r="5.5" fill={c.wheelFill} stroke={c.ink} strokeWidth="3" />
-        <circle cx="5" cy="51" r="3" fill={c.wheelFill} stroke={c.ink} strokeWidth="2.5" />
-        <circle cx="58" cy="33" r="10" fill="none" stroke="#DB4740" strokeWidth="2" opacity="0.45" />
-        <circle cx="58" cy="33" r="6" fill="#DB4740" stroke={c.dotStroke} strokeWidth="2.8" />
-      </g>
-    </svg>
-  );
-}
-
-/**
- * Nom de la marque en capitales condensées, « Tracker » toujours en rouge
- * (choix de Julien : la maquette le mettait en doré sur fond sombre).
- */
-export function Wordmark({ className }: { className?: string }) {
-  return (
-    <span className={cn('font-display text-2xl font-black uppercase leading-[0.85]', className)}>
-      Trophy<span className="text-primary">Tracker</span>
+    <span
+      aria-hidden="true"
+      className={cn(
+        'flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full',
+        cream ? 'bg-cream shadow-[0_0_0_4px_rgba(245,241,234,.22)]' : 'bg-signal shadow-[0_0_0_4px_rgba(225,38,44,.22)]',
+        className,
+      )}
+    >
+      <span className={cn('h-[31%] w-[31%] rounded-full', cream ? 'bg-signal' : 'bg-cream')} />
     </span>
   );
 }
 
-export function Logo({ className }: { className?: string }) {
+/** « trophytracker » en minuscules, « tracker » en rouge. */
+export function Wordmark({ className, plain = false }: { className?: string; plain?: boolean }) {
   return (
-    <Link to="/" className={cn('flex items-center gap-2.5 text-cream hover:text-cream', className)} aria-label="Accueil TrophyTracker">
+    <span className={cn('font-display text-[20px] font-extrabold tracking-[-0.03em]', className)}>
+      trophy<span className={plain ? undefined : 'text-signal'}>tracker</span>
+    </span>
+  );
+}
+
+export function Logo({ className, compact = false }: { className?: string; compact?: boolean }) {
+  return (
+    <Link to="/" className={cn('flex items-center gap-[9px] text-cream no-underline hover:text-cream', className)} aria-label="trophytracker, accueil">
       <LogoMark />
-      <Wordmark />
+      {!compact && <Wordmark />}
     </Link>
   );
 }
