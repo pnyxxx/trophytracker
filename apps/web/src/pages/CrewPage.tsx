@@ -9,6 +9,7 @@ import { PageLoader } from '@/components/common/Spinner';
 import { Button } from '@/components/ui/button';
 import { CrewAvatar, FollowButton, LiveBadge } from '@/components/crew/CrewBits';
 import { CrewStats } from '@/components/crew/CrewStats';
+import { CrewTelemetry } from '@/components/crew/CrewTelemetry';
 import { CrewGallery } from '@/components/crew/CrewGallery';
 import { CrewSponsors } from '@/components/crew/CrewSponsors';
 import { CrewLogbook } from '@/components/crew/CrewLogbook';
@@ -239,11 +240,12 @@ export default function CrewPage() {
         <Container className="flex flex-col gap-10">
           <div className="flex flex-wrap items-end justify-between gap-6">
             <div className="flex flex-col gap-3.5">
-              <Kicker>Tableau de bord</Kicker>
-              <SectionTitle>Les chiffres</SectionTitle>
+              <Kicker>{crew.last_fix_at && isLive(crew.last_fix_at) ? <><LiveDot />En direct du véhicule</> : 'Tableau de bord'}</Kicker>
+              <SectionTitle>Le tableau de bord</SectionTitle>
             </div>
-            <p className="m-0 max-w-[420px] text-base leading-relaxed text-dust-300">Mises à jour automatiquement à chaque nouvelle position.</p>
+            <p className="m-0 max-w-[420px] text-base leading-relaxed text-dust-300">Mis à jour à chaque nouvelle position, météo comprise.</p>
           </div>
+          <CrewTelemetry crew={crew} />
           <CrewStats stats={stats} startedAt={startedAt} />
         </Container>
       </section>

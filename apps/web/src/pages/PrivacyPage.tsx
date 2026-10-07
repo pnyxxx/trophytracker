@@ -100,11 +100,14 @@ export default function PrivacyPage() {
       </ul>
       <p>
         Pour afficher les cartes, votre navigateur télécharge directement des images auprès d’
-        <a href="https://openfreemap.org" target="_blank" rel="noopener noreferrer">OpenFreeMap</a>, d’Esri (imagerie satellite) et
+        <a href="https://openfreemap.org" target="_blank" rel="noopener noreferrer">OpenFreeMap</a>, de l’IGN et d’Esri (imagerie satellite) et
         d’Amazon Web Services (relief), qui voient donc votre adresse IP, comme pour n’importe quelle carte en ligne. Quand un
         voyageur cherche une adresse (sponsor, lieu d’une photo), le texte tapé ou la position à nommer est envoyé à{' '}
         <a href="https://photon.komoot.io" target="_blank" rel="noopener noreferrer">Photon</a> (komoot, Allemagne), un service de
-        recherche d’adresses basé sur OpenStreetMap.
+        recherche d’adresses basé sur OpenStreetMap. Pour afficher la météo sur la page d’un road trip, votre navigateur envoie
+        la dernière position du road trip, arrondie à environ 1 km, à{' '}
+        <a href="https://open-meteo.com" target="_blank" rel="noopener noreferrer">Open-Meteo</a> (Suisse), un service météo
+        gratuit et sans compte.
       </p>
 
       <h2>Cookies</h2>

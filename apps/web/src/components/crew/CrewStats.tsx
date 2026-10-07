@@ -11,9 +11,9 @@ export function CrewStats({ stats, startedAt }: {
   const day = startedAt != null ? dayOfTrip(localDate(startedAt), new Date()) : null;
   const items = [
     { tag: '01 · DISTANCE', label: 'Distance parcourue', value: formatNumber(stats?.total_distance_km, 1), unit: 'km' },
-    { tag: '02 · VITESSE', label: 'Vitesse actuelle', value: formatNumber(stats?.current_speed_kmh), unit: 'km/h' },
-    { tag: '03 · MOYENNE', label: 'Moyenne (dernière heure)', value: formatNumber(stats?.avg_speed_kmh), unit: 'km/h' },
-    { tag: '04 · CALENDRIER', label: 'Jours sur la route', value: day != null ? String(day) : '—', unit: day != null ? (day > 1 ? 'jours' : 'jour') : '' },
+    { tag: '02 · MOYENNE', label: 'Moyenne (dernière heure)', value: formatNumber(stats?.avg_speed_kmh), unit: 'km/h' },
+    { tag: '03 · CALENDRIER', label: 'Jours sur la route', value: day != null ? String(day) : '—', unit: day != null ? (day > 1 ? 'jours' : 'jour') : '' },
+    { tag: '04 · SUPPORTERS', label: 'Proches qui suivent', value: formatNumber(stats?.followers_count), unit: '' },
   ];
 
   return (
