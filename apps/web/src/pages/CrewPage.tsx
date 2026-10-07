@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ChevronDown, HandHeart, Mail, Settings } from 'lucide-react';
+import { ChevronDown, Clapperboard, HandHeart, Mail, Settings } from 'lucide-react';
 import { PageShell } from '@/components/layout/PageShell';
 import { FacebookIcon, InstagramIcon } from '@/components/common/SocialIcons';
 import { Seo } from '@/components/common/Seo';
@@ -24,6 +24,7 @@ import { cn } from '@/lib/utils';
 import NotFound from './NotFound';
 
 const CrewMap = lazy(() => import('@/components/crew/CrewMap').then((m) => ({ default: m.CrewMap })));
+const TripReplay = lazy(() => import('@/components/crew/TripReplay'));
 const CrewElevation = lazy(() => import('@/components/crew/CrewElevation').then((m) => ({ default: m.CrewElevation })));
 
 const TONES = {
@@ -115,6 +116,7 @@ export default function CrewPage() {
   const { data: stages = [] } = useStages(crew?.id);
   const { canEdit } = useMyRole(crew?.id);
   const { points } = useLiveTrack(crew);
+  const [replay, setReplay] = useState(false);
   // Jour 1 du road trip = jour du premier point de la trace.
   const startedAt = points[0]?.[2] ?? null;
   const profile = useMemo(() => altitudeProfile(points, startedAt != null ? localDate(startedAt) : null), [points, startedAt]);
@@ -230,6 +232,17 @@ export default function CrewPage() {
           ? 'Démonstration : un trajet rejoué en boucle et en temps réel.'
           : 'Position en temps réel et trace complète depuis le départ. Pas de nouvelle position ? Souvent, il n’y a simplement pas de réseau.'}
       >
+        {points.length >= 20 && (
+          <div className="flex flex-wrap items-center justify-between gap-3 border border-cream/[0.14] bg-ink-900/60 p-4">
+            <p className="m-0 text-sm text-dust-300">Survolez tout le road trip en 3D, et enregistrez-en une vidéo à partager.</p>
+            <Button onClick={() => setReplay(true)}><Clapperboard />Revivre le road trip en 3D</Button>
+          </div>
+        )}
+        {replay && (
+          <Suspense fallback={null}>
+            <TripReplay name={crew.name} slug={crew.slug} points={points} stages={stages} onClose={() => setReplay(false)} />
+          </Suspense>
+        )}
         <Suspense fallback={<div className="h-[600px] animate-pulse border border-cream/[0.14] bg-ink-900" />}>
           <CrewMap crew={crew} points={points} stages={stages} sponsors={sponsors} photos={photos} />
         </Suspense>
