@@ -24,7 +24,7 @@ describe('renderCrewPage', () => {
 
   it('a une description par défaut', () => {
     const html = renderCrewPage(TEMPLATE, 'https://exemple.fr', 'a-b', { ...crew, tagline: null });
-    expect(html).toContain("content=\"Suivez l&#39;équipage J4L Club en direct sur le 4L Trophy.\"");
+    expect(html).toContain('content="Suivez le voyage J4L Club en direct."');
   });
 
   it('échappe le texte saisi par l\'équipage', () => {

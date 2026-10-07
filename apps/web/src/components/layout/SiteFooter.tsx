@@ -13,16 +13,15 @@ export function SiteFooter() {
             <LogoMark className="h-11 w-11" />
             <div className="flex flex-col gap-1.5">
               <Wordmark className="text-[30px] text-cream" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ochre">Par un trophyste, pour les trophystes</span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ochre">Carnet de route en direct</span>
             </div>
           </div>
           <p className="max-w-[300px] text-sm leading-relaxed">
-            Suivez en direct les équipages du 4L Trophy : position, trace complète, photos et sponsors. Gratuit pour les proches.
+            Le carnet de route en direct de vos voyages, raids et road-trips : position, trace, photos et sponsors. Gratuit pour les proches.
           </p>
         </div>
         <nav className="flex flex-col gap-2.5 text-sm" aria-label="Liens du site">
           <p className="tt-kicker text-cream">Plateforme</p>
-          <Link to="/equipages" className={link}>Tous les équipages</Link>
           <Link to="/inscription" className={link}>Inscrire mon équipage</Link>
           <Link to="/#comment" className={link}>Comment ça marche</Link>
         </nav>
@@ -32,13 +31,10 @@ export function SiteFooter() {
           <Link to="/conditions-utilisation" className={link}>Conditions d’utilisation</Link>
           <Link to="/conditions-vente" className={link}>Conditions de vente</Link>
           <Link to="/confidentialite" className={link}>Confidentialité & données</Link>
-          <a href="https://www.4ltrophy.com" target="_blank" rel="noopener noreferrer" className={link}>
-            Site officiel du 4L Trophy ↗
-          </a>
         </nav>
       </div>
       <div className="border-t border-cream/10 px-4 py-5 text-center text-xs sm:px-7">
-        © {new Date().getFullYear()} TrophyTracker — projet indépendant, non affilié à l’organisation du 4L Trophy.
+        © {new Date().getFullYear()} TrophyTracker — projet indépendant, affilié à aucun organisateur d’événement.
         {' · '}<a href={CONTACT_HREF} className={link}>Contact</a>
         {' · '}<a href={REPORT_HREF} className={link}>Signaler un contenu</a>
       </div>

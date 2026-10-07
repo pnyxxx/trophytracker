@@ -39,7 +39,7 @@ export function useEvent() {
       ]);
       const s = Object.fromEntries(settings.map((r) => [r.key, r.value]));
       return {
-        name: s.event_name ?? '4L Trophy',
+        name: s.event_name ?? 'Départ',
         startDate: s.event_start_date ?? null,
         endDate: s.event_end_date ?? null,
         totalKm: s.event_total_km ? Number(s.event_total_km) : null,
@@ -54,19 +54,6 @@ export type CrewSummary = Pick<
   | 'id' | 'slug' | 'name' | 'car_number' | 'tagline' | 'school' | 'city' | 'avatar_path' | 'followers_count'
   | 'last_lat' | 'last_lon' | 'last_speed_kmh' | 'last_fix_at' | 'total_distance_m'
 >;
-
-export function useCrewSearch(query: string, liveOnly: boolean, limit = 24, enabled = true) {
-  return useQuery({
-    queryKey: keys.crews(query, liveOnly, limit),
-    enabled,
-    placeholderData: (prev) => prev,
-    refetchInterval: 60_000,
-    queryFn: async () =>
-      unwrap(
-        await supabase.rpc('search_crews', { p_query: query || undefined, p_live_only: liveOnly, p_limit: limit }),
-      ) as unknown as { total: number; items: CrewSummary[] },
-  });
-}
 
 export function useCrew(slug: string | undefined) {
   return useQuery({

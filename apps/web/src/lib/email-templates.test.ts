@@ -24,8 +24,8 @@ describe('modèles d’emails de Supabase Auth', () => {
   it('mise en page commune : logo, signature, route, sans emoji', () => {
     for (const html of Object.values(AUTH_EMAIL_TEMPLATES)) {
       expect(html).toContain('src="{{ .SiteURL }}/email-logo.png"');
-      expect(html).toContain('Par un trophyste, pour les trophystes');
-      expect(html).toContain('Marrakech');
+      expect(html).toContain('Carnet de route en direct');
+      expect(html).toContain('Arrivée');
       expect(html).not.toMatch(/\p{Extended_Pictographic}/u);
     }
   });

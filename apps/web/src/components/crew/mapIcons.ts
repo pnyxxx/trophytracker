@@ -86,7 +86,7 @@ export function photoIcon(thumbUrl: string | null, panorama: boolean) {
   });
 }
 
-/** La 4L : point rouge cerclé de blanc, qui pulse quand l'équipage est en direct. */
+/** Le véhicule : point rouge cerclé de blanc, qui pulse quand le voyage est en direct. */
 export function carIcon(live: boolean) {
   return new DivIcon({
     className: 'tt-marker',
@@ -107,16 +107,5 @@ export function sponsorIcon(logoUrl: string | null, name: string) {
     iconSize: [38, 38],
     iconAnchor: [19, 19],
     popupAnchor: [0, -19],
-  });
-}
-
-/** Un équipage sur la carte de tous les équipages : la 4L (point rouge) + son numéro en étiquette. */
-export function crewIcon(live: boolean, label: string) {
-  return new DivIcon({
-    className: 'tt-marker',
-    html: `<div class="tt-car ${live ? 'tt-car--live' : ''}"></div><span class="tt-wp-label tt-crew-label">${escapeHtml(label)}</span>`,
-    iconSize: [18, 18],
-    iconAnchor: [9, 9],
-    popupAnchor: [0, -12],
   });
 }

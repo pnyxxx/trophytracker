@@ -2,7 +2,7 @@ import type { Config } from "tailwindcss";
 import animate from "tailwindcss-animate";
 
 /**
- * Charte « roadbook de rallye » : fond brun nuit, crème, rouge 4L Trophy,
+ * Charte « roadbook de rallye » : fond brun nuit, crème, rouge,
  * titres Big Shoulders, texte Archivo, données en JetBrains Mono.
  */
 export default {

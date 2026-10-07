@@ -7,7 +7,6 @@ import { useAuth } from '@/hooks/auth';
 import { cn } from '@/lib/utils';
 
 const links = [
-  { to: '/equipages', label: 'Équipages' },
   { to: '/#comment', label: 'Comment ça marche' },
 ];
 

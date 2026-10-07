@@ -8,7 +8,6 @@ import { PageLoader } from '@/components/common/Spinner';
 import Landing from '@/pages/Landing';
 
 // Pages chargées à la demande : la page d'accueil reste légère.
-const CrewsPage = lazy(() => import('@/pages/CrewsPage'));
 const CrewPage = lazy(() => import('@/pages/CrewPage'));
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
 const SignupPage = lazy(() => import('@/pages/auth/SignupPage'));
@@ -49,7 +48,6 @@ export default function App() {
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/" element={<Landing />} />
-              <Route path="/equipages" element={<CrewsPage />} />
               <Route path="/equipages/:slug" element={<CrewPage />} />
               <Route path="/connexion" element={<LoginPage />} />
               <Route path="/inscription" element={<SignupPage />} />

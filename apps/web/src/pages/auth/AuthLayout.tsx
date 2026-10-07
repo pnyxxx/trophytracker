@@ -19,13 +19,13 @@ export function AuthLayout({ title, subtitle, children, footer }: {
           <p className="m-0 font-display text-[clamp(64px,7vw,120px)] font-black uppercase leading-[0.95] text-cream">
             Suivez
             <br />
-            votre équipage
+            leur aventure
             <br />
-            jusqu’au <span className="font-stencil text-primary">désert.</span>
+            en <span className="font-stencil text-primary">direct.</span>
           </p>
           <div className="flex flex-wrap gap-x-10 gap-y-2 font-mono text-[11px] uppercase tracking-[0.16em] text-dust-400">
-            <span>Biarritz · 43°27′N 1°32′O</span>
-            <span>Marrakech · 31°35′N 7°59′O</span>
+            <span>Raids · Road-trips</span>
+            <span>Tours du monde · Expéditions</span>
           </div>
         </div>
 

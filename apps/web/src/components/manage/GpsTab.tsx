@@ -70,7 +70,7 @@ function traccarAppLink(serverUrl: string, key: string) {
 
 /**
  * Téléphone (et pas tablette ni ordinateur) : écran tactile dont le petit côté fait moins de 600 px.
- * Un iPad affiche donc le QR code, à scanner avec le téléphone de la 4L.
+ * Un iPad affiche donc le QR code, à scanner avec le téléphone du voyage.
  */
 function isPhone() {
   return window.matchMedia('(pointer: coarse)').matches && Math.min(window.screen.width, window.screen.height) < 600;
@@ -350,7 +350,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
       {/* ── 01 Installer ───────────────────────────────────────────────── */}
       <Step n="01" title="Installer Traccar Client">
         <p className="mb-4 mt-0 text-dust-200">
-          Sur le téléphone qui restera <strong className="text-cream">dans la 4L</strong> (idéalement un téléphone dédié, branché sur
+          Sur le téléphone qui restera <strong className="text-cream">dans le véhicule</strong> (idéalement un téléphone dédié, branché sur
           l’allume-cigare), installez l’appli gratuite <strong className="text-cream">Traccar Client</strong>.
         </p>
         <div className="flex flex-wrap gap-2">
@@ -408,7 +408,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
                 variant="outline"
                 disabled={generate.isPending}
                 onClick={() => {
-                  if (newKey || confirm('Générer un nouveau QR code ? L’ancien réglage ne marchera plus : le téléphone de la 4L devra scanner le nouveau QR code pour continuer à envoyer sa position.')) generate.mutate();
+                  if (newKey || confirm('Générer un nouveau QR code ? L’ancien réglage ne marchera plus : le téléphone du voyage devra scanner le nouveau QR code pour continuer à envoyer sa position.')) generate.mutate();
                 }}
               >
                 <RefreshCw />Générer un nouveau QR code
@@ -453,7 +453,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
               <a href={traccarAppLink(address.url, newKey)}><Smartphone />Ouvrir dans Traccar Client</a>
             </Button>
             <p className="m-0 text-sm leading-relaxed text-dust-300">
-              Sur le téléphone de la 4L : touchez le bouton, puis <strong className="text-cream">OK</strong> à « Apply new configuration? ».
+              Sur le téléphone du voyage : touchez le bouton, puis <strong className="text-cream">OK</strong> à « Apply new configuration? ».
               Tout est réglé d’un coup, sauf le mot de passe (facultatif).
             </p>
             <Button variant="ghost" size="sm" onClick={() => setShowQr(!showQr)}>
@@ -468,7 +468,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
             <QrCode value={traccarConfigLink(address.url, newKey)} label="QR code de configuration de Traccar Client" className="w-full max-w-[220px] justify-self-center rounded-[4px]" />
             <div className="flex flex-col gap-2 text-sm leading-relaxed text-dust-200">
               <p className="m-0 text-base text-cream">
-                Scannez ce QR code avec <strong>l’appareil photo du téléphone de la 4L</strong>, puis touchez « Ouvrir dans Traccar Client » et{' '}
+                Scannez ce QR code avec <strong>l’appareil photo du téléphone du voyage</strong>, puis touchez « Ouvrir dans Traccar Client » et{' '}
                 <strong>OK</strong>.
               </p>
               <p className="m-0 text-dust-300">Tout est réglé d’un coup, sauf le mot de passe (facultatif).</p>
@@ -521,7 +521,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
                 name="Distance"
                 fr="Distance entre deux positions (mètres)"
                 value={<Value>{SETTINGS.distance}</Value>}
-                why="Par défaut 75. Une position tous les 50 m quand la 4L roule (environ toutes les 2 secondes à 90 km/h) : une trace fidèle qui suit bien les virages, pour environ 20 Mo de forfait par journée de route."
+                why="Par défaut 75. Une position tous les 50 m en roulant (environ toutes les 2 secondes à 90 km/h) : une trace fidèle qui suit bien les virages, pour environ 20 Mo de forfait par journée de route."
               />
               <SettingRow
                 name="Stationary heartbeat"
@@ -538,13 +538,13 @@ export function GpsTab({ crew }: { crew: Crew }) {
                 name="Offline buffering"
                 fr="Mémoire hors ligne"
                 value={<Value tone="on">Activé</Value>}
-                why="Activé par défaut, à vérifier. Indispensable : sans réseau (Espagne rurale, désert marocain), les positions sont gardées dans le téléphone puis envoyées dès que ça capte. La trace se complète toute seule."
+                why="Activé par défaut, à vérifier. Indispensable : sans réseau (campagne, montagne, désert), les positions sont gardées dans le téléphone puis envoyées dès que ça capte. La trace se complète toute seule."
               />
               <SettingRow
                 name="Stop detection"
                 fr="Détection d’arrêt"
                 value={<Value>Désactivé</Value>}
-                why="Activé par défaut dans l’appli : à désactiver. Sinon le GPS se met en veille quand la 4L est garée, et l’iPhone ne le réveille pas toujours quand elle repart."
+                why="Activé par défaut dans l’appli : à désactiver. Sinon le GPS se met en veille quand le véhicule est garé, et l’iPhone ne le réveille pas toujours quand il repart."
               />
               <SettingRow
                 name="Password"
@@ -566,7 +566,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
       {/* ── 04 Autorisations ───────────────────────────────────────────── */}
       <Step n="04" title="Autoriser le suivi en permanence">
         <p className="mb-5 mt-0 text-dust-200">
-          Sans ces autorisations, le téléphone coupe l’appli dès que l’écran s’éteint : la 4L « disparaît » de la carte.
+          Sans ces autorisations, le téléphone coupe l’appli dès que l’écran s’éteint : le voyage « disparaît » de la carte.
         </p>
         <div className="grid gap-4 md:grid-cols-2">
           {[
@@ -668,7 +668,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
         </p>
         <p className="mb-0 mt-2 text-xs text-dust-400">
           Tant que le suivi est arrêté, rien n’est publié : testez sans crainte, puis lancez-le en partant de chez vous (en haut de
-          cet onglet). Et pendant la course, la carte n’est pas faite pour s’orienter : le règlement du 4L Trophy interdit le GPS.
+          cet onglet). Et sur un raid ou un rallye, vérifiez que le règlement autorise le partage de position : la carte n’est jamais faite pour s’orienter en course.
         </p>
       </Step>
 

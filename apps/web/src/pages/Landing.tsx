@@ -4,104 +4,84 @@ import { PageShell } from '@/components/layout/PageShell';
 import { Seo } from '@/components/common/Seo';
 import { Kicker, SectionTitle } from '@/components/common/Brand';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Countdown } from '@/components/landing/Countdown';
-import { CrewFinder } from '@/components/landing/CrewFinder';
-import { RouteJourney } from '@/components/landing/RouteJourney';
-import { STOPS, TOTAL_KM } from '@/components/landing/journey';
-import { useCrewSearch, useEvent } from '@/hooks/queries';
-import { departureTime, isLive } from '@/lib/format';
 import { FAIR_PLAY, priceSentence } from '@/lib/legal';
 import { useSeen } from '@/hooks/useInView';
 
-// La carte (MapLibre) est chargée à part : le haut de page s'affiche tout de suite.
-const CtaMap = lazy(() => import('@/components/landing/CtaMap'));
+// La carte 3D (MapLibre) est chargée à part, à l'approche de sa section : le haut de page s'affiche tout de suite.
+const ExampleTripMap = lazy(() => import('@/components/landing/ExampleTripMap'));
+
+/** Bandeau défilant : les voyages qu'on peut suivre. */
+const KINDS = ['Raids', 'Road-trips', 'Rallyes', 'Tours d’Europe', 'Van life', 'Voyages à vélo', 'Expéditions', 'Traversées du désert', 'Tours du monde'];
 
 const audiences = [
   {
     n: '01',
     km: 'KM 0 · À la maison',
     title: 'Pour les proches',
-    text: 'Parents, amis, grands-parents : voyez où se trouve votre équipage à tout moment, sans attendre un message. Rassurant quand ils traversent le désert !',
+    text: 'Parents, amis, grands-parents : voyez où en sont vos voyageurs à tout moment, sans attendre un message. Rassurant quand ils sont loin !',
   },
   {
     n: '02',
     km: 'KM ∞ · Sur la carte',
     title: 'Pour les sponsors',
-    text: 'Suivez l’aventure que vous financez. Votre logo apparaît sur la page et sur la carte de l’équipage, vue par toute sa communauté.',
+    text: 'Suivez l’aventure que vous financez. Votre logo apparaît sur la page et sur la carte du voyage, vue par toute sa communauté.',
   },
   {
     n: '03',
-    km: `KM ${TOTAL_KM} · Au volant`,
-    title: 'Pour les équipages',
-    text: 'Une page à vous en 5 minutes : carte en direct, statistiques, photos et 360°, sponsors. Un seul lien à partager, pour un paiement unique.',
+    km: 'KM ? · Au volant',
+    title: 'Pour les voyageurs',
+    text: 'Raid, road-trip, tour d’Europe en van ou à vélo : une page à vous en 5 minutes, avec carte en direct, relief, photos et 360°, sponsors et cagnotte. Un seul lien à partager.',
   },
 ];
 
 const steps = [
-  { n: '1', title: 'L’équipage crée sa page', text: 'Un paiement unique, puis nom, numéro, photos, sponsors… tout se gère depuis un espace simple.' },
-  { n: '2', title: 'Il active le GPS', text: 'L’appli gratuite Traccar Client sur un téléphone de la 4L suffit. Aucun boîtier à acheter.' },
-  { n: '3', title: 'Vous suivez en direct', text: 'Position, trace complète depuis le départ, vitesse, kilomètres parcourus, photos du bivouac…' },
+  { n: '1', title: 'Créez votre voyage', text: 'Nom, photos, sponsors, cagnotte… tout se gère depuis un espace simple. Invitez vos compagnons de route, gratuitement.' },
+  { n: '2', title: 'Activez le suivi', text: 'L’appli gratuite Traccar Client sur un téléphone suffit : un QR code à scanner. Vous avez déjà un boîtier GPS ? Il marche aussi.' },
+  { n: '3', title: 'Vos proches suivent', text: 'Position en direct, trace complète, kilomètres, vitesse, relief, photos du soir… sur une page privée, juste pour eux.' },
 ];
 
 const features = [
-  { tag: '01 · CARTE', title: 'Carte en temps réel', text: 'La 4L bouge sur la carte sans recharger la page.' },
-  { tag: '02 · PHOTOS', title: 'Photos & 360°', text: 'Revivez les dunes de Merzouga comme si vous y étiez.' },
-  { tag: '03 · FAVORIS', title: 'Vos favoris', text: 'Retrouvez en un clic les équipages que vous suivez.' },
+  { tag: '01 · CARTE', title: 'Carte en temps réel', text: 'La position bouge sur la carte sans recharger la page.' },
+  { tag: '02 · PHOTOS', title: 'Photos & 360°', text: 'Revivez les dunes, les cols et les bivouacs comme si vous y étiez.' },
+  { tag: '03 · PRIVÉ', title: 'Privé par défaut', text: 'Seules les personnes qui ont le lien voient le voyage. Rien sur Google.' },
   { tag: '04 · ÉTHIQUE', title: 'Sans pub & respectueux', text: 'Gratuit pour les proches, sans publicité, sans revente de données, sur nos propres serveurs.' },
 ];
 
 const faq = [
   {
-    q: 'Faut-il un compte pour suivre un équipage ?',
-    a: 'Non : la page d’un équipage public est accessible à tous via son lien. Un compte (gratuit) sert seulement à enregistrer vos équipages favoris.',
+    q: 'Faut-il un compte pour suivre un voyage ?',
+    a: 'Non : il suffit du lien envoyé par les voyageurs. Un compte (gratuit) sert seulement à retrouver en un clic les voyages que vous suivez.',
   },
   {
-    q: 'Comment l’équipage envoie-t-il sa position ?',
-    a: 'Avec l’application gratuite Traccar Client (Android et iPhone) installée sur un téléphone dans la voiture. Elle envoie la position quelques fois par minute quand il y a du réseau, et garde les points en mémoire dans les zones sans réseau pour les envoyer plus tard.',
+    q: 'Comment la position est-elle envoyée ?',
+    a: 'Avec l’application gratuite Traccar Client (Android et iPhone), installée sur un téléphone du voyage, ou avec un boîtier GPS compatible. La position part quelques fois par minute quand il y a du réseau ; dans les zones sans réseau, les points sont gardés en mémoire et envoyés plus tard.',
   },
   {
-    q: 'La position est-elle vraiment en direct ?',
-    a: 'Oui, à quelques secondes près quand le téléphone a du réseau. Dans le désert, la trace se complète dès que la 4L retrouve une connexion.',
+    q: 'Pas de nouvelle position : faut-il s’inquiéter ?',
+    a: 'Presque toujours, non : en montagne ou dans le désert, il n’y a souvent pas de réseau, et la trace se complète dès que le téléphone en retrouve. Si vous avez un doute, contactez directement les voyageurs.',
   },
   {
-    q: 'Qui peut voir la position de l’équipage ?',
-    a: 'L’équipage choisit : page publique (tout le monde avec le lien) ou privée (uniquement ses membres). Il peut changer d’avis à tout moment.',
+    q: 'Qui peut voir la position ?',
+    a: 'Les voyageurs choisissent : page privée (seulement les personnes qui ont le lien, et jamais sur Google) ou publique. Ils peuvent changer d’avis, couper le suivi ou effacer leur trace à tout moment.',
+  },
+  {
+    q: 'Je participe à un raid ou un rallye : j’ai le droit ?',
+    a: 'Ça dépend de l’organisation : certains règlements interdisent tout système de suivi pendant l’épreuve. Vérifiez le vôtre avant d’activer le suivi : vous êtes seuls responsables de son respect. TrophyTracker n’est ni un outil de navigation, ni un outil de sécurité.',
   },
   {
     q: 'Combien ça coûte ?',
-    a: `Suivre un équipage est gratuit, pour tout le monde. Pour créer la page de son équipage : ${priceSentence()}. C’est un paiement unique, sans abonnement, et les coéquipiers la rejoignent gratuitement. TrophyTracker est un projet indépendant, né de l’expérience d’un équipage du 4L Trophy, sans publicité ni revente de données.`,
+    a: `Suivre un voyage est gratuit, pour tout le monde. Pour créer la page de son voyage : ${priceSentence()}. C’est un paiement unique, sans abonnement, et les compagnons de route la rejoignent gratuitement. TrophyTracker est un projet indépendant, né de l’expérience d’un équipage de raid, sans publicité ni revente de données.`,
   },
 ];
 
 export default function Landing() {
-  const ctaRef = useRef<HTMLElement>(null);
-  const ctaSeen = useSeen(ctaRef);
-  const { data: event } = useEvent();
-  const { data: crews } = useCrewSearch('', false, 60);
-
-  const liveCount = (crews?.items ?? []).filter((c) => isLive(c.last_fix_at)).length;
-  const beforeStart = !!event?.startDate && departureTime(event.startDate) > Date.now();
+  const mapRef = useRef<HTMLElement>(null);
+  const mapSeen = useSeen(mapRef);
 
   return (
     <PageShell padTop={false}>
-      {/* Le site lui-même (WebSite, Organization) est décrit dans le HTML statique de l'accueil : seo-plugin.ts.
-          Dates réglées dans l'administration : l'événement n'est décrit que lorsqu'elles sont connues. */}
-      <Seo
-        jsonLd={event?.startDate ? {
-          '@context': 'https://schema.org',
-          '@type': 'SportsEvent',
-          name: event.name,
-          startDate: event.startDate,
-          endDate: event.endDate ?? undefined,
-          eventStatus: 'https://schema.org/EventScheduled',
-          eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-          location: [
-            { '@type': 'Place', name: 'Biarritz', address: { '@type': 'PostalAddress', addressLocality: 'Biarritz', addressCountry: 'FR' } },
-            { '@type': 'Place', name: 'Marrakech', address: { '@type': 'PostalAddress', addressLocality: 'Marrakech', addressCountry: 'MA' } },
-          ],
-          description: 'Raid humanitaire étudiant en Renault 4L de Biarritz à Marrakech, suivi en direct sur TrophyTracker.',
-        } : undefined}
-      />
+      {/* Le site lui-même (WebSite, Organization) est décrit dans le HTML statique de l'accueil : seo-plugin.ts. */}
+      <Seo />
 
       {/* ── 01 Hero ──────────────────────────────────────────────────────── */}
       <section className="relative flex min-h-[100svh] flex-col overflow-x-clip bg-[radial-gradient(120%_80%_at_80%_0%,#3A2215_0%,#1B1310_45%,#120F0C_75%)]">
@@ -109,69 +89,52 @@ export default function Landing() {
           <div className="flex flex-col gap-5">
             <Kicker>
               <span className="h-2 w-2 rounded-full bg-live" />
-              <span>{event?.name ?? '4L Trophy'} · suivi GPS en direct</span>
+              <span>Carnet de route · suivi GPS en direct</span>
             </Kicker>
-            {/* Une ligne par segment. La taille suit la largeur disponible (« jusqu’au désert. » doit tenir,
-                à côté de la colonne de droite sur grand écran) ET la hauteur : tout le hero tient sur un écran. */}
+            {/* Une ligne par segment ; la taille suit la largeur ET la hauteur : tout le hero tient sur un écran. */}
             <h1 className="m-0 font-display text-[clamp(44px,min(13vw,calc((100svh_-_540px)/2.85)),200px)] font-black lg:text-[clamp(64px,min(calc((min(100vw,1400px)_-_496px)/6.55),calc((100svh_-_260px)/2.85)),200px)] uppercase leading-[0.95] tracking-[-0.01em] text-cream sm:whitespace-nowrap">
               Suivez
               <br />
-              votre équipage
+              leur aventure
               <br />
-              jusqu’au <span className="font-stencil text-primary">désert.</span>
+              en <span className="font-stencil text-primary">direct.</span>
             </h1>
           </div>
 
-          <div className="flex w-full max-w-[560px] flex-col gap-5">
+          <div className="flex w-full max-w-[560px] flex-col gap-6">
             <p className="m-0 text-pretty text-lg leading-relaxed text-dust-200">
-              Proches, amis, sponsors : retrouvez la position, la trace complète, les photos et les statistiques de
-              l’équipage que vous soutenez. Gratuit pour vous, sans application à installer.
+              Raids, road-trips, tours du monde : proches, amis et sponsors retrouvent la position, la trace complète, le
+              relief et les photos du voyage qu’ils suivent. Gratuit pour eux, sans application à installer.
             </p>
-
-            <div className="flex flex-col gap-5">
-              <div className="flex flex-col gap-3">
-                <div className="flex justify-between gap-4 font-mono text-[11px] uppercase tracking-[0.16em] text-dust-400">
-                  <span>{beforeStart ? 'Départ dans' : 'Sur la route en ce moment'}</span>
-                  <span className="hidden sm:inline lg:hidden">Biarritz · 43°27′N 1°32′O</span>
-                </div>
-                {beforeStart ? (
-                  <Countdown date={event!.startDate!} />
-                ) : (
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { v: crews?.total ?? '—', l: 'Équipages' },
-                      { v: liveCount, l: 'En direct' },
-                    ].map((c) => (
-                      <div key={c.l} className="border-l-[3px] border-primary bg-black/35 px-3.5 py-3">
-                        <div className="font-mono text-[34px] font-bold leading-none text-cream">{c.v}</div>
-                        <div className="mt-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-primary">{c.l}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <CrewFinder />
-
-              <div className="text-sm text-dust-400">
-                Vous participez au raid ?{' '}
-                <Link to="/inscription" className="font-semibold text-primary hover:text-primary-light">
-                  Inscrivez votre équipage →
-                </Link>
-              </div>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                to="/inscription"
+                className="rounded-[4px] bg-primary px-6 py-4 font-mono text-sm font-bold uppercase tracking-[0.12em] text-white shadow-[0_10px_40px_rgba(219,71,64,.35)] hover:bg-primary-dark hover:text-white"
+              >
+                Créer mon voyage →
+              </Link>
+              <a
+                href="#comment"
+                className="rounded-[4px] border border-cream/25 px-6 py-4 font-mono text-sm font-bold uppercase tracking-[0.12em] text-cream hover:border-cream hover:text-cream"
+              >
+                Comment ça marche
+              </a>
             </div>
+            <p className="m-0 text-sm text-dust-400">
+              On vous a envoyé un lien ? Ouvrez-le simplement : pas besoin de compte pour suivre un voyage.
+            </p>
           </div>
         </div>
 
-        {/* Bandeau défilant des étapes */}
+        {/* Bandeau défilant */}
         <div className="overflow-hidden border-y border-cream/[0.12] bg-ink py-3" aria-hidden="true">
           <div className="flex w-max animate-marquee font-mono text-[13px] uppercase tracking-[0.14em] text-dust-100">
             {[0, 1].map((k) => (
               <div key={k} className="flex gap-10 pr-10">
-                {STOPS.map((s) => (
-                  <span key={s.name} className="whitespace-nowrap">
+                {KINDS.map((s) => (
+                  <span key={s} className="whitespace-nowrap">
                     <span className="text-primary">◆ </span>
-                    {s.name} · {s.country}
+                    {s}
                   </span>
                 ))}
               </div>
@@ -180,14 +143,29 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── 02 La route ──────────────────────────────────────────────────── */}
-      {/* Sur grand écran, ce titre est incrusté dans l'écran fixe de « La route ». */}
-      <section className="bg-ink px-4 pt-[120px] sm:px-7 min-[1000px]:hidden">
-        <div className="flex flex-col gap-3.5">
-          <SectionTitle className="leading-[0.88]">Où sont-ils ?</SectionTitle>
+      {/* ── 02 Un exemple en 3D ──────────────────────────────────────────── */}
+      <section ref={mapRef} className="relative h-[min(820px,100svh)] overflow-hidden bg-ink-900">
+        {mapSeen && (
+          <Suspense fallback={null}>
+            <div className="absolute inset-0"><ExampleTripMap /></div>
+          </Suspense>
+        )}
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,#120F0C_0%,rgba(18,15,12,.35)_25%,rgba(18,15,12,.15)_60%,#120F0C_100%)]" />
+        <div className="pointer-events-none relative z-[3] mx-auto flex max-w-[1240px] flex-col gap-4 px-4 pt-[90px] sm:px-7">
+          <Kicker>Exemple · Col du Stelvio, Italie</Kicker>
+          <SectionTitle className="max-w-[760px] leading-[0.92] text-cream">
+            Une trace,
+            <br />
+            lacet après lacet.
+          </SectionTitle>
+          <p className="m-0 max-w-[440px] text-pretty text-[17px] leading-relaxed text-dust-200">
+            Chaque position dessine la route sur une carte satellite en relief, que vos proches suivent en direct.
+          </p>
+        </div>
+        <div className="absolute bottom-6 left-4 z-[3] font-mono text-[10px] uppercase tracking-[0.14em] text-dust-300 sm:left-7">
+          47 km · 48 lacets · 2 757 m · vue satellite 3D
         </div>
       </section>
-      <RouteJourney />
 
       {/* ── 03 Pour qui ──────────────────────────────────────────────────── */}
       <section className="bg-sand px-4 py-[120px] text-coal sm:px-7">
@@ -201,8 +179,8 @@ export default function Landing() {
               de l’ouvrir.
             </SectionTitle>
             <p className="m-0 max-w-[420px] text-pretty text-[17px] leading-relaxed text-dust-700">
-              Pendant 10 jours, des milliers d’étudiants traversent la France, l’Espagne et le Maroc en 4L. À la maison,
-              on aimerait bien savoir où ils sont. C’est exactement ce que nous faisons.
+              Ils traversent un désert, un continent ou juste les Alpes. À la maison, on aimerait bien savoir où ils sont.
+              C’est exactement ce que nous faisons.
             </p>
           </div>
 
@@ -263,20 +241,20 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── 05 Charte fair-play ──────────────────────────────────────────── */}
+      {/* ── 05 Charte du voyageur ────────────────────────────────────────── */}
       <section className="bg-sand px-4 py-[120px] text-coal sm:px-7">
         <div className="mx-auto flex max-w-[1240px] flex-col gap-14">
           <div className="flex flex-wrap items-end justify-between gap-7">
             <div className="flex flex-col gap-[18px]">
-              <Kicker className="text-dust-700">Charte fair-play</Kicker>
+              <Kicker className="text-dust-700">Charte du voyageur</Kicker>
               <SectionTitle className="leading-[0.88]">
                 L’esprit
                 <br />
-                du raid.
+                du voyage.
               </SectionTitle>
             </div>
             <p className="m-0 max-w-[460px] text-pretty text-[17px] leading-relaxed text-dust-700">
-              {FAIR_PLAY.spirit} Chaque équipage s’y engage avant d’activer son suivi.
+              {FAIR_PLAY.spirit} Chaque voyage s’y engage avant d’activer son suivi.
             </p>
           </div>
           <ol className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(min(100%,260px),1fr))] border-t-2 border-coal p-0">
@@ -317,32 +295,23 @@ export default function Landing() {
       </section>
 
       {/* ── 07 Inscription ───────────────────────────────────────────────── */}
-      <section ref={ctaRef} id="inscription" className="relative h-[820px] overflow-hidden bg-ink-900">
-        {ctaSeen && (
-          <Suspense fallback={null}>
-            <CtaMap />
-          </Suspense>
-        )}
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,#120F0C_0%,rgba(18,15,12,.5)_22%,rgba(18,15,12,.35)_60%,#0A0806_100%)]" />
-        <div className="absolute bottom-6 left-4 z-[3] font-mono text-[10px] uppercase tracking-[0.14em] text-dust-300 sm:left-7">
-          Merzouga, Maroc · vue satellite
-        </div>
-        <div className="relative z-[3] mx-auto flex max-w-[1240px] flex-col items-center gap-[22px] px-4 pt-[110px] text-center sm:px-7">
-          <Kicker className="text-gold">Merzouga · 31°05′N 4°00′O</Kicker>
+      <section id="inscription" className="relative overflow-hidden bg-[radial-gradient(90%_80%_at_50%_100%,#3A2215_0%,#1B1310_50%,#0A0806_100%)] px-4 py-[140px] sm:px-7">
+        <div className="relative mx-auto flex max-w-[1240px] flex-col items-center gap-[22px] text-center">
+          <Kicker className="text-gold">Prochain départ · le vôtre</Kicker>
           <h2 className="m-0 w-full font-display text-[clamp(56px,8vw,128px)] font-black uppercase leading-[0.96] text-cream">
             Vous partez
             <br />
-            sur le raid&nbsp;?
+            à l’aventure&nbsp;?
           </h2>
           <p className="m-0 max-w-[520px] text-lg leading-relaxed text-dust-100">
-            Créez la page de votre équipage en 5 minutes et partagez un seul lien à vos proches et sponsors.
+            Créez la page de votre voyage en 5 minutes et partagez un seul lien à vos proches et sponsors.
           </p>
           <p className="m-0 font-mono text-xs uppercase tracking-[0.14em] text-gold">{priceSentence()} · paiement unique</p>
           <Link
             to="/inscription"
             className="rounded-[4px] bg-primary px-8 py-[18px] font-mono text-sm font-bold uppercase tracking-[0.12em] text-white shadow-[0_10px_40px_rgba(219,71,64,.45)] hover:bg-primary-dark hover:text-white"
           >
-            Inscrire mon équipage →
+            Créer mon voyage →
           </Link>
         </div>
       </section>

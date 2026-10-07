@@ -82,7 +82,7 @@ const SITE_JSON_LD = [
     alternateName: 'Trophy Tracker',
     url: `${SITE_URL}/`,
     inLanguage: 'fr-FR',
-    description: 'Suivi en direct des équipages du 4L Trophy : position, trace, photos et sponsors.',
+    description: 'Le carnet de route en direct de vos voyages : position, trace, relief, photos et sponsors.',
   },
   {
     '@context': 'https://schema.org',

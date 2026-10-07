@@ -16,7 +16,7 @@ export default function SalesTermsPage() {
         {BUSINESS.siret ? <>, SIRET {BUSINESS.siret}</> : <> (immatriculation en cours)</>}
         {BUSINESS.address && <>, {BUSINESS.address}</>}. Contact : <a href={CONTACT_HREF}>{EDITOR.email}</a>.
       </p>
-      <p>TrophyTracker est un service indépendant, non affilié à l’organisation du 4L Trophy.</p>
+      <p>TrophyTracker est un service indépendant, affilié à aucun organisateur de raid, de rallye ou d’événement.</p>
 
       <h2>2. Ce que vous achetez</h2>
       <p>
@@ -27,8 +27,8 @@ export default function SalesTermsPage() {
       <ul>
         <li>Un accès = une page d’équipage. Il est lié au compte qui l’achète, qui devient propriétaire de la page.</li>
         <li>
-          Le service est fourni pendant toute l’édition du raid à laquelle participe l’équipage. La page reste ensuite consultable en
-          souvenir, tant que TrophyTracker existe.
+          Le service est fourni pendant toute la durée du voyage. La page reste ensuite consultable en souvenir, tant que
+          TrophyTracker existe.
         </li>
         <li>
           Le suivi GPS est soumis à la <Link to="/conditions-utilisation#fair-play">charte fair-play</Link> et aux{' '}
@@ -76,7 +76,7 @@ export default function SalesTermsPage() {
       <p>
         En commandant, vous demandez expressément que le service commence immédiatement. Si vous vous rétractez ensuite, vous payez
         la part du service déjà fournie jusqu’à votre demande (article L.221-25 du Code de la consommation), calculée au prorata du
-        temps écoulé entre la commande et la fin de l’édition du raid ; le reste vous est remboursé.
+        temps écoulé entre la commande et la fin du voyage ; le reste vous est remboursé.
       </p>
       <p>
         Pour vous rétracter, envoyez une déclaration claire à <a href={CONTACT_HREF}>{EDITOR.email}</a>, par exemple avec le modèle

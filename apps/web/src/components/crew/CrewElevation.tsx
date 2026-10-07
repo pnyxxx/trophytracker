@@ -1,14 +1,12 @@
 /**
- * Profil d'élévation réel de l'équipage (altitude envoyée par le téléphone), jour par jour :
+ * Profil d'élévation réel du voyage (altitude envoyée par le téléphone), jour par jour :
  * courbe d'altitude, dénivelés positif et négatif, point culminant et dernière position.
  * Survol (ou flèches du clavier) : altitude au kilomètre.
  */
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { formatNumber } from '@/lib/format';
 import { climbOf, thin, type AltPoint } from '@/lib/elevation';
-import type { RaidDay } from '@/lib/stages';
 import { cn } from '@/lib/utils';
-import type { RoadbookStop } from './roadbook';
 
 const H = 168;
 const PAD = { top: 22, right: 10, bottom: 22, left: 44 };
@@ -34,19 +32,11 @@ function useWidth() {
   return [ref, width] as const;
 }
 
-/** Nom de l'étape prévue un jour donné : « Boucle 1 », « Salamanque »… */
-function stageOfDay(stops: RoadbookStop[], day: number) {
-  const inDays = (w: { day_start: number | null; day_end: number | null }) =>
-    w.day_start != null && day >= w.day_start && day <= (w.day_end ?? w.day_start);
-  const stop = stops.filter(inDays).at(-1);
-  return stop?.subs.find(inDays)?.name ?? stop?.name ?? null;
-}
-
-export function CrewElevation({ profile, stops, cal }: { profile: AltPoint[]; stops: RoadbookStop[]; cal: RaidDay }) {
-  // Jours du raid pour lesquels on a des altitudes.
+export function CrewElevation({ profile }: { profile: AltPoint[] }) {
+  // Jours du voyage pour lesquels on a des altitudes.
   const days = useMemo(() => [...new Set(profile.map((p) => p.day).filter((d): d is number => d != null && d >= 1))], [profile]);
-  // Sélection : null = toute la trace ; sinon un jour du raid (par défaut aujourd'hui, s'il a des données).
-  const [day, setDay] = useState<number | null>(() => (cal.day != null && days.includes(cal.day) ? cal.day : null));
+  // Sélection : null = toute la trace ; sinon un jour du voyage.
+  const [day, setDay] = useState<number | null>(null);
   const [hover, setHover] = useState<number | null>(null);
   const [ref, width] = useWidth();
 
@@ -89,10 +79,7 @@ export function CrewElevation({ profile, stops, cal }: { profile: AltPoint[]; st
   };
 
   const peakX = Math.max(PAD.left + 30, Math.min(w - PAD.right - 30, x(stats.maxKm)));
-  const dayLabel = (d: number) => {
-    const name = stageOfDay(stops, d);
-    return name ? `J${d} · ${name}` : `J${d}`;
-  };
+  const dayLabel = (d: number) => `Jour ${d}`;
 
   return (
     <figure className="m-0 border-2 border-coal bg-cream">
@@ -177,7 +164,7 @@ export function CrewElevation({ profile, stops, cal }: { profile: AltPoint[]; st
           {car && (
             <g>
               <circle cx={x(car.km)} cy={y(car.alt)} r={5.5} fill="#DB4740" stroke="#F4ECDF" strokeWidth={2} />
-              <text x={x(car.km) - 9} y={y(car.alt) + 3.5} textAnchor="end" className="fill-primary font-mono text-[10px] font-bold uppercase">La 4L</text>
+              <text x={x(car.km) - 9} y={y(car.alt) + 3.5} textAnchor="end" className="fill-primary font-mono text-[10px] font-bold uppercase">Ici</text>
             </g>
           )}
 

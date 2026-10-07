@@ -92,3 +92,8 @@ Travail sur la branche `generaliste` ; `main` reste l'état en pause jusqu'au fe
 5. **Accueil et identité** : nouvelle page d'accueil généraliste, nouveau voyage de démonstration, nouvelle
    identité (nom, logo sans 4L, polices).
 6. **Réouverture** quand tout est prêt.
+
+Reste à faire repéré pendant l'étape 1 : codes d'accès offerts au format `4L-XXXX-XXXX` (contrainte, génération et
+saisie dans `access_codes`) → passer à `TT-` par une nouvelle migration qui accepte encore les anciens codes ; la démo
+(trajet 2026, `apps/tracker/demo/`) à remplacer à l'étape 5 ; l'« événement » de l'administration (date de départ
+commune, lancement auto du GPS) à remplacer par les dates de chaque voyage à l'étape 2.

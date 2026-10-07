@@ -46,14 +46,14 @@ export default function PrivacyPage() {
         </li>
         <li>
           Tant que l’équipage n’a pas lancé le suivi sur le site (mode essai), seule la dernière position reçue est gardée, visible de
-          ses seuls membres, pour vérifier que le téléphone fonctionne. Le suivi se lance automatiquement le jour du départ officiel
-          du raid, sauf si l’équipage l’a arrêté lui-même.
+          ses seuls membres, pour vérifier que le téléphone fonctionne. Le suivi se lance automatiquement le jour du départ
+          prévu, sauf si l’équipage l’a arrêté lui-même.
         </li>
         <li>
           Elles sont visibles par tous si la page de l’équipage est publique, et uniquement par ses membres si elle est privée.
         </li>
         <li>
-          Conseil : lancez le suivi une fois partis de chez vous et arrêtez-le après le raid, pour ne pas révéler votre domicile.
+          Conseil : lancez le suivi une fois partis de chez vous et arrêtez-le au retour, pour ne pas révéler votre domicile.
         </li>
       </ul>
       <p>
@@ -63,8 +63,8 @@ export default function PrivacyPage() {
       <h3>Les photos</h3>
       <p>
         Elles sont compressées sur votre appareil avant l’envoi et le fichier publié ne garde aucune métadonnée. Pour placer une
-        photo sur la carte, le site lit sur votre appareil sa date et sa position de prise de vue (ou la retrouve grâce à la trace de
-        la 4L) : seule la position que l’équipage valide est publiée, et il peut la retirer à tout moment.{' '}
+        photo sur la carte, le site lit sur votre appareil sa date et sa position de prise de vue (ou la retrouve grâce à la trace du
+        voyage) : seule la position que l’équipage valide est publiée, et il peut la retirer à tout moment.{' '}
         <em>Conservation : jusqu’à leur suppression par l’équipage.</em>
       </p>
       <h3>Les achats</h3>

@@ -1,7 +1,7 @@
 /**
  * Visuels QR code d'un équipage, aux couleurs de TrophyTracker, dessinés dans le navigateur
  * (canvas → PNG) : rien n'est envoyé au serveur.
- *  - « sticker » : carré 1600 px aux coins arrondis (fond transparent autour), pour la 4L ;
+ *  - « sticker » : carré 1600 px aux coins arrondis (fond transparent autour), pour le véhicule ;
  *  - « story » : 1080 × 1920, pour les stories Instagram / Facebook / WhatsApp.
  * Le QR est en correction d'erreur maximale (H) : il reste lisible avec le logo au centre,
  * un autocollant un peu abîmé ou une photo de travers.
@@ -16,7 +16,7 @@ export interface PosterCrew {
   carNumber: string | null;
   /** Adresse complète de la page publique. */
   url: string;
-  /** « 4L Trophy 2027 » */
+  /** Ligne en capitales au-dessus du nom (« Carnet de route en direct »). */
   eventLabel: string;
   /** Logo de l'équipage (même origine), facultatif. */
   avatarUrl?: string | null;
@@ -277,7 +277,7 @@ export async function drawPoster(format: PosterFormat, crew: PosterCrew): Promis
     ctx.fillText(displayUrl(crew.url), cx, qy + qr + 80);
     ctx.font = `400 30px ${MONO}`;
     ctx.fillStyle = C.dust;
-    ctx.fillText('Scannez pour voir la 4L sur la carte, en direct', cx, qy + qr + 140);
+    ctx.fillText('Scannez pour suivre le voyage en direct', cx, qy + qr + 140);
     ctx.fillStyle = C.red;
     ctx.fillRect(cx - 60, h - 90, 120, 6);
   }

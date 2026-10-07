@@ -9,9 +9,9 @@
 export const SITE_URL = 'https://trophytracker.fr';
 export const SITE_NAME = 'TrophyTracker';
 
-export const DEFAULT_TITLE = 'TrophyTracker — Suivez les équipages du 4L Trophy en direct';
+export const DEFAULT_TITLE = 'TrophyTracker — Le carnet de route en direct de vos voyages';
 export const DEFAULT_DESCRIPTION =
-  'Proches, amis, sponsors : suivez en direct la position, la trace complète et les photos des équipages du 4L Trophy. Gratuit pour les proches.';
+  'Raids, road-trips, tours du monde : vos proches et sponsors suivent en direct la position, la trace, le relief et les photos de votre voyage. Gratuit pour eux.';
 
 /** Titre complet affiché dans l'onglet et dans Google. */
 export const fullTitle = (title?: string) => (title ? `${title} · ${SITE_NAME}` : DEFAULT_TITLE);
@@ -24,7 +24,6 @@ export interface PageSeo {
 /** Pages indexables à adresse fixe (même liste que le plan du site, apps/tracker/src/sitemap.ts). */
 export const PAGES = {
   '/': {},
-  '/equipages': { title: 'Équipages', description: 'Trouvez et suivez en direct les équipages du 4L Trophy.' },
   '/mentions-legales': { title: 'Mentions légales' },
   '/confidentialite': { title: 'Confidentialité' },
   '/conditions-utilisation': { title: 'Conditions d’utilisation' },

@@ -29,7 +29,7 @@ import { formatRelative } from '@/lib/format';
 const NEXT_STEPS = [
   { icon: Flag, title: 'Créer la page de l’équipage', text: 'Un nom, et c’est parti. Le reste se complète quand vous voulez.' },
   { icon: Users, title: 'Inviter vos coéquipiers', text: 'Onglet « Membres » : ils rejoignent la page gratuitement.' },
-  { icon: Satellite, title: 'Brancher le GPS', text: 'Onglet « GPS » : un téléphone dans la 4L suffit, on vous guide pas à pas.' },
+  { icon: Satellite, title: 'Brancher le GPS', text: 'Onglet « GPS » : un téléphone dans le véhicule suffit, on vous guide pas à pas.' },
   { icon: Share2, title: 'Partager avec vos proches', text: 'Onglet « QR code » : le lien à envoyer à la famille et aux sponsors.' },
 ];
 
@@ -228,7 +228,7 @@ export default function AccountPage() {
         <Panel title="Équipages suivis">
           {loadingFollowed ? <Spinner /> : !followed?.length ? (
             <p className="text-dust-300">
-              Vous ne suivez aucun équipage. <Link to="/equipages" className="text-primary hover:underline">Trouver un équipage →</Link>
+              Vous ne suivez aucun voyage. Ouvrez le lien qu’un voyageur vous a envoyé, puis « Suivre ».
             </p>
           ) : (
             <div className="grid gap-2 md:grid-cols-2">{followed.map((c) => <CrewCard key={c.id} crew={c} />)}</div>

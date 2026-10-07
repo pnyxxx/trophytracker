@@ -38,11 +38,9 @@ export default function LegalNoticePage() {
 
       <h2>Indépendance</h2>
       <p>
-        TrophyTracker n’est <strong>ni organisé, ni soutenu, ni validé</strong> par l’organisation du 4L Trophy (Rey Voyages, Désertours)
-        ni par Renault. Le nom « 4L Trophy » est une marque de son propriétaire ; il n’est cité que pour désigner l’événement que suivent
-        les équipages. Les informations de l’événement (dates, étapes, parcours) sont indicatives et ne remplacent pas les communications
-        officielles, à retrouver sur{' '}
-        <a href="https://www.4ltrophy.com" target="_blank" rel="noopener noreferrer">4ltrophy.com</a>.
+        TrophyTracker est un projet indépendant : il n’est <strong>affilié à aucun organisateur</strong> de raid, de rallye ou
+        d’événement, et aucun organisateur ne le soutient ni ne le valide. Les étapes, dates et textes d’un voyage sont saisis par ses
+        voyageurs, sous leur responsabilité ; ils ne remplacent jamais les communications officielles d’un organisateur.
       </p>
 
       <h2>Propriété intellectuelle</h2>

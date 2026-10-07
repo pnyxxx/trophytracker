@@ -11,7 +11,6 @@ export interface SitemapCrew {
  */
 const PAGES: { path: string; priority: string; changefreq: string }[] = [
   { path: '/', priority: '1.0', changefreq: 'daily' },
-  { path: '/equipages', priority: '0.9', changefreq: 'daily' },
   { path: '/mentions-legales', priority: '0.2', changefreq: 'yearly' },
   { path: '/confidentialite', priority: '0.2', changefreq: 'yearly' },
   { path: '/conditions-utilisation', priority: '0.2', changefreq: 'yearly' },

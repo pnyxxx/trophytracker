@@ -8,28 +8,24 @@ import { Copy, Download, Send, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useEvent } from '@/hooks/queries';
 import type { Crew } from '@/lib/supabase';
 import { thumbUrl } from '@/lib/media';
 import { canvasToBlob, drawPoster, POSTER_SIZE, type PosterFormat } from '@/lib/qr-poster';
 import { cn } from '@/lib/utils';
 
 const FORMATS: { id: PosterFormat; label: string; hint: string }[] = [
-  { id: 'sticker', label: 'Autocollant', hint: 'Carré 1600 px, coins arrondis : pour la 4L, un sticker, une affiche.' },
+  { id: 'sticker', label: 'Autocollant', hint: 'Carré 1600 px, coins arrondis : pour le véhicule, un sticker, une affiche.' },
   { id: 'story', label: 'Story réseaux', hint: '1080 × 1920 px : Instagram, Facebook, WhatsApp.' },
 ];
 
 type CrewForQr = Pick<Crew, 'slug' | 'name' | 'car_number' | 'avatar_path' | 'is_public'>;
 
 export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl?: boolean }) {
-  const { data: event } = useEvent();
   const [format, setFormat] = useState<PosterFormat>('sticker');
   const [image, setImage] = useState<{ blob: Blob; url: string } | null>(null);
   const [error, setError] = useState(false);
 
-  const year = event?.startDate?.slice(0, 4);
-  const eventName = event?.name ?? '4L Trophy';
-  const eventLabel = year && !/\d{4}/.test(eventName) ? `${eventName} ${year}` : eventName;
+  const eventLabel = 'Carnet de route en direct';
   const pageUrl = `${window.location.origin}/equipages/${crew.slug}`;
   const fileName = `trophytracker-${crew.slug}-${format === 'sticker' ? 'autocollant' : 'story'}.png`;
 
@@ -58,7 +54,7 @@ export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl
   const share = async () => {
     if (!file) return;
     try {
-      await navigator.share({ files: [file], title: crew.name, text: `Suivez ${crew.name} en direct sur le 4L Trophy ! ${pageUrl}` });
+      await navigator.share({ files: [file], title: crew.name, text: `Suivez ${crew.name} en direct ! ${pageUrl}` });
     } catch {
       /* partage annulé */
     }
@@ -140,7 +136,7 @@ export function CrewShareButton({ crew, className }: { crew: CrewForQr; classNam
 
   const send = async () => {
     try {
-      await navigator.share({ title: crew.name, text: `Suivez ${crew.name} en direct sur le 4L Trophy !`, url: pageUrl });
+      await navigator.share({ title: crew.name, text: `Suivez ${crew.name} en direct !`, url: pageUrl });
     } catch {
       /* partage annulé */
     }
@@ -164,7 +160,7 @@ export function CrewShareButton({ crew, className }: { crew: CrewForQr; classNam
       <DialogContent className="max-h-[92vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Partager {crew.name}</DialogTitle>
-          <DialogDescription>Envoyez le lien de la page, ou créez une image avec QR code à coller sur la 4L ou à poster en story.</DialogDescription>
+          <DialogDescription>Envoyez le lien de la page, ou créez une image avec QR code à coller sur le véhicule ou à poster en story.</DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-3 rounded-md border border-cream/15 p-4">
           <p className="m-0 select-all break-all font-mono text-sm text-cream">{pageUrl}</p>

@@ -14,7 +14,7 @@ import { mediaUrl, thumbUrl } from '@/lib/media';
 import { BaseMap } from './BaseMap';
 import { carIcon, photoIcon, sponsorIcon, startIcon, waypointIcon, waypointStyle } from './mapIcons';
 
-/** Zoom de « Suivre la 4L » : on voit les rues autour de la voiture. */
+/** Zoom de « Suivre » : on voit les rues autour du véhicule. */
 const FOLLOW_ZOOM = 14;
 
 
@@ -50,7 +50,7 @@ function MapController({ car, start, points, waypoints, follow }: {
     else map.fitBounds(new LatLngBounds(coords), { padding: [40, 40], maxZoom: 13 });
   }, [map, car, start, points, waypoints]);
 
-  // « Suivre la 4L » : on zoome sur la voiture à l'activation (sans dézoomer si on est déjà
+  // « Suivre » : on zoome sur le véhicule à l'activation (sans dézoomer si on est déjà
   // plus près), puis la carte la garde au centre à chaque nouvelle position.
   const wasFollowing = useRef(false);
   useEffect(() => {
@@ -187,7 +187,7 @@ export function CrewMap({ crew, points, waypoints: allWaypoints, sponsors, photo
             aria-pressed={follow}
           >
             <Crosshair className="h-4 w-4" />
-            {follow ? 'Suivi activé' : 'Suivre la 4L'}
+            {follow ? 'Suivi activé' : 'Suivre le voyage'}
           </button>
         )}
         <button

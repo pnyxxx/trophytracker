@@ -416,7 +416,7 @@ function SettingsAdmin() {
   return (
     <Panel title="Édition en cours">
       <form onSubmit={(e: FormEvent) => { e.preventDefault(); save.mutate(); }} className="grid gap-4 md:grid-cols-2">
-        <Field id="e-name" label="Nom de l’événement"><Input id="e-name" value={form.event_name} onChange={(e) => setForm({ ...form, event_name: e.target.value })} placeholder="4L Trophy 2027" /></Field>
+        <Field id="e-name" label="Nom de l’événement"><Input id="e-name" value={form.event_name} onChange={(e) => setForm({ ...form, event_name: e.target.value })} placeholder="Départ 2027" /></Field>
         <Field id="e-km" label="Distance totale (km)"><Input id="e-km" type="number" value={form.event_total_km} onChange={(e) => setForm({ ...form, event_total_km: e.target.value })} /></Field>
         <Field id="e-start" label="Date de départ" hint="Active le compte à rebours et le compteur de jours."><Input id="e-start" type="date" value={form.event_start_date} onChange={(e) => setForm({ ...form, event_start_date: e.target.value })} /></Field>
         <Field id="e-end" label="Date d’arrivée"><Input id="e-end" type="date" value={form.event_end_date} onChange={(e) => setForm({ ...form, event_end_date: e.target.value })} /></Field>

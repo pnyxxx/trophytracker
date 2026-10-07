@@ -8,7 +8,7 @@
  * par le bruit, même sur une route plate.
  */
 import { haversineKm } from './geo';
-import { dayOfRaid } from './stages';
+import { dayOfTrip } from './days';
 
 export interface AltPoint {
   /** Kilomètre parcouru depuis le premier point de la trace (distance GPS). */
@@ -55,7 +55,7 @@ export function altitudeProfile(points: readonly TrackLike[], startDate: string 
     return {
       km: r.km,
       alt: Math.round(win[Math.floor(win.length / 2)]!),
-      day: startDate ? dayOfRaid(startDate, new Date(r.t * 1000)) : null,
+      day: startDate ? dayOfTrip(startDate, new Date(r.t * 1000)) : null,
     };
   });
 }

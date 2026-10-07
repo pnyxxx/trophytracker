@@ -14,7 +14,7 @@ const reminder = {
 describe('relance « configurez votre GPS »', () => {
   it('nomme l’équipage, la date de création et mène à l’onglet GPS', () => {
     const e = buildGpsReminderEmail(reminder, 'https://site.fr');
-    expect(e.subject).toBe('📡 Breizh en sables : votre 4L n’apparaît pas encore sur la carte');
+    expect(e.subject).toBe('📡 Breizh en sables : votre voyage n’apparaît pas encore sur la carte');
     expect(e.text).toContain('en ligne depuis le 5 octobre');
     expect(e.text).toContain('https://site.fr/mon-compte/equipages/breizh-en-sables?onglet=gps');
     expect(e.html).toContain('href="https://site.fr/mon-compte/equipages/breizh-en-sables?onglet=gps"');

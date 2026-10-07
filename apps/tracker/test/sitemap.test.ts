@@ -9,7 +9,8 @@ describe('buildSitemap', () => {
 
   it('liste les pages fixes avec une adresse absolue', () => {
     expect(xml).toContain('<loc>https://exemple.fr/</loc>');
-    expect(xml).toContain('<loc>https://exemple.fr/equipages</loc>');
+    // Plus de liste publique des voyages.
+    expect(xml).not.toContain('<loc>https://exemple.fr/equipages</loc>');
   });
 
   it('ajoute chaque équipage avec sa date de mise à jour', () => {

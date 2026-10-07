@@ -20,11 +20,10 @@ export default function NotFound() {
             le <span className="font-stencil text-primary">désert.</span>
           </h1>
           <p className="m-0 max-w-[520px] text-lg leading-relaxed text-dust-200">
-            Cette page n’existe pas (ou plus). Si c’est un équipage, il est peut-être passé en privé.
+            Cette page n’existe pas (ou plus). Si c’est un voyage, il est peut-être privé : demandez le lien à ses voyageurs.
           </p>
           <div className="flex flex-wrap gap-3">
             <Button asChild size="lg"><Link to="/">Retour à l’accueil</Link></Button>
-            <Button asChild size="lg" variant="secondary"><Link to="/equipages">Voir les équipages</Link></Button>
           </div>
         </div>
       </section>

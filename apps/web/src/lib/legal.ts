@@ -67,16 +67,16 @@ export const REPORT_HREF = `mailto:${EDITOR.email}?subject=${encodeURIComponent(
 export const CONTACT_HREF = `mailto:${EDITOR.email}?subject=${encodeURIComponent('TrophyTracker')}`;
 
 /**
- * Charte fair-play : acceptée par l'équipage avant de générer sa clé GPS (preuve gardée en base),
+ * Charte du voyageur : acceptée avant de générer la clé GPS (preuve gardée en base),
  * reprise dans les conditions d'utilisation et sur la page d'accueil.
  */
 export const FAIR_PLAY = {
   spirit:
-    'Le 4L Trophy, c’est l’aventure à la boussole et au roadbook, l’entraide et la solidarité. TrophyTracker est là pour que vos proches vivent l’aventure avec vous, pas pour vous la faciliter.',
+    'TrophyTracker est là pour que vos proches vivent l’aventure avec vous, pas pour remplacer une carte, un roadbook ou les secours.',
   rules: [
-    { title: 'Jamais pour s’orienter', text: 'Pendant la course, on n’utilise pas TrophyTracker pour trouver son chemin : ni sa propre position, ni la trace ou la position des autres équipages.' },
-    { title: 'Le règlement d’abord', text: 'On respecte le règlement du 4L Trophy et les consignes de l’organisation. En cas de doute, on leur demande.' },
-    { title: 'Tout l’équipage est d’accord', text: 'Le téléphone localise la 4L et donc tous ses occupants : chaque membre accepte de partager la position.' },
-    { title: 'Pas un outil de sécurité', text: 'Les positions peuvent arriver en retard ou pas du tout. En cas d’urgence : la balise et le bouton d’alerte de l’organisation, et les secours (112 en Europe).' },
+    { title: 'Votre événement l’autorise', text: 'Raid, rallye, course : vérifiez que le règlement de votre épreuve autorise le partage de position. Certains l’interdisent pendant l’épreuve. Vous êtes seuls responsables de son respect.' },
+    { title: 'Jamais pour tricher', text: 'En course, on n’utilise pas TrophyTracker pour trouver son chemin ni pour suivre d’autres concurrents.' },
+    { title: 'Tous les voyageurs sont d’accord', text: 'Le téléphone localise le véhicule et donc tous ses occupants : chaque voyageur accepte de partager la position.' },
+    { title: 'Pas un outil de sécurité', text: 'Les positions peuvent arriver en retard ou pas du tout. En cas d’urgence : les secours (112 en Europe) et, sur un événement, l’organisation.' },
   ],
 };

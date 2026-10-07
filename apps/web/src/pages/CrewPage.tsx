@@ -11,20 +11,18 @@ import { CrewAvatar, FollowButton, LiveBadge } from '@/components/crew/CrewBits'
 import { CrewStats } from '@/components/crew/CrewStats';
 import { CrewGallery } from '@/components/crew/CrewGallery';
 import { CrewSponsors } from '@/components/crew/CrewSponsors';
-import { CrewRoadbook } from '@/components/crew/CrewRoadbook';
 import { CrewShareButton } from '@/components/crew/CrewQr';
-import { useRoadbook } from '@/components/crew/roadbook';
-import { useCrew, useCrewStats, useEvent, useMyRole, usePhotos, useSponsors } from '@/hooks/queries';
+import { useCrew, useCrewStats, useMyRole, usePhotos, useSponsors } from '@/hooks/queries';
 import { useLiveTrack } from '@/hooks/useLiveTrack';
 import { formatRelative, isLive } from '@/lib/format';
-import { raidDay } from '@/lib/stages';
-import { demoRaidTime, demoTrack } from '@/lib/demo-clock';
+import { localDate } from '@/lib/days';
 import { altitudeProfile } from '@/lib/elevation';
 import { mediaUrl } from '@/lib/media';
 import { cn } from '@/lib/utils';
 import NotFound from './NotFound';
 
 const CrewMap = lazy(() => import('@/components/crew/CrewMap').then((m) => ({ default: m.CrewMap })));
+const CrewElevation = lazy(() => import('@/components/crew/CrewElevation').then((m) => ({ default: m.CrewElevation })));
 
 const TONES = {
   dark: 'bg-ink text-cream',
@@ -53,8 +51,6 @@ function Section({ id, kicker, title, subtitle, tone = 'dark', first = false, ch
     </section>
   );
 }
-
-const NO_WAYPOINTS: never[] = [];
 
 /**
  * « Défilez » en bas au centre de l'écran, tant que la page n'a pas bougé. Masqué s'il
@@ -111,63 +107,36 @@ const coords = (lat: number, lon: number) =>
 export default function CrewPage() {
   const { slug } = useParams();
   const { data: crew, isLoading } = useCrew(slug);
-  const { data: event } = useEvent();
   const { data: stats } = useCrewStats(crew?.id);
   const { data: photos = [] } = usePhotos(crew?.id);
   const { data: sponsors = [] } = useSponsors(crew?.id);
   const { canEdit } = useMyRole(crew?.id);
   const { points } = useLiveTrack(crew);
-  const startDate = event?.startDate ?? null;
-  // Équipage de démo : son trajet est rejoué en boucle, on le montre à l'heure DU RAID (lib/demo-clock.ts).
-  const demo = !!crew?.is_demo && !!startDate;
-  const raidPoints = useMemo(() => (demo ? demoTrack(points, startDate!) : points), [demo, points, startDate]);
-  // Jour du raid (recalculé à chaque position reçue, donc aussi après minuit pendant le raid).
-  const cal = useMemo(
-    () => raidDay(startDate, event?.endDate ?? null, new Date(demo ? demoRaidTime(startDate!, Date.now()) : Date.now())),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- last_fix_at : recalcul voulu à chaque position
-    [startDate, event?.endDate, demo, crew?.last_fix_at],
-  );
-  const profile = useMemo(() => altitudeProfile(raidPoints, startDate), [raidPoints, startDate]);
-  const roadbook = useRoadbook(event?.waypoints ?? NO_WAYPOINTS, event?.totalKm ?? null, raidPoints, cal, startDate);
-  const plannedStop = roadbook.stops[roadbook.planned.index];
-  const plannedSub = plannedStop?.subs[roadbook.planned.sub];
-  const planned = plannedStop ? (plannedSub ? `${plannedSub.name} · ${plannedStop.name}` : plannedStop.name) : null;
+  // Jour 1 du voyage = jour du premier point de la trace.
+  const startedAt = points[0]?.[2] ?? null;
+  const profile = useMemo(() => altitudeProfile(points, startedAt != null ? localDate(startedAt) : null), [points, startedAt]);
 
   if (isLoading) return <PageShell><PageLoader /></PageShell>;
   if (!crew) return <NotFound />;
 
   const cover = mediaUrl(crew.cover_path);
   const live = isLive(crew.last_fix_at);
-  const hasRoute = !!event && roadbook.stops.length > 1;
 
   return (
     <PageShell padTop={false}>
       <Seo
         title={crew.name}
-        description={crew.tagline ?? `Suivez l'équipage ${crew.name} en direct sur le 4L Trophy.`}
+        description={crew.tagline ?? `Suivez le voyage ${crew.name} en direct.`}
         image={cover ?? mediaUrl(crew.avatar_path)}
         noindex={!crew.is_public}
-        jsonLd={[
-          {
-            '@context': 'https://schema.org',
-            '@type': 'SportsTeam',
-            name: crew.name,
-            description: crew.tagline ?? undefined,
-            sport: '4L Trophy',
-            image: cover ?? mediaUrl(crew.avatar_path) ?? undefined,
-            url: `${window.location.origin}/equipages/${crew.slug}`,
-            sameAs: [crew.instagram_url, crew.facebook_url].filter(Boolean),
-          },
-          {
-            '@context': 'https://schema.org',
-            '@type': 'BreadcrumbList',
-            itemListElement: [
-              { '@type': 'ListItem', position: 1, name: 'Accueil', item: `${window.location.origin}/` },
-              { '@type': 'ListItem', position: 2, name: 'Équipages', item: `${window.location.origin}/equipages` },
-              { '@type': 'ListItem', position: 3, name: crew.name },
-            ],
-          },
-        ]}
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Accueil', item: `${window.location.origin}/` },
+            { '@type': 'ListItem', position: 2, name: crew.name },
+          ],
+        }}
       />
 
       {/* ── En-tête : remplit l'écran, la carte arrive juste en dessous.
@@ -184,11 +153,11 @@ export default function CrewPage() {
               {crew.car_number && (
                 <span className="rounded-[3px] bg-primary px-2 py-1 font-mono text-xs font-bold tracking-normal text-white">#{crew.car_number}</span>
               )}
-              <span>Équipage · {event?.name ?? '4L Trophy'}</span>
+              <span>Voyage</span>
               <LiveBadge lastFixAt={crew.last_fix_at} />
               {!live && crew.last_fix_at && <span className="text-dust-400">Dernière position {formatRelative(crew.last_fix_at)}</span>}
               {!crew.is_public && <span className="border border-cream/25 px-2 py-1 text-dust-100">Page privée</span>}
-              {crew.is_demo && <span className="border border-ochre/60 px-2 py-1 text-ochre">Équipage de démonstration</span>}
+              {crew.is_demo && <span className="border border-ochre/60 px-2 py-1 text-ochre">Voyage de démonstration</span>}
             </Kicker>
             <div className="flex flex-col gap-3">
               <h1 className="m-0 break-words font-display text-[clamp(56px,9vw,152px)] font-black uppercase leading-[0.92] text-cream">
@@ -253,13 +222,13 @@ export default function CrewPage() {
         id="carte"
         first
         kicker={live ? <><LiveDot />Suivi en direct</> : 'Suivi GPS'}
-        title="Où est la 4L ?"
+        title="Où en sont-ils ?"
         subtitle={crew.is_demo
-          ? 'Démonstration : le vrai trajet de l’équipage, de Saint-Quentin au désert, rejoué en boucle et en temps réel.'
-          : 'Position en temps réel et trace complète depuis le départ.'}
+          ? 'Démonstration : un trajet rejoué en boucle et en temps réel.'
+          : 'Position en temps réel et trace complète depuis le départ. Pas de nouvelle position ? Souvent, il n’y a simplement pas de réseau.'}
       >
         <Suspense fallback={<div className="h-[600px] animate-pulse border border-cream/[0.14] bg-ink-900" />}>
-          <CrewMap crew={crew} points={points} waypoints={event?.waypoints ?? []} sponsors={sponsors} photos={photos} />
+          <CrewMap crew={crew} points={points} waypoints={[]} sponsors={sponsors} photos={photos} />
         </Suspense>
       </Section>
 
@@ -273,20 +242,16 @@ export default function CrewPage() {
             </div>
             <p className="m-0 max-w-[420px] text-base leading-relaxed text-dust-300">Mises à jour automatiquement à chaque nouvelle position.</p>
           </div>
-          <CrewStats stats={stats} cal={cal} planned={planned} />
+          <CrewStats stats={stats} startedAt={startedAt} />
         </Container>
       </section>
 
-      {/* ── La route ─────────────────────────────────────────────────────── */}
-      {hasRoute && (
-        <Section
-          id="route"
-          tone="sand"
-          kicker="Le roadbook"
-          title="La route"
-          subtitle={`De ${roadbook.stops[0]!.name} à ${roadbook.stops.at(-1)!.name} : où en est l’équipage sur le parcours prévu, jour après jour.`}
-        >
-          <CrewRoadbook roadbook={roadbook} cal={cal} distanceKm={stats?.total_distance_km ?? 0} profile={profile} />
+      {/* ── Relief (altitude envoyée par le téléphone) ─────────────────────── */}
+      {profile && (
+        <Section id="relief" tone="sand" kicker="Profil d’altitude" title="Le relief" subtitle="Montées, descentes et point culminant, jour par jour.">
+          <Suspense fallback={<div className="h-[260px] animate-pulse border-2 border-coal bg-cream" />}>
+            <CrewElevation profile={profile} />
+          </Suspense>
         </Section>
       )}
 
@@ -317,9 +282,9 @@ export default function CrewPage() {
       {crew.contact_email && (
         <section className="border-t border-cream/[0.12] bg-ink py-14">
           <Container className="flex flex-wrap items-center justify-between gap-6">
-            <p className="m-0 font-display text-4xl font-black uppercase leading-none">Un message pour l’équipage ?</p>
+            <p className="m-0 font-display text-4xl font-black uppercase leading-none">Un message pour les voyageurs ?</p>
             <div className="flex flex-wrap gap-3">
-              <Button asChild variant="secondary"><a href={`mailto:${crew.contact_email}`}><Mail />Contacter l'équipage</a></Button>
+              <Button asChild variant="secondary"><a href={`mailto:${crew.contact_email}`}><Mail />Leur écrire</a></Button>
             </div>
           </Container>
         </section>

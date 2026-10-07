@@ -22,8 +22,8 @@ const F = {
 };
 const MONO_LABEL = `font-family:${F.mono};font-weight:600;font-size:11px;letter-spacing:.16em;text-transform:uppercase`;
 
-const SIGNATURE = 'Par un trophyste, pour les trophystes';
-const TAGLINE = 'Suivez les équipages du 4L Trophy en direct.';
+const SIGNATURE = 'Carnet de route en direct';
+const TAGLINE = 'Le carnet de route en direct de vos voyages.';
 
 export interface EmailLayout {
   /** Adresse du site (ou `{{ .SiteURL }}`), pour le logo. */
@@ -93,7 +93,7 @@ export function emailLayout(e: EmailLayout): string {
         <td style="vertical-align:middle;white-space:nowrap">
           <img src="${e.siteUrl}/email-logo.png" width="34" height="34" alt="" style="vertical-align:middle;border:0;margin-right:10px"><span style="vertical-align:middle;font-family:${F.display};font-size:24px;font-weight:900;line-height:1;text-transform:uppercase;color:${C.sand}">TROPHY<span style="color:${C.red}">TRACKER</span></span>
         </td>
-        <td class="tt-tagline" align="right" style="vertical-align:middle;${MONO_LABEL};font-size:10px;color:${C.dust}">Suivi en direct · 4L Trophy</td>
+        <td class="tt-tagline" align="right" style="vertical-align:middle;${MONO_LABEL};font-size:10px;color:${C.dust}">Suivi en direct · Carnet de route</td>
       </tr></table>
     </td></tr>
     <tr><td style="padding:12px 24px;border-bottom:2px solid ${C.coal};${MONO_LABEL};color:${C.coal}">${e.kicker}</td></tr>
@@ -104,11 +104,11 @@ export function emailLayout(e: EmailLayout): string {
     </td></tr>
     <tr><td style="padding:14px 20px;border-top:2px solid ${C.coal}">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-        <td style="vertical-align:middle;padding-right:10px;${MONO_LABEL};font-size:10px;color:${C.muted}">Biarritz</td>
+        <td style="vertical-align:middle;padding-right:10px;${MONO_LABEL};font-size:10px;color:${C.muted}">Départ</td>
         ${dottedLine}
         <td style="vertical-align:middle;padding:0 8px;line-height:0"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${C.red};border:3px solid #F6C9C5"></span></td>
         ${dottedLine}
-        <td style="vertical-align:middle;padding-left:10px;${MONO_LABEL};font-size:10px;color:${C.muted}">Marrakech</td>
+        <td style="vertical-align:middle;padding-left:10px;${MONO_LABEL};font-size:10px;color:${C.muted}">Arrivée</td>
       </tr></table>
     </td></tr>
   </table>

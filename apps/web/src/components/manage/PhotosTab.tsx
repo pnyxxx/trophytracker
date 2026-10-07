@@ -4,7 +4,7 @@
  *
  * Position de chaque photo, dans l'ordre :
  *  1. le GPS de l'appareil enregistré dans la photo (EXIF) ;
- *  2. sinon, la trace de la 4L à l'heure de la prise de vue ;
+ *  2. sinon, la trace du voyage à l'heure de la prise de vue ;
  *  3. sinon, à placer à la main (recherche d'adresse, carte, coordonnées) — ou pas du tout.
  * Le fichier envoyé, lui, est ré-encodé sans aucune métadonnée (voir media.ts).
  */
@@ -24,7 +24,7 @@ import { removeCrewImages, thumbUrl, uploadCrewImage } from '@/lib/media';
 import { readPhotoMeta } from '@/lib/photoMeta';
 import { describePosition, type Place } from '@/lib/geocode';
 import { positionAt } from '@/lib/geo';
-import { dayOfRaid } from '@/lib/stages';
+import { dayOfTrip } from '@/lib/days';
 import { Spinner } from '@/components/common/Spinner';
 import { orNull, Panel } from './shared';
 import { LocationPicker, type Coords } from './LocationPicker';
@@ -49,7 +49,7 @@ interface Draft {
 
 const SOURCE_LABEL: Record<Source, string> = {
   photo: 'position enregistrée dans la photo',
-  trace: 'retrouvée grâce à la trace de la 4L',
+  trace: 'retrouvée grâce à la trace du voyage',
   manual: 'placée à la main',
 };
 
@@ -60,8 +60,8 @@ const shortTime = (d: Date) => d.toLocaleTimeString('fr-FR', { hour: '2-digit', 
 function dateLabel(d: Date | null, start: string | null, end: string | null): string | null {
   if (!d) return null;
   if (start) {
-    const day = dayOfRaid(start, d);
-    const total = end ? dayOfRaid(start, new Date(`${end}T12:00:00`)) : 99;
+    const day = dayOfTrip(start, d);
+    const total = end ? dayOfTrip(start, new Date(`${end}T12:00:00`)) : 99;
     if (day >= 1 && day <= total) return `Jour ${day} · ${shortDate(d)}`;
   }
   return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -112,7 +112,7 @@ function PositionDialog({ crew, initial, onSave, onClose }: {
             <>
               {car && (
                 <button type="button" className={shortcut} onClick={() => { setCoords(car); setPlace(null); }}>
-                  <Navigation className="h-3.5 w-3.5" />Dernière position de la 4L
+                  <Navigation className="h-3.5 w-3.5" />Dernière position du voyage
                 </button>
               )}
               <button type="button" className={shortcut} onClick={myPosition} disabled={locating}>
@@ -152,7 +152,7 @@ export function PhotosTab({ crew }: { crew: Crew }) {
   const update = (key: string, patch: Partial<Draft>) =>
     setDrafts((list) => list.map((d) => (d.key === key ? { ...d, ...patch } : d)));
 
-  /** Toute la trace de la 4L (une seule fois), pour retrouver où elle était à l'heure d'une photo. */
+  /** Toute la trace du voyage (une seule fois), pour retrouver où il était à l'heure d'une photo. */
   const track = () =>
     queryClient.fetchQuery({
       queryKey: ['track-all', crew.id],

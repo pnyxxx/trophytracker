@@ -1,35 +1,23 @@
 import type { CrewStats as Stats } from '@/hooks/queries';
+import { dayOfTrip, localDate } from '@/lib/days';
 import { formatNumber } from '@/lib/format';
-import type { RaidDay } from '@/lib/stages';
 
-/** Case « Calendrier » : jour du raid (J7 / 12), compte à rebours avant, ou raid terminé. */
-function calendarItem(cal: RaidDay, planned: string | null) {
-  switch (cal.phase) {
-    case 'before':
-      return { label: 'Avant le départ', value: `J-${cal.daysUntil}`, unit: '' };
-    case 'during':
-      return { label: planned ? `Au programme : ${planned}` : 'Jour de raid', value: `J${cal.day}`, unit: cal.total ? `/ ${cal.total}` : '' };
-    case 'after':
-      return { label: 'Raid terminé', value: String(cal.total ?? '—'), unit: cal.total ? 'jours' : '' };
-    default:
-      return { label: 'Jour de raid', value: '—', unit: '' };
-  }
-}
-
-/** Tableau de bord de l'équipage : cases séparées d'un filet, comme un roadbook. */
-export function CrewStats({ stats, cal, planned }: { stats: Stats | null | undefined; cal: RaidDay; planned: string | null }) {
-  const day = calendarItem(cal, planned);
+/** Tableau de bord du voyage : cases séparées d'un filet, comme un roadbook. */
+export function CrewStats({ stats, startedAt }: {
+  stats: Stats | null | undefined;
+  /** Horodatage (secondes) du premier point de la trace : le jour 1 du voyage. */
+  startedAt: number | null;
+}) {
+  const day = startedAt != null ? dayOfTrip(localDate(startedAt), new Date()) : null;
   const items = [
     { tag: '01 · DISTANCE', label: 'Distance parcourue', value: formatNumber(stats?.total_distance_km, 1), unit: 'km' },
     { tag: '02 · VITESSE', label: 'Vitesse actuelle', value: formatNumber(stats?.current_speed_kmh), unit: 'km/h' },
     { tag: '03 · MOYENNE', label: 'Moyenne (dernière heure)', value: formatNumber(stats?.avg_speed_kmh), unit: 'km/h' },
-    { tag: '04 · CLASSEMENT', label: 'Classement', value: stats?.current_rank ? `${stats.current_rank}ᵉ` : '—', unit: '' },
-    { tag: '05 · SOLIDARITÉ', label: 'Fournitures à livrer', value: formatNumber(stats?.supplies_count), unit: '' },
-    { tag: '06 · CALENDRIER', ...day },
+    { tag: '04 · CALENDRIER', label: 'Jours sur la route', value: day != null ? String(day) : '—', unit: day != null ? (day > 1 ? 'jours' : 'jour') : '' },
   ];
 
   return (
-    <dl className="m-0 grid grid-cols-2 gap-px border border-cream/[0.14] bg-cream/[0.14] lg:grid-cols-3">
+    <dl className="m-0 grid grid-cols-2 gap-px border border-cream/[0.14] bg-cream/[0.14] lg:grid-cols-4">
       {items.map((s) => (
         <div key={s.tag} className="flex flex-col gap-3 bg-ink p-5 md:p-7">
           <dt className="flex flex-col gap-1">

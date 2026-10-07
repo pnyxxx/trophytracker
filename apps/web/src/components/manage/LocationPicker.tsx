@@ -23,7 +23,7 @@ interface Props {
   /** `place` : le lieu choisi dans les suggestions (null après un ajustement à la main). */
   onChange: (value: Coords | null, place: Place | null) => void;
   placeholder?: string;
-  /** Raccourcis supplémentaires (ex. « Position de la 4L »), affichés sous la recherche. */
+  /** Raccourcis supplémentaires (ex. « Dernière position du voyage »), affichés sous la recherche. */
   shortcuts?: ReactNode;
 }
 

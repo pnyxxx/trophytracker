@@ -27,7 +27,7 @@ const storagePath = (p: string) => p.split('/').map(encodeURIComponent).join('/'
 export function renderCrewPage(template: string, siteUrl: string, slug: string, crew: CrewMeta): string {
   const base = siteUrl.replace(/\/$/, '');
   // Même texte par défaut que la page React (apps/web/src/pages/CrewPage.tsx).
-  const description = crew.tagline ?? `Suivez l'équipage ${crew.name} en direct sur le 4L Trophy.`;
+  const description = crew.tagline ?? `Suivez le voyage ${crew.name} en direct.`;
   // Couverture réduite à 1200 px de large (taille conseillée pour les aperçus, et bien plus légère).
   const image = crew.cover_path
     ? `${base}/storage/v1/render/image/public/${MEDIA_BUCKET}/${storagePath(crew.cover_path)}?width=1200&quality=75`
