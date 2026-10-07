@@ -6,7 +6,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
 
-select plan(25);
+select plan(26);
 
 insert into auth.users (id, email, raw_user_meta_data, aud, role) values
   ('00000000-0000-0000-0000-0000000000a1', 'anna@test.local', '{"display_name":"Anna"}', 'authenticated', 'authenticated'),
@@ -33,8 +33,8 @@ create temp table t_codes (name text, code text);
 grant all on t_codes to authenticated;
 insert into t_codes values ('solo', public.admin_create_access_code('Sponsor X'));
 insert into t_codes values ('duo', public.admin_create_access_code('Deux équipages', 2));
-select matches((select code from t_codes where name = 'solo'), '^4L-[A-HJKMNP-Z2-9]{4}-[A-HJKMNP-Z2-9]{4}$',
-  'le code est lisible : 4L-XXXX-XXXX sans caractère ambigu');
+select matches((select code from t_codes where name = 'solo'), '^TT-[A-HJKMNP-Z2-9]{4}-[A-HJKMNP-Z2-9]{4}$',
+  'le code est lisible : TT-XXXX-XXXX sans caractère ambigu');
 select throws_ok($$ select public.admin_create_access_code('trop tard', 1, now() - interval '1 day') $$, 'P0001', null,
   'pas de date limite dans le passé');
 select is((select count(*)::int from public.admin_list_access_codes()), 2, 'l''admin voit ses codes');
@@ -42,11 +42,11 @@ reset role;
 
 -- ─── Utiliser un code ───────────────────────────────────────────────────────
 select pg_temp.as_user('00000000-0000-0000-0000-0000000000a1');
-select is(public.redeem_access_code('4L-ZZZZ-ZZZZ'), 'invalid', 'un code inconnu est refusé');
+select is(public.redeem_access_code('TT-ZZZZ-ZZZZ'), 'invalid', 'un code inconnu est refusé');
 select throws_ok($$ select public.create_crew('Anna Team') $$, 'P0001', null, 'sans code valable, pas d''équipage');
--- Saisie « à la main » : minuscules, espaces, sans le préfixe 4L.
+-- Saisie « à la main » : minuscules, espaces, sans le préfixe TT.
 select is(public.redeem_access_code(lower(replace(substr((select code from t_codes where name = 'solo'), 4), '-', ' '))), 'ok',
-  'anna utilise le code, même saisi en minuscules et sans « 4L- »');
+  'anna utilise le code, même saisi en minuscules et sans « TT- »');
 select is((select source || '/' || status || '/' || amount_cents from public.crew_purchases), 'code/paid/0',
   'anna reçoit un accès offert à 0 €');
 select throws_ok(format('select public.redeem_access_code(%L)', (select code from t_codes where name = 'duo')), 'P0001', null,
@@ -57,6 +57,14 @@ reset role;
 select pg_temp.as_user('00000000-0000-0000-0000-0000000000b1');
 select is(public.redeem_access_code((select code from t_codes where name = 'solo')), 'exhausted', 'un code à usage unique ne sert qu''une fois');
 select is(public.redeem_access_code((select code from t_codes where name = 'duo')), 'ok', 'bob utilise le code à 2 utilisations');
+reset role;
+
+-- Un ancien code « 4L- » déjà distribué reste valable, même saisi sans préfixe.
+insert into auth.users (id, email, raw_user_meta_data, aud, role) values
+  ('00000000-0000-0000-0000-0000000000d1', 'dina@test.local', '{"display_name":"Dina"}', 'authenticated', 'authenticated');
+insert into public.access_codes (code, note) values ('4L-OLDC-ODE2', 'Ancien format');
+select pg_temp.as_user('00000000-0000-0000-0000-0000000000d1');
+select is(public.redeem_access_code('oldc ode2'), 'ok', 'un ancien code 4L- marche encore');
 reset role;
 
 -- ─── Désactivation, expiration, essais répétés ──────────────────────────────

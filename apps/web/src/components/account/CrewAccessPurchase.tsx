@@ -59,7 +59,7 @@ function AccessCodeForm() {
           required
           value={code}
           onChange={(e) => setCode(e.target.value.toUpperCase())}
-          placeholder="4L-XXXX-XXXX"
+          placeholder="TT-XXXX-XXXX"
           autoComplete="off"
           spellCheck={false}
           className="font-mono uppercase tracking-[0.08em]"
