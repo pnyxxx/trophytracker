@@ -374,6 +374,53 @@ export type Database = {
           },
         ]
       }
+      journal_entries: {
+        Row: {
+          ai_generated: boolean
+          body: string
+          created_at: string
+          created_by: string | null
+          crew_id: string
+          day: string
+          id: string
+          published: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          ai_generated?: boolean
+          body: string
+          created_at?: string
+          created_by?: string | null
+          crew_id: string
+          day: string
+          id?: string
+          published?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          ai_generated?: boolean
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          crew_id?: string
+          day?: string
+          id?: string
+          published?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_entries_crew_id_fkey"
+            columns: ["crew_id"]
+            isOneToOne: false
+            referencedRelation: "crews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       photos: {
         Row: {
           created_at: string
@@ -797,6 +844,10 @@ export type Database = {
           has_device_key: boolean
           traccar_device_id: string
         }[]
+      }
+      get_day_summary: {
+        Args: { p_crew: string; p_day: string; p_tz?: string }
+        Returns: Json
       }
       get_telemetry: { Args: { p_crew: string; p_tz?: string }; Returns: Json }
       get_track: { Args: { p_crew: string; p_since?: string }; Returns: Json }

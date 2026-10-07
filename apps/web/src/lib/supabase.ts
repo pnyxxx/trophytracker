@@ -47,4 +47,5 @@ export type Crew = Tables<'crews'>;
 export type Photo = Tables<'photos'>;
 export type Sponsor = Tables<'sponsors'>;
 export type TripStage = Tables<'trip_stages'>;
+export type JournalEntry = Tables<'journal_entries'>;
 export type Profile = Tables<'profiles'>;

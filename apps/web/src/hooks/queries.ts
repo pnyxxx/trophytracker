@@ -14,6 +14,7 @@ export const keys = {
   photos: (crewId: string) => ['photos', crewId] as const,
   sponsors: (crewId: string) => ['sponsors', crewId] as const,
   stages: (crewId: string) => ['stages', crewId] as const,
+  journal: (crewId: string) => ['journal', crewId] as const,
   members: (crewId: string) => ['members', crewId] as const,
   tracking: (crewId: string) => ['tracking', crewId] as const,
   follows: (userId: string) => ['follows', userId] as const,
@@ -82,6 +83,15 @@ export function useStages(crewId: string | undefined) {
     queryFn: async () =>
       unwrap(await supabase.from('trip_stages').select('*').eq('crew_id', crewId!)
         .order('arrived_at', { ascending: true, nullsFirst: false }).order('created_at')),
+  });
+}
+
+/** Pages du journal de bord (publiées pour les visiteurs ; brouillons en plus pour les voyageurs). */
+export function useJournal(crewId: string | undefined) {
+  return useQuery({
+    queryKey: keys.journal(crewId ?? ''),
+    enabled: !!crewId,
+    queryFn: async () => unwrap(await supabase.from('journal_entries').select('*').eq('crew_id', crewId!).order('day')),
   });
 }
 

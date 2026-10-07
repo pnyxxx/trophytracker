@@ -107,7 +107,9 @@ export default function PrivacyPage() {
         recherche d’adresses basé sur OpenStreetMap. Pour afficher la météo sur la page d’un road trip, votre navigateur envoie
         la dernière position du road trip, arrondie à environ 1 km, à{' '}
         <a href="https://open-meteo.com" target="_blank" rel="noopener noreferrer">Open-Meteo</a> (Suisse), un service météo
-        gratuit et sans compte.
+        gratuit et sans compte. Quand un voyageur demande un brouillon de journal de bord, les faits de la journée (kilomètres,
+        heures, altitudes, noms des étapes et des photos, notes) sont envoyés à Anthropic (États-Unis), qui fournit l’IA Claude, le
+        temps de rédiger le texte ; le voyageur le relit avant toute publication.
       </p>
 
       <h2>Cookies</h2>

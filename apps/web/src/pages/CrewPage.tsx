@@ -14,7 +14,7 @@ import { CrewGallery } from '@/components/crew/CrewGallery';
 import { CrewSponsors } from '@/components/crew/CrewSponsors';
 import { CrewLogbook } from '@/components/crew/CrewLogbook';
 import { CrewShareButton } from '@/components/crew/CrewQr';
-import { useCrew, useCrewStats, useMyRole, usePhotos, useSponsors, useStages } from '@/hooks/queries';
+import { useCrew, useCrewStats, useJournal, useMyRole, usePhotos, useSponsors, useStages } from '@/hooks/queries';
 import { useLiveTrack } from '@/hooks/useLiveTrack';
 import { formatRelative, isLive } from '@/lib/format';
 import { localDate } from '@/lib/days';
@@ -114,6 +114,8 @@ export default function CrewPage() {
   const { data: photos = [] } = usePhotos(crew?.id);
   const { data: sponsors = [] } = useSponsors(crew?.id);
   const { data: stages = [] } = useStages(crew?.id);
+  const { data: journal = [] } = useJournal(crew?.id);
+  const published = journal.filter((j) => j.published);
   const { canEdit } = useMyRole(crew?.id);
   const { points } = useLiveTrack(crew);
   const [replay, setReplay] = useState(false);
@@ -273,9 +275,9 @@ export default function CrewPage() {
       )}
 
       {/* ── Carnet de route : étapes (et journal) ───────────────────────────── */}
-      {stages.length > 0 && (
-        <Section id="carnet" tone="cream" kicker="Carnet de route" title="Les étapes" subtitle="Racontées par les voyageurs, au fil de la route.">
-          <CrewLogbook stages={stages} photos={photos} />
+      {(stages.length > 0 || published.length > 0) && (
+        <Section id="carnet" tone="cream" kicker="Carnet de route" title="Jour après jour" subtitle="Étapes et journal de bord, racontés par les voyageurs.">
+          <CrewLogbook stages={stages} photos={photos} journal={published} />
         </Section>
       )}
 

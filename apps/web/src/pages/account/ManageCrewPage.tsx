@@ -14,6 +14,7 @@ import { MembersTab } from '@/components/manage/MembersTab';
 import { GpsTab } from '@/components/manage/GpsTab';
 import { DangerTab } from '@/components/manage/DangerTab';
 import { StagesTab } from '@/components/manage/StagesTab';
+import { JournalTab } from '@/components/manage/JournalTab';
 import { LaunchChecklist } from '@/components/manage/LaunchChecklist';
 import { CrewQrPanel, CrewShareButton } from '@/components/crew/CrewQr';
 
@@ -21,6 +22,7 @@ const TABS = [
   { id: 'infos', label: 'Infos' },
   { id: 'gps', label: 'GPS' },
   { id: 'etapes', label: 'Étapes' },
+  { id: 'journal', label: 'Journal' },
   { id: 'photos', label: 'Photos' },
   { id: 'sponsors', label: 'Sponsors' },
   { id: 'membres', label: 'Membres' },
@@ -66,6 +68,7 @@ export default function ManageCrewPage() {
           <TabsContent value="infos"><InfoTab crew={crew} /></TabsContent>
           <TabsContent value="gps"><GpsTab crew={crew} /></TabsContent>
           <TabsContent value="etapes"><StagesTab crew={crew} /></TabsContent>
+          <TabsContent value="journal"><JournalTab crew={crew} /></TabsContent>
           <TabsContent value="photos"><PhotosTab crew={crew} /></TabsContent>
           <TabsContent value="sponsors"><SponsorsTab crew={crew} /></TabsContent>
           <TabsContent value="membres"><MembersTab crew={crew} /></TabsContent>
