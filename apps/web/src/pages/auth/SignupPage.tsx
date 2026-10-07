@@ -54,7 +54,7 @@ export default function SignupPage() {
   return (
     <AuthLayout
       title="Créer un compte"
-      subtitle="Gratuit pour suivre vos équipages favoris. Vous participez au raid ? Créez ensuite la page du vôtre."
+      subtitle="Gratuit pour suivre vos road trips favoris. Vous participez au raid ? Créez ensuite la page du vôtre."
       footer={<>Déjà inscrit ? <Link to={`/connexion?next=${encodeURIComponent(next)}`} className="font-semibold text-primary hover:underline">Se connecter</Link></>}
     >
       <GoogleButton next={next} />

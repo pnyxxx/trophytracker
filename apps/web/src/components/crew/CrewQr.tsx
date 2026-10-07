@@ -1,5 +1,5 @@
 /**
- * QR code de l'équipage, aux couleurs de TrophyTracker : aperçu, téléchargement PNG et partage.
+ * QR code du road trip, aux couleurs de TrophyTracker : aperçu, téléchargement PNG et partage.
  * Proposé sur la page publique (dans la fenêtre « Partager », avec le lien de la page)
  * et dans l'espace équipage (onglet « QR code »).
  */
@@ -26,7 +26,7 @@ export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl
   const [error, setError] = useState(false);
 
   const eventLabel = 'Carnet de route en direct';
-  const pageUrl = `${window.location.origin}/equipages/${crew.slug}`;
+  const pageUrl = `${window.location.origin}/road-trips/${crew.slug}`;
   const fileName = `trophytracker-${crew.slug}-${format === 'sticker' ? 'autocollant' : 'story'}.png`;
 
   useEffect(() => {
@@ -101,7 +101,7 @@ export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl
         {showUrl && <p className="m-0 break-all font-mono text-xs text-dust-400">Le QR code ouvre : {pageUrl}</p>}
         {!crew.is_public && (
           <p className="m-0 rounded-md border border-gold/40 bg-gold/10 px-3 py-2 text-sm text-gold">
-            Votre page est privée : le QR code ne marchera que pour les membres de l’équipage. Rendez-la publique dans « Infos » avant de l’imprimer.
+            Votre page est privée : le QR code ne marchera que pour les membres du road trip. Rendez-la publique dans « Infos » avant de l’imprimer.
           </p>
         )}
 
@@ -131,7 +131,7 @@ export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl
  */
 export function CrewShareButton({ crew, className }: { crew: CrewForQr; className?: string }) {
   const [open, setOpen] = useState(false);
-  const pageUrl = `${window.location.origin}/equipages/${crew.slug}`;
+  const pageUrl = `${window.location.origin}/road-trips/${crew.slug}`;
   const canShare = typeof navigator.share === 'function';
 
   const send = async () => {

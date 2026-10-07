@@ -39,14 +39,14 @@ export default function LegalNoticePage() {
       <h2>Indépendance</h2>
       <p>
         TrophyTracker est un projet indépendant : il n’est <strong>affilié à aucun organisateur</strong> de raid, de rallye ou
-        d’événement, et aucun organisateur ne le soutient ni ne le valide. Les étapes, dates et textes d’un voyage sont saisis par ses
+        d’événement, et aucun organisateur ne le soutient ni ne le valide. Les étapes, dates et textes d’un road trip sont saisis par ses
         voyageurs, sous leur responsabilité ; ils ne remplacent jamais les communications officielles d’un organisateur.
       </p>
 
       <h2>Propriété intellectuelle</h2>
       <p>
-        Le site (textes, design, code) appartient à son éditeur. Les pages des équipages, leurs textes, photos et logos de sponsors
-        appartiennent aux équipages et à leurs auteurs, qui en sont responsables (voir les{' '}
+        Le site (textes, design, code) appartient à son éditeur. Les pages des road trips, leurs textes, photos et logos de sponsors
+        appartiennent aux road trips et à leurs auteurs, qui en sont responsables (voir les{' '}
         <Link to="/conditions-utilisation">conditions d’utilisation</Link>).
       </p>
       <p>

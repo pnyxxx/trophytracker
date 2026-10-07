@@ -1,5 +1,20 @@
 import { toast } from 'sonner';
 
+/**
+ * Messages de la base encore écrits avec « équipage » (fonctions SQL d'avant le passage aux road trips) :
+ * on les reformule ici, en attendant que ces fonctions soient réécrites.
+ */
+const WORDING: [RegExp, string][] = [
+  [/L[’']équipage doit/g, 'Le road trip doit'],
+  [/quitter l[’']équipage/g, 'quitter le road trip'],
+  [/de l[’']équipage/g, 'du road trip'],
+  [/d[’']un (autre )?équipage/g, 'd’un $1road trip'],
+  [/votre équipage/g, 'votre road trip'],
+  [/cet équipage/g, 'ce road trip'],
+  [/(\d+) équipages/g, '$1 road trips'],
+];
+export const reword = (msg: string) => WORDING.reduce((m, [re, by]) => m.replace(re, by), msg);
+
 /** Message d'erreur lisible, en français, à partir d'une erreur Supabase / réseau. */
 export function errorMessage(err: unknown): string {
   if (!err) return 'Erreur inconnue';
@@ -23,7 +38,7 @@ export function errorMessage(err: unknown): string {
   if (e.code === '23505') return msg.includes('duplicate') ? 'Cet élément existe déjà' : msg;
   if (e.code === '23514') return 'Valeur invalide';
   if (msg.includes('Payload too large') || e.status === 413) return 'Fichier trop volumineux';
-  return msg;
+  return reword(msg);
 }
 
 export const toastError = (err: unknown) => toast.error(errorMessage(err));

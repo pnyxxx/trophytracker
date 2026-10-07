@@ -1,5 +1,5 @@
 /**
- * Profil d'élévation RÉEL d'un équipage, à partir de l'altitude envoyée par le téléphone avec
+ * Profil d'élévation RÉEL d'un road trip, à partir de l'altitude envoyée par le téléphone avec
  * chaque position (Traccar Client). Pas de donnée externe : si le téléphone n'envoie pas
  * l'altitude, il n'y a pas de profil (et la section ne s'affiche pas).
  *

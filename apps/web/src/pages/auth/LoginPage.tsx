@@ -69,7 +69,7 @@ export default function LoginPage() {
   return (
     <AuthLayout
       title="Connexion"
-      subtitle="Retrouvez vos équipages favoris et gérez le vôtre."
+      subtitle="Retrouvez vos road trips favoris et gérez le vôtre."
       footer={<>Pas encore de compte ? <Link to={`/inscription?next=${encodeURIComponent(next)}`} className="font-semibold text-primary hover:underline">Créer un compte</Link></>}
     >
       <GoogleButton next={next} />

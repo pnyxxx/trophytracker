@@ -4,7 +4,7 @@
  *
  * Position de chaque photo, dans l'ordre :
  *  1. le GPS de l'appareil enregistré dans la photo (EXIF) ;
- *  2. sinon, la trace du voyage à l'heure de la prise de vue ;
+ *  2. sinon, la trace du road trip à l'heure de la prise de vue ;
  *  3. sinon, à placer à la main (recherche d'adresse, carte, coordonnées) — ou pas du tout.
  * Le fichier envoyé, lui, est ré-encodé sans aucune métadonnée (voir media.ts).
  */
@@ -49,7 +49,7 @@ interface Draft {
 
 const SOURCE_LABEL: Record<Source, string> = {
   photo: 'position enregistrée dans la photo',
-  trace: 'retrouvée grâce à la trace du voyage',
+  trace: 'retrouvée grâce à la trace du road trip',
   manual: 'placée à la main',
 };
 
@@ -101,7 +101,7 @@ function PositionDialog({ crew, initial, onSave, onClose }: {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Où a été prise cette photo&nbsp;?</DialogTitle>
-          <DialogDescription>Elle apparaîtra à cet endroit sur la carte de l’équipage.</DialogDescription>
+          <DialogDescription>Elle apparaîtra à cet endroit sur la carte du road trip.</DialogDescription>
         </DialogHeader>
         <LocationPicker
           id="photo-place"
@@ -112,7 +112,7 @@ function PositionDialog({ crew, initial, onSave, onClose }: {
             <>
               {car && (
                 <button type="button" className={shortcut} onClick={() => { setCoords(car); setPlace(null); }}>
-                  <Navigation className="h-3.5 w-3.5" />Dernière position du voyage
+                  <Navigation className="h-3.5 w-3.5" />Dernière position du road trip
                 </button>
               )}
               <button type="button" className={shortcut} onClick={myPosition} disabled={locating}>
@@ -152,7 +152,7 @@ export function PhotosTab({ crew }: { crew: Crew }) {
   const update = (key: string, patch: Partial<Draft>) =>
     setDrafts((list) => list.map((d) => (d.key === key ? { ...d, ...patch } : d)));
 
-  /** Toute la trace du voyage (une seule fois), pour retrouver où il était à l'heure d'une photo. */
+  /** Toute la trace du road trip (une seule fois), pour retrouver où il était à l'heure d'une photo. */
   const track = () =>
     queryClient.fetchQuery({
       queryKey: ['track-all', crew.id],

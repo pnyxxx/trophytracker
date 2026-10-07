@@ -14,10 +14,10 @@ const reminder = {
 describe('relance « configurez votre GPS »', () => {
   it('nomme l’équipage, la date de création et mène à l’onglet GPS', () => {
     const e = buildGpsReminderEmail(reminder, 'https://site.fr');
-    expect(e.subject).toBe('📡 Breizh en sables : votre voyage n’apparaît pas encore sur la carte');
+    expect(e.subject).toBe('📡 Breizh en sables : votre road trip n’apparaît pas encore sur la carte');
     expect(e.text).toContain('en ligne depuis le 5 octobre');
-    expect(e.text).toContain('https://site.fr/mon-compte/equipages/breizh-en-sables?onglet=gps');
-    expect(e.html).toContain('href="https://site.fr/mon-compte/equipages/breizh-en-sables?onglet=gps"');
+    expect(e.text).toContain('https://site.fr/mon-compte/road-trips/breizh-en-sables?onglet=gps');
+    expect(e.html).toContain('href="https://site.fr/mon-compte/road-trips/breizh-en-sables?onglet=gps"');
     expect(e.html).toContain('Traccar Client');
   });
 
@@ -34,6 +34,6 @@ describe('relance « configurez votre GPS »', () => {
     }, 'https://site.fr');
     expect(e.subject).toBe('📡 Relance GPS envoyée : Breizh en sables');
     expect(e.text).toContain('Yann (y@exemple.fr)');
-    expect(e.html).toContain('href="https://site.fr/equipages/breizh-en-sables"');
+    expect(e.html).toContain('href="https://site.fr/road-trips/breizh-en-sables"');
   });
 });

@@ -39,13 +39,13 @@ const STORES = [
 export function renderSetupPage(appLink: string, keyKnown: boolean): string {
   const body = keyKnown
     ? `<h1>Régler le suivi GPS</h1>
-  <p>Ce téléphone va envoyer la position du voyage. Touchez le bouton, puis répondez <strong>OK</strong> à « Apply new configuration? ».</p>
+  <p>Ce téléphone va envoyer la position du road trip. Touchez le bouton, puis répondez <strong>OK</strong> à « Apply new configuration? ».</p>
   <a class="btn" href="${escapeHtml(appLink)}">Ouvrir dans Traccar Client</a>
   <p class="small">Rien ne se passe ? Installez d’abord l’appli gratuite <strong>Traccar Client</strong>, puis scannez à nouveau le QR code.</p>
   <p class="stores">${STORES.map((s) => `<a href="${s.href}">${s.label}</a>`).join('')}</p>`
     : `<h1>QR code périmé</h1>
   <p>Cette clé n’est plus active : une nouvelle clé a sans doute été générée depuis.</p>
-  <p>Ouvrez l’onglet <strong>GPS</strong> de votre espace équipage sur trophytracker.fr et scannez le nouveau QR code.</p>`;
+  <p>Ouvrez l’onglet <strong>GPS</strong> de votre espace road trip sur trophytracker.fr et scannez le nouveau QR code.</p>`;
 
   return `<!doctype html>
 <html lang="fr">

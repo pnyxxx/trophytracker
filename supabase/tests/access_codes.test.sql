@@ -37,7 +37,7 @@ select matches((select code from t_codes where name = 'solo'), '^TT-[A-HJKMNP-Z2
   'le code est lisible : TT-XXXX-XXXX sans caractère ambigu');
 select throws_ok($$ select public.admin_create_access_code('trop tard', 1, now() - interval '1 day') $$, 'P0001', null,
   'pas de date limite dans le passé');
-select is((select count(*)::int from public.admin_list_access_codes()), 2, 'l''admin voit ses codes');
+select is((select count(*)::int from public.admin_list_access_codes() l join t_codes t on t.code = l.code), 2, 'l''admin voit ses codes');
 reset role;
 
 -- ─── Utiliser un code ───────────────────────────────────────────────────────

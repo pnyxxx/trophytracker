@@ -1,5 +1,5 @@
 /**
- * Carte en direct d'un équipage : trace complète, position actuelle, ville de départ,
+ * Carte en direct d'un road trip : trace complète, position actuelle, ville de départ,
  * points du parcours prévu, sponsors et photos placées.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -43,7 +43,7 @@ function MapController({ car, start, points, waypoints, follow }: {
       ? points.map((p) => [p[0], p[1]])
       : waypoints.map((w) => [w.lat, w.lon]);
     if (car) coords.push(car);
-    if (start) coords.push(start); // la ville de départ fait partie du voyage
+    if (start) coords.push(start); // la ville de départ fait partie du road trip
     if (coords.length === 0) return;
     initialized.current = true;
     if (coords.length === 1) map.setView(coords[0]!, 12);
@@ -187,7 +187,7 @@ export function CrewMap({ crew, points, waypoints: allWaypoints, sponsors, photo
             aria-pressed={follow}
           >
             <Crosshair className="h-4 w-4" />
-            {follow ? 'Suivi activé' : 'Suivre le voyage'}
+            {follow ? 'Suivi activé' : 'Suivre le road trip'}
           </button>
         )}
         <button
@@ -201,7 +201,7 @@ export function CrewMap({ crew, points, waypoints: allWaypoints, sponsors, photo
 
       {!car && (
         <div className="pointer-events-none absolute inset-x-3 bottom-4 z-[500] mx-auto w-fit border-l-[3px] border-primary bg-ink/[0.94] px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-cream">
-          Pas encore de position GPS : l'équipage n'a pas démarré son suivi.
+          Pas encore de position GPS : les voyageurs n'ont pas démarré leur suivi.
         </div>
       )}
     </div>

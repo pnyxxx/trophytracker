@@ -1,4 +1,4 @@
-/** Jours calendaires d'un voyage (J1 = jour du départ, en heure locale). */
+/** Jours calendaires d'un road trip (J1 = jour du départ, en heure locale). */
 
 /** Nombre de jours calendaires depuis l'origine, pour une date locale (« AAAA-MM-JJ » ou Date). */
 function dayIndex(d: string | Date) {
@@ -9,7 +9,7 @@ function dayIndex(d: string | Date) {
   return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86_400_000;
 }
 
-/** Jour du voyage (1 = jour du départ) d'un instant donné, sans borne. */
+/** Jour du road trip (1 = jour du départ) d'un instant donné, sans borne. */
 export const dayOfTrip = (startDate: string, at: Date) => dayIndex(at) - dayIndex(startDate) + 1;
 
 /** Date locale « AAAA-MM-JJ » d'un horodatage en secondes. */

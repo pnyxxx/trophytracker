@@ -4,9 +4,9 @@
  *                                (ouverte dans un navigateur : page « Régler Traccar Client », cf. setup-page.ts)
  *   GET      /health          ← santé du service (Docker healthcheck)
  *   GET      /sitemap.xml     ← plan du site pour Google (équipages publics)
- *   GET      /equipages/:slug ← HTML d'une page équipage, avec son titre et son aperçu de partage
+ *   GET      /road-trips/:slug ← HTML d'une page équipage, avec son titre et son aperçu de partage
  *
- * Exposé publiquement via Caddy sous /ingest/, /sitemap.xml et /equipages/….
+ * Exposé publiquement via Caddy sous /ingest/, /sitemap.xml et /road-trips/….
  */
 import Fastify from 'fastify';
 import rateLimit from '@fastify/rate-limit';
@@ -49,7 +49,7 @@ export async function buildHttp(db: Db, opts: { trustProxy: boolean; logger: boo
 
   // Équipage privé ou inconnu : coquille neutre, la page React affiche ce qu'il faut (sans rien révéler ici).
   // En cas d'erreur, Caddy sert lui-même la coquille neutre (apps/web/Caddyfile).
-  app.get<{ Params: { slug: string } }>('/equipages/:slug', async (req, reply) => {
+  app.get<{ Params: { slug: string } }>('/road-trips/:slug', async (req, reply) => {
     const { slug } = req.params;
     const crew = CREW_SLUG.test(slug) ? await db.crewPageMeta(slug) : null;
     const html = crew ? renderCrewPage(await shell('crew'), opts.siteUrl ?? 'http://localhost', slug, crew) : await shell('app');
@@ -57,7 +57,7 @@ export async function buildHttp(db: Db, opts: { trustProxy: boolean; logger: boo
   });
 
   // Seuls les refus sont journalisés (jamais la clé en entier ni les coordonnées) :
-  // de quoi dépanner un équipage sans noyer les journaux sous les positions normales.
+  // de quoi dépanner un road trip sans noyer les journaux sous les positions normales.
   const ingest = async (req: import('fastify').FastifyRequest, reply: import('fastify').FastifyReply) => {
     // QR code de configuration scanné avec l'appareil photo : page avec un bouton qui ouvre l'appli.
     if (req.method === 'GET' && isSetupRequest(req.query, req.headers.accept)) {

@@ -25,51 +25,51 @@ export default function PrivacyPage() {
       </p>
       <h3>Vos favoris</h3>
       <p>
-        La liste des équipages que vous suivez, visible par vous seul. <em>Base légale : l’exécution du service. Conservation : jusqu’à
+        La liste des road trips que vous suivez, visible par vous seul. <em>Base légale : l’exécution du service. Conservation : jusqu’à
         la suppression du compte.</em>
       </p>
-      <h3>Les pages d’équipage</h3>
+      <h3>Les pages de road trip</h3>
       <p>
-        Nom de l’équipage, présentation, école, ville, liens, email de contact, photos et sponsors, tels que l’équipage les saisit.
-        <em> Base légale : l’exécution du service. Conservation : jusqu’à la suppression de la page par l’équipage.</em>
+        Nom du road trip, présentation, école, ville, liens, email de contact, photos et sponsors, tels que les voyageurs les saisissent.
+        <em> Base légale : l’exécution du service. Conservation : jusqu’à la suppression de la page par les voyageurs.</em>
       </p>
       <h3>Les positions GPS</h3>
       <p>
-        Position, heure, vitesse, cap, altitude, précision et niveau de batterie envoyés par le téléphone de l’équipage. Ils servent à
+        Position, heure, vitesse, cap, altitude, précision et niveau de batterie envoyés par le téléphone du road trip. Ils servent à
         afficher la carte, la trace et les statistiques.
       </p>
       <ul>
         <li>
-          Elles ne sont collectées que lorsqu’un membre de l’équipage <strong>active volontairement</strong> le suivi, avec l’accord de
+          Elles ne sont collectées que lorsqu’un membre du road trip <strong>active volontairement</strong> le suivi, avec l’accord de
           tous les membres (le téléphone localise la voiture et donc tous ses occupants). Chacun peut retirer son accord à tout moment :
-          l’équipage coupe alors le suivi et peut supprimer la trace.
+          les voyageurs coupent alors le suivi et peuvent supprimer la trace.
         </li>
         <li>
-          Tant que l’équipage n’a pas lancé le suivi sur le site (mode essai), seule la dernière position reçue est gardée, visible de
+          Tant que les voyageurs n’ont pas lancé le suivi sur le site (mode essai), seule la dernière position reçue est gardée, visible de
           ses seuls membres, pour vérifier que le téléphone fonctionne. Le suivi se lance automatiquement le jour du départ
-          prévu, sauf si l’équipage l’a arrêté lui-même.
+          prévu, sauf si les voyageurs l’ont arrêté eux-mêmes.
         </li>
         <li>
-          Elles sont visibles par tous si la page de l’équipage est publique, et uniquement par ses membres si elle est privée.
+          Elles sont visibles par tous si la page du road trip est publique, et uniquement par ses membres si elle est privée.
         </li>
         <li>
           Conseil : lancez le suivi une fois partis de chez vous et arrêtez-le au retour, pour ne pas révéler votre domicile.
         </li>
       </ul>
       <p>
-        <em>Base légale : le consentement des membres de l’équipage. Conservation : jusqu’à ce que l’équipage supprime sa trace ou
+        <em>Base légale : le consentement des membres du road trip. Conservation : jusqu’à ce que les voyageurs suppriment leur trace ou
         sa page.</em>
       </p>
       <h3>Les photos</h3>
       <p>
         Elles sont compressées sur votre appareil avant l’envoi et le fichier publié ne garde aucune métadonnée. Pour placer une
         photo sur la carte, le site lit sur votre appareil sa date et sa position de prise de vue (ou la retrouve grâce à la trace du
-        voyage) : seule la position que l’équipage valide est publiée, et il peut la retirer à tout moment.{' '}
-        <em>Conservation : jusqu’à leur suppression par l’équipage.</em>
+        road trip) : seule la position que les voyageurs valident est publiée, et ils peuvent la retirer à tout moment.{' '}
+        <em>Conservation : jusqu’à leur suppression par les voyageurs.</em>
       </p>
       <h3>Les achats</h3>
       <p>
-        Pour l’accès équipage : compte acheteur, email, montant, date, statut du paiement, équipage créé et date d’acceptation des
+        Pour l’accès road trip : compte acheteur, email, montant, date, statut du paiement, road trip créé et date d’acceptation des
         conditions de vente. Le paiement lui-même est traité par Stripe : nous ne voyons jamais vos coordonnées bancaires.
         <em> Base légale : l’exécution du contrat et nos obligations comptables. Conservation : 10 ans (pièces comptables), même
         si le compte est supprimé.</em>
@@ -85,7 +85,7 @@ export default function PrivacyPage() {
       <ul>
         <li>
           l’éditeur du site, qui reçoit un email à chaque nouveau compte et à chaque nouvel abonnement (nom affiché, email du
-          compte, équipage suivi) pour suivre l’activité du service ; ces notifications sont effacées après 30 jours ;
+          compte, road trip suivi) pour suivre l’activité du service ; ces notifications sont effacées après 30 jours ;
         </li>
         <li>
           <strong>Cloudflare</strong> (États-Unis), par qui passe le trafic du site pour le protéger. Ce transfert hors de l’Union
@@ -93,7 +93,7 @@ export default function PrivacyPage() {
         </li>
         <li><strong>Brevo</strong> (France), qui envoie les emails ;</li>
         <li>
-          <strong>Stripe</strong> (Irlande et États-Unis), qui traite les paiements de l’accès équipage, en tant que prestataire de
+          <strong>Stripe</strong> (Irlande et États-Unis), qui traite les paiements de l’accès road trip, en tant que prestataire de
           paiement ; ses transferts hors de l’Union européenne sont encadrés par le Data Privacy Framework et des clauses types ;
         </li>
         <li><strong>Google</strong>, uniquement si vous choisissez de vous connecter avec votre compte Google.</li>
@@ -102,7 +102,7 @@ export default function PrivacyPage() {
         Pour afficher les cartes, votre navigateur télécharge directement des images auprès d’
         <a href="https://openfreemap.org" target="_blank" rel="noopener noreferrer">OpenFreeMap</a>, d’Esri (imagerie satellite) et
         d’Amazon Web Services (relief), qui voient donc votre adresse IP, comme pour n’importe quelle carte en ligne. Quand un
-        équipage cherche une adresse (sponsor, lieu d’une photo), le texte tapé ou la position à nommer est envoyé à{' '}
+        voyageur cherche une adresse (sponsor, lieu d’une photo), le texte tapé ou la position à nommer est envoyé à{' '}
         <a href="https://photon.komoot.io" target="_blank" rel="noopener noreferrer">Photon</a> (komoot, Allemagne), un service de
         recherche d’adresses basé sur OpenStreetMap.
       </p>
@@ -116,7 +116,7 @@ export default function PrivacyPage() {
       <h2>Sécurité</h2>
       <p>
         Connexion chiffrée (HTTPS), mots de passe chiffrés, double authentification disponible, droits d’accès vérifiés par la base de
-        données elle-même, clé GPS secrète par équipage. En cas de fuite de données présentant un risque, la CNIL et les personnes
+        données elle-même, clé GPS secrète par road trip. En cas de fuite de données présentant un risque, la CNIL et les personnes
         concernées seront prévenues comme la loi le prévoit.
       </p>
 
@@ -124,7 +124,7 @@ export default function PrivacyPage() {
       <p>
         Vous pouvez accéder à vos données, les corriger, les supprimer, les récupérer, vous opposer à leur traitement ou retirer votre
         consentement. La plupart se fait directement depuis « Mon compte » : la suppression du compte efface immédiatement vos données.
-        Un équipage peut supprimer sa page et ses photos, et effacer sa trace GPS (onglet GPS). Pour le reste, écrivez à{' '}
+        Un road trip peut supprimer sa page et ses photos, et effacer sa trace GPS (onglet GPS). Pour le reste, écrivez à{' '}
         <a href={CONTACT_HREF}>{EDITOR.email}</a> : réponse sous un mois au plus.
       </p>
       <p>

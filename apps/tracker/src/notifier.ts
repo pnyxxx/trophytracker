@@ -1,7 +1,7 @@
 /**
  * Envoi des emails automatiques, toutes les `pollSeconds`, par SMTP (le même
  * serveur que les emails du site) :
- *   - relances « configurez votre GPS » aux équipages (private.pending_gps_reminders),
+ *   - relances « configurez votre GPS » aux road trips (private.pending_gps_reminders),
  *     dont l'envoi ajoute une notification pour les admins ;
  *   - emails aux admins (file private.admin_notifications).
  * Un échec est retenté au tour suivant (5 essais au plus, compté par la base) ;

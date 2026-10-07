@@ -8,7 +8,7 @@ export default function SalesTermsPage() {
     <LegalPage
       seoTitle={PAGES['/conditions-vente'].title}
       title={<>Conditions<br />de vente</>}
-      intro="Suivre un équipage est gratuit. Ces conditions s’appliquent à l’achat d’un accès équipage, qui permet de créer la page d’un équipage."
+      intro="Suivre un road trip est gratuit. Ces conditions s’appliquent à l’achat d’un accès road trip, qui permet de créer la page d’un road trip."
     >
       <h2>1. Le vendeur</h2>
       <p>
@@ -20,14 +20,14 @@ export default function SalesTermsPage() {
 
       <h2>2. Ce que vous achetez</h2>
       <p>
-        L’<strong>accès équipage</strong> permet de créer <strong>la page d’un équipage</strong> sur TrophyTracker et d’utiliser ses
+        L’<strong>accès road trip</strong> permet de créer <strong>la page d’un road trip</strong> sur TrophyTracker et d’utiliser ses
         services : page publique ou privée, suivi GPS en direct avec l’application gratuite Traccar Client, trace et statistiques,
-        photos et photos 360°, sponsors, invitation des coéquipiers (gratuite pour eux).
+        photos et photos 360°, sponsors, invitation des compagnons de route (gratuite pour eux).
       </p>
       <ul>
-        <li>Un accès = une page d’équipage. Il est lié au compte qui l’achète, qui devient propriétaire de la page.</li>
+        <li>Un accès = une page de road trip. Il est lié au compte qui l’achète, qui devient propriétaire de la page.</li>
         <li>
-          Le service est fourni pendant toute la durée du voyage. La page reste ensuite consultable en souvenir, tant que
+          Le service est fourni pendant toute la durée du road trip. La page reste ensuite consultable en souvenir, tant que
           TrophyTracker existe.
         </li>
         <li>
@@ -65,7 +65,7 @@ export default function SalesTermsPage() {
 
       <h2>6. Accès au service</h2>
       <p>
-        L’accès est disponible dès la confirmation du paiement : vous pouvez créer la page de votre équipage depuis « Mon compte ». En
+        L’accès est disponible dès la confirmation du paiement : vous pouvez créer la page de votre road trip depuis « Mon compte ». En
         cas de problème, écrivez à <a href={CONTACT_HREF}>{EDITOR.email}</a>.
       </p>
 
@@ -76,11 +76,11 @@ export default function SalesTermsPage() {
       <p>
         En commandant, vous demandez expressément que le service commence immédiatement. Si vous vous rétractez ensuite, vous payez
         la part du service déjà fournie jusqu’à votre demande (article L.221-25 du Code de la consommation), calculée au prorata du
-        temps écoulé entre la commande et la fin du voyage ; le reste vous est remboursé.
+        temps écoulé entre la commande et la fin du road trip ; le reste vous est remboursé.
       </p>
       <p>
         Pour vous rétracter, envoyez une déclaration claire à <a href={CONTACT_HREF}>{EDITOR.email}</a>, par exemple avec le modèle
-        ci-dessous. Le remboursement est fait sous 14 jours, sur la carte utilisée pour le paiement. La page de l’équipage est alors
+        ci-dessous. Le remboursement est fait sous 14 jours, sur la carte utilisée pour le paiement. La page du road trip est alors
         dépubliée et le suivi GPS désactivé.
       </p>
 
@@ -91,7 +91,7 @@ export default function SalesTermsPage() {
         vous pourrez obtenir une réduction du prix ou la résolution du contrat.
       </p>
       <p>
-        Le suivi GPS dépend du téléphone de l’équipage et des réseaux mobiles : une position retardée dans une zone sans réseau n’est
+        Le suivi GPS dépend du téléphone du road trip et des réseaux mobiles : une position retardée dans une zone sans réseau n’est
         pas un défaut du service (voir les <Link to="/conditions-utilisation">conditions d’utilisation</Link>).
       </p>
 
@@ -128,7 +128,7 @@ export default function SalesTermsPage() {
         À envoyer à {EDITOR.name}, <a href={CONTACT_HREF}>{EDITOR.email}</a> :
       </p>
       <p className="border-l-[3px] border-cream/20 pl-5 text-base">
-        Je vous notifie par la présente ma rétractation du contrat portant sur la prestation de services ci-dessous : accès équipage
+        Je vous notifie par la présente ma rétractation du contrat portant sur la prestation de services ci-dessous : accès road trip
         TrophyTracker.
         <br />Commandé le : …
         <br />Nom du consommateur : …

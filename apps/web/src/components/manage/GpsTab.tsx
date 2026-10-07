@@ -70,7 +70,7 @@ function traccarAppLink(serverUrl: string, key: string) {
 
 /**
  * Téléphone (et pas tablette ni ordinateur) : écran tactile dont le petit côté fait moins de 600 px.
- * Un iPad affiche donc le QR code, à scanner avec le téléphone du voyage.
+ * Un iPad affiche donc le QR code, à scanner avec le téléphone du road trip.
  */
 function isPhone() {
   return window.matchMedia('(pointer: coarse)').matches && Math.min(window.screen.width, window.screen.height) < 600;
@@ -262,12 +262,12 @@ export function GpsTab({ crew }: { crew: Crew }) {
             </h2>
             <p className="mb-0 mt-3 text-sm leading-relaxed text-dust-200">
               {enabled ? (
-                <>Chaque position envoyée par le téléphone s’ajoute à la trace et apparaît sur la page de l’équipage.</>
+                <>Chaque position envoyée par le téléphone s’ajoute à la trace et apparaît sur la page du road trip.</>
               ) : (
                 <>
-                  Testez votre téléphone tranquillement chez vous : vous seuls voyez sa position ici, rien n’apparaît sur la page de
-                  l’équipage. <strong className="text-cream">Lancez le suivi au moment de partir pour de bon.</strong>
-                  {startLabel && <> Un oubli ? Il se lancera tout seul le jour du départ officiel, le {startLabel}.</>}
+                  Testez votre téléphone tranquillement chez vous : vous seuls voyez sa position ici, rien n’apparaît sur la page du
+                  road trip. <strong className="text-cream">Lancez le suivi au moment de partir pour de bon.</strong>
+                  {startLabel && <> Un oubli ? Il se lancera tout seul le jour du départ prévu, le {startLabel}.</>}
                 </>
               )}
             </p>
@@ -363,9 +363,9 @@ export function GpsTab({ crew }: { crew: Crew }) {
       </Step>
 
       {/* ── 02 Clé ─────────────────────────────────────────────────────── */}
-      <Step n="02" title="Générer la clé de l’équipage">
+      <Step n="02" title="Générer la clé du road trip">
         <p className="mb-4 mt-0 text-dust-200">
-          La clé identifie votre équipage : c’est elle que le téléphone envoie avec chaque position. Sans elle, les positions sont refusées.
+          La clé identifie votre road trip : c’est elle que le téléphone envoie avec chaque position. Sans elle, les positions sont refusées.
         </p>
 
         {/* La charte reste affichée (cochée) jusqu'au prochain chargement : la page ne saute pas. */}
@@ -373,7 +373,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
           <div className="mb-5 border-l-[3px] border-primary bg-black/30 p-5 md:p-6">
             <p className="tt-kicker m-0 text-ochre">Charte fair-play · à lire avant d’activer le suivi</p>
             <p className="mb-4 mt-3 text-dust-200">{FAIR_PLAY.spirit}</p>
-            <p className="m-0 mb-3 text-sm text-dust-300">En activant le suivi, notre équipage s’engage :</p>
+            <p className="m-0 mb-3 text-sm text-dust-300">En activant le suivi, notre road trip s’engage :</p>
             <ol className="m-0 grid list-none gap-3 p-0 md:grid-cols-2">
               {FAIR_PLAY.rules.map((r, i) => (
                 <li key={r.title} className="flex gap-3 text-sm leading-relaxed text-dust-200">
@@ -393,7 +393,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
                 onChange={(e) => setCharterChecked(e.target.checked)}
                 className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
               />
-              {charterJustAccepted ? '✅ Charte acceptée au nom de l’équipage.' : 'J’ai lu la charte et je l’accepte au nom de l’équipage.'}
+              {charterJustAccepted ? '✅ Charte acceptée au nom du road trip.' : 'J’ai lu la charte et je l’accepte au nom du road trip.'}
             </label>
           </div>
         )}
@@ -408,7 +408,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
                 variant="outline"
                 disabled={generate.isPending}
                 onClick={() => {
-                  if (newKey || confirm('Générer un nouveau QR code ? L’ancien réglage ne marchera plus : le téléphone du voyage devra scanner le nouveau QR code pour continuer à envoyer sa position.')) generate.mutate();
+                  if (newKey || confirm('Générer un nouveau QR code ? L’ancien réglage ne marchera plus : le téléphone du road trip devra scanner le nouveau QR code pour continuer à envoyer sa position.')) generate.mutate();
                 }}
               >
                 <RefreshCw />Générer un nouveau QR code
@@ -453,7 +453,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
               <a href={traccarAppLink(address.url, newKey)}><Smartphone />Ouvrir dans Traccar Client</a>
             </Button>
             <p className="m-0 text-sm leading-relaxed text-dust-300">
-              Sur le téléphone du voyage : touchez le bouton, puis <strong className="text-cream">OK</strong> à « Apply new configuration? ».
+              Sur le téléphone du road trip : touchez le bouton, puis <strong className="text-cream">OK</strong> à « Apply new configuration? ».
               Tout est réglé d’un coup, sauf le mot de passe (facultatif).
             </p>
             <Button variant="ghost" size="sm" onClick={() => setShowQr(!showQr)}>
@@ -468,7 +468,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
             <QrCode value={traccarConfigLink(address.url, newKey)} label="QR code de configuration de Traccar Client" className="w-full max-w-[220px] justify-self-center rounded-[4px]" />
             <div className="flex flex-col gap-2 text-sm leading-relaxed text-dust-200">
               <p className="m-0 text-base text-cream">
-                Scannez ce QR code avec <strong>l’appareil photo du téléphone du voyage</strong>, puis touchez « Ouvrir dans Traccar Client » et{' '}
+                Scannez ce QR code avec <strong>l’appareil photo du téléphone du road trip</strong>, puis touchez « Ouvrir dans Traccar Client » et{' '}
                 <strong>OK</strong>.
               </p>
               <p className="m-0 text-dust-300">Tout est réglé d’un coup, sauf le mot de passe (facultatif).</p>
@@ -528,7 +528,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
                 fr="Signal de vie à l’arrêt (secondes)"
                 must
                 value={<Value>{SETTINGS.heartbeat}</Value>}
-                why="Désactivé par défaut ! À l’arrêt (pause, bivouac), il envoie une position toutes les 5 minutes pour que la page reste « En direct ». Le site considère l’équipage hors ligne après 10 minutes sans nouvelles : restez entre 60 et 600."
+                why="Désactivé par défaut ! À l’arrêt (pause, bivouac), il envoie une position toutes les 5 minutes pour que la page reste « En direct ». Le site considère le road trip hors ligne après 10 minutes sans nouvelles : restez entre 60 et 600."
               />
             </ul>
 
@@ -566,7 +566,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
       {/* ── 04 Autorisations ───────────────────────────────────────────── */}
       <Step n="04" title="Autoriser le suivi en permanence">
         <p className="mb-5 mt-0 text-dust-200">
-          Sans ces autorisations, le téléphone coupe l’appli dès que l’écran s’éteint : le voyage « disparaît » de la carte.
+          Sans ces autorisations, le téléphone coupe l’appli dès que l’écran s’éteint : le road trip « disparaît » de la carte.
         </p>
         <div className="grid gap-4 md:grid-cols-2">
           {[
@@ -628,7 +628,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
             <p className="mb-0 mt-1 text-sm text-dust-300">
               {live
                 ? enabled
-                  ? `Dernière position ${formatRelative(lastFix)}. Votre 4L apparaît sur la page de l’équipage.`
+                  ? `Dernière position ${formatRelative(lastFix)}. Votre 4L apparaît sur la page du road trip.`
                   : `Dernière position ${formatRelative(lastFix)}. Tout fonctionne ! Elle n’est visible qu’ici : lancez le suivi en partant.`
                 : 'Rien après 2 minutes ? Vérifiez la clé (Device identifier), l’adresse (Server URL) et les autorisations.'}
             </p>
@@ -676,8 +676,8 @@ export function GpsTab({ crew }: { crew: Crew }) {
         <p className="m-0 flex items-start gap-2 text-sm text-dust-200">
           <Smartphone className="mt-0.5 h-4 w-4 shrink-0" />
           {tracking?.traccar_device_id
-            ? <>Votre équipage est relié à l’appareil Traccar <code className="rounded bg-black/40 px-1.5">{tracking.traccar_device_id}</code>.</>
-            : <>Un administrateur de la plateforme peut relier votre équipage à un appareil existant sur un serveur Traccar. Contactez-le en indiquant son identifiant.</>}
+            ? <>Votre road trip est relié à l’appareil Traccar <code className="rounded bg-black/40 px-1.5">{tracking.traccar_device_id}</code>.</>
+            : <>Un administrateur de la plateforme peut relier votre road trip à un appareil existant sur un serveur Traccar. Contactez-le en indiquant son identifiant.</>}
         </p>
       </Panel>
     </div>

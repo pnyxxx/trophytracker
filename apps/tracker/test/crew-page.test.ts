@@ -18,13 +18,13 @@ describe('renderCrewPage', () => {
     expect(html).toContain('<title>J4L Club · TrophyTracker</title>');
     expect(html).toContain('<meta property="og:title" content="J4L Club · TrophyTracker" />');
     expect(html).toContain('content="De Paris au désert"');
-    expect(html).toContain('href="https://exemple.fr/equipages/j4l-club"');
+    expect(html).toContain('href="https://exemple.fr/road-trips/j4l-club"');
     expect(html).not.toContain('__SEO_');
   });
 
   it('a une description par défaut', () => {
     const html = renderCrewPage(TEMPLATE, 'https://exemple.fr', 'a-b', { ...crew, tagline: null });
-    expect(html).toContain('content="Suivez le voyage J4L Club en direct."');
+    expect(html).toContain('content="Suivez le road trip J4L Club en direct."');
   });
 
   it('échappe le texte saisi par l\'équipage', () => {

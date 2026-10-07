@@ -1,8 +1,8 @@
 /**
- * Trace GPS d'un équipage, mise à jour EN DIRECT.
+ * Trace GPS d'un road trip, mise à jour EN DIRECT.
  *
  * 1. Charge toute la trace une fois (get_track).
- * 2. S'abonne en temps réel (Supabase Realtime) aux changements de l'équipage :
+ * 2. S'abonne en temps réel (Supabase Realtime) aux changements du road trip :
  *    à chaque nouvelle position reçue par le serveur, on ne télécharge QUE les
  *    nouveaux points (paramètre p_since) → très économe en données mobiles.
  * 3. Filet de sécurité : rafraîchissement toutes les 2 minutes (connexion instable).
@@ -62,7 +62,7 @@ export function useLiveTrack(crew: Crew | null | undefined) {
         { event: 'UPDATE', schema: 'public', table: 'crews', filter: `id=eq.${crewId}` },
         (payload) => {
           const updated = payload.new as Crew;
-          // Trace effacée (remise à zéro par l'équipage, nouveau tour de l'équipage de démo) :
+          // Trace effacée (remise à zéro par l'équipage, nouveau tour du road trip de démo) :
           // on repart de zéro au lieu de relier l'ancienne trace à la nouvelle.
           const before = queryClient.getQueryData<Crew | null>(keys.crew(updated.slug));
           if (before && updated.total_distance_m < before.total_distance_m) {

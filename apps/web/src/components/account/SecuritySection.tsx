@@ -174,7 +174,7 @@ function MfaForm() {
   }
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <p className="text-sm text-dust-300">Protégez votre compte avec un code à usage unique en plus du mot de passe. Recommandé pour les équipages.</p>
+      <p className="text-sm text-dust-300">Protégez votre compte avec un code à usage unique en plus du mot de passe. Recommandé pour les road trips.</p>
       <Button variant="secondary" onClick={() => start.mutate()} disabled={start.isPending}>Activer</Button>
     </div>
   );

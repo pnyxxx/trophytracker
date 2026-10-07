@@ -54,7 +54,7 @@ export function MembersTab({ crew }: { crew: Crew }) {
     onSuccess: (_d, userId) => {
       refresh();
       if (userId === user?.id) {
-        toast.success('Vous avez quitté l’équipage');
+        toast.success('Vous avez quitté le road trip');
         navigate('/mon-compte');
       } else toast.success('Membre retiré');
     },
@@ -63,12 +63,12 @@ export function MembersTab({ crew }: { crew: Crew }) {
 
   return (
     <Panel
-      title="Membres de l’équipage"
-      description="Les membres peuvent modifier la page, publier des photos et gérer le GPS. Les propriétaires peuvent en plus gérer les membres et supprimer l’équipage."
+      title="Membres du road trip"
+      description="Les membres peuvent modifier la page, publier des photos et gérer le GPS. Les propriétaires peuvent en plus gérer les membres et supprimer le road trip."
     >
       {isOwner && (
         <form onSubmit={(e: FormEvent) => { e.preventDefault(); add.mutate(); }} className="mb-6 flex flex-col gap-3 sm:flex-row">
-          <Input type="email" required placeholder="Email du coéquipier (une invitation lui est envoyée s’il n’a pas de compte)" value={email} onChange={(e) => setEmail(e.target.value)} aria-label="Email du membre à ajouter" />
+          <Input type="email" required placeholder="Email du compagnon de route (une invitation lui est envoyée s’il n’a pas de compte)" value={email} onChange={(e) => setEmail(e.target.value)} aria-label="Email du membre à ajouter" />
           <Button type="submit" disabled={add.isPending}><UserPlus />Inviter</Button>
         </form>
       )}
@@ -87,7 +87,7 @@ export function MembersTab({ crew }: { crew: Crew }) {
               )}
               {m.user_id && (isOwner || m.user_id === user?.id) && (
                 <Button size="sm" variant="ghost" className="hover:text-primary-light"
-                  onClick={() => { if (confirm(m.user_id === user?.id ? 'Quitter cet équipage ?' : `Retirer ${m.display_name} ?`)) remove.mutate(m.user_id!); }}>
+                  onClick={() => { if (confirm(m.user_id === user?.id ? 'Quitter ce road trip ?' : `Retirer ${m.display_name} ?`)) remove.mutate(m.user_id!); }}>
                   <UserMinus />{m.user_id === user?.id ? 'Quitter' : 'Retirer'}
                 </Button>
               )}

@@ -1,5 +1,5 @@
 /**
- * Visuels QR code d'un équipage, aux couleurs de TrophyTracker, dessinés dans le navigateur
+ * Visuels QR code d'un road trip, aux couleurs de TrophyTracker, dessinés dans le navigateur
  * (canvas → PNG) : rien n'est envoyé au serveur.
  *  - « sticker » : carré 1600 px aux coins arrondis (fond transparent autour), pour le véhicule ;
  *  - « story » : 1080 × 1920, pour les stories Instagram / Facebook / WhatsApp.
@@ -18,7 +18,7 @@ export interface PosterCrew {
   url: string;
   /** Ligne en capitales au-dessus du nom (« Carnet de route en direct »). */
   eventLabel: string;
-  /** Logo de l'équipage (même origine), facultatif. */
+  /** Logo du road trip (même origine), facultatif. */
   avatarUrl?: string | null;
 }
 
@@ -180,7 +180,7 @@ function drawCarNumber(ctx: CanvasRenderingContext2D, num: string, cx: number, c
   ctx.textBaseline = 'alphabetic';
 }
 
-/** Nom de l'équipage, sur une ou deux lignes ; renvoie la position y sous le texte. */
+/** Nom du road trip, sur une ou deux lignes ; renvoie la position y sous le texte. */
 function drawName(ctx: CanvasRenderingContext2D, name: string, cx: number, top: number, maxWidth: number, max: number) {
   const upper = name.toUpperCase();
   const font = (px: number) => `900 ${px}px ${DISPLAY}`;
@@ -277,7 +277,7 @@ export async function drawPoster(format: PosterFormat, crew: PosterCrew): Promis
     ctx.fillText(displayUrl(crew.url), cx, qy + qr + 80);
     ctx.font = `400 30px ${MONO}`;
     ctx.fillStyle = C.dust;
-    ctx.fillText('Scannez pour suivre le voyage en direct', cx, qy + qr + 140);
+    ctx.fillText('Scannez pour suivre le road trip en direct', cx, qy + qr + 140);
     ctx.fillStyle = C.red;
     ctx.fillRect(cx - 60, h - 90, 120, 6);
   }

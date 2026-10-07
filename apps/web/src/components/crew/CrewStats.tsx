@@ -2,10 +2,10 @@ import type { CrewStats as Stats } from '@/hooks/queries';
 import { dayOfTrip, localDate } from '@/lib/days';
 import { formatNumber } from '@/lib/format';
 
-/** Tableau de bord du voyage : cases séparées d'un filet, comme un roadbook. */
+/** Tableau de bord du road trip : cases séparées d'un filet, comme un roadbook. */
 export function CrewStats({ stats, startedAt }: {
   stats: Stats | null | undefined;
-  /** Horodatage (secondes) du premier point de la trace : le jour 1 du voyage. */
+  /** Horodatage (secondes) du premier point de la trace : le jour 1 du road trip. */
   startedAt: number | null;
 }) {
   const day = startedAt != null ? dayOfTrip(localDate(startedAt), new Date()) : null;

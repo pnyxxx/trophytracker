@@ -67,7 +67,7 @@ export function InfoTab({ crew }: { crew: Crew }) {
 
   return (
     <form onSubmit={(e: FormEvent) => { e.preventDefault(); save.mutate(); }} className="space-y-6">
-      <Panel title="Images" description="Le logo apparaît sur la carte et dans la liste des équipages ; la couverture en fond du haut de votre page.">
+      <Panel title="Images" description="Le logo apparaît sur la carte et dans la liste des road trips ; la couverture en fond du haut de votre page.">
         <div className="flex flex-col gap-4 sm:flex-row">
           <AvatarPicker crew={crew} />
           <CoverPicker crew={crew} />
@@ -76,8 +76,8 @@ export function InfoTab({ crew }: { crew: Crew }) {
 
       <Panel title="Présentation">
         <div className="grid gap-4 md:grid-cols-2">
-          <Field id="name" label="Nom de l'équipage"><Input id="name" required minLength={2} maxLength={80} value={form.name} onChange={set('name')} /></Field>
-          <Field id="car" label="Numéro d'équipage"><Input id="car" maxLength={10} value={form.car_number} onChange={set('car_number')} /></Field>
+          <Field id="name" label="Nom du road trip"><Input id="name" required minLength={2} maxLength={80} value={form.name} onChange={set('name')} /></Field>
+          <Field id="car" label="Numéro du road trip"><Input id="car" maxLength={10} value={form.car_number} onChange={set('car_number')} /></Field>
           <div className="md:col-span-2">
             <Field id="tagline" label="Slogan" hint="Une phrase courte affichée sous le nom."><Input id="tagline" maxLength={140} value={form.tagline} onChange={set('tagline')} /></Field>
           </div>
@@ -100,7 +100,7 @@ export function InfoTab({ crew }: { crew: Crew }) {
         </div>
       </Panel>
 
-      <Panel title="Contact & réseaux" description="Instagram et Facebook s’affichent en boutons bien visibles en haut de votre page ; l’email, en bas, dans « Un message pour l’équipage ? ».">
+      <Panel title="Contact & réseaux" description="Instagram et Facebook s’affichent en boutons bien visibles en haut de votre page ; l’email, en bas, dans « Un message pour les voyageurs ? ».">
         <div className="grid gap-4 md:grid-cols-3">
           <Field id="email" label="Email de contact"><Input id="email" type="email" value={form.contact_email} onChange={set('contact_email')} /></Field>
           <Field id="insta" label="Instagram"><Input id="insta" inputMode="url" placeholder="@votre-compte ou lien" value={form.instagram_url} onChange={set('instagram_url')} /></Field>
@@ -122,7 +122,7 @@ export function InfoTab({ crew }: { crew: Crew }) {
             <p className="text-sm text-dust-400">
               {form.is_public
                 ? 'Tout le monde peut voir la page et la position GPS avec le lien.'
-                : 'Seuls les membres de l’équipage voient la page (y compris la position).'}
+                : 'Seuls les membres du road trip voient la page (y compris la position).'}
             </p>
           </div>
         </div>

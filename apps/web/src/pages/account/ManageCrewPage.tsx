@@ -41,11 +41,11 @@ export default function ManageCrewPage() {
     <PageShell padTop={false}>
       <Seo title={`Gérer ${crew.name}`} noindex />
       <PageHero
-        kicker={<><Link to="/mon-compte" className="inline-flex items-center gap-1 text-dust-300 hover:text-cream"><ArrowLeft className="h-3.5 w-3.5" />Mon compte</Link><span className="text-dust-600">/</span>Espace équipage</>}
+        kicker={<><Link to="/mon-compte" className="inline-flex items-center gap-1 text-dust-300 hover:text-cream"><ArrowLeft className="h-3.5 w-3.5" />Mon compte</Link><span className="text-dust-600">/</span>Espace road trip</>}
         title={crew.name}
         aside={
           <Button asChild variant="secondary">
-            <Link to={`/equipages/${crew.slug}`}>Voir la page publique <ExternalLink /></Link>
+            <Link to={`/road-trips/${crew.slug}`}>Voir la page publique <ExternalLink /></Link>
           </Button>
         }
       />

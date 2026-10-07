@@ -5,7 +5,7 @@
  * Crée 3 équipages d'exemple, chacun avec son propre compte (un seul équipage par
  * compte), dont « J4L Club », l'équipage de démonstration, avec ses vrais sponsors : sa trace
  * est rejouée en boucle par le service tracker (apps/tracker/src/demo.ts).
- * Relancer le script remplace les équipages de démo existants.
+ * Relancer le script remplace les road trips de démo existants.
  */
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
@@ -110,4 +110,4 @@ sql(`\\o /dev/null\n${traceSql(ids['les-sables-mouvants'], roadUntil(...SALAMANQ
 
 console.log(`✅ Données de démo créées.
    Compte démo : ${DEMO_EMAIL} / ${DEMO_PASSWORD}
-   Page d'exemple : ${env.SITE_URL}/equipages/j4l-club`);
+   Page d'exemple : ${env.SITE_URL}/road-trips/j4l-club`);

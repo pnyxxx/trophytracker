@@ -23,7 +23,7 @@ const F = {
 const MONO_LABEL = `font-family:${F.mono};font-weight:600;font-size:11px;letter-spacing:.16em;text-transform:uppercase`;
 
 const SIGNATURE = 'Carnet de route en direct';
-const TAGLINE = 'Le carnet de route en direct de vos voyages.';
+const TAGLINE = 'Le carnet de route en direct de vos road trips.';
 
 export interface EmailLayout {
   /** Adresse du site (ou `{{ .SiteURL }}`), pour le logo. */

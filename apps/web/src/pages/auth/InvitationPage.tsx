@@ -42,7 +42,7 @@ export default function InvitationPage() {
   if (state === 'verifying') return <PageLoader />;
   if (state === 'invalid') {
     return (
-      <AuthLayout title="Invitation expirée" subtitle="Ce lien n'est plus valide. Demandez à votre coéquipier de vous inviter à nouveau.">
+      <AuthLayout title="Invitation expirée" subtitle="Ce lien n'est plus valide. Demandez à votre compagnon de route de vous inviter à nouveau.">
         <Button className="w-full" onClick={() => navigate('/connexion')}>Se connecter</Button>
       </AuthLayout>
     );
@@ -61,12 +61,12 @@ export default function InvitationPage() {
     setBusy(false);
     if (error) return setError(errorMessage(error));
     await queryClient.invalidateQueries();
-    toast.success('Bienvenue dans l’équipage ! 🎉');
+    toast.success('Bienvenue dans le road trip ! 🎉');
     navigate('/mon-compte', { replace: true });
   };
 
   return (
-    <AuthLayout title="Bienvenue dans l’équipage !" subtitle="Choisissez votre nom et votre mot de passe pour activer votre compte.">
+    <AuthLayout title="Bienvenue dans le road trip !" subtitle="Choisissez votre nom et votre mot de passe pour activer votre compte.">
       <form onSubmit={submit} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="name">Prénom ou pseudo</Label>

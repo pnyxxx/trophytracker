@@ -110,7 +110,7 @@ export function useCrewMembers(crewId: string | undefined) {
   });
 }
 
-/** Ids des équipages suivis par l'utilisateur connecté. */
+/** Ids des road trips suivis par l'utilisateur connecté. */
 export function useFollowedIds() {
   const { user } = useAuth();
   return useQuery({
@@ -154,7 +154,7 @@ export function useMyCrews() {
   });
 }
 
-/** Rôle de l'utilisateur connecté dans un équipage (null si non membre). */
+/** Rôle de l'utilisateur connecté dans un road trip (null si non membre). */
 export function useMyRole(crewId: string | undefined) {
   const { data } = useMyCrews();
   const { isAdmin } = useAuth();

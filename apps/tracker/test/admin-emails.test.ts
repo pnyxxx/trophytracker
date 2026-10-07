@@ -13,16 +13,16 @@ describe('emails aux admins', () => {
     expect(e.html).toContain('href="https://site.fr/admin"');
   });
 
-  it('nouveau compte invité dans un équipage', () => {
+  it('nouveau compte invité dans un road trip', () => {
     const e = buildAdminEmail({ id: 2, kind: 'new_account', payload: { name: 'Léo', email: 'leo@exemple.fr', invited_to_crew: 'J4L Club' }, created_at: at }, 'https://site.fr');
-    expect(e.text).toContain('Invité dans l’équipage « J4L Club »');
+    expect(e.text).toContain('Invité dans le road trip « J4L Club »');
   });
 
   it('nouvel abonnement : équipage, nombre d’abonnés, lien vers sa page', () => {
     const e = buildAdminEmail({ id: 3, kind: 'new_follow', payload: { name: 'Mamie', email: 'm@exemple.fr', crew_name: 'J4L Club', crew_slug: 'j4l-club', followers: 12 }, created_at: at }, 'https://site.fr');
     expect(e.subject).toBe('⭐ Nouvel abonné pour J4L Club');
     expect(e.text).toContain('12 abonnés');
-    expect(e.html).toContain('href="https://site.fr/equipages/j4l-club"');
+    expect(e.html).toContain('href="https://site.fr/road-trips/j4l-club"');
   });
 
   it('paiement Stripe : montant, total des ventes, lien vers l’administration', () => {

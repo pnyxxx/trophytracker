@@ -1,5 +1,5 @@
 /**
- * Logo et image de couverture d'un équipage : envoi, suppression et, pour la
+ * Logo et image de couverture d'un road trip : envoi, suppression et, pour la
  * couverture, cadrage (on fait glisser l'image pour choisir la partie visible).
  */
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';

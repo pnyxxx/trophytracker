@@ -1,5 +1,5 @@
 /**
- * Achat de l'accès équipage (paiement unique) : ce qui est inclus, prix du jour,
+ * Achat de l'accès road trip (paiement unique) : ce qui est inclus, prix du jour,
  * les deux cases exigées par le Code de la consommation, puis redirection vers
  * la page de paiement Stripe (Edge Function create-checkout). Ou un code d'accès offert
  * (généré dans l'administration), qui débloque l'accès sans paiement.
@@ -17,11 +17,11 @@ import { toastError, unwrap } from '@/lib/errors';
 import { CONTACT_HREF, currentPriceCents, euros, isLaunchPrice, PRICING } from '@/lib/legal';
 
 const INCLUDED = [
-  'La page de votre équipage, publique ou privée',
+  'La page de votre road trip, publique ou privée',
   'Le suivi GPS en direct avec un simple téléphone',
   'Trace complète, kilomètres et statistiques',
   'Photos, photos 360° et sponsors sur la carte',
-  'Vos coéquipiers invités gratuitement',
+  'Vos compagnons de route invités gratuitement',
 ];
 
 const CODE_REFUSED: Record<string, string> = {
@@ -40,7 +40,7 @@ function AccessCodeForm() {
     mutationFn: async () => unwrap(await supabase.rpc('redeem_access_code', { p_code: code })),
     onSuccess: (result) => {
       if (result !== 'ok') { toast.error(CODE_REFUSED[result] ?? 'Code refusé.'); return; }
-      toast.success('Code accepté : votre accès équipage est offert !');
+      toast.success('Code accepté : votre accès road trip est offert !');
       void queryClient.invalidateQueries({ queryKey: ['crew-access'] });
     },
     onError: toastError,
@@ -94,7 +94,7 @@ export function CrewAccessPurchase() {
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)]">
       <div>
         <p className="m-0 max-w-[520px] text-dust-300">
-          Vous participez au raid ? Créez la page de votre équipage pour la partager à vos proches et sponsors. Vos coéquipiers la
+          Vous participez au raid ? Créez la page de votre road trip pour la partager à vos proches et sponsors. Vos compagnons de route la
           rejoindront ensuite par invitation, gratuitement.
         </p>
         <ul className="m-0 mt-5 list-none space-y-2 p-0">
@@ -108,7 +108,7 @@ export function CrewAccessPurchase() {
       </div>
 
       <div className="border border-cream/[0.14] bg-black/30 p-5">
-        <p className="tt-kicker m-0 text-ochre">Accès équipage · paiement unique</p>
+        <p className="tt-kicker m-0 text-ochre">Accès road trip · paiement unique</p>
         <p className="m-0 mt-3 flex items-baseline gap-3">
           <span className="font-display text-6xl font-black leading-none text-cream">{euros(price)}</span>
           {isLaunchPrice() && <span className="text-lg text-dust-500 line-through">{euros(PRICING.regularCents)}</span>}

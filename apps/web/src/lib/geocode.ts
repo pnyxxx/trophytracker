@@ -85,7 +85,7 @@ export function parseCoords(text: string): { lat: number; lon: number } | null {
 export const isValidCoords = (lat: number, lon: number) =>
   Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180 && !(lat === 0 && lon === 0);
 
-/** Position et région d'une ville de départ (drapeau sur la carte d'un équipage). */
+/** Position et région d'une ville de départ (drapeau sur la carte d'un road trip). */
 export interface CitySpot {
   lat: number;
   lon: number;

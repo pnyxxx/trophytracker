@@ -1,6 +1,6 @@
 /**
  * Contenu des emails envoyés aux admins (nouveau compte, nouvel abonnement,
- * accès équipage payé ou obtenu avec un code, relance GPS envoyée à un équipage).
+ * accès road trip payé ou obtenu avec un code, relance GPS envoyée à un road trip).
  * Les noms viennent des utilisateurs : ils sont échappés dans le HTML et
  * débarrassés des retours à la ligne dans le sujet.
  */
@@ -48,7 +48,7 @@ export function buildAdminEmail(n: AdminNotification, siteUrl: string): Email {
     const invited = typeof p.invited_to_crew === 'string' && p.invited_to_crew ? p.invited_to_crew : null;
     const via = p.provider === 'google' ? ' (connexion Google)' : '';
     const title = `Nouveau compte : ${name}`;
-    const detail = invited ? `Invité dans l’équipage « ${invited} ».` : `Inscription sur le site${via}.`;
+    const detail = invited ? `Invité dans le road trip « ${invited} ».` : `Inscription sur le site${via}.`;
     return {
       subject: oneLine(`👤 ${title}`),
       text: `${name} (${email}) vient de créer un compte sur TrophyTracker.\n${detail}\nLe ${when(n.created_at)}.\n\n${siteUrl}/admin`,
@@ -66,7 +66,7 @@ export function buildAdminEmail(n: AdminNotification, siteUrl: string): Email {
     const count = typeof p.paid_count === 'number' ? p.paid_count : null;
     const code = byCode ? `${str(p.code)}${typeof p.code_note === 'string' && p.code_note.trim() ? ` (${p.code_note.trim()})` : ''}` : null;
     const title = byCode ? `Code d’accès utilisé : ${name}` : `Paiement reçu : ${amount}`;
-    const intro = byCode ? 'a obtenu un accès équipage avec un code.' : `a payé ${amount} pour créer la page de son équipage.`;
+    const intro = byCode ? 'a obtenu un accès road trip avec un code.' : `a payé ${amount} pour créer la page de son road trip.`;
     const total = count === null ? null : byCode ? `${count} accès obtenu${count > 1 ? 's' : ''} par code au total.` : `${count} accès payé${count > 1 ? 's' : ''} au total.`;
     const details: [string, string][] = [
       ['Email', email],
@@ -83,34 +83,34 @@ export function buildAdminEmail(n: AdminNotification, siteUrl: string): Email {
   }
 
   if (n.kind === 'gps_reminder') {
-    const crew = str(p.crew_name, 'Un équipage');
+    const crew = str(p.crew_name, 'Un road trip');
     const members = str(p.members);
     const created = typeof p.crew_created_at === 'string' ? when(new Date(p.crew_created_at)) : '—';
     const title = `Relance GPS envoyée : ${crew}`;
-    const crewUrl = `${siteUrl}/equipages/${encodeURIComponent(str(p.crew_slug, ''))}`;
+    const crewUrl = `${siteUrl}/road-trips/${encodeURIComponent(str(p.crew_slug, ''))}`;
     return {
       subject: oneLine(`📡 ${title}`),
       text: `« ${crew} » n’a envoyé aucune position GPS depuis la création de sa page (${created}) : un rappel vient d’être envoyé à ${members}.\nLe ${when(n.created_at)}.\n\n${crewUrl}`,
-      html: layout(siteUrl, 'Admin · Relance GPS', title, `L’équipage « ${esc(crew)} » n’a encore envoyé aucune position : un rappel vient de partir à ses membres.`, [
+      html: layout(siteUrl, 'Admin · Relance GPS', title, `Le road trip « ${esc(crew)} » n’a encore envoyé aucune position : un rappel vient de partir à ses membres.`, [
         ['Membres', members],
         ['Page créée', created],
         ['Relancé le', when(n.created_at)],
-      ], crewUrl, 'Voir l’équipage'),
+      ], crewUrl, 'Voir le road trip'),
     };
   }
 
-  const crew = str(p.crew_name, 'un équipage');
+  const crew = str(p.crew_name, 'un road trip');
   const followers = typeof p.followers === 'number' ? p.followers : null;
   const title = `Nouvel abonné pour ${crew}`;
-  const count = followers === null ? '' : `L’équipage a maintenant ${followers} abonné${followers > 1 ? 's' : ''}.`;
-  const crewUrl = `${siteUrl}/equipages/${encodeURIComponent(str(p.crew_slug, ''))}`;
+  const count = followers === null ? '' : `Le road trip a maintenant ${followers} abonné${followers > 1 ? 's' : ''}.`;
+  const crewUrl = `${siteUrl}/road-trips/${encodeURIComponent(str(p.crew_slug, ''))}`;
   return {
     subject: oneLine(`⭐ ${title}`),
-    text: `${name} (${email}) suit maintenant l’équipage « ${crew} ».\n${count}\nLe ${when(n.created_at)}.\n\n${crewUrl}`,
-    html: layout(siteUrl, 'Admin · Nouvel abonné', title, `<strong>${esc(name)}</strong> suit maintenant l’équipage « ${esc(crew)} ».`, [
+    text: `${name} (${email}) suit maintenant le road trip « ${crew} ».\n${count}\nLe ${when(n.created_at)}.\n\n${crewUrl}`,
+    html: layout(siteUrl, 'Admin · Nouvel abonné', title, `<strong>${esc(name)}</strong> suit maintenant le road trip « ${esc(crew)} ».`, [
       ['Email', email],
       ...(followers === null ? [] : [['Abonnés', String(followers)] as [string, string]]),
       ['Date', when(n.created_at)],
-    ], crewUrl, 'Voir l’équipage'),
+    ], crewUrl, 'Voir le road trip'),
   };
 }

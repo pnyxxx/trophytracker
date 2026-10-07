@@ -1,4 +1,4 @@
-/** Petits composants réutilisés pour afficher un équipage. */
+/** Petits composants réutilisés pour afficher un road trip. */
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Heart } from 'lucide-react';
@@ -58,7 +58,7 @@ export function FollowButton({ crewId, slug, count, className }: { crewId: strin
       });
     },
     onSuccess: (_d, follow) => {
-      toast.success(follow ? 'Équipage ajouté à vos favoris' : 'Vous ne suivez plus cet équipage');
+      toast.success(follow ? 'Road trip ajouté à vos favoris' : 'Vous ne suivez plus ce road trip');
     },
     onError: (err) => toastError(err),
     onSettled: () => {
@@ -69,7 +69,7 @@ export function FollowButton({ crewId, slug, count, className }: { crewId: strin
 
   const onClick = () => {
     if (!user) {
-      toast.info('Créez un compte gratuit pour suivre vos équipages favoris');
+      toast.info('Créez un compte gratuit pour suivre vos road trips favoris');
       navigate(`/connexion?next=${encodeURIComponent(location.pathname)}`);
       return;
     }
@@ -91,7 +91,7 @@ export function CrewCard({ crew }: { crew: CrewSummary }) {
   const place = [crew.school, crew.city].filter(Boolean).join(' · ') || crew.tagline;
   return (
     <Link
-      to={`/equipages/${crew.slug}`}
+      to={`/road-trips/${crew.slug}`}
       className="group grid grid-cols-[auto_1fr_auto] items-center gap-4 border border-cream/[0.08] bg-ink-800 px-4 py-3.5 text-cream transition duration-200 hover:translate-x-1 hover:border-primary hover:text-cream"
     >
       <CrewAvatar name={crew.name} path={crew.avatar_path} />

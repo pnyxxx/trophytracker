@@ -30,7 +30,7 @@ const F = {
 const MONO_LABEL = `font-family:${F.mono};font-weight:600;font-size:11px;letter-spacing:.16em;text-transform:uppercase`;
 
 const SIGNATURE = 'Carnet de route en direct';
-const TAGLINE = 'Le carnet de route en direct de vos voyages.';
+const TAGLINE = 'Le carnet de route en direct de vos road trips.';
 
 export interface EmailLayout {
   /** Adresse du site (ou `{{ .SiteURL }}`), pour le logo. */
@@ -144,7 +144,7 @@ const alert = (title: string, text: string) =>
 export const AUTH_EMAIL_TEMPLATES: Record<string, string> = {
   'confirmation.html': action(
     'Inscription', 'Bienvenue à bord',
-    'Merci pour votre inscription. Confirmez votre adresse email pour activer votre compte et suivre vos équipages préférés.',
+    'Merci pour votre inscription. Confirmez votre adresse email pour activer votre compte et suivre vos road trips préférés.',
     '{{ .ConfirmationURL }}', 'Confirmer mon email',
   ),
   'magic-link.html': action(
@@ -163,8 +163,8 @@ export const AUTH_EMAIL_TEMPLATES: Record<string, string> = {
     '{{ .ConfirmationURL }}', 'Confirmer le changement',
   ),
   'invite.html': action(
-    'Invitation', 'Vous êtes invité dans un équipage',
-    'Un compagnon de route vous a ajouté à son voyage sur TrophyTracker, le carnet de route en direct. Acceptez l’invitation pour choisir votre mot de passe et gérer la page du voyage.',
+    'Invitation', 'Vous êtes invité dans un road trip',
+    'Un compagnon de route vous a ajouté à son road trip sur TrophyTracker, le carnet de route en direct. Acceptez l’invitation pour choisir votre mot de passe et gérer la page du road trip.',
     `${SITE}/invitation?token_hash={{ .TokenHash }}&type=invite`, 'Accepter l’invitation',
     'Vous ne connaissez pas l’expéditeur ? Ignorez cet email : aucun compte ne sera activé.',
   ),

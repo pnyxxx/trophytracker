@@ -1,5 +1,5 @@
 /**
- * Voyage d'exemple de l'accueil, en satellite 3D : la trace se dessine derrière la position, qui monte
+ * Road trip d’exemple de l'accueil, en satellite 3D : la trace se dessine derrière la position, qui monte
  * les lacets du col du Stelvio (Italie) et redescend vers Bormio, en boucle ; la caméra tourne lentement.
  * Tracé routier réel (OSRM), fichier example-trip.json. Chargé à part : MapLibre est volumineux.
  */

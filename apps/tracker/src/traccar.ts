@@ -76,7 +76,7 @@ export function toIncomingPoint(p: TraccarPosition): IncomingPoint | null {
   };
 }
 
-/** Un équipage peut référencer l'appareil par son id numérique, son identifiant unique ou son nom. */
+/** Un road trip peut référencer l'appareil par son id numérique, son identifiant unique ou son nom. */
 export function matchesDevice(ref: string, d: TraccarDevice): boolean {
   return ref === String(d.id) || ref === d.uniqueId || ref === d.name;
 }

@@ -54,7 +54,7 @@ produit centré sur cet événement sans son accord n'est pas viable, même s'il
 ## 3. Décisions
 
 - Le site devient une **appli généraliste de carnet de route en direct**, dans l'esprit de Polarsteps, utilisable par
-  tout road-trip ou rallye. Différenciateur : suivi en direct pour les proches, sponsors, cagnotte, voyage à plusieurs.
+  tout road trip ou rallye. Différenciateur : suivi en direct pour les proches, sponsors, cagnotte, voyage à plusieurs.
 - **Plus aucune mention du 4L Trophy** ni de « trophyste ».
 - **Plus d'étapes ni de parcours prédéfinis** : chaque voyage crée ses propres étapes.
 - **Plus de carte commune ni d'annuaire public** ; pages **privées par défaut** (visibles par lien), **non
@@ -97,3 +97,19 @@ Reste à faire repéré pendant l'étape 1 : codes d'accès offerts au format `4
 saisie dans `access_codes`) → passer à `TT-` par une nouvelle migration qui accepte encore les anciens codes ; la démo
 (trajet 2026, `apps/tracker/demo/`) à remplacer à l'étape 5 ; l'« événement » de l'administration (date de départ
 commune, lancement auto du GPS) à remplacer par les dates de chaque voyage à l'étape 2.
+
+## 6. Choix du 7 octobre au soir : « road trip » et « Mission control »
+
+- **Vocabulaire** : « road trip » (site en français). Adresses `/road-trips/<nom>` ; les anciennes `/equipages/<nom>`
+  redirigent (QR codes déjà imprimés).
+- **Style « Mission control »** : sombre, satellite et 3D, télémétrie façon tableau de bord, nouveau logo sans 4L,
+  nouvelles polices.
+- **Fonctionnalités, dans l'ordre** :
+  - **A. Fondations** : vocabulaire, adresses, plusieurs road trips par compte.
+  - **B. Identité** « Mission control » sur tout le site et les emails.
+  - **C. Guidage et étapes** : checklist « Prêt au départ » ; étapes créées par le voyageur ; détection automatique
+    des nuits et arrêts proposée en un clic.
+  - **D. Télémétrie et météo** en direct (vitesse, altitude, cap, batterie, réseau, météo à la position).
+  - **E. Replay 3D** exportable en vidéo et **journal de bord IA** du soir (relu et publié par le voyageur).
+  - **F. Sponsors** (statistiques de visibilité, rapport PDF de fin de voyage) et **mur d'encouragements** des proches.
+- Codes offerts : `TT-XXXX-XXXX` (fait, les anciens `4L-` restent valables).

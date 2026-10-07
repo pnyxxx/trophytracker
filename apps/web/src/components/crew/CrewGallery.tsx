@@ -1,4 +1,4 @@
-/** Galerie de l'équipage : photos classiques et panoramas 360° interactifs. */
+/** Galerie du road trip : photos classiques et panoramas 360° interactifs. */
 import { lazy, Suspense, useState } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, MapPin, X } from 'lucide-react';
 import type { Photo } from '@/lib/supabase';

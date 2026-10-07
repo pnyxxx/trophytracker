@@ -10,8 +10,8 @@ import { useSeen } from '@/hooks/useInView';
 // La carte 3D (MapLibre) est chargée à part, à l'approche de sa section : le haut de page s'affiche tout de suite.
 const ExampleTripMap = lazy(() => import('@/components/landing/ExampleTripMap'));
 
-/** Bandeau défilant : les voyages qu'on peut suivre. */
-const KINDS = ['Raids', 'Road-trips', 'Rallyes', 'Tours d’Europe', 'Van life', 'Voyages à vélo', 'Expéditions', 'Traversées du désert', 'Tours du monde'];
+/** Bandeau défilant : les road trips qu'on peut suivre. */
+const KINDS = ['Raids', 'Road trips', 'Rallyes', 'Tours d’Europe', 'Van life', 'Voyages à vélo', 'Expéditions', 'Traversées du désert', 'Tours du monde'];
 
 const audiences = [
   {
@@ -24,18 +24,18 @@ const audiences = [
     n: '02',
     km: 'KM ∞ · Sur la carte',
     title: 'Pour les sponsors',
-    text: 'Suivez l’aventure que vous financez. Votre logo apparaît sur la page et sur la carte du voyage, vue par toute sa communauté.',
+    text: 'Suivez l’aventure que vous financez. Votre logo apparaît sur la page et sur la carte du road trip, vue par toute sa communauté.',
   },
   {
     n: '03',
     km: 'KM ? · Au volant',
     title: 'Pour les voyageurs',
-    text: 'Raid, road-trip, tour d’Europe en van ou à vélo : une page à vous en 5 minutes, avec carte en direct, relief, photos et 360°, sponsors et cagnotte. Un seul lien à partager.',
+    text: 'Raid, road trip, tour d’Europe en van ou à vélo : une page à vous en 5 minutes, avec carte en direct, relief, photos et 360°, sponsors et cagnotte. Un seul lien à partager.',
   },
 ];
 
 const steps = [
-  { n: '1', title: 'Créez votre voyage', text: 'Nom, photos, sponsors, cagnotte… tout se gère depuis un espace simple. Invitez vos compagnons de route, gratuitement.' },
+  { n: '1', title: 'Créez votre road trip', text: 'Nom, photos, sponsors, cagnotte… tout se gère depuis un espace simple. Invitez vos compagnons de route, gratuitement.' },
   { n: '2', title: 'Activez le suivi', text: 'L’appli gratuite Traccar Client sur un téléphone suffit : un QR code à scanner. Vous avez déjà un boîtier GPS ? Il marche aussi.' },
   { n: '3', title: 'Vos proches suivent', text: 'Position en direct, trace complète, kilomètres, vitesse, relief, photos du soir… sur une page privée, juste pour eux.' },
 ];
@@ -43,18 +43,18 @@ const steps = [
 const features = [
   { tag: '01 · CARTE', title: 'Carte en temps réel', text: 'La position bouge sur la carte sans recharger la page.' },
   { tag: '02 · PHOTOS', title: 'Photos & 360°', text: 'Revivez les dunes, les cols et les bivouacs comme si vous y étiez.' },
-  { tag: '03 · PRIVÉ', title: 'Privé par défaut', text: 'Seules les personnes qui ont le lien voient le voyage. Rien sur Google.' },
+  { tag: '03 · PRIVÉ', title: 'Privé par défaut', text: 'Seules les personnes qui ont le lien voient le road trip. Rien sur Google.' },
   { tag: '04 · ÉTHIQUE', title: 'Sans pub & respectueux', text: 'Gratuit pour les proches, sans publicité, sans revente de données, sur nos propres serveurs.' },
 ];
 
 const faq = [
   {
-    q: 'Faut-il un compte pour suivre un voyage ?',
-    a: 'Non : il suffit du lien envoyé par les voyageurs. Un compte (gratuit) sert seulement à retrouver en un clic les voyages que vous suivez.',
+    q: 'Faut-il un compte pour suivre un road trip ?',
+    a: 'Non : il suffit du lien envoyé par les voyageurs. Un compte (gratuit) sert seulement à retrouver en un clic les road trips que vous suivez.',
   },
   {
     q: 'Comment la position est-elle envoyée ?',
-    a: 'Avec l’application gratuite Traccar Client (Android et iPhone), installée sur un téléphone du voyage, ou avec un boîtier GPS compatible. La position part quelques fois par minute quand il y a du réseau ; dans les zones sans réseau, les points sont gardés en mémoire et envoyés plus tard.',
+    a: 'Avec l’application gratuite Traccar Client (Android et iPhone), installée sur un téléphone du road trip, ou avec un boîtier GPS compatible. La position part quelques fois par minute quand il y a du réseau ; dans les zones sans réseau, les points sont gardés en mémoire et envoyés plus tard.',
   },
   {
     q: 'Pas de nouvelle position : faut-il s’inquiéter ?',
@@ -70,7 +70,7 @@ const faq = [
   },
   {
     q: 'Combien ça coûte ?',
-    a: `Suivre un voyage est gratuit, pour tout le monde. Pour créer la page de son voyage : ${priceSentence()}. C’est un paiement unique, sans abonnement, et les compagnons de route la rejoignent gratuitement. TrophyTracker est un projet indépendant, né de l’expérience d’un équipage de raid, sans publicité ni revente de données.`,
+    a: `Suivre un road trip est gratuit, pour tout le monde. Pour créer la page de son road trip : ${priceSentence()}. C’est un paiement unique, sans abonnement, et les compagnons de route la rejoignent gratuitement. TrophyTracker est un projet indépendant, né de l’expérience d’un équipage de raid, sans publicité ni revente de données.`,
   },
 ];
 
@@ -103,15 +103,15 @@ export default function Landing() {
 
           <div className="flex w-full max-w-[560px] flex-col gap-6">
             <p className="m-0 text-pretty text-lg leading-relaxed text-dust-200">
-              Raids, road-trips, tours du monde : proches, amis et sponsors retrouvent la position, la trace complète, le
-              relief et les photos du voyage qu’ils suivent. Gratuit pour eux, sans application à installer.
+              Raids, road trips, tours du monde : proches, amis et sponsors retrouvent la position, la trace complète, le
+              relief et les photos du road trip qu’ils suivent. Gratuit pour eux, sans application à installer.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
                 to="/inscription"
                 className="rounded-[4px] bg-primary px-6 py-4 font-mono text-sm font-bold uppercase tracking-[0.12em] text-white shadow-[0_10px_40px_rgba(219,71,64,.35)] hover:bg-primary-dark hover:text-white"
               >
-                Créer mon voyage →
+                Créer mon road trip →
               </Link>
               <a
                 href="#comment"
@@ -121,7 +121,7 @@ export default function Landing() {
               </a>
             </div>
             <p className="m-0 text-sm text-dust-400">
-              On vous a envoyé un lien ? Ouvrez-le simplement : pas besoin de compte pour suivre un voyage.
+              On vous a envoyé un lien ? Ouvrez-le simplement : pas besoin de compte pour suivre un road trip.
             </p>
           </div>
         </div>
@@ -250,11 +250,11 @@ export default function Landing() {
               <SectionTitle className="leading-[0.88]">
                 L’esprit
                 <br />
-                du voyage.
+                du road trip.
               </SectionTitle>
             </div>
             <p className="m-0 max-w-[460px] text-pretty text-[17px] leading-relaxed text-dust-700">
-              {FAIR_PLAY.spirit} Chaque voyage s’y engage avant d’activer son suivi.
+              {FAIR_PLAY.spirit} Chaque road trip s’y engage avant d’activer son suivi.
             </p>
           </div>
           <ol className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(min(100%,260px),1fr))] border-t-2 border-coal p-0">
@@ -304,14 +304,14 @@ export default function Landing() {
             à l’aventure&nbsp;?
           </h2>
           <p className="m-0 max-w-[520px] text-lg leading-relaxed text-dust-100">
-            Créez la page de votre voyage en 5 minutes et partagez un seul lien à vos proches et sponsors.
+            Créez la page de votre road trip en 5 minutes et partagez un seul lien à vos proches et sponsors.
           </p>
           <p className="m-0 font-mono text-xs uppercase tracking-[0.14em] text-gold">{priceSentence()} · paiement unique</p>
           <Link
             to="/inscription"
             className="rounded-[4px] bg-primary px-8 py-[18px] font-mono text-sm font-bold uppercase tracking-[0.12em] text-white shadow-[0_10px_40px_rgba(219,71,64,.45)] hover:bg-primary-dark hover:text-white"
           >
-            Créer mon voyage →
+            Créer mon road trip →
           </Link>
         </div>
       </section>

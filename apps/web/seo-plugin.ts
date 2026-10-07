@@ -82,7 +82,7 @@ const SITE_JSON_LD = [
     alternateName: 'Trophy Tracker',
     url: `${SITE_URL}/`,
     inLanguage: 'fr-FR',
-    description: 'Le carnet de route en direct de vos voyages : position, trace, relief, photos et sponsors.',
+    description: 'Le carnet de route en direct de vos road trips : position, trace, relief, photos et sponsors.',
   },
   {
     '@context': 'https://schema.org',

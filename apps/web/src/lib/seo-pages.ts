@@ -9,9 +9,9 @@
 export const SITE_URL = 'https://trophytracker.fr';
 export const SITE_NAME = 'TrophyTracker';
 
-export const DEFAULT_TITLE = 'TrophyTracker — Le carnet de route en direct de vos voyages';
+export const DEFAULT_TITLE = 'TrophyTracker — Le carnet de route en direct de vos road trips';
 export const DEFAULT_DESCRIPTION =
-  'Raids, road-trips, tours du monde : vos proches et sponsors suivent en direct la position, la trace, le relief et les photos de votre voyage. Gratuit pour eux.';
+  'Raids, road trips, tours du monde : vos proches et sponsors suivent en direct la position, la trace, le relief et les photos de votre road trip. Gratuit pour eux.';
 
 /** Titre complet affiché dans l'onglet et dans Google. */
 export const fullTitle = (title?: string) => (title ? `${title} · ${SITE_NAME}` : DEFAULT_TITLE);

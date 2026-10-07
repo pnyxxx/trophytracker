@@ -17,7 +17,7 @@ export const POSITRON_STYLE = 'https://tiles.openfreemap.org/styles/positron';
 
 /**
  * Fond vectoriel détaillé OpenFreeMap (routes colorées, relief ombré, pistes) : bien lisible une fois
- * zoomé, pour suivre un équipage de près.
+ * zoomé, pour suivre un road trip de près.
  */
 export const LIBERTY_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 

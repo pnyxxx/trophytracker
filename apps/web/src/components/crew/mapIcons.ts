@@ -63,7 +63,7 @@ const BRETON_FLAG = (() => {
   );
 })();
 
-/** Ville de départ de l'équipage : drapeau planté (breton si on part de Bretagne) + nom de la ville. */
+/** Ville de départ du road trip : drapeau planté (breton si on part de Bretagne) + nom de la ville. */
 export function startIcon(city: string | null, region: string | null) {
   const flag = region === 'Bretagne' ? BRETON_FLAG : RED_FLAG;
   return new DivIcon({
@@ -86,7 +86,7 @@ export function photoIcon(thumbUrl: string | null, panorama: boolean) {
   });
 }
 
-/** Le véhicule : point rouge cerclé de blanc, qui pulse quand le voyage est en direct. */
+/** Le véhicule : point rouge cerclé de blanc, qui pulse quand le road trip est en direct. */
 export function carIcon(live: boolean) {
   return new DivIcon({
     className: 'tt-marker',

@@ -27,14 +27,14 @@ import { formatRelative } from '@/lib/format';
 
 /** La suite après le paiement, montrée dans la fenêtre de bienvenue. */
 const NEXT_STEPS = [
-  { icon: Flag, title: 'Créer la page de l’équipage', text: 'Un nom, et c’est parti. Le reste se complète quand vous voulez.' },
-  { icon: Users, title: 'Inviter vos coéquipiers', text: 'Onglet « Membres » : ils rejoignent la page gratuitement.' },
+  { icon: Flag, title: 'Créer la page du road trip', text: 'Un nom, et c’est parti. Le reste se complète quand vous voulez.' },
+  { icon: Users, title: 'Inviter vos compagnons de route', text: 'Onglet « Membres » : ils rejoignent la page gratuitement.' },
   { icon: Satellite, title: 'Brancher le GPS', text: 'Onglet « GPS » : un téléphone dans le véhicule suffit, on vous guide pas à pas.' },
   { icon: Share2, title: 'Partager avec vos proches', text: 'Onglet « QR code » : le lien à envoyer à la famille et aux sponsors.' },
 ];
 
 /**
- * Création de l'équipage. Au retour de Stripe (`welcome`), la fenêtre s'ouvre
+ * Création du road trip. Au retour de Stripe (`welcome`), la fenêtre s'ouvre
  * d'abord sur un remerciement et la suite en quelques étapes, puis le formulaire.
  */
 function CreateCrewDialog({ welcome = false, onClose }: { welcome?: boolean; onClose?: () => void }) {
@@ -48,10 +48,10 @@ function CreateCrewDialog({ welcome = false, onClose }: { welcome?: boolean; onC
     mutationFn: async () =>
       unwrap(await supabase.rpc('create_crew', { p_name: form.name.trim(), p_car_number: form.car.trim(), p_tagline: form.tagline.trim() })),
     onSuccess: (crew) => {
-      toast.success('Équipage créé ! Complétez maintenant sa page.');
+      toast.success('Road trip créé ! Complétez maintenant sa page.');
       void queryClient.invalidateQueries({ queryKey: ['my-crews'] });
       setOpen(false);
-      navigate(`/mon-compte/equipages/${crew.slug}`);
+      navigate(`/mon-compte/road-trips/${crew.slug}`);
     },
     onError: toastError,
   });
@@ -65,7 +65,7 @@ function CreateCrewDialog({ welcome = false, onClose }: { welcome?: boolean; onC
       }}
     >
       <DialogTrigger asChild>
-        <Button><Plus />Créer mon équipage</Button>
+        <Button><Plus />Créer mon road trip</Button>
       </DialogTrigger>
       <DialogContent>
         {step === 'welcome' ? (
@@ -76,7 +76,7 @@ function CreateCrewDialog({ welcome = false, onClose }: { welcome?: boolean; onC
               </p>
               <DialogTitle className="font-display text-4xl font-black uppercase leading-none">Merci, et bienvenue&nbsp;!</DialogTitle>
               <DialogDescription className="text-dust-300">
-                Votre accès équipage est activé. Stripe vous envoie le reçu par email. Voici la suite :
+                Votre accès road trip est activé. Stripe vous envoie le reçu par email. Voici la suite :
               </DialogDescription>
             </DialogHeader>
             <ol className="m-0 list-none space-y-3 p-0">
@@ -92,21 +92,21 @@ function CreateCrewDialog({ welcome = false, onClose }: { welcome?: boolean; onC
                 </li>
               ))}
             </ol>
-            <Button className="w-full" onClick={() => setStep('form')}>Créer mon équipage<ArrowRight /></Button>
+            <Button className="w-full" onClick={() => setStep('form')}>Créer mon road trip<ArrowRight /></Button>
           </>
         ) : (
           <>
-            <DialogHeader><DialogTitle>Mon équipage</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>Mon road trip</DialogTitle></DialogHeader>
             <form
               onSubmit={(e: FormEvent) => { e.preventDefault(); create.mutate(); }}
               className="space-y-4"
             >
               <div className="space-y-2">
-                <Label htmlFor="crew-name">Nom de l'équipage</Label>
+                <Label htmlFor="crew-name">Nom du road trip</Label>
                 <Input id="crew-name" required minLength={2} maxLength={80} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="crew-car">Numéro d'équipage <span className="text-muted-foreground">(optionnel)</span></Label>
+                <Label htmlFor="crew-car">Numéro du road trip <span className="text-muted-foreground">(optionnel)</span></Label>
                 <Input id="crew-car" maxLength={10} value={form.car} onChange={(e) => setForm({ ...form, car: e.target.value })} />
               </div>
               <div className="space-y-2">
@@ -131,7 +131,7 @@ export default function AccountPage() {
   const myCrew = myCrews?.[0];
   const [name, setName] = useState<string | null>(null);
 
-  // Accès équipage payé et pas encore utilisé ? Au retour de Stripe (?paiement=ok), on
+  // Accès road trip payé et pas encore utilisé ? Au retour de Stripe (?paiement=ok), on
   // réinterroge quelques secondes le temps que Stripe confirme le paiement au serveur.
   const [params, setParams] = useSearchParams();
   const payment = params.get('paiement');
@@ -179,12 +179,12 @@ export default function AccountPage() {
       <Container className="max-w-5xl space-y-6 border-t border-cream/[0.12] py-12 md:py-16">
 
         {/* Un compte = un seul équipage (règle garantie par la base) */}
-        <Panel title="Mon équipage">
+        <Panel title="Mon road trip">
           {loadingMine || loadingAccess ? <Spinner /> : !myCrew && (hasAccess || profile?.role === 'admin') ? (
             <div className="flex flex-wrap items-center justify-between gap-4">
               <p className="m-0 max-w-[520px] text-dust-300">
                 {payment === 'ok' ? <><strong className="text-cream">Paiement reçu, merci !</strong> </> : null}
-                Votre accès équipage est prêt : créez la page de votre équipage. Vos coéquipiers la rejoindront ensuite par
+                Votre accès road trip est prêt : créez la page de votre road trip. Vos compagnons de route la rejoindront ensuite par
                 invitation, gratuitement.
               </p>
               <CreateCrewDialog welcome={payment === 'ok'} onClose={() => setParams({}, { replace: true })} />
@@ -200,7 +200,7 @@ export default function AccountPage() {
             <div className="flex flex-wrap items-center gap-5">
               <CrewAvatar name={myCrew.crew.name} path={myCrew.crew.avatar_path} className="h-16 w-16 text-2xl" />
               <div className="min-w-0 flex-1">
-                <Link to={`/equipages/${myCrew.crew.slug}`} className="font-display text-3xl font-black uppercase leading-none text-cream hover:text-primary">
+                <Link to={`/road-trips/${myCrew.crew.slug}`} className="font-display text-3xl font-black uppercase leading-none text-cream hover:text-primary">
                   {myCrew.crew.name}
                 </Link>
                 <p className="mb-0 mt-2 font-mono text-[11px] uppercase tracking-[0.1em] text-dust-400">
@@ -209,26 +209,26 @@ export default function AccountPage() {
                 {!myCrew.crew.tracking_enabled && (
                   <p className="mb-0 mt-2 text-xs text-dust-300">
                     <span className="text-ochre">Suivi GPS arrêté (mode essai).</span>{' '}
-                    <Link to={`/mon-compte/equipages/${myCrew.crew.slug}?onglet=gps`} className="underline hover:text-cream">Le lancer en partant</Link>
+                    <Link to={`/mon-compte/road-trips/${myCrew.crew.slug}?onglet=gps`} className="underline hover:text-cream">Le lancer en partant</Link>
                   </p>
                 )}
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button asChild variant="outline">
-                  <Link to={`/equipages/${myCrew.crew.slug}`}>Voir la page</Link>
+                  <Link to={`/road-trips/${myCrew.crew.slug}`}>Voir la page</Link>
                 </Button>
                 <Button asChild>
-                  <Link to={`/mon-compte/equipages/${myCrew.crew.slug}`}><Settings />Gérer</Link>
+                  <Link to={`/mon-compte/road-trips/${myCrew.crew.slug}`}><Settings />Gérer</Link>
                 </Button>
               </div>
             </div>
           )}
         </Panel>
 
-        <Panel title="Équipages suivis">
+        <Panel title="Road trips suivis">
           {loadingFollowed ? <Spinner /> : !followed?.length ? (
             <p className="text-dust-300">
-              Vous ne suivez aucun voyage. Ouvrez le lien qu’un voyageur vous a envoyé, puis « Suivre ».
+              Vous ne suivez aucun road trip. Ouvrez le lien qu’un voyageur vous a envoyé, puis « Suivre ».
             </p>
           ) : (
             <div className="grid gap-2 md:grid-cols-2">{followed.map((c) => <CrewCard key={c.id} crew={c} />)}</div>

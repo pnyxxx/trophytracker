@@ -17,12 +17,12 @@ export function SiteFooter() {
             </div>
           </div>
           <p className="max-w-[300px] text-sm leading-relaxed">
-            Le carnet de route en direct de vos voyages, raids et road-trips : position, trace, photos et sponsors. Gratuit pour les proches.
+            Le carnet de route en direct de vos road trips, raids et road trips : position, trace, photos et sponsors. Gratuit pour les proches.
           </p>
         </div>
         <nav className="flex flex-col gap-2.5 text-sm" aria-label="Liens du site">
           <p className="tt-kicker text-cream">Plateforme</p>
-          <Link to="/inscription" className={link}>Inscrire mon équipage</Link>
+          <Link to="/inscription" className={link}>Créer mon road trip</Link>
           <Link to="/#comment" className={link}>Comment ça marche</Link>
         </nav>
         <nav className="flex flex-col gap-2.5 text-sm" aria-label="Informations">

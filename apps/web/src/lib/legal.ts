@@ -30,7 +30,7 @@ export const VAT_MENTION = 'TVA non applicable, art. 293 B du CGI';
 export const LEGAL_UPDATED_AT = '2 octobre 2026';
 
 /**
- * Tarif de l'accès équipage, pour l'affichage. Le montant réellement payé est
+ * Tarif de l'accès road trip, pour l'affichage. Le montant réellement payé est
  * calculé par la base (private.crew_price_at) : garder les deux identiques.
  */
 export const PRICING = {
@@ -44,7 +44,7 @@ export const PRICING = {
 /** Le tarif de lancement est-il encore en cours ? */
 export const isLaunchPrice = (now = Date.now()) => now < PRICING.launchEndsAt;
 
-/** Prix de l'accès équipage aujourd'hui, en centimes. */
+/** Prix de l'accès road trip aujourd'hui, en centimes. */
 export const currentPriceCents = (now = Date.now()) => (isLaunchPrice(now) ? PRICING.launchCents : PRICING.regularCents);
 
 /** « 15 € », « 19,50 € ». */
@@ -54,8 +54,8 @@ export const euros = (cents: number) =>
 /** Phrase de tarif réutilisée sur le site. */
 export function priceSentence(now = Date.now()) {
   return isLaunchPrice(now)
-    ? `${euros(PRICING.launchCents)} par équipage jusqu’au ${PRICING.launchLastDay} (tarif de lancement), puis ${euros(PRICING.regularCents)}`
-    : `${euros(PRICING.regularCents)} par équipage`;
+    ? `${euros(PRICING.launchCents)} par road trip jusqu’au ${PRICING.launchLastDay} (tarif de lancement), puis ${euros(PRICING.regularCents)}`
+    : `${euros(PRICING.regularCents)} par road trip`;
 }
 
 /** Lien « Signaler un contenu » : un email pré-rempli à l'éditeur. */

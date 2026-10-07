@@ -8,7 +8,7 @@ export function haversineKm(lat1: number, lon1: number, lat2: number, lon2: numb
 }
 
 /**
- * Où était le voyage à l'instant `t` (secondes) d'après sa trace [lat, lon, t, …] triée par date ?
+ * Où était le road trip à l'instant `t` (secondes) d'après sa trace [lat, lon, t, …] triée par date ?
  * Interpole entre les deux points qui encadrent `t` ; sinon prend le plus proche. Rien si
  * la trace n'a aucun point à moins de `maxGapS` secondes (le téléphone n'émettait pas à ce moment-là).
  */

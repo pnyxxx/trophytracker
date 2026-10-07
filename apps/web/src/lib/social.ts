@@ -1,5 +1,5 @@
 /**
- * Liens Instagram / Facebook saisis par un équipage : on accepte un lien
+ * Liens Instagram / Facebook saisis par un road trip : on accepte un lien
  * complet, un lien sans « https:// » ou juste le nom du compte (« @j4lclub »),
  * et on le transforme en adresse propre.
  */

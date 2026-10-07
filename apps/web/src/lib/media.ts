@@ -59,7 +59,7 @@ export async function compressImage(file: File, preset: ImagePreset): Promise<Co
   return { blob: final, width, height };
 }
 
-/** Envoie une image compressée dans le dossier de l'équipage ; renvoie son chemin. */
+/** Envoie une image compressée dans le dossier du road trip ; renvoie son chemin. */
 export async function uploadCrewImage(crewId: string, folder: string, file: File, preset: ImagePreset) {
   const img = await compressImage(file, preset);
   const ext = img.blob.type === 'image/webp' ? 'webp' : 'jpg';
@@ -76,7 +76,7 @@ export async function removeCrewImages(...paths: (string | null | undefined)[]) 
   if (list.length) await supabase.storage.from(MEDIA_BUCKET).remove(list);
 }
 
-/** Supprime tous les fichiers d'un équipage (avant la suppression de l'équipage). */
+/** Supprime tous les fichiers d'un road trip (avant la suppression du road trip). */
 export async function removeCrewFolder(crewId: string) {
   for (const sub of ['avatar', 'cover', 'photos', 'sponsors']) {
     const { data } = await supabase.storage.from(MEDIA_BUCKET).list(`${crewId}/${sub}`, { limit: 1000 });

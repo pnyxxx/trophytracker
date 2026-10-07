@@ -9,13 +9,13 @@ describe('buildSitemap', () => {
 
   it('liste les pages fixes avec une adresse absolue', () => {
     expect(xml).toContain('<loc>https://exemple.fr/</loc>');
-    // Plus de liste publique des voyages.
-    expect(xml).not.toContain('<loc>https://exemple.fr/equipages</loc>');
+    // Plus de liste publique des road trips.
+    expect(xml).not.toContain('<loc>https://exemple.fr/road-trips</loc>');
   });
 
-  it('ajoute chaque équipage avec sa date de mise à jour', () => {
-    expect(xml).toContain('<loc>https://exemple.fr/equipages/j4l-club</loc>\n    <lastmod>2026-09-28</lastmod>');
-    expect(xml).toContain('<loc>https://exemple.fr/equipages/a-b</loc>\n    <lastmod>2026-09-01</lastmod>');
+  it('ajoute chaque road trip avec sa date de mise à jour', () => {
+    expect(xml).toContain('<loc>https://exemple.fr/road-trips/j4l-club</loc>\n    <lastmod>2026-09-28</lastmod>');
+    expect(xml).toContain('<loc>https://exemple.fr/road-trips/a-b</loc>\n    <lastmod>2026-09-01</lastmod>');
   });
 
   it('n\'expose ni les comptes ni l\'administration', () => {

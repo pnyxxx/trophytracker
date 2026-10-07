@@ -25,7 +25,7 @@ function Overview() {
     refetchInterval: 30_000,
     queryFn: async () => unwrap(await supabase.rpc('admin_overview')) as Record<string, number>,
   });
-  const labels: Record<string, string> = { users: 'Comptes', crews: 'Équipages', live_crews: 'En direct', positions: 'Positions GPS', follows: 'Abonnements' };
+  const labels: Record<string, string> = { users: 'Comptes', crews: 'Road trips', live_crews: 'En direct', positions: 'Positions GPS', follows: 'Abonnements' };
   return (
     <dl className="m-0 grid grid-cols-2 gap-px border border-cream/[0.14] bg-cream/[0.14] md:grid-cols-5">
       {Object.entries(labels).map(([k, label]) => (
@@ -55,17 +55,17 @@ function CrewsAdmin() {
 
   if (isLoading) return <Spinner />;
   return (
-    <Panel title={`Équipages (${data.length})`} description="Associez un équipage à un appareil du serveur Traccar (identifiant, id numérique ou nom).">
+    <Panel title={`Road trips (${data.length})`} description="Associez un road trip à un appareil du serveur Traccar (identifiant, id numérique ou nom).">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead className="font-mono text-[11px] uppercase tracking-[0.14em] text-dust-400">
-            <tr><th className="py-2">Équipage</th><th>Abonnés</th><th>GPS</th><th className="min-w-[260px]">Appareil Traccar</th></tr>
+            <tr><th className="py-2">Road trip</th><th>Abonnés</th><th>GPS</th><th className="min-w-[260px]">Appareil Traccar</th></tr>
           </thead>
           <tbody className="divide-y divide-cream/10">
             {data.map((c) => (
               <tr key={c.id}>
                 <td className="py-3 pr-4">
-                  <Link to={`/equipages/${c.slug}`} className="font-display text-xl font-extrabold uppercase text-cream hover:text-primary">{c.name}</Link>
+                  <Link to={`/road-trips/${c.slug}`} className="font-display text-xl font-extrabold uppercase text-cream hover:text-primary">{c.name}</Link>
                   <p className="text-xs text-dust-500">{c.car_number ? `#${c.car_number} · ` : ''}{c.is_public ? 'Public' : 'Privé'}</p>
                 </td>
                 <td className="pr-4 text-dust-200">{c.followers_count}</td>
@@ -108,7 +108,7 @@ function PurchasesAdmin() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="font-mono text-[11px] uppercase tracking-[0.14em] text-dust-400">
-                <tr><th className="py-2">Date</th><th>Compte</th><th>Montant</th><th>Statut</th><th>Équipage</th></tr>
+                <tr><th className="py-2">Date</th><th>Compte</th><th>Montant</th><th>Statut</th><th>Road trip</th></tr>
               </thead>
               <tbody className="divide-y divide-cream/10">
                 {data.map((p) => (
@@ -123,7 +123,7 @@ function PurchasesAdmin() {
                     </td>
                     <td className="pr-4 text-dust-200">{PURCHASE_STATUS[p.status] ?? p.status}</td>
                     <td>
-                      {p.crew_slug ? <Link to={`/equipages/${p.crew_slug}`} className="text-cream hover:text-primary">{p.crew_name}</Link>
+                      {p.crew_slug ? <Link to={`/road-trips/${p.crew_slug}`} className="text-cream hover:text-primary">{p.crew_name}</Link>
                         : <span className="text-xs text-dust-500">{p.status === 'paid' ? 'Pas encore créé' : '—'}</span>}
                     </td>
                   </tr>
@@ -180,7 +180,7 @@ function AccessCodesAdmin() {
   const grant = useMutation({
     mutationFn: async () => unwrap(await supabase.rpc('admin_grant_crew_access', { p_email: email.trim() })),
     onSuccess: () => {
-      toast.success('Accès offert : la personne peut créer son équipage depuis « Mon compte »');
+      toast.success('Accès offert : la personne peut créer son road trip depuis « Mon compte »');
       setEmail('');
       refresh();
     },
@@ -195,11 +195,11 @@ function AccessCodesAdmin() {
     <div className="space-y-6">
       <Panel
         title="Générer un code"
-        description={<>La personne le saisit dans <strong className="text-cream">Mon compte</strong> (avec ou sans compte au moment où vous le lui donnez) et peut créer son équipage sans payer.</>}
+        description={<>La personne le saisit dans <strong className="text-cream">Mon compte</strong> (avec ou sans compte au moment où vous le lui donnez) et peut créer son road trip sans payer.</>}
       >
         <form className="grid gap-4 md:grid-cols-[minmax(0,1fr)_140px_180px_auto] md:items-end" onSubmit={(e: FormEvent) => { e.preventDefault(); create.mutate(); }}>
           <Field id="code-note" label="Pour qui ? (note)">
-            <Input id="code-note" maxLength={200} placeholder="ex. Équipage du sponsor Dupont" value={note} onChange={(e) => setNote(e.target.value)} />
+            <Input id="code-note" maxLength={200} placeholder="ex. Road trip du sponsor Dupont" value={note} onChange={(e) => setNote(e.target.value)} />
           </Field>
           <Field id="code-uses" label="Utilisations">
             <Input id="code-uses" type="number" min={1} max={500} required value={maxUses} onChange={(e) => setMaxUses(e.target.value)} />
@@ -351,7 +351,7 @@ function RouteAdmin() {
   });
 
   return (
-    <Panel title="Parcours prévu" description="Points affichés sur toutes les cartes et dans « La route », dans l’ordre croissant. Les jours (J1 = jour du départ) relient le calendrier aux étapes : tant que le programme dit qu’un équipage est à une étape et qu’il reste dans les environs (boucles…), elle reste « en cours ».">
+    <Panel title="Parcours prévu" description="Points affichés sur toutes les cartes et dans « La route », dans l’ordre croissant. Les jours (J1 = jour du départ) relient le calendrier aux étapes : tant que le programme dit qu’un road trip est à une étape et qu’il reste dans les environs (boucles…), elle reste « en cours ».">
       <ul className="mb-6 divide-y divide-cream/10">
         {event?.waypoints.map((w) => (
           <li key={w.id} className={`flex items-center gap-3 py-2 ${w.parent_id ? 'pl-8' : ''}`}>
@@ -437,7 +437,7 @@ export default function AdminPage() {
         <Overview />
         <Tabs defaultValue="crews">
           <TabsList className="mb-8 flex w-full justify-start overflow-x-auto">
-            <TabsTrigger value="crews">Équipages</TabsTrigger>
+            <TabsTrigger value="crews">Road trips</TabsTrigger>
             <TabsTrigger value="purchases">Paiements</TabsTrigger>
             <TabsTrigger value="codes">Accès offerts</TabsTrigger>
             <TabsTrigger value="users">Comptes</TabsTrigger>

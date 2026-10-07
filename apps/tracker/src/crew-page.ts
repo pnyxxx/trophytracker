@@ -1,6 +1,6 @@
 /**
- * Page d'un équipage telle que l'envoie le serveur : le modèle HTML du site (_shell/crew.html, produit par
- * apps/web/seo-plugin.ts) complété avec le nom, la description et la photo de l'équipage.
+ * Page d'un road trip telle que l'envoie le serveur : le modèle HTML du site (_shell/crew.html, produit par
+ * apps/web/seo-plugin.ts) complété avec le nom, la description et la photo du road trip.
  * Google et les aperçus de partage (WhatsApp, Facebook, iMessage…) les lisent sans exécuter le JavaScript.
  */
 
@@ -27,7 +27,7 @@ const storagePath = (p: string) => p.split('/').map(encodeURIComponent).join('/'
 export function renderCrewPage(template: string, siteUrl: string, slug: string, crew: CrewMeta): string {
   const base = siteUrl.replace(/\/$/, '');
   // Même texte par défaut que la page React (apps/web/src/pages/CrewPage.tsx).
-  const description = crew.tagline ?? `Suivez le voyage ${crew.name} en direct.`;
+  const description = crew.tagline ?? `Suivez le road trip ${crew.name} en direct.`;
   // Couverture réduite à 1200 px de large (taille conseillée pour les aperçus, et bien plus légère).
   const image = crew.cover_path
     ? `${base}/storage/v1/render/image/public/${MEDIA_BUCKET}/${storagePath(crew.cover_path)}?width=1200&quality=75`
@@ -35,10 +35,10 @@ export function renderCrewPage(template: string, siteUrl: string, slug: string, 
       ? `${base}/storage/v1/object/public/${MEDIA_BUCKET}/${storagePath(crew.avatar_path)}`
       : `${base}/og-image.png`;
 
-  const values = { name: crew.name, description, url: `${base}/equipages/${slug}`, image };
+  const values = { name: crew.name, description, url: `${base}/road-trips/${slug}`, image };
   let html = template;
   for (const key of Object.keys(TOKENS) as (keyof typeof TOKENS)[]) {
-    // Fonction de remplacement : un « $ » dans le nom d'un équipage reste un simple caractère.
+    // Fonction de remplacement : un « $ » dans le nom d'un road trip reste un simple caractère.
     html = html.replaceAll(TOKENS[key], () => escapeHtml(values[key]));
   }
   return html;

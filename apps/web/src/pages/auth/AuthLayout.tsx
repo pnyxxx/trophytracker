@@ -24,7 +24,7 @@ export function AuthLayout({ title, subtitle, children, footer }: {
             en <span className="font-stencil text-primary">direct.</span>
           </p>
           <div className="flex flex-wrap gap-x-10 gap-y-2 font-mono text-[11px] uppercase tracking-[0.16em] text-dust-400">
-            <span>Raids · Road-trips</span>
+            <span>Raids · Road trips</span>
             <span>Tours du monde · Expéditions</span>
           </div>
         </div>

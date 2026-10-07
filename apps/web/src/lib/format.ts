@@ -20,7 +20,7 @@ export function formatRelative(iso: string | null | undefined, now = Date.now())
   return `le ${new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}`;
 }
 
-/** Un équipage est « en direct » si sa dernière position a moins de 10 minutes. */
+/** Un road trip est « en direct » si sa dernière position a moins de 10 minutes. */
 export const isLive = (lastFixAt: string | null | undefined, now = Date.now()) =>
   !!lastFixAt && now - new Date(lastFixAt).getTime() < 10 * 60 * 1000;
 

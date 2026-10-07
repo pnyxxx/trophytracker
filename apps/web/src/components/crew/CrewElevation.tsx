@@ -1,5 +1,5 @@
 /**
- * Profil d'élévation réel du voyage (altitude envoyée par le téléphone), jour par jour :
+ * Profil d'élévation réel du road trip (altitude envoyée par le téléphone), jour par jour :
  * courbe d'altitude, dénivelés positif et négatif, point culminant et dernière position.
  * Survol (ou flèches du clavier) : altitude au kilomètre.
  */
@@ -33,9 +33,9 @@ function useWidth() {
 }
 
 export function CrewElevation({ profile }: { profile: AltPoint[] }) {
-  // Jours du voyage pour lesquels on a des altitudes.
+  // Jours du road trip pour lesquels on a des altitudes.
   const days = useMemo(() => [...new Set(profile.map((p) => p.day).filter((d): d is number => d != null && d >= 1))], [profile]);
-  // Sélection : null = toute la trace ; sinon un jour du voyage.
+  // Sélection : null = toute la trace ; sinon un jour du road trip.
   const [day, setDay] = useState<number | null>(null);
   const [hover, setHover] = useState<number | null>(null);
   const [ref, width] = useWidth();
@@ -202,7 +202,7 @@ export function CrewElevation({ profile }: { profile: AltPoint[] }) {
       </div>
 
       <p className="m-0 border-t border-coal/15 px-4 py-2 font-mono text-[10px] text-dust-600 md:px-5">
-        Altitude mesurée par le GPS du téléphone de l’équipage (lissée) : quelques mètres de marge.
+        Altitude mesurée par le GPS du téléphone du road trip (lissée) : quelques mètres de marge.
       </p>
     </figure>
   );

@@ -112,7 +112,7 @@ export default function CrewPage() {
   const { data: sponsors = [] } = useSponsors(crew?.id);
   const { canEdit } = useMyRole(crew?.id);
   const { points } = useLiveTrack(crew);
-  // Jour 1 du voyage = jour du premier point de la trace.
+  // Jour 1 du road trip = jour du premier point de la trace.
   const startedAt = points[0]?.[2] ?? null;
   const profile = useMemo(() => altitudeProfile(points, startedAt != null ? localDate(startedAt) : null), [points, startedAt]);
 
@@ -126,7 +126,7 @@ export default function CrewPage() {
     <PageShell padTop={false}>
       <Seo
         title={crew.name}
-        description={crew.tagline ?? `Suivez le voyage ${crew.name} en direct.`}
+        description={crew.tagline ?? `Suivez le road trip ${crew.name} en direct.`}
         image={cover ?? mediaUrl(crew.avatar_path)}
         noindex={!crew.is_public}
         jsonLd={{
@@ -153,11 +153,11 @@ export default function CrewPage() {
               {crew.car_number && (
                 <span className="rounded-[3px] bg-primary px-2 py-1 font-mono text-xs font-bold tracking-normal text-white">#{crew.car_number}</span>
               )}
-              <span>Voyage</span>
+              <span>Road trip</span>
               <LiveBadge lastFixAt={crew.last_fix_at} />
               {!live && crew.last_fix_at && <span className="text-dust-400">Dernière position {formatRelative(crew.last_fix_at)}</span>}
               {!crew.is_public && <span className="border border-cream/25 px-2 py-1 text-dust-100">Page privée</span>}
-              {crew.is_demo && <span className="border border-ochre/60 px-2 py-1 text-ochre">Voyage de démonstration</span>}
+              {crew.is_demo && <span className="border border-ochre/60 px-2 py-1 text-ochre">Road trip de démonstration</span>}
             </Kicker>
             <div className="flex flex-col gap-3">
               <h1 className="m-0 break-words font-display text-[clamp(56px,9vw,152px)] font-black uppercase leading-[0.92] text-cream">
@@ -207,7 +207,7 @@ export default function CrewPage() {
                 <CrewShareButton crew={crew} />
                 {canEdit && (
                   <Button asChild variant="secondary">
-                    <Link to={`/mon-compte/equipages/${crew.slug}`}><Settings />Gérer</Link>
+                    <Link to={`/mon-compte/road-trips/${crew.slug}`}><Settings />Gérer</Link>
                   </Button>
                 )}
               </div>
