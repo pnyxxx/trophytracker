@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import type { Crew } from '@/lib/supabase';
 import { thumbUrl } from '@/lib/media';
 import { canvasToBlob, drawPoster, POSTER_SIZE, type PosterFormat } from '@/lib/qr-poster';
+import { markShared } from '@/lib/share';
 import { cn } from '@/lib/utils';
 
 const FORMATS: { id: PosterFormat; label: string; hint: string }[] = [
@@ -18,7 +19,7 @@ const FORMATS: { id: PosterFormat; label: string; hint: string }[] = [
   { id: 'story', label: 'Story réseaux', hint: '1080 × 1920 px : Instagram, Facebook, WhatsApp.' },
 ];
 
-type CrewForQr = Pick<Crew, 'slug' | 'name' | 'car_number' | 'avatar_path' | 'is_public'>;
+type CrewForQr = Pick<Crew, 'id' | 'slug' | 'name' | 'car_number' | 'avatar_path' | 'is_public'>;
 
 export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl?: boolean }) {
   const [format, setFormat] = useState<PosterFormat>('sticker');
@@ -53,6 +54,7 @@ export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl
 
   const share = async () => {
     if (!file) return;
+    markShared(crew.id);
     try {
       await navigator.share({ files: [file], title: crew.name, text: `Suivez ${crew.name} en direct ! ${pageUrl}` });
     } catch {
@@ -107,7 +109,7 @@ export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl
 
         <div className="flex flex-wrap gap-2">
           <Button asChild disabled={!image}>
-            <a href={image?.url} download={fileName} aria-disabled={!image} onClick={(e) => !image && e.preventDefault()}>
+            <a href={image?.url} download={fileName} aria-disabled={!image} onClick={(e) => (image ? markShared(crew.id) : e.preventDefault())}>
               <Download /> Télécharger le PNG
             </a>
           </Button>
@@ -135,6 +137,7 @@ export function CrewShareButton({ crew, className }: { crew: CrewForQr; classNam
   const canShare = typeof navigator.share === 'function';
 
   const send = async () => {
+    markShared(crew.id);
     try {
       await navigator.share({ title: crew.name, text: `Suivez ${crew.name} en direct !`, url: pageUrl });
     } catch {
@@ -142,6 +145,7 @@ export function CrewShareButton({ crew, className }: { crew: CrewForQr; classNam
     }
   };
   const copy = async () => {
+    markShared(crew.id);
     try {
       await navigator.clipboard.writeText(pageUrl);
       toast.success('Lien copié ! Partagez-le à vos proches et sponsors.');

@@ -11,6 +11,7 @@ import { CrewAvatar, FollowButton, LiveBadge } from '@/components/crew/CrewBits'
 import { CrewStats } from '@/components/crew/CrewStats';
 import { CrewGallery } from '@/components/crew/CrewGallery';
 import { CrewSponsors } from '@/components/crew/CrewSponsors';
+import { CrewLogbook } from '@/components/crew/CrewLogbook';
 import { CrewShareButton } from '@/components/crew/CrewQr';
 import { useCrew, useCrewStats, useMyRole, usePhotos, useSponsors, useStages } from '@/hooks/queries';
 import { useLiveTrack } from '@/hooks/useLiveTrack';
@@ -253,6 +254,13 @@ export default function CrewPage() {
           <Suspense fallback={<div className="h-[260px] animate-pulse border-2 border-coal bg-cream" />}>
             <CrewElevation profile={profile} />
           </Suspense>
+        </Section>
+      )}
+
+      {/* ── Carnet de route : étapes (et journal) ───────────────────────────── */}
+      {stages.length > 0 && (
+        <Section id="carnet" tone="cream" kicker="Carnet de route" title="Les étapes" subtitle="Racontées par les voyageurs, au fil de la route.">
+          <CrewLogbook stages={stages} photos={photos} />
         </Section>
       )}
 
