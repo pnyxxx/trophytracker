@@ -150,9 +150,9 @@ export default function Landing() {
             <div className="absolute inset-0"><ExampleTripMap /></div>
           </Suspense>
         )}
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,#120F0C_0%,rgba(18,15,12,.35)_25%,rgba(18,15,12,.15)_60%,#120F0C_100%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,#120F0C_0%,rgba(18,15,12,.25)_22%,rgba(18,15,12,0)_55%,rgba(18,15,12,.85)_100%)]" />
         <div className="pointer-events-none relative z-[3] mx-auto flex max-w-[1240px] flex-col gap-4 px-4 pt-[90px] sm:px-7">
-          <Kicker>Exemple · Col du Stelvio, Italie</Kicker>
+          <Kicker>Exemple · Col du Galibier, Alpes</Kicker>
           <SectionTitle className="max-w-[760px] leading-[0.92] text-cream">
             Une trace,
             <br />
@@ -163,7 +163,7 @@ export default function Landing() {
           </p>
         </div>
         <div className="absolute bottom-6 left-4 z-[3] font-mono text-[10px] uppercase tracking-[0.14em] text-dust-300 sm:left-7">
-          47 km · 48 lacets · 2 757 m · vue satellite 3D
+          Valloire → Galibier → Lautaret · 27 km · 2 642 m · vue satellite 3D
         </div>
       </section>
 

@@ -41,8 +41,8 @@ http://web {
 		Permissions-Policy "camera=(), microphone=(), geolocation=(self), payment=()"
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		# Seules nos ressources + les tuiles de carte sont autorisées : bloque les injections de scripts.
-		# (OpenFreeMap : fond de carte ; Esri : imagerie satellite ; s3.amazonaws.com : relief de l'accueil)
-		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://tiles.openfreemap.org https://server.arcgisonline.com https://s3.amazonaws.com; connect-src 'self' https://photon.komoot.io https://tiles.openfreemap.org https://server.arcgisonline.com https://s3.amazonaws.com; font-src 'self' data:; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+		# (OpenFreeMap : fond de carte ; IGN et Esri : imagerie satellite ; s3.amazonaws.com : relief ; Open-Meteo : météo)
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://tiles.openfreemap.org https://server.arcgisonline.com https://data.geopf.fr https://s3.amazonaws.com; connect-src 'self' https://photon.komoot.io https://tiles.openfreemap.org https://server.arcgisonline.com https://data.geopf.fr https://s3.amazonaws.com https://api.open-meteo.com; font-src 'self' data:; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
 		-Server
 	}
 
