@@ -798,6 +798,7 @@ export type Database = {
           traccar_device_id: string
         }[]
       }
+      get_telemetry: { Args: { p_crew: string; p_tz?: string }; Returns: Json }
       get_track: { Args: { p_crew: string; p_since?: string }; Returns: Json }
       purchase_attach_session: {
         Args: { p_purchase: string; p_session: string }
