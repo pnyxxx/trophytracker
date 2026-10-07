@@ -1,5 +1,9 @@
 # Analyse juridique de TrophyTracker
 
+> ⚠️ **Mise à jour du 7 octobre 2026** : règlement 2026 lu (l'art. 7.4 interdit tout tracker), l'organisation a
+> demandé la mise en pause du site et le projet devient une appli généraliste. Tout est dans [PIVOT.md](PIVOT.md) ;
+> cette analyse reste valable pour le reste (statut, CGV, RGPD…).
+
 > Analyse du 2026-09-26. **Ce document n'est pas un avis d'avocat** : c'est un état des lieux, sources à l'appui,
 > pour savoir quoi faire et quoi faire vérifier. Avant de lancer l'offre payante, le faire relire gratuitement :
 > permanence d'avocat gratuite (mairie, maison de justice et du droit), clinique juridique d'une faculté de droit,
