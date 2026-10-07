@@ -52,7 +52,7 @@ http://web {
 	@paused {
 		expression `"{$SITE_PAUSED:false}" == "true"`
 		header Cf-Connecting-IP *
-		not path /pause.html /favicon.svg
+		not path /pause.html /pause/* /favicon.svg
 	}
 	rewrite @paused /pause.html
 	header @paused X-Robots-Tag "noindex"

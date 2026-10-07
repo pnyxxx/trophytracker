@@ -4,27 +4,87 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#120F0C">
   <title>TrophyTracker fait une pause</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <!-- Page affichée au public quand SITE_PAUSED=true (voir apps/web/Caddyfile). Autonome : aucun script, aucune ressource externe. -->
+  <!--
+    Page affichée au public quand SITE_PAUSED=true (voir apps/web/Caddyfile).
+    Même mise en page « roadbook » que les emails (apps/tracker/src/email-layout.ts), sans aucun script ni ressource
+    externe : polices et logo sont servis depuis /pause/, que la pause laisse passer.
+  -->
   <style>
-    :root { --bg: #f4ecdf; --fg: #2a211b; --muted: #6b5d52; --accent: #db4740; }
-    @media (prefers-color-scheme: dark) { :root { --bg: #1d1814; --fg: #f4ecdf; --muted: #b3a597; } }
+    @font-face { font-family: 'Big Shoulders Display'; font-weight: 900; font-display: swap; src: url(/pause/big-shoulders-display-latin-900-normal.woff2) format('woff2'); }
+    @font-face { font-family: Archivo; font-weight: 400; font-display: swap; src: url(/pause/archivo-latin-400-normal.woff2) format('woff2'); }
+    @font-face { font-family: Archivo; font-weight: 700; font-display: swap; src: url(/pause/archivo-latin-700-normal.woff2) format('woff2'); }
+    @font-face { font-family: 'JetBrains Mono'; font-weight: 600; font-display: swap; src: url(/pause/jetbrains-mono-latin-600-normal.woff2) format('woff2'); }
+
+    :root {
+      --night: #120F0C; --paper: #FFF8EC; --sand: #F4ECDF; --coal: #1A1612; --text: #3A3027;
+      --muted: #6B6157; --red: #DB4740; --ochre: #D98A3D; --ochre-dark: #A8652A; --dust: #9E9282;
+      --display: 'Big Shoulders Display', 'Avenir Next Condensed', 'Arial Narrow', Impact, sans-serif;
+      --sans: Archivo, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --mono: 'JetBrains Mono', Menlo, Consolas, monospace;
+    }
     * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px 16px;
-      background: var(--bg); color: var(--fg); font: 17px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
-    main { max-width: 34rem; }
-    h1 { margin: 0 0 16px; font-size: clamp(28px, 7vw, 40px); line-height: 1.1; }
-    h1 span { color: var(--accent); }
-    p { margin: 0 0 12px; color: var(--muted); }
-    a { color: var(--accent); }
+    html, body { margin: 0; }
+    body {
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 32px 16px; background: var(--night); color: var(--text); font-family: var(--sans);
+      background-image: radial-gradient(ellipse at 50% 0%, rgba(219, 71, 64, .14), transparent 60%);
+    }
+    .label { font-family: var(--mono); font-weight: 600; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; }
+
+    .card { width: 100%; max-width: 540px; background: var(--paper); border: 2px solid var(--coal); box-shadow: 0 30px 80px rgba(0, 0, 0, .45); }
+    .bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 20px; background: var(--coal); }
+    .brand { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+    .brand img { width: 34px; height: 34px; }
+    .brand span { font-family: var(--display); font-weight: 900; font-size: 24px; line-height: 1; text-transform: uppercase; color: var(--sand); }
+    .brand b { font-weight: 900; color: var(--red); }
+    .bar .label { font-size: 10px; color: var(--dust); }
+    .kicker { padding: 12px 24px; border-bottom: 2px solid var(--coal); color: var(--coal); }
+
+    .body { padding: 30px 24px; }
+    h1 { margin: 0 0 18px; font-family: var(--display); font-weight: 900; font-size: 52px; line-height: .95; text-transform: uppercase; color: var(--coal); }
+    h1 em { font-style: normal; color: var(--red); }
+    p { margin: 0 0 14px; font-size: 15px; line-height: 1.6; }
+    p:last-child { margin-bottom: 0; }
+    .note { margin-top: 24px; padding-top: 18px; border-top: 1px dashed #C9BDAC; font-size: 13px; color: var(--muted); }
+    a { color: var(--red); }
+
+    .road { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-top: 2px solid var(--coal); color: var(--muted); }
+    .road .label { font-size: 10px; white-space: nowrap; }
+    .road i { flex: 1; border-top: 2px dotted var(--ochre); }
+    .road .dot { flex: none; width: 14px; height: 14px; border-radius: 50%; background: var(--red); border: 3px solid #F6C9C5; animation: pulse 2.4s ease-in-out infinite; }
+    @keyframes pulse { 50% { box-shadow: 0 0 0 6px rgba(219, 71, 64, .18); } }
+    @media (prefers-reduced-motion: reduce) { .road .dot { animation: none; } }
+
+    .sign { margin: 18px 0 0; font-size: 10px; letter-spacing: .2em; color: var(--ochre); text-align: center; }
+
+    @media (max-width: 520px) {
+      .bar .label { display: none; }
+      .body { padding: 24px 18px; }
+      h1 { font-size: 40px; }
+    }
   </style>
 </head>
 <body>
-  <main>
-    <h1>Trophy<span>Tracker</span> fait une pause</h1>
-    <p>Le site est temporairement indisponible. Les comptes et les données sont conservés.</p>
-    <p>Une question ? Écrivez à <a href="mailto:julien.plomion2006@gmail.com">julien.plomion2006@gmail.com</a>.</p>
+  <main class="card">
+    <div class="bar">
+      <div class="brand"><img src="/pause/logo.svg" alt=""><span>Trophy<b>Tracker</b></span></div>
+      <div class="label">Carnet de route en direct</div>
+    </div>
+    <div class="kicker label">Information · Mise en pause</div>
+    <div class="body">
+      <h1>On fait une <em>pause</em></h1>
+      <p>TrophyTracker est temporairement indisponible.</p>
+      <p>Rien n’est perdu : les comptes, les pages, les photos et les traces sont conservés en toute sécurité.</p>
+      <p class="note">Une question, une demande de remboursement ou de copie de vos données&nbsp;? Écrivez à
+        <a href="mailto:julien.plomion2006@gmail.com">julien.plomion2006@gmail.com</a>.</p>
+    </div>
+    <div class="road">
+      <span class="label">En pause</span><i></i><span class="dot"></span><i></i><span class="label">Bientôt de retour</span>
+    </div>
   </main>
+  <p class="sign label">TrophyTracker · projet indépendant</p>
 </body>
 </html>
