@@ -72,7 +72,7 @@ const pageHead = (p: string, seo: PageSeo): Head => ({
 
 /**
  * Le site lui-même, décrit sur l'accueil : c'est là que Google cherche le nom du site.
- * alternateName lui apprend que « Trophy Tracker » (en deux mots) désigne aussi TrophyTracker.
+ * alternateName lui apprend que « Trophy Tracker » (en deux mots) désigne aussi trophytracker.
  */
 const SITE_JSON_LD = [
   {

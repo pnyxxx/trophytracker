@@ -4,87 +4,66 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
-  <meta name="theme-color" content="#120F0C">
-  <title>TrophyTracker fait une pause</title>
+  <meta name="theme-color" content="#15161A">
+  <title>trophytracker fait une pause</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <!--
     Page affichée au public quand SITE_PAUSED=true (voir apps/web/Caddyfile).
-    Même mise en page « roadbook » que les emails (apps/tracker/src/email-layout.ts), sans aucun script ni ressource
-    externe : polices et logo sont servis depuis /pause/, que la pause laisse passer.
+    Style « Balise », sans aucun script ni ressource externe : polices et logo sont servis depuis /pause/,
+    que la pause laisse passer.
   -->
   <style>
-    @font-face { font-family: 'Big Shoulders Display'; font-weight: 900; font-display: swap; src: url(/pause/big-shoulders-display-latin-900-normal.woff2) format('woff2'); }
-    @font-face { font-family: Archivo; font-weight: 400; font-display: swap; src: url(/pause/archivo-latin-400-normal.woff2) format('woff2'); }
-    @font-face { font-family: Archivo; font-weight: 700; font-display: swap; src: url(/pause/archivo-latin-700-normal.woff2) format('woff2'); }
-    @font-face { font-family: 'JetBrains Mono'; font-weight: 600; font-display: swap; src: url(/pause/jetbrains-mono-latin-600-normal.woff2) format('woff2'); }
+    @font-face { font-family: 'Bricolage Grotesque'; font-weight: 200 800; font-display: swap; src: url(/pause/bricolage-grotesque-latin-wght-normal.woff2) format('woff2'); }
+    @font-face { font-family: 'Atkinson Hyperlegible'; font-weight: 400; font-display: swap; src: url(/pause/atkinson-hyperlegible-latin-400-normal.woff2) format('woff2'); }
+    @font-face { font-family: 'Atkinson Hyperlegible'; font-weight: 700; font-display: swap; src: url(/pause/atkinson-hyperlegible-latin-700-normal.woff2) format('woff2'); }
+    @font-face { font-family: 'DM Mono'; font-weight: 400; font-display: swap; src: url(/pause/dm-mono-latin-400-normal.woff2) format('woff2'); }
 
     :root {
-      --night: #120F0C; --paper: #FFF8EC; --sand: #F4ECDF; --coal: #1A1612; --text: #3A3027;
-      --muted: #6B6157; --red: #DB4740; --ochre: #D98A3D; --ochre-dark: #A8652A; --dust: #9E9282;
-      --display: 'Big Shoulders Display', 'Avenir Next Condensed', 'Arial Narrow', Impact, sans-serif;
-      --sans: Archivo, 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      --mono: 'JetBrains Mono', Menlo, Consolas, monospace;
+      --night: #15161A; --surface: #1F2026; --line: #2B2C33; --cream: #F5F1EA; --dust: #E4DFD6; --muted: #A9A59D;
+      --red: #E1262C; --red-text: #FF6B6B;
+      --display: 'Bricolage Grotesque', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --sans: 'Atkinson Hyperlegible', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --mono: 'DM Mono', Menlo, Consolas, monospace;
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; }
     body {
-      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      padding: 32px 16px; background: var(--night); color: var(--text); font-family: var(--sans);
-      background-image: radial-gradient(ellipse at 50% 0%, rgba(219, 71, 64, .14), transparent 60%);
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+      padding: 32px 16px; background: var(--night); color: var(--cream); font-family: var(--sans); font-size: 17px;
+      background-image: radial-gradient(ellipse at 50% 0%, rgba(225, 38, 44, .16), transparent 60%);
+      -webkit-font-smoothing: antialiased;
     }
-    .label { font-family: var(--mono); font-weight: 600; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--cream); }
+    .brand img { width: 30px; height: 30px; }
+    .brand span { font-family: var(--display); font-weight: 800; font-size: 24px; letter-spacing: -.03em; }
+    .brand b { font-weight: 800; color: var(--red); }
 
-    .card { width: 100%; max-width: 540px; background: var(--paper); border: 2px solid var(--coal); box-shadow: 0 30px 80px rgba(0, 0, 0, .45); }
-    .bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 20px; background: var(--coal); }
-    .brand { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
-    .brand img { width: 34px; height: 34px; }
-    .brand span { font-family: var(--display); font-weight: 900; font-size: 24px; line-height: 1; text-transform: uppercase; color: var(--sand); }
-    .brand b { font-weight: 900; color: var(--red); }
-    .bar .label { font-size: 10px; color: var(--dust); }
-    .kicker { padding: 12px 24px; border-bottom: 2px solid var(--coal); color: var(--coal); }
-
-    .body { padding: 30px 24px; }
-    h1 { margin: 0 0 18px; font-family: var(--display); font-weight: 900; font-size: 52px; line-height: .95; text-transform: uppercase; color: var(--coal); }
+    main { width: 100%; max-width: 560px; background: var(--surface); border: 1.5px solid var(--line); border-radius: 28px; padding: 34px; }
+    .pill { display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; padding: 7px 13px; background: rgba(232, 163, 61, .16); color: #F2C27A; font-family: var(--mono); font-size: 14px; }
+    .pill i { width: 8px; height: 8px; border-radius: 50%; border: 2px solid #E8A33D; }
+    h1 { margin: 18px 0 16px; font-family: var(--display); font-weight: 800; font-size: 56px; line-height: .98; letter-spacing: -.045em; }
     h1 em { font-style: normal; color: var(--red); }
-    p { margin: 0 0 14px; font-size: 15px; line-height: 1.6; }
-    p:last-child { margin-bottom: 0; }
-    .note { margin-top: 24px; padding-top: 18px; border-top: 1px dashed #C9BDAC; font-size: 13px; color: var(--muted); }
-    a { color: var(--red); }
-
-    .road { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-top: 2px solid var(--coal); color: var(--muted); }
-    .road .label { font-size: 10px; white-space: nowrap; }
-    .road i { flex: 1; border-top: 2px dotted var(--ochre); }
-    .road .dot { flex: none; width: 14px; height: 14px; border-radius: 50%; background: var(--red); border: 3px solid #F6C9C5; animation: pulse 2.4s ease-in-out infinite; }
-    @keyframes pulse { 50% { box-shadow: 0 0 0 6px rgba(219, 71, 64, .18); } }
-    @media (prefers-reduced-motion: reduce) { .road .dot { animation: none; } }
-
-    .sign { margin: 18px 0 0; font-size: 10px; letter-spacing: .2em; color: var(--ochre); text-align: center; }
+    p { margin: 0 0 12px; font-size: 18px; line-height: 1.55; color: var(--dust); }
+    .note { margin-top: 22px; padding-top: 18px; border-top: 1.5px solid var(--line); font-size: 15px; color: var(--muted); }
+    a { color: var(--red-text); }
+    .sign { margin: 0; font-family: var(--mono); font-size: 13px; color: var(--muted); }
 
     @media (max-width: 520px) {
-      .bar .label { display: none; }
-      .body { padding: 24px 18px; }
-      h1 { font-size: 40px; }
+      main { padding: 24px 20px; }
+      h1 { font-size: 42px; }
     }
   </style>
 </head>
 <body>
-  <main class="card">
-    <div class="bar">
-      <div class="brand"><img src="/pause/logo.svg" alt=""><span>Trophy<b>Tracker</b></span></div>
-      <div class="label">Carnet de route en direct</div>
-    </div>
-    <div class="kicker label">Information · Mise en pause</div>
-    <div class="body">
-      <h1>On fait une <em>pause</em></h1>
-      <p>TrophyTracker est temporairement indisponible.</p>
-      <p>Rien n’est perdu : les comptes, les pages, les photos et les traces sont conservés en toute sécurité.</p>
-      <p class="note">Une question, une demande de remboursement ou de copie de vos données&nbsp;? Écrivez à
-        <a href="mailto:julien.plomion2006@gmail.com">julien.plomion2006@gmail.com</a>.</p>
-    </div>
-    <div class="road">
-      <span class="label">En pause</span><i></i><span class="dot"></span><i></i><span class="label">Bientôt de retour</span>
-    </div>
+  <div class="brand"><img src="/pause/logo.svg" alt=""><span>trophy<b>tracker</b></span></div>
+  <main>
+    <span class="pill"><i></i>hors réseau · pour un moment</span>
+    <h1>On fait une <em>pause.</em></h1>
+    <p>trophytracker est temporairement indisponible.</p>
+    <p>Rien n’est perdu : les comptes, les pages, les photos et les traces sont conservés en toute sécurité.</p>
+    <p class="note">Une question, une demande de remboursement ou de copie de vos données&nbsp;? Écrivez à
+      <a href="mailto:julien.plomion2006@gmail.com">julien.plomion2006@gmail.com</a>.</p>
   </main>
-  <p class="sign label">TrophyTracker · projet indépendant</p>
+  <p class="sign">trophytracker · projet indépendant</p>
 </body>
 </html>

@@ -8,7 +8,7 @@ export default function LegalNoticePage() {
     <LegalPage seoTitle={PAGES['/mentions-legales'].title} title={<>Mentions<br />légales</>}>
       <h2>Éditeur</h2>
       <p>
-        TrophyTracker est un projet indépendant, édité par <strong>{EDITOR.name}</strong>, {BUSINESS.status.toLowerCase()}.
+        trophytracker est un projet indépendant, édité par <strong>{EDITOR.name}</strong>, {BUSINESS.status.toLowerCase()}.
         <br />
         {BUSINESS.siret ? <>SIRET : {BUSINESS.siret}</> : <>Immatriculation en cours.</>} {VAT_MENTION}.
         {BUSINESS.address && <><br />Adresse : {BUSINESS.address}</>}
@@ -38,7 +38,7 @@ export default function LegalNoticePage() {
 
       <h2>Indépendance</h2>
       <p>
-        TrophyTracker est un projet indépendant : il n’est <strong>affilié à aucun organisateur</strong> de raid, de rallye ou
+        trophytracker est un projet indépendant : il n’est <strong>affilié à aucun organisateur</strong> de raid, de rallye ou
         d’événement, et aucun organisateur ne le soutient ni ne le valide. Les étapes, dates et textes d’un road trip sont saisis par ses
         voyageurs, sous leur responsabilité ; ils ne remplacent jamais les communications officielles d’un organisateur.
       </p>

@@ -1,29 +1,32 @@
 import { Link } from 'react-router-dom';
 import { PageShell } from '@/components/layout/PageShell';
 import { Seo } from '@/components/common/Seo';
-import { Kicker } from '@/components/common/Brand';
 import { Button } from '@/components/ui/button';
 
+/** Page introuvable : la balise a perdu le signal. */
 export default function NotFound() {
   return (
     <PageShell>
       <Seo title="Page introuvable" noindex />
-      <section className="relative flex min-h-[88vh] items-center overflow-hidden bg-[radial-gradient(120%_80%_at_80%_0%,#3A2215_0%,#1B1310_45%,#120F0C_75%)]">
-        <div aria-hidden="true" className="pointer-events-none absolute -bottom-24 -right-6 font-display text-[min(60vw,520px)] font-extrabold leading-none text-transparent [-webkit-text-stroke:1px_rgba(244,236,223,.08)]">
+      <section className="relative flex min-h-[80vh] items-center overflow-hidden">
+        <div aria-hidden="true" className="tt-display pointer-events-none absolute -bottom-20 -right-6 text-[min(60vw,520px)] leading-none text-transparent [-webkit-text-stroke:1.5px_rgba(245,241,234,.08)]">
           404
         </div>
-        <div className="relative mx-auto flex w-full max-w-[1400px] flex-col gap-7 px-4 pb-16 pt-32 sm:px-7">
-          <Kicker>Hors piste · 31°05′N 4°00′O</Kicker>
-          <h1 className="m-0 font-display text-[clamp(64px,10vw,160px)] font-extrabold leading-[0.95] text-cream">
-            Perdu dans
+        <div className="relative mx-auto flex w-full max-w-[1400px] flex-col items-start gap-6 px-5 py-20">
+          <span className="flex items-center gap-2 rounded-full bg-gold/[0.16] px-[13px] py-[7px] font-mono text-[14px] text-gold-text">
+            <span className="h-2 w-2 rounded-full border-2 border-gold" />404 · signal perdu
+          </span>
+          <h1 className="tt-display m-0 text-[clamp(56px,9vw,140px)] leading-[0.95] text-cream">
+            Cette page est
             <br />
-            le <span className="font-display text-primary">désert.</span>
+            <span className="text-signal">hors réseau.</span>
           </h1>
-          <p className="m-0 max-w-[520px] text-lg leading-relaxed text-dust-200">
-            Cette page n’existe pas (ou plus). Si c’est un road trip, il est peut-être privé : demandez le lien à ses voyageurs.
+          <p className="m-0 max-w-[560px] text-[19px] leading-relaxed text-dust-200">
+            Elle n’existe pas, ou plus. Si c’est un road trip, il est peut-être réservé à ses voyageurs : demande-leur le lien.
           </p>
           <div className="flex flex-wrap gap-3">
             <Button asChild size="lg"><Link to="/">Retour à l’accueil</Link></Button>
+            <Button asChild size="lg" variant="outline"><Link to="/creer">Créer mon trip</Link></Button>
           </div>
         </div>
       </section>

@@ -553,7 +553,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
                   <>
                     Un verrou <strong className="text-cream">sur le téléphone uniquement</strong> : il est demandé pour couper le suivi ou ouvrir
                     les réglages. Pratique pour qu’un équipier ne désactive pas le suivi par erreur. Il n’est jamais envoyé, n’a rien à voir avec
-                    votre compte TrophyTracker, et le QR code ne le remplit pas : à saisir à la main si vous en voulez un.
+                    votre compte trophytracker, et le QR code ne le remplit pas : à saisir à la main si vous en voulez un.
                   </>
                 }
               />
@@ -627,7 +627,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
             <p className="mb-0 mt-1 text-sm text-dust-300">
               {live
                 ? enabled
-                  ? `Dernière position ${formatRelative(lastFix)}. Votre 4L apparaît sur la page du road trip.`
+                  ? `Dernière position ${formatRelative(lastFix)}. Votre position apparaît sur la page du road trip.`
                   : `Dernière position ${formatRelative(lastFix)}. Tout fonctionne ! Elle n’est visible qu’ici : lancez le suivi en partant.`
                 : 'Rien après 2 minutes ? Vérifiez la clé (Device identifier), l’adresse (Server URL) et les autorisations.'}
             </p>

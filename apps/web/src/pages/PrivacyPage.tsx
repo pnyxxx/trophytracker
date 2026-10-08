@@ -8,7 +8,7 @@ export default function PrivacyPage() {
     <LegalPage
       seoTitle={PAGES['/confidentialite'].title}
       title={<>Confidentialité<br />& données</>}
-      intro="TrophyTracker est un projet indépendant. Nous collectons le strict minimum, ne vendons aucune donnée et n’affichons aucune publicité."
+      intro="trophytracker est un projet indépendant. Nous collectons le strict minimum, ne vendons aucune donnée et n’affichons aucune publicité."
     >
       <h2>Qui est responsable</h2>
       <p>

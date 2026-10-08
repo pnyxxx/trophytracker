@@ -18,12 +18,12 @@ export function LegalPage({ seoTitle, title, intro, children }: {
   return (
     <PageShell>
       <Seo title={seoTitle} />
-      <PageHero kicker="Informations" title={title} />
-      <Container className="border-t border-cream/[0.12] py-14 md:py-20">
-        <article className="max-w-3xl text-lg leading-relaxed text-dust-100 [&_a]:text-primary-light [&_a]:underline [&_a]:underline-offset-2 [&_a:hover]:text-cream [&_h2]:mb-4 [&_h2]:mt-14 [&_h2]:border-t [&_h2]:border-cream/[0.14] [&_h2]:pt-8 [&_h2]:font-display [&_h2]:text-[40px] [&_h2]:font-extrabold [&_h2]: [&_h2]:leading-none [&_h2]:text-cream [&>h2:first-child]:mt-0 [&>h2:first-child]:border-t-0 [&>h2:first-child]:pt-0 [&_h3]:mb-2 [&_h3]:mt-8 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:text-cream [&_li]:mb-2 [&_p]:mb-4 [&_strong]:text-cream [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:marker:text-primary">
-          {intro && <p className="border-l-[3px] border-primary pl-5 text-xl text-cream">{intro}</p>}
+      <PageHero kicker="informations" title={title} />
+      <Container className="border-t-[1.5px] border-ink-700 py-12 md:py-16">
+        <article className="max-w-3xl text-[18px] leading-relaxed text-dust-100 [&_a]:text-signal-text [&_a]:underline [&_a]:underline-offset-[3px] [&_a:hover]:text-cream [&_h2]:mb-4 [&_h2]:mt-14 [&_h2]:font-display [&_h2]:text-[34px] [&_h2]:font-extrabold [&_h2]:leading-none [&_h2]:tracking-[-0.035em] [&_h2]:text-cream [&>h2:first-child]:mt-0 [&_h3]:mb-2 [&_h3]:mt-8 [&_h3]:text-[20px] [&_h3]:font-bold [&_h3]:text-cream [&_li]:mb-2 [&_p]:mb-4 [&_strong]:text-cream [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:marker:text-signal">
+          {intro && <p className="rounded-[24px] bg-ink-800 p-5 text-[19px] text-cream">{intro}</p>}
           {children}
-          <p className="mt-14 font-mono text-xs uppercase tracking-[0.12em] text-dust-500">Dernière mise à jour : {LEGAL_UPDATED_AT}</p>
+          <p className="mt-14 font-mono text-[13px] text-dust-500">dernière mise à jour : {LEGAL_UPDATED_AT}</p>
         </article>
       </Container>
     </PageShell>

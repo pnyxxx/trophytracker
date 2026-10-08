@@ -22,7 +22,7 @@ const schema = z.object({
   SMTP_PASS: z.string().optional(),
   // Docker Compose passe une chaîne vide quand la variable n'est pas définie : même effet qu'absente.
   SMTP_ADMIN_EMAIL: z.string().optional().transform((v) => v || 'noreply@trophytracker.local'),
-  SMTP_SENDER_NAME: z.string().optional().transform((v) => v || 'TrophyTracker'),
+  SMTP_SENDER_NAME: z.string().optional().transform((v) => v || 'trophytracker'),
   /** Adresse publique du site (liens dans les emails). */
   SITE_URL: z.string().optional().transform((v) => v || 'http://localhost'),
   /** Site web vu depuis le réseau Docker : modèles HTML des pages équipage (/_shell/…). */

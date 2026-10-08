@@ -74,6 +74,10 @@ Branche : `generaliste`. Le site en ligne reste en pause tant que Julien ne vali
   « Inviter des proches » dans Partage. `GOTRUE_RATE_LIMIT_EMAIL_SENT=300` (toute connexion envoie un e-mail).
 - [x] Visuels QR (`lib/qr-poster.ts`, testé) : autocollant carré 12 cm (1440 px), story 1080 × 1920 sur l'imagerie
   satellite Esri (CORS ouvert) avec la trace et la balise, autocollant rond 8 cm (960 px). QR vérifiés au décodage.
+- [x] Pages restantes : `LegalPage` (mentions, CGU, CGV, confidentialité) au style Balise, 404 « Cette page est hors
+  réseau », page pause refaite (polices Balise et logo balise dans `public/pause/`, plus rien de l'ancienne 4L).
+  Nom de marque en minuscules partout dans les textes (« trophytracker »). Texte `<noscript>` d'`index.html` qui parlait
+  encore du 4L Trophy : corrigé.
 
 ## À faire, dans l'ordre
 
@@ -111,7 +115,7 @@ Branche : `generaliste`. Le site en ligne reste en pause tant que Julien ne vali
    nouveaux : invitation d'un proche, « C'est parti » (bouton « Je pars »), résumé du soir aux abonnés (désinscription).
 9. ~~**Visuels QR**~~ (fait) (`Visuels QR.dc.html`) : autocollant carré 12 cm, story 1080×1920 sur fond satellite avec la trace,
    autocollant rond 8 cm (`lib/qr-poster.ts`).
-10. **Pages restantes** : mentions, CGU, CGV, confidentialité, 404, page pause (`public/pause.html`), compte,
+10. ~~**Pages restantes**~~ (fait) : mentions, CGU, CGV, confidentialité, 404, page pause (`public/pause.html`), compte,
     invitation, au nouveau style (fond nuit, plus de sections crème).
 11. **Phase F** puis **démo neutre** (voir docs/PIVOT.md), puis vérifs (`make check`, `make test`, captures téléphone et
     ordinateur), puis mise en ligne quand Julien valide.

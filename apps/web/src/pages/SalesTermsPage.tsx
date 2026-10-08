@@ -16,11 +16,11 @@ export default function SalesTermsPage() {
         {BUSINESS.siret ? <>, SIRET {BUSINESS.siret}</> : <> (immatriculation en cours)</>}
         {BUSINESS.address && <>, {BUSINESS.address}</>}. Contact : <a href={CONTACT_HREF}>{EDITOR.email}</a>.
       </p>
-      <p>TrophyTracker est un service indépendant, affilié à aucun organisateur de raid, de rallye ou d’événement.</p>
+      <p>trophytracker est un service indépendant, affilié à aucun organisateur de raid, de rallye ou d’événement.</p>
 
       <h2>2. Ce que vous achetez</h2>
       <p>
-        L’<strong>accès road trip</strong> permet de créer <strong>la page d’un road trip</strong> sur TrophyTracker et d’utiliser ses
+        L’<strong>accès road trip</strong> permet de créer <strong>la page d’un road trip</strong> sur trophytracker et d’utiliser ses
         services : page publique ou privée, suivi GPS en direct avec l’application gratuite Traccar Client, trace et statistiques,
         photos et photos 360°, sponsors, invitation des compagnons de route (gratuite pour eux).
       </p>
@@ -28,7 +28,7 @@ export default function SalesTermsPage() {
         <li>Un accès = une page de road trip. Il est lié au compte qui l’achète, qui devient propriétaire de la page.</li>
         <li>
           Le service est fourni pendant toute la durée du road trip. La page reste ensuite consultable en souvenir, tant que
-          TrophyTracker existe.
+          trophytracker existe.
         </li>
         <li>
           Le suivi GPS est soumis à la <Link to="/conditions-utilisation#fair-play">charte fair-play</Link> et aux{' '}
@@ -51,7 +51,7 @@ export default function SalesTermsPage() {
 
       <h2>4. Commande</h2>
       <p>
-        La commande se passe depuis « Mon compte », connecté à un compte TrophyTracker. Avant de payer, vous acceptez ces conditions et
+        La commande se passe depuis « Mon compte », connecté à un compte trophytracker. Avant de payer, vous acceptez ces conditions et
         demandez l’accès immédiat au service (article 7), puis vous êtes redirigé vers la page de paiement sécurisée. Le contrat est
         conclu dès que le paiement est accepté. Vous recevez une confirmation par email, et ces conditions restent disponibles sur
         cette page. Les commandes sont archivées pendant 10 ans.
@@ -59,7 +59,7 @@ export default function SalesTermsPage() {
 
       <h2>5. Paiement</h2>
       <p>
-        Le paiement se fait par carte bancaire via <strong>Stripe</strong>, prestataire de paiement agréé. TrophyTracker ne voit ni ne
+        Le paiement se fait par carte bancaire via <strong>Stripe</strong>, prestataire de paiement agréé. trophytracker ne voit ni ne
         conserve jamais vos coordonnées bancaires. Le montant est débité au moment de la commande.
       </p>
 
@@ -129,7 +129,7 @@ export default function SalesTermsPage() {
       </p>
       <p className="border-l-[3px] border-cream/20 pl-5 text-base">
         Je vous notifie par la présente ma rétractation du contrat portant sur la prestation de services ci-dessous : accès road trip
-        TrophyTracker.
+        trophytracker.
         <br />Commandé le : …
         <br />Nom du consommateur : …
         <br />Adresse email du compte : …

@@ -59,12 +59,12 @@ export function priceSentence(now = Date.now()) {
 }
 
 /** Lien « Signaler un contenu » : un email pré-rempli à l'éditeur. */
-export const REPORT_HREF = `mailto:${EDITOR.email}?subject=${encodeURIComponent('TrophyTracker — Signalement de contenu')}&body=${encodeURIComponent(
+export const REPORT_HREF = `mailto:${EDITOR.email}?subject=${encodeURIComponent('trophytracker — Signalement de contenu')}&body=${encodeURIComponent(
   'Adresse de la page ou de la photo concernée :\n\nPourquoi ce contenu pose problème :\n',
 )}`;
 
 /** Lien de contact général. */
-export const CONTACT_HREF = `mailto:${EDITOR.email}?subject=${encodeURIComponent('TrophyTracker')}`;
+export const CONTACT_HREF = `mailto:${EDITOR.email}?subject=${encodeURIComponent('trophytracker')}`;
 
 /**
  * Charte du voyageur : acceptée avant de générer la clé GPS (preuve gardée en base),
@@ -72,10 +72,10 @@ export const CONTACT_HREF = `mailto:${EDITOR.email}?subject=${encodeURIComponent
  */
 export const FAIR_PLAY = {
   spirit:
-    'TrophyTracker est là pour que vos proches vivent l’aventure avec vous, pas pour remplacer une carte, un roadbook ou les secours.',
+    'trophytracker est là pour que vos proches vivent l’aventure avec vous, pas pour remplacer une carte, un roadbook ou les secours.',
   rules: [
     { title: 'Votre événement l’autorise', text: 'Raid, rallye, course : vérifiez que le règlement de votre épreuve autorise le partage de position. Certains l’interdisent pendant l’épreuve. Vous êtes seuls responsables de son respect.' },
-    { title: 'Jamais pour tricher', text: 'En course, on n’utilise pas TrophyTracker pour trouver son chemin ni pour suivre d’autres concurrents.' },
+    { title: 'Jamais pour tricher', text: 'En course, on n’utilise pas trophytracker pour trouver son chemin ni pour suivre d’autres concurrents.' },
     { title: 'Tous les voyageurs sont d’accord', text: 'Le téléphone localise le véhicule et donc tous ses occupants : chaque voyageur accepte de partager la position.' },
     { title: 'Pas un outil de sécurité', text: 'Les positions peuvent arriver en retard ou pas du tout. En cas d’urgence : les secours (112 en Europe) et, sur un événement, l’organisation.' },
   ],

@@ -12,7 +12,7 @@ export default function TermsPage() {
     >
       <h2>1. Le service</h2>
       <p>
-        TrophyTracker permet aux voyageurs (road trip, raid, rallye, tour du monde…) de créer la page de leur road trip, de partager
+        trophytracker permet aux voyageurs (road trip, raid, rallye, tour du monde…) de créer la page de leur road trip, de partager
         leur position GPS, leur trace, leurs photos et leurs sponsors, et à leurs proches de les suivre. Le site est édité par {EDITOR.name} (voir les{' '}
         <Link to="/mentions-legales">mentions légales</Link>).
       </p>
@@ -62,8 +62,8 @@ export default function TermsPage() {
       </p>
       <p>
         Les voyageurs sont <strong>seuls responsables</strong> du respect de ce règlement et de l’usage qu’ils font de ce site
-        pendant l’épreuve. TrophyTracker n’est ni un outil de navigation, ni un outil de sécurité, ni un moyen d’assistance. Un
-        road trip qui utiliserait TrophyTracker pour s’orienter ou suivre d’autres concurrents le ferait en violation de ces
+        pendant l’épreuve. trophytracker n’est ni un outil de navigation, ni un outil de sécurité, ni un moyen d’assistance. Un
+        road trip qui utiliserait trophytracker pour s’orienter ou suivre d’autres concurrents le ferait en violation de ces
         conditions, et son accès au suivi peut être désactivé. Si un organisateur nous signale qu’un road trip enfreint son règlement,
         nous pouvons suspendre son suivi.
       </p>
@@ -99,13 +99,13 @@ export default function TermsPage() {
       <h2>7. Disponibilité</h2>
       <p>
         Le site est maintenu avec soin mais sans garantie de disponibilité permanente : maintenance, panne ou coupure réseau peuvent
-        l’interrompre. TrophyTracker fait de son mieux pour que le service fonctionne, surtout pendant les road trips, sans pouvoir le promettre.
+        l’interrompre. trophytracker fait de son mieux pour que le service fonctionne, surtout pendant les road trips, sans pouvoir le promettre.
       </p>
 
       <h2>8. Responsabilité</h2>
       <p>
-        Chaque road trip est sous la responsabilité de ses voyageurs, pour sa page et ce qui y est publié. TrophyTracker, en tant qu’hébergeur, retire les contenus
-        manifestement illicites dès qu’il en a connaissance. Dans les limites prévues par la loi, TrophyTracker ne peut être tenu
+        Chaque road trip est sous la responsabilité de ses voyageurs, pour sa page et ce qui y est publié. trophytracker, en tant qu’hébergeur, retire les contenus
+        manifestement illicites dès qu’il en a connaissance. Dans les limites prévues par la loi, trophytracker ne peut être tenu
         responsable d’une position manquante, retardée ou inexacte, ni des conséquences d’une interruption du service.
       </p>
 

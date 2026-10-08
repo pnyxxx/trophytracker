@@ -26,7 +26,7 @@ const when = (d: Date) =>
 const money = (cents: number, currency: string) =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: currency.toUpperCase() }).format(cents / 100);
 
-const FOOTER = 'Vous recevez cet email parce que vous êtes administrateur de TrophyTracker.';
+const FOOTER = 'Vous recevez cet email parce que vous êtes administrateur de trophytracker.';
 
 /** Mise en page commune : celle des emails du site, avec les détails en lignes « étiquette : valeur ». */
 function layout(siteUrl: string, kicker: string, title: string, intro: string, details: [string, string][], href: string, label: string) {
@@ -51,7 +51,7 @@ export function buildAdminEmail(n: AdminNotification, siteUrl: string): Email {
     const detail = invited ? `Invité dans le road trip « ${invited} ».` : `Inscription sur le site${via}.`;
     return {
       subject: oneLine(`👤 ${title}`),
-      text: `${name} (${email}) vient de créer un compte sur TrophyTracker.\n${detail}\nLe ${when(n.created_at)}.\n\n${siteUrl}/admin`,
+      text: `${name} (${email}) vient de créer un compte sur trophytracker.\n${detail}\nLe ${when(n.created_at)}.\n\n${siteUrl}/admin`,
       html: layout(siteUrl, 'Admin · Nouveau compte', title, `<strong>${esc(name)}</strong> vient de créer un compte.`, [
         ['Email', email],
         ['Origine', detail],
