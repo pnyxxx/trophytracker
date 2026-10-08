@@ -10,9 +10,6 @@ import Landing from '@/pages/Landing';
 // Pages chargées à la demande : la page d'accueil reste légère.
 const CrewPage = lazy(() => import('@/pages/CrewPage'));
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
-const SignupPage = lazy(() => import('@/pages/auth/SignupPage'));
-const ForgotPasswordPage = lazy(() => import('@/pages/auth/ForgotPasswordPage'));
-const ResetPasswordPage = lazy(() => import('@/pages/auth/ResetPasswordPage'));
 const InvitationPage = lazy(() => import('@/pages/auth/InvitationPage'));
 const AccountPage = lazy(() => import('@/pages/account/AccountPage'));
 const ManageCrewPage = lazy(() => import('@/pages/account/ManageCrewPage'));
@@ -50,11 +47,9 @@ export default function App() {
               <Route path="/" element={<Landing />} />
               <Route path="/road-trips/:slug" element={<CrewPage />} />
               <Route path="/connexion" element={<LoginPage />} />
-              <Route path="/inscription" element={<SignupPage />} />
+              <Route path="/inscription" element={<LoginPage signup />} />
               {/* Provisoire : le parcours de création (/creer) arrive à l'étape 4 de la refonte. */}
               <Route path="/creer" element={<Navigate to="/inscription" replace />} />
-              <Route path="/mot-de-passe-oublie" element={<ForgotPasswordPage />} />
-              <Route path="/nouveau-mot-de-passe" element={<ResetPasswordPage />} />
               <Route path="/invitation" element={<InvitationPage />} />
               <Route path="/confidentialite" element={<PrivacyPage />} />
               <Route path="/mentions-legales" element={<LegalNoticePage />} />

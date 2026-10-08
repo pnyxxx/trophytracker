@@ -1,7 +1,7 @@
 /**
  * Test de bout en bout sur la stack qui tourne (docker compose --profile dev up -d).
  *   node scripts/e2e/smoke.mjs
- * Crée de vrais comptes (confirmés via Mailpit), un équipage, une photo, des positions GPS,
+ * Crée de vrais comptes (connexion par code à 6 chiffres lu dans Mailpit), un équipage, une photo, des positions GPS,
  * et vérifie la sécurité (un autre compte ne peut rien modifier).
  */
 import { readFileSync } from 'node:fs';
@@ -44,36 +44,57 @@ async function waitEmail(to, subjectStart) {
   return null;
 }
 
-async function latestEmailLink(to) {
-  for (let i = 0; i < 20; i++) {
-    const list = await (await fetch(`${MAILPIT}/api/v1/search?query=to:${encodeURIComponent(to)}`)).json();
-    if (list.messages?.length) {
-      const msg = await (await fetch(`${MAILPIT}/api/v1/message/${list.messages[0].ID}`)).json();
-      const link = msg.HTML.match(/href="([^"]*verify[^"]*)"/)?.[1];
-      return { subject: msg.Subject, link: link?.replaceAll('&amp;', '&') };
-    }
-    await sleep(500);
-  }
-  return {};
+/** Code à 6 chiffres du dernier e-mail reçu par `to` (sujet commençant par `subjectStart`), puis efface cet e-mail. */
+async function takeCode(to, subjectStart) {
+  const mail = await waitEmail(to, subjectStart);
+  if (!mail) return null;
+  await fetch(`${MAILPIT}/api/v1/messages`, { method: 'DELETE', body: JSON.stringify({ IDs: [mail.ID] }), headers: { 'Content-Type': 'application/json' } });
+  return mail.Text.match(/\b\d{6}\b/)?.[0] ?? null;
 }
 
-async function signUpConfirmed(name) {
-  const email = `${name}-${run}@test.local`;
-  const password = 'motdepasse-solide-42';
+/** Demande un code ; Supabase Auth refuse un 2ᵉ e-mail du même type en moins d'une minute : on patiente. */
+async function requestCode(c, email, options) {
+  for (let i = 0; i < 16; i++) {
+    const { error } = await c.auth.signInWithOtp({ email, options });
+    if (!error?.message?.includes('For security purposes')) return error;
+    await sleep(5000);
+  }
+  return new Error('code toujours refusé après 80 s');
+}
+
+/** Connexion complète par code (le compte doit exister). */
+async function signInWithCode(email) {
   const c = client();
-  const { error } = await c.auth.signUp({ email, password, options: { data: { display_name: name } } });
-  check(!error, `inscription de ${name}${error ? ' : ' + error.message : ''}`);
-  const mail = await latestEmailLink(email);
-  check(mail.subject === 'Confirmez votre inscription sur TrophyTracker', `email de confirmation reçu en français (« ${mail.subject} »)`);
-  const res = await fetch(mail.link, { redirect: 'manual' });
-  check(res.status === 303 || res.status === 302, 'lien de confirmation valide');
-  const { error: e2 } = await c.auth.signInWithPassword({ email, password });
-  check(!e2, `connexion de ${name}`);
+  const error = await requestCode(c, email, { shouldCreateUser: false });
+  const code = await takeCode(email, 'Votre code de connexion');
+  const { data, error: vErr } = await c.auth.verifyOtp({ email, token: code ?? '', type: 'email' });
+  return { c, ok: !error && !!code && !vErr && !!data.session, error: error ?? vErr };
+}
+
+async function signUpConfirmed(name, { checkCodes = false } = {}) {
+  const email = `${name}-${run}@test.local`;
+  const c = client();
+  const error = await requestCode(c, email, { shouldCreateUser: true, data: { display_name: name } });
+  check(!error, `inscription de ${name} : code demandé${error ? ' : ' + error.message : ''}`);
+  const code = await takeCode(email, 'Votre code pour créer');
+  check(/^\d{6}$/.test(code ?? ''), 'e-mail « Votre code pour créer votre compte » reçu, avec un code à 6 chiffres');
+  if (checkCodes) {
+    const { error: bad } = await client().auth.verifyOtp({ email, token: code === '000000' ? '111111' : '000000', type: 'email' });
+    check(!!bad, 'un mauvais code est refusé');
+  }
+  const { data, error: e2 } = await c.auth.verifyOtp({ email, token: code ?? '', type: 'email' });
+  check(!e2 && !!data.session, `connexion de ${name} avec le code${e2 ? ' : ' + e2.message : ''}`);
+  const { data: profile } = await c.from('profiles').select('display_name').eq('id', data.user?.id ?? '').maybeSingle();
+  check(profile?.display_name === name, `profil créé avec le prénom « ${profile?.display_name} »`);
+  if (checkCodes) {
+    const { error: replay } = await client().auth.verifyOtp({ email, token: code ?? '', type: 'email' });
+    check(!!replay, 'un code ne sert qu’une fois');
+  }
   return { c, email };
 }
 
 // ── Scénario ────────────────────────────────────────────────────────────────
-const { c: alice } = await signUpConfirmed('alice');
+const { c: alice } = await signUpConfirmed('alice', { checkCodes: true });
 const { c: bob } = await signUpConfirmed('bob');
 const anon = client();
 
@@ -94,7 +115,8 @@ const paidEvent = { type: 'checkout.session.completed', data: { object: { id: `c
 const forged = await stripeEvent(paidEvent, 'whsec_faux');
 check(forged.status === 400, 'un faux événement Stripe (mauvaise signature) est refusé');
 const webhook = await stripeEvent(paidEvent);
-check(webhook.status === 200 && (await webhook.json()).result === 'paid', 'Stripe confirme le paiement d’alice (webhook signé)');
+const webhookBody = await webhook.text();
+check(webhook.status === 200 && JSON.parse(webhookBody).result === 'paid', `Stripe confirme le paiement d’alice (webhook signé)${webhook.status === 200 ? '' : ' : ' + webhookBody}`);
 
 const { data: crew, error: ce } = await alice.rpc('create_crew', { p_name: `Les Dunes ${run}`, p_starts_on: '2027-07-01' });
 check(!ce && crew?.slug, `alice crée le road trip « ${crew?.name} »`);
@@ -176,11 +198,12 @@ const { data: hidden } = await anon.from('crews').select('id').eq('id', crew.id)
 const { data: hiddenTrack } = await anon.rpc('get_track', { p_crew: crew.id });
 check(hidden?.length === 0 && hiddenTrack?.length === 0, 'page privée : invisible, trace comprise, pour un visiteur');
 
-// Mot de passe oublié
-await anon.auth.resetPasswordForEmail(`bob-${run}@test.local`, { redirectTo: `${SITE}/nouveau-mot-de-passe` });
-await sleep(1000);
-const reset = await latestEmailLink(`bob-${run}@test.local`);
-check(reset.subject?.startsWith('Réinitialisation'), `email « mot de passe oublié » reçu (« ${reset.subject} »)`);
+// Connexion d'un compte existant : e-mail « Votre code de connexion »
+const bobAgain = await signInWithCode(`bob-${run}@test.local`);
+check(bobAgain.ok, `bob se reconnecte avec un nouveau code${bobAgain.error ? ' : ' + bobAgain.error.message : ''}`);
+const { error: noAccount } = await client().auth.signInWithOtp({ email: `inconnu-${run}@test.local`, options: { shouldCreateUser: false } });
+const { data: ghost } = await service.auth.admin.listUsers({ perPage: 1000 });
+check(!!noAccount && !ghost.users.some((u) => u.email === `inconnu-${run}@test.local`), 'connexion seule (sans inscription) : aucun compte créé pour une adresse inconnue');
 
 // ── Emails intégrés à Supabase ─────────────────────────────────────────────
 await alice.from('crews').update({ is_public: true }).eq('id', crew.id);
@@ -196,30 +219,31 @@ check(!!tokenHash && invMail.HTML.includes(`${SITE}/invitation?token_hash=`), 'e
 const carol = client();
 const { error: vErr } = await carol.auth.verifyOtp({ token_hash: tokenHash, type: 'invite' });
 check(!vErr, 'carol accepte l’invitation (lien à usage unique)');
-const { error: cpErr } = await carol.auth.updateUser({ password: 'carol-mot-de-passe-42' });
-check(!cpErr, `carol choisit son mot de passe${cpErr ? ' : ' + cpErr.message : ''}`);
+const { error: cpErr } = await carol.auth.updateUser({ data: { display_name: 'Carol' } });
+check(!cpErr, `carol choisit son prénom${cpErr ? ' : ' + cpErr.message : ''}`);
 const { data: { user: carolUser0 } } = await carol.auth.getUser();
 const { data: carolCrew, error: ccErr } = await carol.from('crew_members').select('role').eq('crew_id', crew.id).eq('user_id', carolUser0.id);
 check(carolCrew?.[0]?.role === 'member', `carol est membre de l’équipage${ccErr ? ' : ' + ccErr.message : ` (${JSON.stringify(carolCrew)})`}`);
 const { error: replay } = await client().auth.verifyOtp({ token_hash: tokenHash, type: 'invite' });
 check(!!replay, 'le lien d’invitation ne peut pas être réutilisé');
 
+// Invitée qui n'a pas cliqué à temps (lien expiré) : elle se connecte simplement par code.
+const daveEmail = `dave-${run}@test.local`;
+const { data: inv3 } = await alice.functions.invoke('invite-member', { body: { crewId: crew.id, email: daveEmail } });
+check(inv3?.status === 'invited', 'invitation envoyée à dave');
+const dave = client();
+const daveErr = await requestCode(dave, daveEmail, { shouldCreateUser: true });
+const daveCode = await takeCode(daveEmail, 'Votre code');
+const { data: daveSession, error: daveVErr } = await dave.auth.verifyOtp({ email: daveEmail, token: daveCode ?? '', type: 'email' });
+check(!daveErr && !daveVErr && !!daveSession.session, `dave (invité) se connecte par code, sans le lien${daveErr || daveVErr ? ' : ' + (daveErr ?? daveVErr).message : ''}`);
+const { data: daveCrew } = await dave.from('crew_members').select('role').eq('crew_id', crew.id).eq('user_id', daveSession.user?.id ?? '');
+check(daveCrew?.[0]?.role === 'member', 'dave retrouve le road trip où il a été invité');
+
 // Invitation d'une personne AVEC compte
 const { data: inv2 } = await alice.functions.invoke('invite-member', { body: { crewId: crew.id, email: `bob-${run}@test.local` } });
 check(inv2?.status === 'added', 'bob (compte existant) est ajouté directement');
 const { error: bobInv } = await bob.functions.invoke('invite-member', { body: { crewId: crew.id, email: `mallory-${run}@test.local` } });
 check(!!bobInv, 'un simple membre ne peut pas inviter');
-
-// Changement de mot de passe → alerte de sécurité (avec code par email si demandé)
-let { error: pwErr } = await alice.auth.updateUser({ password: 'nouveau-mot-de-passe-43' });
-if (pwErr?.code === 'reauthentication_needed') {
-  await alice.auth.reauthenticate();
-  const codeMail = await waitEmail(aliceEmail, 'Votre code');
-  const nonce = codeMail?.Text.match(/\b\d{6}\b/)?.[0];
-  ({ error: pwErr } = await alice.auth.updateUser({ password: 'nouveau-mot-de-passe-43', nonce }));
-}
-check(!pwErr, `alice change son mot de passe${pwErr ? ' : ' + pwErr.message : ''}`);
-check(!!(await waitEmail(aliceEmail, 'Votre mot de passe a été modifié')), 'email d’alerte « mot de passe modifié » reçu');
 
 // Double authentification
 const { data: enr, error: enrErr } = await alice.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'e2e' });
@@ -228,8 +252,8 @@ const { error: mfaErr } = await alice.auth.mfa.challengeAndVerify({ factorId: en
 check(!mfaErr, 'code TOTP accepté : double authentification activée');
 check(!!(await waitEmail(aliceEmail, 'Double authentification activée')), 'email d’alerte « double authentification activée » reçu');
 
-const alice2 = client();
-await alice2.auth.signInWithPassword({ email: aliceEmail, password: 'nouveau-mot-de-passe-43' });
+const { c: alice2, ok: alice2ok } = await signInWithCode(aliceEmail);
+check(alice2ok, 'alice se reconnecte avec un code e-mail');
 const { data: noMfa } = await alice2.from('crews').update({ tagline: 'sans code' }).eq('id', crew.id).select();
 check(noMfa?.length === 0, 'nouvelle connexion SANS le code : aucune modification possible');
 await alice2.auth.mfa.challengeAndVerify({ factorId: enr.id, code: totp(enr.totp.secret) });
@@ -237,10 +261,12 @@ const { data: withMfa } = await alice2.from('crews').update({ tagline: 'avec cod
 check(withMfa?.length === 1, 'avec le code : modifications autorisées');
 await alice.auth.refreshSession();
 
-// Carol quitte l'équipage puis supprime son compte
-const { data: carolUser } = await carol.auth.getUser();
-await carol.rpc('remove_crew_member', { p_crew: crew.id, p_user: carolUser.user.id });
-await carol.rpc('delete_my_account');
+// Carol et dave quittent l'équipage puis suppriment leur compte
+for (const c of [carol, dave]) {
+  const { data: u } = await c.auth.getUser();
+  await c.rpc('remove_crew_member', { p_crew: crew.id, p_user: u.user.id });
+  await c.rpc('delete_my_account');
+}
 
 // Ménage : suppression des fichiers puis de l'équipage
 await alice.storage.from('crew-media').remove([path]);

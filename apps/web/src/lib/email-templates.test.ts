@@ -13,12 +13,22 @@ describe('modèles d’emails de Supabase Auth', () => {
     expect(Object.keys(AUTH_EMAIL_TEMPLATES).sort()).toEqual([...FILES].sort());
   });
 
-  it('chaque email d’action contient son lien', () => {
-    for (const f of ['confirmation.html', 'recovery.html', 'magic-link.html', 'email-change.html']) {
-      expect(AUTH_EMAIL_TEMPLATES[f]).toContain('href="{{ .ConfirmationURL }}"');
+  it('connexion et inscription : un code à 6 chiffres, jamais de lien', () => {
+    for (const f of ['confirmation.html', 'recovery.html', 'magic-link.html', 'reauthentication.html']) {
+      expect(AUTH_EMAIL_TEMPLATES[f]).toContain('{{ .Token }}');
+      expect(AUTH_EMAIL_TEMPLATES[f]).not.toContain('{{ .ConfirmationURL }}');
     }
+  });
+
+  it('chaque email d’action contient son lien', () => {
+    expect(AUTH_EMAIL_TEMPLATES['email-change.html']).toContain('href="{{ .ConfirmationURL }}"');
     expect(AUTH_EMAIL_TEMPLATES['invite.html']).toContain('href="{{ .SiteURL }}/invitation?token_hash={{ .TokenHash }}&type=invite"');
-    expect(AUTH_EMAIL_TEMPLATES['reauthentication.html']).toContain('{{ .Token }}');
+  });
+
+  it('plus aucune mention de mot de passe', () => {
+    for (const html of Object.values(AUTH_EMAIL_TEMPLATES).filter((h) => !h.includes('Mot de passe modifié'))) {
+      expect(html).not.toMatch(/mot de passe/i);
+    }
   });
 
   it('mise en page commune : logo, signature, route, sans emoji', () => {

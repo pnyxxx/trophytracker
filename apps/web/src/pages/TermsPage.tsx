@@ -27,7 +27,7 @@ export default function TermsPage() {
       <h2>2. Votre compte</h2>
       <ul>
         <li>Il faut avoir au moins <strong>15 ans</strong> pour créer un compte, et <strong>18 ans</strong> pour créer ou gérer la page d’un road trip.</li>
-        <li>Vous donnez des informations exactes et gardez votre mot de passe secret. Vous êtes responsable de ce qui est fait depuis votre compte.</li>
+        <li>Vous donnez des informations exactes et gardez pour vous l’accès à votre adresse e-mail (on se connecte avec un code qui y est envoyé). Vous êtes responsable de ce qui est fait depuis votre compte.</li>
         <li>Vous pouvez supprimer votre compte à tout moment depuis « Mon compte ».</li>
       </ul>
 

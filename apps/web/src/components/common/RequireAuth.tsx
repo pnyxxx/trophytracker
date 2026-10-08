@@ -5,10 +5,10 @@ import { PageLoader } from './Spinner';
 
 /** Protège une page : redirige vers la connexion (puis revient ici après). */
 export function RequireAuth({ children, admin = false }: { children: ReactNode; admin?: boolean }) {
-  const { user, profile, isAdmin, loading, needsMfa } = useAuth();
+  const { user, profile, isAdmin, loading, needsMfa, mfaPending } = useAuth();
   const location = useLocation();
 
-  if (loading || (user && admin && !profile)) return <PageLoader />;
+  if (loading || mfaPending || (user && admin && !profile)) return <PageLoader />;
   if (!user || needsMfa) {
     return <Navigate to={`/connexion?next=${encodeURIComponent(location.pathname + location.search)}`} replace />;
   }

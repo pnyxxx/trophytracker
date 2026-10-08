@@ -130,32 +130,37 @@ export function emailLayout(e: EmailLayout): string {
 
 // ─── Les modèles de Supabase Auth ───────────────────────────────────────────
 
+import { EDITOR } from './legal';
+
 const SITE = '{{ .SiteURL }}';
 const NOT_YOU = 'Si vous n’êtes pas à l’origine de cette demande, ignorez simplement cet email.';
 /** Pied des alertes de sécurité : que faire si quelqu'un d'autre a touché au compte. */
-const ALERT = `Si ce n’est pas vous, ${link(`${SITE}/mot-de-passe-oublie`, 'réinitialisez immédiatement votre mot de passe')} et contactez l’équipe.`;
+const ALERT = `Si ce n’est pas vous, écrivez-nous sans attendre à ${link(`mailto:${EDITOR.email}`, EDITOR.email)}.`;
+/** Note des e-mails contenant un code de connexion. */
+const CODE_NOTE = `Ce code expire dans 10 minutes et ne sert qu’une fois. Ne le communiquez à personne : nous ne vous le demanderons jamais. ${NOT_YOU}`;
 
 const action = (kicker: string, title: string, text: string, href: string, label: string, note = NOT_YOU) =>
   emailLayout({ siteUrl: SITE, kicker, title, body: paragraph(text) + button(href, label), note });
+/** E-mail « code à 6 chiffres » : connexion et création de compte (pas de mot de passe sur le site). */
+const code = (kicker: string, title: string, text: string) =>
+  emailLayout({ siteUrl: SITE, kicker, title, body: paragraph(text) + codeBox('{{ .Token }}'), note: CODE_NOTE });
 const alert = (title: string, text: string) =>
   emailLayout({ siteUrl: SITE, kicker: 'Sécurité', title, body: paragraph(text), note: ALERT });
 
 /** Nom du fichier (servi sous /email-templates/) → HTML. */
 export const AUTH_EMAIL_TEMPLATES: Record<string, string> = {
-  'confirmation.html': action(
-    'Inscription', 'Bienvenue à bord',
-    'Merci pour votre inscription. Confirmez votre adresse email pour activer votre compte et suivre vos road trips préférés.',
-    '{{ .ConfirmationURL }}', 'Confirmer mon email',
+  'confirmation.html': code(
+    'Inscription', 'Votre code',
+    'Bienvenue ! Pour créer votre compte, saisissez ce code sur la page ouverte dans votre navigateur :',
   ),
-  'magic-link.html': action(
-    'Connexion', 'Votre lien de connexion',
-    'Cliquez sur le bouton ci-dessous pour vous connecter. Ce lien ne fonctionne qu’une fois.',
-    '{{ .ConfirmationURL }}', 'Me connecter',
+  'magic-link.html': code(
+    'Connexion', 'Votre code de connexion',
+    'Pour vous connecter, saisissez ce code sur la page ouverte dans votre navigateur :',
   ),
-  'recovery.html': action(
-    'Mot de passe', 'Mot de passe oublié ?',
-    'Pas de panique. Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe. Ce lien est valable une heure.',
-    '{{ .ConfirmationURL }}', 'Choisir un nouveau mot de passe',
+  // Aucun écran du site ne demande de « mot de passe oublié » : si l'API est appelée, l'e-mail sert de connexion.
+  'recovery.html': code(
+    'Connexion', 'Votre code de connexion',
+    'Pour vous connecter, saisissez ce code sur la page ouverte dans votre navigateur :',
   ),
   'email-change.html': action(
     'Adresse email', 'Confirmez le changement d’adresse',
@@ -164,21 +169,21 @@ export const AUTH_EMAIL_TEMPLATES: Record<string, string> = {
   ),
   'invite.html': action(
     'Invitation', 'Vous êtes invité dans un road trip',
-    'Un compagnon de route vous a ajouté à son road trip sur TrophyTracker, le carnet de route en direct. Acceptez l’invitation pour choisir votre mot de passe et gérer la page du road trip.',
+    'Un compagnon de route vous a ajouté à son road trip sur trophytracker, le carnet de route en direct. Acceptez l’invitation pour gérer la page du road trip avec lui.',
     `${SITE}/invitation?token_hash={{ .TokenHash }}&type=invite`, 'Accepter l’invitation',
-    'Vous ne connaissez pas l’expéditeur ? Ignorez cet email : aucun compte ne sera activé.',
+    `Ce bouton marche pendant 10 minutes. Ensuite, connectez-vous simplement sur ${link(`${SITE}/connexion`, 'trophytracker')} avec cette adresse e-mail : vous recevrez un code. Vous ne connaissez pas l’expéditeur ? Ignorez cet e-mail.`,
   ),
   'reauthentication.html': emailLayout({
     siteUrl: SITE,
     kicker: 'Sécurité',
     title: 'Votre code de confirmation',
-    body: paragraph('Pour confirmer une modification sensible de votre compte (mot de passe), saisissez ce code sur le site :') + codeBox('{{ .Token }}'),
+    body: paragraph('Pour confirmer une modification sensible de votre compte, saisissez ce code sur le site :') + codeBox('{{ .Token }}'),
     note: `Ce code expire rapidement. ${NOT_YOU}`,
   }),
   'password-changed.html': alert('Mot de passe modifié', 'Le mot de passe de votre compte TrophyTracker ({{ .Email }}) vient d’être modifié.'),
   'email-changed.html': alert('Adresse email modifiée', 'L’adresse email de votre compte TrophyTracker a été modifiée. Elle est désormais {{ .Email }}.'),
   'phone-changed.html': alert('Téléphone modifié', 'Le numéro de téléphone associé à votre compte TrophyTracker ({{ .Email }}) a été modifié.'),
-  'identity-linked.html': alert('Nouvelle méthode de connexion', 'Une nouvelle méthode de connexion (par exemple Google) a été ajoutée à votre compte TrophyTracker ({{ .Email }}).'),
+  'identity-linked.html': alert('Nouvelle méthode de connexion', 'Une nouvelle méthode de connexion a été ajoutée à votre compte trophytracker ({{ .Email }}).'),
   'identity-unlinked.html': alert('Méthode de connexion retirée', 'Une méthode de connexion a été retirée de votre compte TrophyTracker ({{ .Email }}).'),
   'mfa-enrolled.html': alert('Double authentification activée', 'La double authentification a été activée sur votre compte TrophyTracker ({{ .Email }}). Votre compte est mieux protégé.'),
   'mfa-unenrolled.html': alert('Double authentification désactivée', 'La double authentification a été désactivée sur votre compte TrophyTracker ({{ .Email }}).'),

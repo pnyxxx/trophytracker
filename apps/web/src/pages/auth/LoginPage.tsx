@@ -1,96 +1,47 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { PasswordInput } from '@/components/ui/password-input';
-import { Label } from '@/components/ui/label';
+import { PageLoader } from '@/components/common/Spinner';
+import { EmailCodeSignIn } from '@/components/auth/EmailCodeSignIn';
 import { useAuth } from '@/hooks/auth';
-import { supabase } from '@/lib/supabase';
-import { errorMessage } from '@/lib/errors';
 import { AuthLayout, safeNext } from './AuthLayout';
-import { GoogleButton } from './GoogleButton';
 import { MfaChallenge } from './MfaChallenge';
 
-export default function LoginPage() {
+/**
+ * /connexion et /inscription : le même parcours par code e-mail (l'inscription demande en plus le prénom).
+ * Une adresse inconnue crée le compte ; une adresse connue connecte : on ne révèle pas lequel des deux.
+ */
+export default function LoginPage({ signup = false }: { signup?: boolean }) {
   const [params] = useSearchParams();
   const next = safeNext(params.get('next'));
   const navigate = useNavigate();
-  const { user, needsMfa } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [magicSent, setMagicSent] = useState(false);
+  const { user, loading, needsMfa, mfaPending } = useAuth();
+  const [hold, setHold] = useState(false);
 
   useEffect(() => {
-    if (user && !needsMfa) navigate(next, { replace: true });
-  }, [user, needsMfa, next, navigate]);
+    if (user && !hold && !mfaPending && !needsMfa) navigate(next, { replace: true });
+  }, [user, hold, mfaPending, needsMfa, next, navigate]);
 
-  const submit = async (e: FormEvent) => {
-    e.preventDefault();
-    setBusy(true);
-    setError(null);
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-    setBusy(false);
-    if (error) setError(errorMessage(error));
-    else toast.success('Bon retour parmi nous !');
-  };
+  if (loading || (user && !hold && mfaPending)) return <PageLoader />;
 
-  const sendMagicLink = async () => {
-    if (!email.trim()) return setError('Entrez votre email pour recevoir un lien de connexion');
-    setBusy(true);
-    setError(null);
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.trim(),
-      options: { shouldCreateUser: false, emailRedirectTo: `${window.location.origin}${next}` },
-    });
-    setBusy(false);
-    if (error) setError(errorMessage(error));
-    else setMagicSent(true);
-  };
-
-  if (user && needsMfa) {
+  if (user && !hold && needsMfa) {
     return (
-      <AuthLayout title="Double authentification" subtitle="Saisissez le code à 6 chiffres affiché par votre application.">
+      <AuthLayout title="Double authentification" subtitle="Saisis le code à 6 chiffres affiché par ton application d’authentification.">
         <MfaChallenge />
       </AuthLayout>
     );
   }
 
-  if (magicSent) {
-    return (
-      <AuthLayout title="Vérifiez vos emails" subtitle={`Si un compte existe pour ${email}, un lien de connexion vient d'être envoyé.`}>
-        <Button variant="secondary" className="w-full" onClick={() => setMagicSent(false)}>Retour</Button>
-      </AuthLayout>
-    );
-  }
+  const other = signup
+    ? <>Déjà inscrit ? <Link to={`/connexion?next=${encodeURIComponent(next)}`} className="font-bold text-signal-text hover:text-cream">Se connecter</Link></>
+    : <>Pas encore de compte ? <Link to={`/inscription?next=${encodeURIComponent(next)}`} className="font-bold text-signal-text hover:text-cream">Créer un compte</Link></>;
 
   return (
     <AuthLayout
-      title="Connexion"
-      subtitle="Retrouvez vos road trips favoris et gérez le vôtre."
-      footer={<>Pas encore de compte ? <Link to={`/inscription?next=${encodeURIComponent(next)}`} className="font-semibold text-primary hover:underline">Créer un compte</Link></>}
+      title={signup ? 'Créer ton compte' : 'Connexion'}
+      subtitle={signup ? 'Ton compte sert à retrouver ton road trip depuis n’importe quel appareil.' : 'Entre ton e-mail : on t’envoie un code pour te connecter.'}
+      footer={other}
     >
-      <GoogleButton next={next} />
-      <form onSubmit={submit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-        </div>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="password">Mot de passe</Label>
-            <Link to="/mot-de-passe-oublie" className="text-xs text-dust-300 hover:text-cream">Mot de passe oublié ?</Link>
-          </div>
-          <PasswordInput id="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
-        </div>
-        {error && <p role="alert" className="text-sm text-primary-light">{error}</p>}
-        <Button type="submit" className="w-full" disabled={busy}>{busy ? 'Connexion…' : 'Se connecter'}</Button>
-        <Button type="button" variant="ghost" className="h-auto min-h-10 w-full whitespace-normal py-2.5 leading-snug text-dust-200 hover:text-cream" onClick={sendMagicLink} disabled={busy}>
-          Recevoir un lien de connexion par email
-        </Button>
-      </form>
+      <EmailCodeSignIn askName={signup} initialEmail={params.get('email') ?? ''} onHold={setHold} />
     </AuthLayout>
   );
 }

@@ -46,17 +46,13 @@ Pour ne pas finir en spam, configurez **SPF, DKIM et DMARC** sur votre domaine (
 Modifier un email : éditez le fichier HTML correspondant puis `docker compose up -d --build web`.
 Les sujets sont dans `infra/supabase.override.yml` (`GOTRUE_MAILER_SUBJECTS_*`).
 
-## Connexion avec Google (optionnel)
+## Connexion
 
-1. https://console.cloud.google.com → *API et services* → *Identifiants* → *ID client OAuth* (application Web).
-2. URI de redirection autorisée : `https://votre-domaine.fr/auth/v1/callback`.
-3. Dans `.env` :
-   ```ini
-   GOOGLE_ENABLED=true
-   GOOGLE_CLIENT_ID=…apps.googleusercontent.com
-   GOOGLE_SECRET=…
-   ```
-4. `docker compose up -d` : le bouton « Continuer avec Google » apparaît automatiquement.
+Uniquement par **code à 6 chiffres envoyé par e-mail** (pas de mot de passe, pas de connexion Google) :
+`signInWithOtp` puis `verifyOtp({ type: 'email' })`, voir `apps/web/src/components/auth/EmailCodeSignIn.tsx`.
+Le code vaut 10 minutes (`GOTRUE_MAILER_OTP_EXP`, qui vaut aussi pour les liens d'invitation et de changement
+d'adresse) ; un nouveau code par minute au plus. Les admins gardent la double authentification (TOTP).
+En local, les codes arrivent dans Mailpit (http://localhost:8025).
 
 ## Traccar (optionnel)
 
@@ -75,5 +71,5 @@ Les réglages de l'**édition** (nom, dates de départ/arrivée, distance totale
 
 ## Configuration publique du site
 
-Le navigateur lit `/config.js`, généré par Caddy à partir de `ANON_KEY` et `GOOGLE_ENABLED`.
+Le navigateur lit `/config.js`, généré par Caddy à partir de `ANON_KEY` et de la présence d'une clé Stripe.
 La clé ANON est **publique par conception** : elle ne donne que les droits du rôle `anon`, strictement limités par la RLS.

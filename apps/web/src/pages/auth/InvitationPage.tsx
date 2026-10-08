@@ -1,28 +1,29 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import { PageLoader } from '@/components/common/Spinner';
+import { EmailCodeSignIn } from '@/components/auth/EmailCodeSignIn';
 import { useAuth } from '@/hooks/auth';
 import { supabase } from '@/lib/supabase';
 import { errorMessage } from '@/lib/errors';
 import { AuthLayout } from './AuthLayout';
 
 /**
- * Lien de l'email d'invitation : /invitation?token_hash=…&type=invite
- * On vérifie le jeton (usage unique), puis la personne choisit son nom et son mot de passe.
+ * Lien de l'e-mail d'invitation : /invitation?token_hash=…&type=invite
+ * On vérifie le jeton (usage unique, 10 minutes), puis la personne choisit son prénom.
+ * Lien expiré : pas grave, le compte existe déjà ; elle se connecte avec un code reçu par e-mail.
  */
 export default function InvitationPage() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const [state, setState] = useState<'verifying' | 'ready' | 'invalid'>('verifying');
-  const [form, setForm] = useState({ name: '', password: '', confirm: '' });
+  const [state, setState] = useState<'verifying' | 'ready' | 'expired'>('verifying');
+  const [name, setName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const verified = useRef(false);
@@ -31,19 +32,24 @@ export default function InvitationPage() {
     if (verified.current) return;
     verified.current = true;
     const tokenHash = params.get('token_hash');
-    if (!tokenHash) return setState(user ? 'ready' : 'invalid');
+    if (!tokenHash) return setState(user ? 'ready' : 'expired');
     supabase.auth.verifyOtp({ token_hash: tokenHash, type: 'invite' }).then(({ error }) => {
-      setState(error ? 'invalid' : 'ready');
+      setState(error ? 'expired' : 'ready');
       // Retire le jeton de l'URL (historique, partage d'écran…).
       window.history.replaceState(null, '', '/invitation');
     });
   }, [params, user]);
 
+  const welcome = () => {
+    toast.success('Bienvenue dans le road trip !');
+    navigate('/mon-compte', { replace: true });
+  };
+
   if (state === 'verifying') return <PageLoader />;
-  if (state === 'invalid') {
+  if (state === 'expired') {
     return (
-      <AuthLayout title="Invitation expirée" subtitle="Ce lien n'est plus valide. Demandez à votre compagnon de route de vous inviter à nouveau.">
-        <Button className="w-full" onClick={() => navigate('/connexion')}>Se connecter</Button>
+      <AuthLayout title="Rejoins le road trip" subtitle="Ce lien d’invitation a expiré, mais ta place est gardée : entre ton e-mail pour recevoir un code de connexion.">
+        <EmailCodeSignIn onDone={welcome} />
       </AuthLayout>
     );
   }
@@ -51,41 +57,25 @@ export default function InvitationPage() {
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (form.password.length < 10) return setError('Le mot de passe doit contenir au moins 10 caractères');
-    if (form.password !== form.confirm) return setError('Les deux mots de passe ne correspondent pas');
     setBusy(true);
-    const { data, error } = await supabase.auth.updateUser({ password: form.password, data: { display_name: form.name.trim() } });
-    if (!error && data.user) {
-      await supabase.from('profiles').update({ display_name: form.name.trim() }).eq('id', data.user.id);
-    }
+    const displayName = name.trim();
+    const { data, error } = await supabase.auth.updateUser({ data: { display_name: displayName } });
+    if (!error && data.user) await supabase.from('profiles').update({ display_name: displayName }).eq('id', data.user.id);
     setBusy(false);
     if (error) return setError(errorMessage(error));
     await queryClient.invalidateQueries();
-    toast.success('Bienvenue dans le road trip ! 🎉');
-    navigate('/mon-compte', { replace: true });
+    welcome();
   };
 
   return (
-    <AuthLayout title="Bienvenue dans le road trip !" subtitle="Choisissez votre nom et votre mot de passe pour activer votre compte.">
-      <form onSubmit={submit} className="space-y-4">
+    <AuthLayout title="Bienvenue dans le road trip !" subtitle="Dernière étape : ton prénom, c’est le nom que verront tes proches. Pour revenir plus tard, il suffira de ton e-mail : on t’enverra un code.">
+      <form onSubmit={submit} className="flex flex-col gap-5">
         <div className="space-y-2">
-          <Label htmlFor="name">Prénom ou pseudo</Label>
-          <Input id="name" required minLength={2} maxLength={60} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          <Label htmlFor="name">Ton prénom</Label>
+          <Input id="name" autoComplete="given-name" required minLength={2} maxLength={60} autoFocus value={name} onChange={(e) => setName(e.target.value)} />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="password">Mot de passe <span className="text-dust-500">(10 caractères min.)</span></Label>
-          <PasswordInput id="password" autoComplete="new-password" required minLength={10} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="confirm">Confirmer</Label>
-          <PasswordInput id="confirm" autoComplete="new-password" required value={form.confirm} onChange={(e) => setForm({ ...form, confirm: e.target.value })} />
-        </div>
-        {error && <p role="alert" className="text-sm text-primary-light">{error}</p>}
-        <Button type="submit" className="w-full" disabled={busy}>{busy ? 'Activation…' : 'Activer mon compte'}</Button>
-        <p className="text-center text-xs text-dust-500">
-          En activant votre compte, vous acceptez les <Link to="/conditions-utilisation" className="underline">conditions d’utilisation</Link> et
-          la <Link to="/confidentialite" className="underline">politique de confidentialité</Link>.
-        </p>
+        {error && <p role="alert" className="m-0 text-[15px] text-signal-text">{error}</p>}
+        <Button type="submit" size="lg" className="w-full" disabled={busy || name.trim().length < 2}>{busy ? 'Activation…' : 'Rejoindre le road trip'}</Button>
       </form>
     </AuthLayout>
   );

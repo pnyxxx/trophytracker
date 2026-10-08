@@ -19,7 +19,7 @@ export default function PrivacyPage() {
       <h2>Ce que nous stockons, et pourquoi</h2>
       <h3>Votre compte</h3>
       <p>
-        Email, nom affiché, mot de passe (chiffré, jamais lisible, même par nous) et, si vous l’activez, la double authentification.
+        Email, nom affiché et, si vous l’activez, la double authentification. Pas de mot de passe : vous vous connectez avec un code à usage unique envoyé par e-mail.
         Ils servent à vous connecter et à vous envoyer les emails liés à votre compte. <em>Base légale : l’exécution du service
         (conditions d’utilisation). Conservation : jusqu’à la suppression du compte.</em>
       </p>
@@ -94,9 +94,8 @@ export default function PrivacyPage() {
         <li><strong>Brevo</strong> (France), qui envoie les emails ;</li>
         <li>
           <strong>Stripe</strong> (Irlande et États-Unis), qui traite les paiements de l’accès road trip, en tant que prestataire de
-          paiement ; ses transferts hors de l’Union européenne sont encadrés par le Data Privacy Framework et des clauses types ;
+          paiement ; ses transferts hors de l’Union européenne sont encadrés par le Data Privacy Framework et des clauses types.
         </li>
-        <li><strong>Google</strong>, uniquement si vous choisissez de vous connecter avec votre compte Google.</li>
       </ul>
       <p>
         Pour afficher les cartes, votre navigateur télécharge directement des images auprès d’

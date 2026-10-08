@@ -9,7 +9,6 @@
  */
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
-import { randomBytes } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 import { loadEnv } from './lib-env.mjs';
 import { roadUntil, SALAMANQUE, traceSql } from './lib-demo-trace.mjs';
@@ -18,7 +17,6 @@ import { DEMO_CREW, DEMO_SLUG } from './lib-demo-crew.mjs';
 const env = loadEnv();
 const admin = createClient(env.SITE_URL, env.SERVICE_ROLE_KEY, { auth: { persistSession: false } });
 const DEMO_EMAIL = 'demo@trophytracker.local';
-const DEMO_PASSWORD = `demo-${randomBytes(6).toString('hex')}`;
 
 const sql = (query) =>
   execFileSync('docker', ['compose', 'exec', '-T', 'db', 'psql', '-U', 'postgres', '-v', 'ON_ERROR_STOP=1', '-q', '-t', '-A'], {
@@ -28,22 +26,19 @@ const sql = (query) =>
 
 // ── Comptes démo (un compte = un seul équipage) ──────────────────────────────
 const { data: list } = await admin.auth.admin.listUsers({ perPage: 1000 });
-async function demoAccount(email, displayName, password) {
+// Pas de mot de passe : on se connecte avec un code reçu par e-mail (Mailpit en local).
+async function demoAccount(email, displayName) {
   const existing = list.users.find((u) => u.email === email);
-  if (existing) {
-    await admin.auth.admin.updateUserById(existing.id, { password });
-    return existing;
-  }
+  if (existing) return existing;
   const { data, error } = await admin.auth.admin.createUser({
     email,
-    password,
     email_confirm: true,
     user_metadata: { display_name: displayName },
   });
   if (error) throw error;
   return data.user;
 }
-const demo = await demoAccount(DEMO_EMAIL, 'Julien', DEMO_PASSWORD);
+const demo = await demoAccount(DEMO_EMAIL, 'Julien');
 
 // ── Équipages ────────────────────────────────────────────────────────────────
 const crews = [
@@ -89,7 +84,7 @@ for (const c of crews) {
   // J4L Club appartient au compte démo principal ; les autres ont chacun leur compte.
   const owner = c.slug === 'j4l-club'
     ? demo
-    : await demoAccount(`demo-${c.slug}@trophytracker.local`, c.name, `demo-${randomBytes(9).toString('hex')}`);
+    : await demoAccount(`demo-${c.slug}@trophytracker.local`, c.name);
   const { error: memberError } = await admin.from('crew_members').insert({ crew_id: crew.id, user_id: owner.id, role: 'owner' });
   if (memberError) throw memberError;
   await admin.from('crew_devices').insert({ crew_id: crew.id });
@@ -109,5 +104,5 @@ sql(`update public.crews set tracking_enabled = true where id = '${ids['les-sabl
 sql(`\\o /dev/null\n${traceSql(ids['les-sables-mouvants'], roadUntil(...SALAMANQUE), 150, 20)}`);
 
 console.log(`✅ Données de démo créées.
-   Compte démo : ${DEMO_EMAIL} / ${DEMO_PASSWORD}
+   Compte démo : ${DEMO_EMAIL} (connexion par code, à lire dans Mailpit : http://localhost:${env.MAILPIT_UI_PORT || 8025})
    Page d'exemple : ${env.SITE_URL}/road-trips/j4l-club`);

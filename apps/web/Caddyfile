@@ -61,7 +61,7 @@ http://web {
 	handle /config.js {
 		header Content-Type "application/javascript; charset=utf-8"
 		header Cache-Control "no-cache"
-		respond `window.__TT_CONFIG__ = { anonKey: "{$ANON_KEY}", googleEnabled: {$GOOGLE_ENABLED:false}, paymentsEnabled: "{$PAYMENTS_ENABLED}" === "true", lanIp: "{$HOST_LAN_IP}", lanPort: "{$WEB_HTTP_PORT:80}" };`
+		respond `window.__TT_CONFIG__ = { anonKey: "{$ANON_KEY}", paymentsEnabled: "{$PAYMENTS_ENABLED}" === "true", lanIp: "{$HOST_LAN_IP}", lanPort: "{$WEB_HTTP_PORT:80}" };`
 	}
 
 	# API Supabase
@@ -128,7 +128,7 @@ http://web {
 
 		# Pages affichées par le JavaScript seul (comptes, connexion…), qui portent la consigne « noindex ».
 		# ⚠️ À tenir à jour avec les routes de apps/web/src/App.tsx.
-		@app path /connexion /inscription /mot-de-passe-oublie /nouveau-mot-de-passe /invitation /mon-compte /mon-compte/* /admin
+		@app path /connexion /inscription /creer /invitation /mon-compte /mon-compte/* /admin
 		handle @app {
 			rewrite * /_shell/app.html
 			header Cache-Control "no-cache"

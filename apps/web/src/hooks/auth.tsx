@@ -14,10 +14,10 @@ interface AuthContextValue {
   isAdmin: boolean;
   /** true tant que la session initiale n'est pas connue. */
   loading: boolean;
-  /** true juste après un clic sur un lien « mot de passe oublié ». */
-  recovering: boolean;
-  /** Connecté par mot de passe mais le code de double authentification reste à saisir. */
+  /** Connecté (code e-mail) mais le code de double authentification reste à saisir. */
   needsMfa: boolean;
+  /** true tant qu'on ne sait pas encore si la double authentification est exigée. */
+  mfaPending: boolean;
   signOut: () => Promise<void>;
 }
 
@@ -27,7 +27,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [recovering, setRecovering] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -36,9 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     const { data } = supabase.auth.onAuthStateChange((event, next) => {
       setSession(next);
-      if (event === 'PASSWORD_RECOVERY') setRecovering(true);
       if (event === 'SIGNED_OUT') {
-        setRecovering(false);
         // Les données privées de l'utilisateur ne doivent pas rester en cache.
         queryClient.clear();
       }
@@ -47,10 +44,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [queryClient]);
 
   // Niveau d'authentification : « aal2 » exigé si la double authentification est activée.
-  const { data: aal } = useQuery({
-    queryKey: ['aal', session?.access_token],
+  // Au renouvellement du jeton (toutes les heures), on garde l'ancien résultat du même utilisateur
+  // le temps de revérifier : sinon les pages protégées clignoteraient (chargement).
+  const { data: aal, isPending: aalPending } = useQuery({
+    queryKey: ['aal', session?.user.id, session?.access_token],
     enabled: !!session,
     queryFn: async () => (await supabase.auth.mfa.getAuthenticatorAssuranceLevel()).data,
+    placeholderData: (prev, prevQuery) => (prevQuery?.queryKey[1] === session?.user.id ? prev : undefined),
   });
   const needsMfa = !!aal && aal.nextLevel === 'aal2' && aal.currentLevel !== 'aal2';
 
@@ -71,8 +71,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     profile,
     isAdmin: profile?.role === 'admin',
     loading,
-    recovering,
     needsMfa,
+    mfaPending: !!session && aalPending,
     signOut: async () => {
       await supabase.auth.signOut();
     },

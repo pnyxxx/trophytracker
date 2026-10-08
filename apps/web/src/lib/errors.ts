@@ -23,13 +23,11 @@ export function errorMessage(err: unknown): string {
 
   // Messages de Supabase Auth (en anglais) → français
   const auth: Record<string, string> = {
-    'Invalid login credentials': 'Email ou mot de passe incorrect',
-    'Email not confirmed': 'Confirmez d’abord votre email (vérifiez votre boîte de réception)',
-    'User already registered': 'Un compte existe déjà avec cet email',
-    'Password should be at least': 'Le mot de passe doit contenir au moins 10 caractères',
-    'New password should be different': 'Le nouveau mot de passe doit être différent de l’ancien',
-    'Email rate limit exceeded': 'Trop d’emails envoyés, réessayez dans quelques minutes',
-    'For security purposes': 'Par sécurité, patientez quelques secondes avant de réessayer',
+    'Token has expired or is invalid': 'Code incorrect ou expiré. Vérifie les chiffres, ou demande un nouveau code.',
+    'Unable to validate email address': 'Cette adresse e-mail n’est pas valide',
+    'Email rate limit exceeded': 'Trop d’e-mails envoyés, réessaie dans quelques minutes',
+    'Request rate limit reached': 'Trop de tentatives, réessaie dans quelques minutes',
+    'For security purposes': 'Par sécurité, patiente une minute avant de redemander un code',
     'Failed to fetch': 'Connexion au serveur impossible. Vérifiez votre connexion Internet.',
   };
   for (const [en, fr] of Object.entries(auth)) if (msg.includes(en)) return fr;

@@ -87,7 +87,6 @@ services:
       # ":80" en local ; votre domaine en production (HTTPS automatique).
       SITE_ADDRESS: ${SITE_ADDRESS:-:80}
       ANON_KEY: ${ANON_KEY}
-      GOOGLE_ENABLED: ${GOOGLE_ENABLED:-false}
       # « true » dès qu'une clé Stripe est configurée : le site ouvre alors le paiement.
       PAYMENTS_ENABLED: ${STRIPE_SECRET_KEY:+true}
       # En local uniquement (rempli par `make up`) : adresse joignable depuis un téléphone.

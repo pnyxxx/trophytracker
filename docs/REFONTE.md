@@ -26,13 +26,19 @@ Branche : `generaliste`. Le site en ligne reste en pause tant que Julien ne vali
 - [x] En-tête et pied de page : `PageShell header="floating"` (accueil, pilule floutée) ou collant par défaut ;
   `headerActions` = boutons propres à la page (à utiliser pour Suivre / Partager à l'étape 5). Ancre `/#exemple`.
   Route provisoire `/creer` → `/inscription` (dans `App.tsx`, à remplacer à l'étape 4).
+- [x] Connexion par code e-mail : `components/auth/EmailCodeSignIn.tsx` (e-mail → code → prénom si absent ; prop
+  `onHold` pour que la page n'aille pas plus loin avant la fin), à réutiliser dans `/creer`. Code valable 10 min
+  (`GOTRUE_MAILER_OTP_EXP=600`, vaut aussi pour le lien d'invitation : expiré, l'invité se connecte par code).
+  Plus de mot de passe ni de Google ; TOTP des admins gardé. E-mails : code seulement (nouveau gabarit à l'étape 8).
+  Écrans de connexion au « tu » comme la maquette du parcours (l'espace voyageur et les e-mails de la maquette sont au
+  « vous » : à trancher avec Julien).
 
 ## À faire, dans l'ordre
 
 1. ~~**En-tête et pied de page**~~ (fait) (`SiteHeader`, `SiteFooter`, `PageShell`) : en-tête flottant en pilule floutée sur
    l'accueil (logo, Comment ça marche, Exemple de voyage, Connexion, « Créer mon trip »), en-tête collant simple ailleurs ;
    pied de page sobre (logo, Comment ça marche, Confidentialité, Contact, mentions, CGU, CGV, © année).
-2. **Connexion par code** (pages auth, `hooks/auth.tsx`, modèles d'e-mails `email-templates.ts`, config GoTrue
+2. ~~**Connexion par code**~~ (fait) (pages auth, `hooks/auth.tsx`, modèles d'e-mails `email-templates.ts`, config GoTrue
    `infra/supabase.override.yml` : `GOTRUE_MAILER_OTP_LENGTH=6`, désactiver Google), tests e2e `scripts/e2e/smoke.mjs`
    (récupérer le code dans Mailpit au lieu du lien).
 3. **Accueil** (`Accueil.dc.html`) : récit défilant sur carte satellite 3D (5 chapitres + images-clés de caméra,

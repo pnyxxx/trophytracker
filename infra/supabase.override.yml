@@ -24,21 +24,25 @@ services:
 
   auth:
     environment:
-      # Mots de passe : 10 caractères minimum.
+      # Connexion par code à 6 chiffres envoyé par e-mail, valable 10 minutes (pas de mot de passe).
+      # Ce délai vaut aussi pour les liens d'invitation : expirés, l'invité se connecte simplement par code.
+      GOTRUE_MAILER_OTP_LENGTH: "6"
+      GOTRUE_MAILER_OTP_EXP: "600"
+      # Les mots de passe ne servent plus (aucun écran ne les propose) ; minimum gardé si l'API est appelée.
       GOTRUE_PASSWORD_MIN_LENGTH: "10"
       # Emails en français, servis par notre conteneur `web` (générés depuis apps/web/src/lib/email-templates.ts).
-      GOTRUE_MAILER_SUBJECTS_CONFIRMATION: "Confirmez votre inscription sur TrophyTracker"
-      GOTRUE_MAILER_SUBJECTS_RECOVERY: "Réinitialisation de votre mot de passe TrophyTracker"
-      GOTRUE_MAILER_SUBJECTS_MAGIC_LINK: "Votre lien de connexion TrophyTracker"
+      GOTRUE_MAILER_SUBJECTS_CONFIRMATION: "Votre code pour créer votre compte trophytracker"
+      GOTRUE_MAILER_SUBJECTS_RECOVERY: "Votre code de connexion trophytracker"
+      GOTRUE_MAILER_SUBJECTS_MAGIC_LINK: "Votre code de connexion trophytracker"
       GOTRUE_MAILER_SUBJECTS_EMAIL_CHANGE: "Confirmez votre nouvelle adresse email"
-      GOTRUE_MAILER_SUBJECTS_INVITE: "Vous êtes invité sur TrophyTracker"
+      GOTRUE_MAILER_SUBJECTS_INVITE: "Vous êtes invité dans un road trip sur trophytracker"
       GOTRUE_MAILER_TEMPLATES_CONFIRMATION: http://web/email-templates/confirmation.html
       GOTRUE_MAILER_TEMPLATES_RECOVERY: http://web/email-templates/recovery.html
       GOTRUE_MAILER_TEMPLATES_MAGIC_LINK: http://web/email-templates/magic-link.html
       GOTRUE_MAILER_TEMPLATES_EMAIL_CHANGE: http://web/email-templates/email-change.html
       GOTRUE_MAILER_TEMPLATES_INVITE: http://web/email-templates/invite.html
       GOTRUE_MAILER_TEMPLATES_REAUTHENTICATION: http://web/email-templates/reauthentication.html
-      GOTRUE_MAILER_SUBJECTS_REAUTHENTICATION: "Votre code de confirmation TrophyTracker"
+      GOTRUE_MAILER_SUBJECTS_REAUTHENTICATION: "Votre code de confirmation trophytracker"
       # Changement d'email : confirmation demandée sur l'ancienne ET la nouvelle adresse.
       GOTRUE_MAILER_SECURE_EMAIL_CHANGE_ENABLED: "true"
       # Changer de mot de passe exige un code reçu par email (sauf juste après connexion).
@@ -69,11 +73,8 @@ services:
       # Double authentification (appli TOTP type Google Authenticator), activée par défaut.
       GOTRUE_MFA_TOTP_ENROLL_ENABLED: "true"
       GOTRUE_MFA_TOTP_VERIFY_ENABLED: "true"
-      # Connexion avec Google (optionnelle) — voir docs/CONFIGURATION.md
-      GOTRUE_EXTERNAL_GOOGLE_ENABLED: ${GOOGLE_ENABLED:-false}
-      GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
-      GOTRUE_EXTERNAL_GOOGLE_SECRET: ${GOOGLE_SECRET:-}
-      GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI: ${API_EXTERNAL_URL}/callback
+      # Pas de connexion Google : uniquement le code par e-mail.
+      GOTRUE_EXTERNAL_GOOGLE_ENABLED: "false"
 
   # Nos Edge Functions (supabase/functions) remplacent les exemples officiels.
   functions:
