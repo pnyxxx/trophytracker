@@ -1,287 +1,387 @@
-import { lazy, Suspense, useRef } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageShell } from '@/components/layout/PageShell';
 import { Seo } from '@/components/common/Seo';
-import { Kicker, SectionTitle } from '@/components/common/Brand';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { FAIR_PLAY, priceSentence } from '@/lib/legal';
-import { useSeen } from '@/hooks/useInView';
+import { EXAMPLE_PATH } from '@/lib/example';
+import { pointAtDist } from '@/lib/route-anim';
+import { cn } from '@/lib/utils';
+import { CHAPTERS, distAt, LAST, offlineAt, ROUTE } from '@/components/landing/story';
 
-// La carte 3D (MapLibre) est chargée à part, à l'approche de sa section : le haut de page s'affiche tout de suite.
-const ExampleTripMap = lazy(() => import('@/components/landing/ExampleTripMap'));
-
-/** Bandeau défilant : les road trips qu'on peut suivre. */
-const KINDS = ['Raids', 'Road trips', 'Rallyes', 'Tours d’Europe', 'Van life', 'Voyages à vélo', 'Expéditions', 'Traversées du désert', 'Tours du monde'];
-
-const audiences = [
-  {
-    n: '01',
-    km: 'KM 0 · À la maison',
-    title: 'Pour les proches',
-    text: 'Parents, amis, grands-parents : voyez où en sont vos voyageurs à tout moment, sans attendre un message. Rassurant quand ils sont loin !',
-  },
-  {
-    n: '02',
-    km: 'KM ∞ · Sur la carte',
-    title: 'Pour les sponsors',
-    text: 'Suivez l’aventure que vous financez. Votre logo apparaît sur la page et sur la carte du road trip, vue par toute sa communauté.',
-  },
-  {
-    n: '03',
-    km: 'KM ? · Au volant',
-    title: 'Pour les voyageurs',
-    text: 'Raid, road trip, tour d’Europe en van ou à vélo : une page à vous en 5 minutes, avec carte en direct, relief, photos et 360°, sponsors et cagnotte. Un seul lien à partager.',
-  },
-];
+// La carte 3D (MapLibre) est chargée à part : le texte de l'accueil s'affiche tout de suite.
+const StoryMap = lazy(() => import('@/components/landing/StoryMap'));
 
 const steps = [
-  { n: '1', title: 'Créez votre road trip', text: 'Nom, photos, sponsors, cagnotte… tout se gère depuis un espace simple. Invitez vos compagnons de route, gratuitement.' },
-  { n: '2', title: 'Activez le suivi', text: 'L’appli gratuite Traccar Client sur un téléphone suffit : un QR code à scanner. Vous avez déjà un boîtier GPS ? Il marche aussi.' },
-  { n: '3', title: 'Vos proches suivent', text: 'Position en direct, trace complète, kilomètres, vitesse, relief, photos du soir… sur une page privée, juste pour eux.' },
+  { n: '1', t: '≈ 2 min', title: 'Crée ton trip', text: 'Un nom, une photo, tes compagnons de route. L’itinéraire, c’est si tu veux : la trace s’écrit en roulant.' },
+  { n: '2', t: '≈ 3 min', title: 'Lance le suivi', text: 'Un QR code à scanner avec l’appli gratuite Traccar Client : ton téléphone envoie ta position. Pas de réseau ? Il garde tout en mémoire.' },
+  { n: '3', t: 'tout le trip', title: 'Envoie le lien', text: 'Ton voyage est privé par défaut. Seuls ceux à qui tu envoies le lien peuvent le suivre, sans compte et sans appli.' },
 ];
 
-const features = [
-  { tag: '01 · CARTE', title: 'Carte en temps réel', text: 'La position bouge sur la carte sans recharger la page.' },
-  { tag: '02 · PHOTOS', title: 'Photos & 360°', text: 'Revivez les dunes, les cols et les bivouacs comme si vous y étiez.' },
-  { tag: '03 · PRIVÉ', title: 'Privé par défaut', text: 'Seules les personnes qui ont le lien voient le road trip. Rien sur Google.' },
-  { tag: '04 · ÉTHIQUE', title: 'Sans pub & respectueux', text: 'Gratuit pour les proches, sans publicité, sans revente de données, sur nos propres serveurs.' },
+const panels = [
+  { tag: 'direct', red: true, v: '< 10 s', title: 'Le vrai direct', text: 'Position, vitesse, météo et altitude mises à jour en continu, même pour les grands-parents sur téléphone.' },
+  { tag: 'à plusieurs', v: '1 page', title: 'Toute la bande', text: 'Invite tes compagnons de route : vous gérez la page ensemble, et vos proches suivent tout au même endroit.' },
+  { tag: 'sponsors · cagnotte', v: '1 lien', title: 'Soutenir le voyage', text: 'Une vitrine pour tes sponsors et le lien de ta cagnotte, sur la même page que la carte.' },
+  { tag: '3D', v: 'vidéo', title: 'Revivre en 3D', text: 'Le voyage rejoué en survol satellite, à exporter en vidéo paysage, story ou carré.' },
+];
+
+const trips = [
+  { label: 'en van', tag: 'semaines → mois', r: -2 },
+  { label: 'à moto', tag: 'dénivelé', r: 1.5 },
+  { label: 'entre potes', tag: 'à plusieurs', r: -1 },
+  { label: 'en famille', tag: 'sans compte', r: 2 },
+  { label: 'en raid', tag: 'sponsors', r: -1.5, red: true },
+  { label: 'autour du monde', tag: 'multi-pays', r: 1 },
+  { label: 'en camping-car', tag: 'bivouacs', r: -2.5 },
+  { label: 'à vélo', tag: 'étape par étape', r: 1.5 },
 ];
 
 const faq = [
   {
     q: 'Faut-il un compte pour suivre un road trip ?',
-    a: 'Non : il suffit du lien envoyé par les voyageurs. Un compte (gratuit) sert seulement à retrouver en un clic les road trips que vous suivez.',
+    a: 'Non : il suffit du lien envoyé par les voyageurs. Rien à installer, ça marche sur n’importe quel téléphone ou ordinateur.',
   },
   {
     q: 'Comment la position est-elle envoyée ?',
-    a: 'Avec l’application gratuite Traccar Client (Android et iPhone), installée sur un téléphone du road trip, ou avec un boîtier GPS compatible. La position part quelques fois par minute quand il y a du réseau ; dans les zones sans réseau, les points sont gardés en mémoire et envoyés plus tard.',
+    a: 'Avec l’application gratuite Traccar Client (Android et iPhone), installée sur un téléphone du voyage et réglée d’un coup avec un QR code, ou avec un boîtier GPS compatible. Sans réseau, les points sont gardés en mémoire et envoyés dès que le téléphone capte.',
   },
   {
     q: 'Pas de nouvelle position : faut-il s’inquiéter ?',
-    a: 'Presque toujours, non : en montagne ou dans le désert, il n’y a souvent pas de réseau, et la trace se complète dès que le téléphone en retrouve. Si vous avez un doute, contactez directement les voyageurs.',
+    a: 'Presque toujours, non : en montagne ou dans le désert, il n’y a souvent pas de réseau, et la trace se complète dès que le téléphone en retrouve. Si tu as un doute, contacte directement les voyageurs.',
   },
   {
     q: 'Qui peut voir la position ?',
-    a: 'Les voyageurs choisissent : page privée (seulement les personnes qui ont le lien, et jamais sur Google) ou publique. Ils peuvent changer d’avis, couper le suivi ou effacer leur trace à tout moment.',
+    a: 'Les voyageurs choisissent : privé (seulement les personnes qui ont le lien, et jamais sur Google) ou public. Ils peuvent changer d’avis, couper le suivi ou effacer leur trace à tout moment. Les arrêts de nuit sont floutés.',
   },
   {
     q: 'Je participe à un raid ou un rallye : j’ai le droit ?',
-    a: 'Ça dépend de l’organisation : certains règlements interdisent tout système de suivi pendant l’épreuve. Vérifiez le vôtre avant d’activer le suivi : vous êtes seuls responsables de son respect. TrophyTracker n’est ni un outil de navigation, ni un outil de sécurité.',
+    a: 'Ça dépend de l’organisation : certains règlements interdisent tout système de suivi pendant l’épreuve. Vérifie le tien avant de lancer le suivi : tu es seul responsable de son respect. trophytracker n’est ni un outil de navigation, ni un outil de sécurité.',
   },
   {
     q: 'Combien ça coûte ?',
-    a: `Suivre un road trip est gratuit, pour tout le monde. Pour créer la page de son road trip : ${priceSentence()}. C’est un paiement unique, sans abonnement, et les compagnons de route la rejoignent gratuitement. TrophyTracker est un projet indépendant, né de l’expérience d’un équipage de raid, sans publicité ni revente de données.`,
+    a: `Suivre un road trip est gratuit, pour tout le monde. Pour créer la page de ton road trip : ${priceSentence()}. C’est un paiement unique, sans abonnement, et tes compagnons de route te rejoignent gratuitement. Sans publicité ni revente de données.`,
   },
 ];
 
+const fmt = (n: number, digits = 0) => n.toLocaleString('fr-FR', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
+
+/** Grand écran et animations permises : le récit se joue au défilement. Sinon : vue fixe et chapitres en cartes. */
+function useStoryMode() {
+  const query = '(min-width: 960px) and (prefers-reduced-motion: no-preference)';
+  const [wide, setWide] = useState(() => typeof window !== 'undefined' && window.matchMedia(query).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const on = () => setWide(mq.matches);
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
+  return wide;
+}
+
+/** Avancement du récit (0 → LAST) selon la position de défilement dans la section. */
+function useStoryProgress(ref: React.RefObject<HTMLElement | null>, active: boolean) {
+  const [prog, setProg] = useState(active ? 0 : LAST);
+  useEffect(() => {
+    if (!active) return setProg(LAST);
+    let pending = false;
+    const update = () => {
+      pending = false;
+      const el = ref.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const f = clamp01(-r.top / (r.height - window.innerHeight || 1));
+      setProg((p) => (Math.abs(p - f * LAST) > 0.004 ? f * LAST : p));
+    };
+    const onScroll = () => {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, [ref, active]);
+  return prog;
+}
+
+/** La carte du lien privé, à la fin du récit. */
+function LinkCard({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  const [copied, setCopied] = useState(false);
+  const url = `${window.location.host}${EXAMPLE_PATH}`;
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}${EXAMPLE_PATH}`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      /* presse-papiers refusé : le lien reste lisible */
+    }
+  };
+  return (
+    <div className={cn('flex flex-col gap-4 rounded-[28px] bg-cream p-[22px] text-coal shadow-[0_30px_60px_rgba(0,0,0,.45)]', className)} style={style}>
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-[20px] font-extrabold tracking-[-0.02em]">Valloire → Lautaret</span>
+        <span className="rounded-full bg-coal px-2.5 py-1 font-mono text-[11px] text-cream">privé</span>
+      </div>
+      <div className="flex items-center gap-2 rounded-2xl border-[1.5px] border-coal/[0.12] bg-white py-1.5 pl-3.5 pr-1.5">
+        <span className="min-w-0 flex-1 truncate font-mono text-[13px]">{url}</span>
+        <button type="button" onClick={copy} className="min-h-10 rounded-xl bg-signal px-3.5 text-[14px] font-bold text-white hover:bg-signal-hover">
+          {copied ? 'Copié ✓' : 'Copier'}
+        </button>
+      </div>
+      <span className="text-[14px] text-dust-700">Les personnes qui ont le lien suivent le voyage · aucune n’a besoin de compte</span>
+    </div>
+  );
+}
+
 export default function Landing() {
-  const mapRef = useRef<HTMLElement>(null);
-  const mapSeen = useSeen(mapRef);
+  const storyRef = useRef<HTMLElement>(null);
+  const wide = useStoryMode();
+  const prog = useStoryProgress(storyRef, wide);
+  const [altitude, setAltitude] = useState<number | null>(null);
+
+  const d = distAt(prog);
+  const pos = pointAtDist(ROUTE, d);
+  const off = wide && offlineAt(prog);
+  const near = Math.round(prog);
+  const linkK = clamp01((prog - 4.4) / 0.5);
+  const hud = [
+    { l: 'position', v: `${fmt(pos[1], 3)}°N ${fmt(pos[0], 3)}°E` },
+    { l: 'distance', v: `${fmt(d / 1000, 1)} km` },
+    { l: 'vitesse', v: off ? '— km/h' : `${Math.round(34 + 10 * Math.sin(d / 900))} km/h` },
+    { l: 'altitude', v: altitude == null ? '—' : `${fmt(altitude)} m` },
+  ];
 
   return (
     <PageShell header="floating">
       {/* Le site lui-même (WebSite, Organization) est décrit dans le HTML statique de l'accueil : seo-plugin.ts. */}
       <Seo />
 
-      {/* ── 01 Hero ──────────────────────────────────────────────────────── */}
-      <section className="relative flex min-h-[100svh] flex-col overflow-x-clip bg-[radial-gradient(120%_80%_at_80%_0%,#3A2215_0%,#1B1310_45%,#120F0C_75%)]">
-        <div className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col justify-end gap-8 px-4 pb-10 pt-28 sm:px-7 lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:content-center lg:items-end lg:gap-12 lg:pb-14">
-          <div className="flex flex-col gap-5">
-            <Kicker>
-              <span className="h-2 w-2 rounded-full bg-live" />
-              <span>Carnet de route · suivi GPS en direct</span>
-            </Kicker>
-            {/* Une ligne par segment ; la taille suit la largeur ET la hauteur : tout le hero tient sur un écran. */}
-            <h1 className="m-0 font-display text-[clamp(44px,min(13vw,calc((100svh_-_540px)/2.85)),200px)] font-extrabold lg:text-[clamp(64px,min(calc((min(100vw,1400px)_-_496px)/6.55),calc((100svh_-_260px)/2.85)),200px)] leading-[0.95] tracking-[-0.01em] text-cream sm:whitespace-nowrap">
-              Suivez
-              <br />
-              leur aventure
-              <br />
-              en <span className="font-display text-primary">direct.</span>
-            </h1>
+      {/* ── 01 Récit : la montée du Galibier, au fil du défilement ─────────── */}
+      <section ref={storyRef} className="relative" style={{ height: wide ? '330vh' : '100svh' }} aria-label="Exemple : un road trip suivi en direct">
+        <div className="sticky top-0 h-[100svh] overflow-hidden bg-[#1A1C20]">
+          <div className="absolute inset-0">
+            <Suspense fallback={null}>
+              <StoryMap prog={prog} wide={wide} onAltitude={setAltitude} />
+            </Suspense>
           </div>
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(130%_100%_at_60%_40%,transparent_50%,rgba(10,10,12,.65)_100%),linear-gradient(180deg,rgba(18,19,22,.6)_0%,transparent_18%,transparent_45%,rgba(18,19,22,.94)_100%)]" />
 
-          <div className="flex w-full max-w-[560px] flex-col gap-6">
-            <p className="m-0 text-pretty text-lg leading-relaxed text-dust-200">
-              Raids, road trips, tours du monde : proches, amis et sponsors retrouvent la position, la trace complète, le
-              relief et les photos du road trip qu’ils suivent. Gratuit pour eux, sans application à installer.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Link
-                to="/inscription"
-                className="rounded-full bg-primary px-6 py-4 font-mono text-sm font-bold uppercase tracking-[0.12em] text-white shadow-[0_10px_40px_rgba(219,71,64,.35)] hover:bg-primary-dark hover:text-white"
-              >
-                Créer mon road trip →
-              </Link>
-              <a
-                href="#comment"
-                className="rounded-full border border-cream/25 px-6 py-4 font-mono text-sm font-bold uppercase tracking-[0.12em] text-cream hover:border-cream hover:text-cream"
-              >
-                Comment ça marche
-              </a>
+          {/* Télémétrie du voyageur */}
+          <div className={cn('pointer-events-none absolute inset-x-5 top-24 transition-opacity duration-500', wide && prog > 0.6 && prog < 4.5 ? 'opacity-100' : 'opacity-0')} aria-hidden="true">
+            <div className="mx-auto flex max-w-[1400px] flex-wrap justify-end gap-2">
+              {hud.map((h) => (
+                <div key={h.l} className="flex min-w-[112px] flex-col gap-0.5 rounded-2xl border-[1.5px] border-cream/[0.14] bg-[#121316]/[0.72] px-3.5 py-2 backdrop-blur-[10px]">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-dust-500">{h.l}</span>
+                  <span className="font-mono text-[16px] font-medium text-cream">{h.v}</span>
+                </div>
+              ))}
             </div>
-            <p className="m-0 text-sm text-dust-400">
-              On vous a envoyé un lien ? Ouvrez-le simplement : pas besoin de compte pour suivre un road trip.
+          </div>
+
+          {/* Hors réseau */}
+          <div className={cn('pointer-events-none absolute left-1/2 top-[150px] flex -translate-x-1/2 items-center gap-2.5 whitespace-nowrap rounded-full bg-cream px-4 py-2 font-mono text-[13px] font-medium text-coal transition-opacity duration-500', off ? 'opacity-100' : 'opacity-0')} aria-hidden="true">
+            <span className="h-2 w-2 rounded-full border-2 border-coal" />
+            Hors réseau · {fmt(0.6 + (prog - 2.5) * 0.4, 1)} km en mémoire
+          </div>
+
+          {/* Repères de chapitres */}
+          {wide && (
+            <div className="pointer-events-none absolute right-5 top-1/2 flex -translate-y-1/2 flex-col gap-2.5" aria-hidden="true">
+              {Array.from({ length: LAST + 1 }, (_, k) => (
+                <span key={k} className={cn('w-1.5 rounded-[3px] transition-all duration-300', k === near ? 'h-7' : 'h-1.5', k <= near ? 'bg-signal' : 'bg-cream/30')} />
+              ))}
+            </div>
+          )}
+
+          {/* Accroche */}
+          <div
+            className="absolute inset-x-0 bottom-0"
+            style={wide ? { opacity: Math.max(0, 1 - prog * 2.2), transform: `translateY(${Math.round(-prog * 120)}px)`, pointerEvents: prog < 0.3 ? 'auto' : 'none' } : undefined}
+          >
+            <div className="mx-auto grid max-w-[1400px] items-end gap-8 px-5 pb-14 lg:grid-cols-2">
+              <h1 className="tt-display m-0 text-[clamp(60px,9vw,150px)] leading-[0.88] tracking-[-0.05em] text-cream">
+                Ton road trip,
+                <br />
+                <span className="text-signal">en direct.</span>
+              </h1>
+              <div className="flex max-w-[440px] flex-col gap-5 lg:justify-self-end">
+                <p className="m-0 text-pretty text-[19px] leading-normal text-dust-200">
+                  Tu roules, ceux que tu invites te suivent. Position, trace, photos et stats sur une page privée, accessible uniquement par ton lien.
+                </p>
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <Link to="/creer" className="rounded-full bg-signal px-[22px] py-[15px] text-[16px] font-bold text-white shadow-[0_4px_0_#8A1217] hover:bg-signal-hover hover:text-white">
+                    Créer mon trip →
+                  </Link>
+                  {wide && (
+                    <span className="flex items-center gap-2.5 font-mono text-[12px] text-dust-300">
+                      <span className="inline-block animate-bounce">↓</span>Fais défiler pour partir
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Chapitres (grand écran) */}
+          {wide && (
+            <div className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2">
+              <div className="relative mx-auto h-[360px] max-w-[1400px] px-5">
+                {CHAPTERS.map((c, k) => {
+                  const dk = prog - (k + 1);
+                  const op = k === CHAPTERS.length - 1 && prog > 4.6 ? 0 : Math.max(0, 1 - Math.max(0, Math.abs(dk) - 0.3) * 3);
+                  return (
+                    <div
+                      key={c.tag}
+                      className="absolute left-5 top-1/2 flex w-[440px] flex-col gap-3.5 rounded-[28px] border-[1.5px] border-cream/[0.14] bg-[#121316]/[0.74] p-7 backdrop-blur-[14px] backdrop-saturate-[140%]"
+                      style={{ opacity: op, transform: `translateY(calc(-50% + ${Math.round(-dk * 30)}px))` }}
+                      aria-hidden={op < 0.5}
+                    >
+                      <span className="self-start rounded-full bg-signal px-[11px] py-1 font-mono text-[12px] font-medium text-white">{c.tag}</span>
+                      <h2 className="tt-display m-0 text-[clamp(34px,3.6vw,52px)] leading-[0.98] text-cream">{c.title}</h2>
+                      <p className="m-0 text-[17px] leading-[1.55] text-dust-200">{c.text}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Le lien privé, à la fin du récit */}
+          {wide && (
+            <LinkCard
+              className="absolute bottom-16 right-[max(48px,calc((100vw-1400px)/2+48px))] w-[min(400px,calc(100%-40px))] transition-opacity duration-300"
+              style={{ opacity: linkK, transform: `translateY(${Math.round((1 - linkK) * 30)}px)`, pointerEvents: linkK > 0.5 ? 'auto' : 'none' }}
+            />
+          )}
+        </div>
+      </section>
+
+      {/* Chapitres en cartes (téléphone, ou animations réduites) */}
+      {!wide && (
+        <section className="mx-auto flex max-w-[1400px] flex-col gap-3 px-5 pb-6 pt-14">
+          {CHAPTERS.map((c) => (
+            <div key={c.tag} className="flex flex-col gap-2.5 rounded-[24px] border-[1.5px] border-cream/[0.08] bg-[#1D1E23] p-[22px]">
+              <span className="self-start rounded-full bg-signal px-[11px] py-1 font-mono text-[12px] font-medium text-white">{c.tag}</span>
+              <h2 className="tt-display m-0 text-[30px] leading-none text-cream">{c.title}</h2>
+              <p className="m-0 text-[16px] leading-normal text-dust-200">{c.text}</p>
+            </div>
+          ))}
+          <LinkCard className="mt-3" />
+        </section>
+      )}
+
+      {/* ── 02 Comment ça marche ─────────────────────────────────────────── */}
+      <section id="comment" className="mx-auto flex max-w-[1400px] scroll-mt-[88px] flex-col gap-11 px-5 py-[110px]">
+        <div className="flex flex-wrap items-end justify-between gap-6">
+          <h2 className="tt-display m-0 text-[clamp(44px,5.6vw,84px)] leading-[0.95] text-cream">
+            Prêt en 5 minutes.
+            <br />
+            <span className="text-dust-500">Zéro prise de tête.</span>
+          </h2>
+          <span className="font-mono text-[13px] text-dust-500">// comment ça marche</span>
+        </div>
+        <ol className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(min(100%,300px),1fr))] gap-4 p-0">
+          {steps.map((s) => (
+            <li key={s.n} className="flex min-h-[300px] flex-col gap-4 rounded-[28px] bg-cream p-7 text-coal">
+              <div className="flex items-center justify-between">
+                <span className="flex h-[52px] w-[52px] items-center justify-center rounded-full bg-coal text-[24px] font-extrabold text-cream">{s.n}</span>
+                <span className="rounded-full bg-coal/[0.12] px-2.5 py-1 font-mono text-[12px] font-medium">{s.t}</span>
+              </div>
+              <h3 className="tt-display mb-0 mt-auto text-[32px] leading-none">{s.title}</h3>
+              <p className="m-0 text-[17px] leading-normal">{s.text}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {/* ── 03 Ce qui change ─────────────────────────────────────────────── */}
+      <section className="border-t-[1.5px] border-cream/[0.08]">
+        <div className="mx-auto grid max-w-[1400px] grid-cols-[repeat(auto-fit,minmax(min(100%,400px),1fr))] items-start gap-14 px-5 py-[110px]">
+          <div className="flex flex-col gap-5 lg:sticky lg:top-[110px]">
+            <span className="self-start rounded-full bg-cream px-3 py-1 font-mono text-[12px] font-medium text-coal">le lien partagé</span>
+            <h2 className="tt-display m-0 text-[clamp(44px,5.6vw,84px)] leading-[0.95] text-cream">
+              Ce qui change
+              <br />
+              <span className="text-signal">vraiment.</span>
+            </h2>
+            <p className="m-0 max-w-[420px] text-[18px] leading-[1.55] text-dust-300">
+              Ton trip reste privé : seuls ceux qui ont ton lien le voient. Famille, potes ou sponsors, toute la bande est dans la voiture avec toi. Ou presque.
             </p>
           </div>
-        </div>
-
-        {/* Bandeau défilant */}
-        <div className="overflow-hidden border-y border-cream/[0.12] bg-ink py-3" aria-hidden="true">
-          <div className="flex w-max animate-marquee font-mono text-[13px] uppercase tracking-[0.14em] text-dust-100">
-            {[0, 1].map((k) => (
-              <div key={k} className="flex gap-10 pr-10">
-                {KINDS.map((s) => (
-                  <span key={s} className="whitespace-nowrap">
-                    <span className="text-primary">◆ </span>
-                    {s}
-                  </span>
-                ))}
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,250px),1fr))] gap-3.5">
+            {panels.map((p) => (
+              <div key={p.tag} className={cn('flex min-h-[230px] flex-col gap-3.5 rounded-[24px] border-[1.5px] border-cream/[0.08] bg-[#1D1E23] p-6 transition-colors', p.red ? 'hover:border-signal' : 'hover:border-cream')}>
+                <span className={cn('self-start rounded-full px-[11px] py-1 font-mono text-[12px] font-medium text-coal', p.red ? 'bg-signal text-white' : 'bg-cream')}>{p.tag}</span>
+                <span className="font-mono text-[30px] font-medium tracking-[-0.03em] text-cream">{p.v}</span>
+                <div className="mt-auto flex flex-col gap-1.5">
+                  <span className="text-[22px] font-extrabold tracking-[-0.01em] text-cream">{p.title}</span>
+                  <span className="text-[15px] leading-normal text-dust-300">{p.text}</span>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── 02 Un exemple en 3D ──────────────────────────────────────────── */}
-      <section id="exemple" ref={mapRef} className="relative h-[min(820px,100svh)] scroll-mt-[88px] overflow-hidden bg-ink-900">
-        {mapSeen && (
-          <Suspense fallback={null}>
-            <div className="absolute inset-0"><ExampleTripMap /></div>
-          </Suspense>
-        )}
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,#120F0C_0%,rgba(18,15,12,.25)_22%,rgba(18,15,12,0)_55%,rgba(18,15,12,.85)_100%)]" />
-        <div className="pointer-events-none relative z-[3] mx-auto flex max-w-[1240px] flex-col gap-4 px-4 pt-[90px] sm:px-7">
-          <Kicker>Exemple · Col du Galibier, Alpes</Kicker>
-          <SectionTitle className="max-w-[760px] leading-[0.92] text-cream">
-            Une trace,
-            <br />
-            lacet après lacet.
-          </SectionTitle>
-          <p className="m-0 max-w-[440px] text-pretty text-[17px] leading-relaxed text-dust-200">
-            Chaque position dessine la route sur une carte satellite en relief, que vos proches suivent en direct.
-          </p>
-        </div>
-        <div className="absolute bottom-6 left-4 z-[3] font-mono text-[10px] uppercase tracking-[0.14em] text-dust-300 sm:left-7">
-          Valloire → Galibier → Lautaret · 27 km · 2 642 m · vue satellite 3D
-        </div>
-      </section>
-
-      {/* ── 03 Pour qui ──────────────────────────────────────────────────── */}
-      <section className="bg-sand px-4 py-[120px] text-coal sm:px-7">
-        <div className="mx-auto flex max-w-[1240px] flex-col gap-14">
-          <div className="flex flex-wrap items-end justify-between gap-7">
-            <SectionTitle className="max-w-[780px] leading-[0.96]">
-              Un seul lien.
-              <br />
-              Trois raisons
-              <br />
-              de l’ouvrir.
-            </SectionTitle>
-            <p className="m-0 max-w-[420px] text-pretty text-[17px] leading-relaxed text-dust-700">
-              Ils traversent un désert, un continent ou juste les Alpes. À la maison, on aimerait bien savoir où ils sont.
-              C’est exactement ce que nous faisons.
-            </p>
-          </div>
-
-          {/* Le roadbook : une case par public */}
-          <div className="border-2 border-coal bg-cream">
-            <div className="flex flex-wrap border-b-2 border-coal bg-coal font-mono text-[11px] uppercase tracking-[0.16em] text-sand" aria-hidden="true">
-              <div className="flex-[0_0_150px] px-5 py-2.5">Case</div>
-              <div className="flex-[1_1_220px] px-5 py-2.5">Direction</div>
-              <div className="hidden flex-[2_1_320px] px-5 py-2.5 sm:block">Note du roadbook</div>
-            </div>
-            {audiences.map((a) => (
-              <div key={a.n} className="flex flex-wrap border-b-2 border-coal transition-colors last:border-b-0 hover:bg-paper">
-                <div className="flex flex-[0_0_150px] flex-col gap-1.5 border-r-2 border-coal px-5 py-7">
-                  <span className="font-display text-[64px] font-extrabold leading-[0.9] text-primary">{a.n}</span>
-                  <span className="font-mono text-[11px] text-dust-700">{a.km}</span>
-                </div>
-                <div className="flex flex-[1_1_220px] items-center px-5 py-7">
-                  <h3 className="m-0 font-display text-[40px] font-extrabold leading-[0.95]">{a.title}</h3>
-                </div>
-                <div className="flex flex-[2_1_320px] items-center px-5 pb-7 sm:py-7">
-                  <p className="m-0 text-pretty text-[17px] leading-relaxed text-dust-800">{a.text}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── 04 Comment ça marche ─────────────────────────────────────────── */}
-      <section id="comment" className="scroll-mt-[88px] bg-cream px-4 py-[120px] text-coal sm:px-7">
-        <div className="mx-auto flex max-w-[1240px] flex-col gap-16">
-          <SectionTitle className="leading-[0.88]">
-            Comment
-            <br />
-            ça marche ?
-          </SectionTitle>
-          <ol className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(min(100%,300px),1fr))] border-t-2 border-coal p-0">
-            {steps.map((s) => (
-              <li key={s.n} className="flex flex-col gap-4 border-b-2 border-coal py-8 pr-7">
-                <div className="flex items-baseline gap-3">
-                  <span className="font-display text-[120px] font-extrabold leading-[0.8] text-primary">{s.n}</span>
-                  <span className="tt-kicker text-dust-700">Étape</span>
-                </div>
-                <h3 className="m-0 font-display text-[34px] font-extrabold leading-[0.95]">{s.title}</h3>
-                <p className="m-0 max-w-[340px] text-base leading-relaxed text-dust-800">{s.text}</p>
+      {/* ── 04 Tous les trips ────────────────────────────────────────────── */}
+      <section className="border-t-[1.5px] border-cream/[0.08]">
+        <div className="mx-auto flex max-w-[1400px] flex-col gap-9 px-5 py-[110px]">
+          <h2 className="tt-display m-0 text-[clamp(44px,5.6vw,84px)] leading-[0.95] text-cream">Quel que soit le véhicule.</h2>
+          <ul className="m-0 flex list-none flex-wrap gap-3 p-0">
+            {trips.map((t) => (
+              <li
+                key={t.label}
+                className={cn('flex items-baseline gap-3 rounded-full border-[1.5px] px-[26px] py-3.5 transition-transform duration-200 [transform:rotate(var(--r))] hover:[transform:rotate(0deg)_scale(1.04)]', t.red ? 'border-signal bg-signal text-white' : 'border-cream/35 text-cream')}
+                style={{ '--r': `${t.r}deg` } as React.CSSProperties}
+              >
+                <span className="text-[clamp(22px,2.6vw,36px)] font-extrabold tracking-[-0.02em]">{t.label}</span>
+                <span className="font-mono text-[12px] opacity-75">{t.tag}</span>
               </li>
             ))}
-          </ol>
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,240px),1fr))] gap-5">
-            {features.map((f) => (
-              <div key={f.tag} className="flex flex-col gap-2.5 bg-coal p-6 text-cream">
-                <span className="font-mono text-[11px] tracking-[0.14em] text-ochre">{f.tag}</span>
-                <span className="font-display text-[26px] font-extrabold leading-none">{f.title}</span>
-                <span className="text-sm leading-[1.55] text-dust-300">{f.text}</span>
-              </div>
-            ))}
-          </div>
+          </ul>
         </div>
       </section>
 
       {/* ── 05 Charte du voyageur ────────────────────────────────────────── */}
-      <section className="bg-sand px-4 py-[120px] text-coal sm:px-7">
-        <div className="mx-auto flex max-w-[1240px] flex-col gap-14">
-          <div className="flex flex-wrap items-end justify-between gap-7">
-            <div className="flex flex-col gap-[18px]">
-              <Kicker className="text-dust-700">Charte du voyageur</Kicker>
-              <SectionTitle className="leading-[0.88]">
-                L’esprit
-                <br />
-                du road trip.
-              </SectionTitle>
-            </div>
-            <p className="m-0 max-w-[460px] text-pretty text-[17px] leading-relaxed text-dust-700">
-              {FAIR_PLAY.spirit} Chaque road trip s’y engage avant d’activer son suivi.
+      <section className="border-t-[1.5px] border-cream/[0.08]">
+        <div className="mx-auto flex max-w-[1400px] flex-col gap-11 px-5 py-[110px]">
+          <div className="flex flex-wrap items-end justify-between gap-6">
+            <h2 className="tt-display m-0 text-[clamp(44px,5.6vw,84px)] leading-[0.95] text-cream">
+              L’esprit
+              <br />
+              <span className="text-dust-500">du road trip.</span>
+            </h2>
+            <p className="m-0 max-w-[460px] text-pretty text-[17px] leading-relaxed text-dust-300">
+              {FAIR_PLAY.spirit} Chaque road trip s’y engage avant de lancer son suivi.
             </p>
           </div>
-          <ol className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(min(100%,260px),1fr))] border-t-2 border-coal p-0">
+          <ol className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(min(100%,260px),1fr))] gap-3.5 p-0">
             {FAIR_PLAY.rules.map((r, i) => (
-              <li key={r.title} className="flex flex-col gap-3 border-b-2 border-coal py-8 pr-7">
-                <span className="font-display text-[64px] font-extrabold leading-[0.85] text-primary">{i + 1}</span>
-                <h3 className="m-0 font-display text-[28px] font-extrabold leading-[0.95]">{r.title}</h3>
-                <p className="m-0 max-w-[340px] text-base leading-relaxed text-dust-800">{r.text}</p>
+              <li key={r.title} className="flex flex-col gap-3 rounded-[24px] border-[1.5px] border-cream/[0.08] bg-[#1D1E23] p-6">
+                <span className="font-mono text-[13px] text-signal-text">0{i + 1}</span>
+                <h3 className="m-0 text-[22px] font-extrabold leading-tight tracking-[-0.01em] text-cream">{r.title}</h3>
+                <p className="m-0 text-[15px] leading-relaxed text-dust-300">{r.text}</p>
               </li>
             ))}
           </ol>
-          <Link to="/conditions-utilisation#fair-play" className="self-start font-mono text-sm font-bold uppercase tracking-[0.12em] text-primary hover:text-primary-dark">
+          <Link to="/conditions-utilisation#fair-play" className="self-start font-bold text-signal-text hover:text-cream">
             Lire les conditions d’utilisation →
           </Link>
         </div>
       </section>
 
-      {/* ── 06 FAQ ───────────────────────────────────────────────────────── */}
-      <section className="bg-ink px-4 py-[120px] sm:px-7">
-        <div className="mx-auto grid max-w-[1240px] grid-cols-[repeat(auto-fit,minmax(min(100%,380px),1fr))] items-start gap-14">
-          <div className="flex flex-col gap-[18px]">
-            <Kicker>Briefing avant départ</Kicker>
-            <SectionTitle className="leading-[0.88]">
-              Questions
-              <br />
-              fréquentes
-            </SectionTitle>
+      {/* ── 06 Questions ─────────────────────────────────────────────────── */}
+      <section className="border-t-[1.5px] border-cream/[0.08]">
+        <div className="mx-auto grid max-w-[1400px] grid-cols-[repeat(auto-fit,minmax(min(100%,380px),1fr))] items-start gap-14 px-5 py-[110px]">
+          <div className="flex flex-col gap-4">
+            <span className="font-mono text-[13px] text-dust-500">// avant de partir</span>
+            <h2 className="tt-display m-0 text-[clamp(44px,5.6vw,84px)] leading-[0.95] text-cream">Questions fréquentes</h2>
           </div>
           <Accordion type="single" collapsible defaultValue="q0" className="border-t border-cream/20">
             {faq.map((f, i) => (
@@ -294,25 +394,25 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── 07 Inscription ───────────────────────────────────────────────── */}
-      <section id="inscription" className="relative overflow-hidden bg-[radial-gradient(90%_80%_at_50%_100%,#3A2215_0%,#1B1310_50%,#0A0806_100%)] px-4 py-[140px] sm:px-7">
-        <div className="relative mx-auto flex max-w-[1240px] flex-col items-center gap-[22px] text-center">
-          <Kicker className="text-gold">Prochain départ · le vôtre</Kicker>
-          <h2 className="m-0 w-full font-display text-[clamp(56px,8vw,128px)] font-extrabold leading-[0.96] text-cream">
-            Vous partez
+      {/* ── 07 Départ ────────────────────────────────────────────────────── */}
+      <section id="go" className="px-5 pb-[90px]">
+        <div className="mx-auto grid max-w-[1400px] grid-cols-[repeat(auto-fit,minmax(min(100%,380px),1fr))] items-end gap-8 rounded-[40px] bg-signal px-7 py-14 text-white sm:px-12 sm:py-[72px]">
+          <h2 className="tt-display m-0 text-[clamp(52px,7vw,112px)] leading-[0.9] tracking-[-0.045em]">
+            Le compteur
             <br />
-            à l’aventure&nbsp;?
+            démarre quand
+            <br />
+            tu pars.
           </h2>
-          <p className="m-0 max-w-[520px] text-lg leading-relaxed text-dust-100">
-            Créez la page de votre road trip en 5 minutes et partagez un seul lien à vos proches et sponsors.
-          </p>
-          <p className="m-0 font-mono text-xs uppercase tracking-[0.14em] text-gold">{priceSentence()} · paiement unique</p>
-          <Link
-            to="/inscription"
-            className="rounded-full bg-primary px-8 py-[18px] font-mono text-sm font-bold uppercase tracking-[0.12em] text-white shadow-[0_10px_40px_rgba(219,71,64,.45)] hover:bg-primary-dark hover:text-white"
-          >
-            Créer mon road trip →
-          </Link>
+          <div className="flex max-w-[400px] flex-col items-start gap-[18px] lg:justify-self-end">
+            <p className="m-0 text-[18px] font-medium leading-normal">
+              Sans pub, sans abonnement, et tes données restent à toi. Crée ton trip maintenant, lance le suivi le jour J.
+            </p>
+            <p className="m-0 font-mono text-[13px] leading-relaxed text-white/85">{priceSentence()} · paiement unique · gratuit pour tes proches</p>
+            <Link to="/creer" className="rounded-full bg-[#121316] px-[26px] py-[17px] text-[17px] font-extrabold text-white hover:bg-white hover:text-[#121316]">
+              Créer mon trip →
+            </Link>
+          </div>
         </div>
       </section>
     </PageShell>

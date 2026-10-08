@@ -32,6 +32,13 @@ Branche : `generaliste`. Le site en ligne reste en pause tant que Julien ne vali
   Plus de mot de passe ni de Google ; TOTP des admins gardé. E-mails : code seulement (nouveau gabarit à l'étape 8).
   Écrans de connexion au « tu » comme la maquette du parcours (l'espace voyageur et les e-mails de la maquette sont au
   « vous » : à trancher avec Julien).
+- [x] Accueil : récit défilant `components/landing/story.ts` (images-clés, chapitres, photos) + `StoryMap.tsx` (carte
+  IGN 3D pilotée par `prog`), HUD avec altitude réelle lue dans le relief, passage hors réseau, photos = vues aériennes
+  IGN du col (`public/accueil/`), carte du lien vers `EXAMPLE_PATH` (`lib/example.ts` = `/t/exemple`, à créer par la
+  démo neutre). Téléphone / animations réduites : vue fixe + chapitres en cartes. « Ce qui change de Polarsteps »
+  devenu « Ce qui change vraiment » (pas de nom de concurrent : publicité comparative encadrée). Plus de « gratuit »
+  sauf pour les proches ; prix affiché dans le bloc rouge et la FAQ. « 1 carte, tous les véhicules » remplacé par
+  « Toute la bande » (1 véhicule), cagnotte « 1 lien » (pas de pourcentage).
 
 ## À faire, dans l'ordre
 
@@ -41,7 +48,7 @@ Branche : `generaliste`. Le site en ligne reste en pause tant que Julien ne vali
 2. ~~**Connexion par code**~~ (fait) (pages auth, `hooks/auth.tsx`, modèles d'e-mails `email-templates.ts`, config GoTrue
    `infra/supabase.override.yml` : `GOTRUE_MAILER_OTP_LENGTH=6`, désactiver Google), tests e2e `scripts/e2e/smoke.mjs`
    (récupérer le code dans Mailpit au lieu du lien).
-3. **Accueil** (`Accueil.dc.html`) : récit défilant sur carte satellite 3D (5 chapitres + images-clés de caméra,
+3. ~~**Accueil**~~ (fait) (`Accueil.dc.html`) : récit défilant sur carte satellite 3D (5 chapitres + images-clés de caméra,
    HUD position/distance/vitesse/jour, bandeau « Hors réseau · X km en mémoire », photos qui apparaissent, carte du lien
    privé à copier), « Prêt en 5 minutes », « Ce qui change de Polarsteps » (4 panneaux), « Quel que soit le véhicule »
    (pilules inclinées), grand bloc rouge « Le compteur démarre quand tu pars », FAQ et charte à garder (on les avait).

@@ -7,11 +7,11 @@
 
 /** Adresse officielle du site (adresses canoniques et images de partage, qui doivent être absolues). */
 export const SITE_URL = 'https://trophytracker.fr';
-export const SITE_NAME = 'TrophyTracker';
+export const SITE_NAME = 'trophytracker';
 
-export const DEFAULT_TITLE = 'TrophyTracker — Le carnet de route en direct de vos road trips';
+export const DEFAULT_TITLE = 'trophytracker — Ton road trip, en direct';
 export const DEFAULT_DESCRIPTION =
-  'Raids, road trips, tours du monde : vos proches et sponsors suivent en direct la position, la trace, le relief et les photos de votre road trip. Gratuit pour eux.';
+  'Tu roules, ceux que tu invites te suivent : position, trace, photos et stats de ton road trip sur une page privée, accessible uniquement par ton lien. Gratuit pour tes proches, sans appli.';
 
 /** Titre complet affiché dans l'onglet et dans Google. */
 export const fullTitle = (title?: string) => (title ? `${title} · ${SITE_NAME}` : DEFAULT_TITLE);

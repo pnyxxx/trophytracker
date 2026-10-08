@@ -5,13 +5,14 @@ import { LogOut, Menu, X } from 'lucide-react';
 import { LogoMark, Wordmark } from '@/components/common/Logo';
 import { useAuth } from '@/hooks/auth';
 import { cn } from '@/lib/utils';
+import { EXAMPLE_PATH } from '@/lib/example';
 
 export type HeaderVariant = 'floating' | 'sticky';
 
 /** Liens de découverte : seulement sur l'accueil, en-tête flottant. */
 const discover = [
   { to: '/#comment', label: 'Comment ça marche' },
-  { to: '/#exemple', label: 'Exemple de voyage' },
+  { to: EXAMPLE_PATH, label: 'Exemple de voyage' },
 ];
 
 const navLink = 'text-[15px] font-medium text-dust-200 hover:text-white';
