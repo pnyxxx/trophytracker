@@ -62,7 +62,7 @@ export function FollowButton({ crewId, slug, count, className, quiet = false }: 
       });
     },
     onSuccess: (_d, follow) => {
-      toast.success(follow ? 'C’est noté : tu retrouveras ce road trip dans ton compte' : 'Tu ne suis plus ce road trip');
+      toast.success(follow ? 'C’est noté : tu recevras un e-mail au départ et un résumé chaque soir de route' : 'Tu ne suis plus ce road trip');
     },
     onError: (err) => toastError(err),
     onSettled: () => {

@@ -8,6 +8,7 @@ import type { IncomingPoint } from './points.js';
 import type { AdminNotification } from './admin-emails.js';
 import type { GpsReminder } from './crew-emails.js';
 import type { CrewMeta } from './crew-page.js';
+import type { TripMail } from './trip-emails.js';
 
 /** « test » : suivi arrêté, position gardée comme essai (hors trace). */
 export type IngestResult = 'stored' | 'skipped' | 'stale' | 'invalid' | 'glitch' | 'test';
@@ -55,6 +56,21 @@ export function createDb(url: string, opts: { minDistanceM: number; maxSilenceS:
 
     async gpsReminderDone(crewId: string, error: string | null) {
       await sql`select private.gps_reminder_done(${crewId}::uuid, ${error})`;
+    },
+
+    /** Ajoute les résumés du soir à la file (sans effet avant 21 h, heure de Paris). */
+    async queueEveningDigests(): Promise<number> {
+      const [row] = await sql<{ n: number }[]>`select private.queue_evening_digests() as n`;
+      return row?.n ?? 0;
+    },
+
+    /** E-mails du voyage à envoyer aux proches (invitation, « C'est parti », résumé du soir). */
+    pendingTripMails() {
+      return sql<TripMail[]>`select * from private.pending_trip_mails(50)`;
+    },
+
+    async tripMailDone(id: number, error: string | null) {
+      await sql`select private.trip_mail_done(${id}, ${error})`;
     },
 
     /** Équipages publics (plan du site). */

@@ -34,8 +34,8 @@ function totp(secretBase32) {
   return String((h.readUInt32BE(o) & 0x7fffffff) % 1e6).padStart(6, '0');
 }
 
-async function waitEmail(to, subjectStart) {
-  for (let i = 0; i < 20; i++) {
+async function waitEmail(to, subjectStart, seconds = 10) {
+  for (let i = 0; i < seconds * 2; i++) {
     const list = await (await fetch(`${MAILPIT}/api/v1/search?query=to:${encodeURIComponent(to)}`)).json();
     const found = list.messages?.find((m) => m.Subject.startsWith(subjectStart));
     if (found) return await (await fetch(`${MAILPIT}/api/v1/message/${found.ID}`)).json();
@@ -162,8 +162,23 @@ const tryRes = await fetch(`${SITE}/ingest/osmand?id=${key}&lat=48.85&lon=2.35&t
 const { data: tryFix } = await alice.from('gps_test_fixes').select('lat').eq('crew_id', crew.id).maybeSingle();
 const { data: tryTrack } = await anon.rpc('get_track', { p_crew: crew.id });
 check(tryRes.ok && tryFix?.lat === 48.85 && tryTrack?.length === 0, 'suivi arrêté : la position d’essai est reçue, mais pas publiée');
+// Un proche invité par e-mail (sans compte) reçoit le lien, puis « C'est parti » au lancement du suivi.
+const mamie = `mamie-${run}@test.local`;
+const { data: invited, error: invRelErr } = await alice.rpc('invite_relatives', { p_crew: crew.id, p_emails: [mamie, 'pas-une-adresse'] });
+check(!invRelErr && invited === 1, `alice invite un proche par e-mail${invRelErr ? ' : ' + invRelErr.message : ''}`);
+const { error: strangerInv } = await bob.rpc('invite_relatives', { p_crew: crew.id, p_emails: [`spam-${run}@test.local`] });
+check(!!strangerInv, 'bob ne peut pas inviter de proches dans le road trip d’alice');
+
 const { error: startErr } = await alice.rpc('set_tracking', { p_crew: crew.id, p_enabled: true });
 check(!startErr, 'suivi lancé');
+// Le service tracker relève la file toutes les 30 s.
+const inviteMail = await waitEmail(mamie, 'alice vous invite', 90);
+check(!!inviteMail && inviteMail.HTML.includes(`${SITE}/t/${crew.slug}`), 'le proche reçoit l’invitation avec le lien du voyage');
+const departMail = await waitEmail(mamie, 'C’est parti', 90);
+check(!!departMail, 'le proche reçoit « C’est parti » au lancement du suivi');
+const unsubToken = departMail?.HTML.match(/desabonnement\?t=([0-9a-f-]{36})/)?.[1];
+const { data: unsub } = await client().rpc('unsubscribe', { p_token: unsubToken ?? '00000000-0000-0000-0000-000000000000' });
+check(unsub?.status === 'ok', 'il se désinscrit en un clic, sans compte (lien de l’e-mail)');
 
 let realtimeHit = false;
 const channel = anon.channel('t').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'crews', filter: `id=eq.${crew.id}` }, () => { realtimeHit = true; });

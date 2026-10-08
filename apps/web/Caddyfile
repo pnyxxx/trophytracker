@@ -128,7 +128,7 @@ http://web {
 
 		# Pages affichées par le JavaScript seul (comptes, connexion…), qui portent la consigne « noindex ».
 		# ⚠️ À tenir à jour avec les routes de apps/web/src/App.tsx.
-		@app path /connexion /inscription /creer /invitation /mon-compte /mon-compte/* /admin
+		@app path /connexion /inscription /creer /desabonnement /invitation /mon-compte /mon-compte/* /admin
 		handle @app {
 			rewrite * /_shell/app.html
 			header Cache-Control "no-cache"

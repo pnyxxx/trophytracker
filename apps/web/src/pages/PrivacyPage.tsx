@@ -28,6 +28,14 @@ export default function PrivacyPage() {
         La liste des road trips que vous suivez, visible par vous seul. <em>Base légale : l’exécution du service. Conservation : jusqu’à
         la suppression du compte.</em>
       </p>
+      <h3>Les e-mails aux proches</h3>
+      <p>
+        Si vous suivez un road trip avec un compte, ou si un voyageur vous invite par e-mail, nous gardons votre adresse pour vous
+        envoyer l’invitation, un e-mail « C’est parti » au départ et un résumé chaque soir de route. Chaque e-mail contient un lien
+        pour ne plus rien recevoir, en un clic et sans compte ; les voyageurs voient la liste des adresses qu’ils ont invitées et
+        peuvent les retirer. <em>Base légale : notre intérêt légitime à prévenir les proches qui suivent un voyage, à la demande des
+        voyageurs. Conservation : jusqu’à la désinscription, ou la suppression de la page du road trip.</em>
+      </p>
       <h3>Les pages de road trip</h3>
       <p>
         Nom du road trip, présentation, école, ville, liens, email de contact, photos et sponsors, tels que les voyageurs les saisissent.

@@ -20,6 +20,7 @@ const TermsPage = lazy(() => import('@/pages/TermsPage'));
 const SalesTermsPage = lazy(() => import('@/pages/SalesTermsPage'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 const CreateTripPage = lazy(() => import('@/pages/CreateTripPage'));
+const UnsubscribePage = lazy(() => import('@/pages/UnsubscribePage'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -50,6 +51,7 @@ export default function App() {
               <Route path="/connexion" element={<LoginPage />} />
               <Route path="/inscription" element={<LoginPage signup />} />
               <Route path="/creer" element={<CreateTripPage />} />
+              <Route path="/desabonnement" element={<UnsubscribePage />} />
               <Route path="/invitation" element={<InvitationPage />} />
               <Route path="/confidentialite" element={<PrivacyPage />} />
               <Route path="/mentions-legales" element={<LegalNoticePage />} />

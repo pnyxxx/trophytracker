@@ -106,6 +106,66 @@ function FundraiserForm({ crew }: { crew: Crew }) {
   );
 }
 
+/** Inviter des proches par e-mail : ils reçoivent le lien, puis « C'est parti » et le résumé du soir. */
+function InviteRelatives({ crew }: { crew: Crew }) {
+  const queryClient = useQueryClient();
+  const [text, setText] = useState('');
+  const { data: subscribers = [] } = useQuery({
+    queryKey: ['crew-subscribers', crew.id],
+    queryFn: async () => unwrap(await supabase.from('crew_subscribers').select('id, email, unsubscribed_at, created_at').eq('crew_id', crew.id).order('created_at')),
+  });
+  const emails = text.split(/[\s,;]+/).map((x) => x.trim()).filter(Boolean);
+  const invite = useMutation({
+    mutationFn: async () => unwrap(await supabase.rpc('invite_relatives', { p_crew: crew.id, p_emails: emails })),
+    onSuccess: (n) => {
+      toast.success(n ? `${n} invitation${n > 1 ? 's' : ''} envoyée${n > 1 ? 's' : ''}` : 'Ces personnes sont déjà invitées');
+      setText('');
+      markShared(crew.id);
+      void queryClient.invalidateQueries({ queryKey: ['crew-subscribers', crew.id] });
+    },
+    onError: toastError,
+  });
+  const remove = useMutation({
+    mutationFn: async (id: string) => unwrap(await supabase.from('crew_subscribers').delete().eq('id', id)),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['crew-subscribers', crew.id] }),
+    onError: toastError,
+  });
+  return (
+    <div className="flex flex-col gap-3.5 rounded-[28px] bg-ink-800 p-5 sm:p-[22px]">
+      <h3 className="tt-display m-0 text-[24px] text-cream">Inviter des proches par e-mail</h3>
+      <p className="m-0 text-[15px] leading-relaxed text-dust-300">
+        Ils reçoivent le lien, puis un e-mail « C’est parti » quand tu appuies sur « Je pars », et un résumé chaque soir de route.
+        Pas de compte à créer ; un clic suffit pour se désinscrire.
+      </p>
+      {!crew.is_public ? (
+        <p className="m-0 text-[15px] text-gold-text">Ta page est réservée aux voyageurs : rends-la « privée, par lien » dans les réglages pour inviter des proches.</p>
+      ) : (
+        <form onSubmit={(e: FormEvent) => { e.preventDefault(); invite.mutate(); }} className="flex flex-col gap-2.5">
+          <label htmlFor="relatives" className="text-[16px] font-bold">Leurs adresses e-mail</label>
+          <textarea id="relatives" rows={3} value={text} onChange={(e) => setText(e.target.value)} placeholder="mamie@exemple.fr, papa@exemple.fr"
+            className="min-h-[96px] w-full rounded-2xl border-2 border-ink-600 bg-ink px-4 py-3 text-[17px] text-cream placeholder:text-dust-600 hover:border-dust-600 focus-visible:border-cream focus-visible:outline-none" />
+          <Button type="submit" className="self-start" disabled={!emails.length || invite.isPending}>
+            {invite.isPending ? 'Envoi…' : `Envoyer ${emails.length > 1 ? `${emails.length} invitations` : 'l’invitation'}`}
+          </Button>
+        </form>
+      )}
+      {subscribers.length > 0 && (
+        <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
+          {subscribers.map((x) => (
+            <li key={x.id} className="flex items-center justify-between gap-3 rounded-2xl bg-ink px-3.5 py-2.5">
+              <span className="min-w-0 truncate text-[15px] text-cream">{x.email}</span>
+              <span className="flex items-center gap-2">
+                <span className={cn('font-mono text-[12px]', x.unsubscribed_at ? 'text-dust-500' : 'text-live-text')}>{x.unsubscribed_at ? 'désinscrit' : 'invité'}</span>
+                <Button size="sm" variant="ghost" aria-label={`Retirer ${x.email}`} onClick={() => remove.mutate(x.id)}>Retirer</Button>
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 /** Partage : lien à copier, e-mail aux grands-parents, QR code et visuels. */
 export function SharePanel({ crew }: { crew: Crew }) {
   const [copied, setCopied] = useState(false);
@@ -132,6 +192,7 @@ export function SharePanel({ crew }: { crew: Crew }) {
         </div>
         <span className="text-[15px] text-dust-800">Personne n’a besoin de compte pour suivre le voyage.</span>
       </div>
+      <InviteRelatives crew={crew} />
       <div className="rounded-[28px] bg-ink-800 p-5 sm:p-[22px]">
         <h3 className="tt-display m-0 mb-4 text-[24px] text-cream">Autocollant et story</h3>
         <CrewQrPanel crew={crew} showUrl={false} />
@@ -146,7 +207,7 @@ function GoButton({ crew, fairPlayOk, onNeedGps }: { crew: Crew; fairPlayOk: boo
   const go = useMutation({
     mutationFn: async () => unwrap(await supabase.rpc('set_tracking', { p_crew: crew.id, p_enabled: true })),
     onSuccess: () => {
-      toast.success('Bonne route ! Le suivi est lancé : tes proches te voient avancer.');
+      toast.success('Bonne route ! Le suivi est lancé : tes proches te voient avancer et reçoivent « C’est parti ».');
       void queryClient.invalidateQueries({ queryKey: keys.crew(crew.slug) });
     },
     onError: toastError,
@@ -164,7 +225,7 @@ function GoButton({ crew, fairPlayOk, onNeedGps }: { crew: Crew; fairPlayOk: boo
     <div className="flex flex-col gap-3 rounded-[28px] bg-signal p-6 text-white">
       <span className="font-mono text-[13px]">jour J</span>
       <span className="tt-display text-[34px] leading-none">Quand tout est coché, appuie sur « Je pars ».</span>
-      <span className="text-[17px] leading-normal">Le suivi démarre : ta position apparaît en direct sur la page. Tu peux l’arrêter à tout moment.</span>
+      <span className="text-[17px] leading-normal">Le suivi démarre : ta position apparaît en direct sur la page, et tes proches reçoivent un e-mail « C’est parti ». Tu peux l’arrêter à tout moment.</span>
       {fairPlayOk ? (
         <Button variant="secondary" size="lg" className="mt-1.5 self-start" disabled={go.isPending} onClick={() => go.mutate()}>{go.isPending ? 'Lancement…' : 'Je pars →'}</Button>
       ) : (

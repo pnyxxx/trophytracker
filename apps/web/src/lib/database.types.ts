@@ -190,6 +190,44 @@ export type Database = {
           },
         ]
       }
+      crew_subscribers: {
+        Row: {
+          created_at: string
+          crew_id: string
+          email: string
+          id: string
+          invited_by: string | null
+          unsub_token: string
+          unsubscribed_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          crew_id: string
+          email: string
+          id?: string
+          invited_by?: string | null
+          unsub_token?: string
+          unsubscribed_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          crew_id?: string
+          email?: string
+          id?: string
+          invited_by?: string | null
+          unsub_token?: string
+          unsubscribed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crew_subscribers_crew_id_fkey"
+            columns: ["crew_id"]
+            isOneToOne: false
+            referencedRelation: "crews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crews: {
         Row: {
           avatar_path: string | null
@@ -317,16 +355,22 @@ export type Database = {
         Row: {
           created_at: string
           crew_id: string
+          emails: boolean
+          unsub_token: string
           user_id: string
         }
         Insert: {
           created_at?: string
           crew_id: string
+          emails?: boolean
+          unsub_token?: string
           user_id?: string
         }
         Update: {
           created_at?: string
           crew_id?: string
+          emails?: boolean
+          unsub_token?: string
           user_id?: string
         }
         Relationships: [
@@ -881,6 +925,10 @@ export type Database = {
       }
       get_telemetry: { Args: { p_crew: string; p_tz?: string }; Returns: Json }
       get_track: { Args: { p_crew: string; p_since?: string }; Returns: Json }
+      invite_relatives: {
+        Args: { p_crew: string; p_emails: string[] }
+        Returns: number
+      }
       purchase_attach_session: {
         Args: { p_purchase: string; p_session: string }
         Returns: undefined
@@ -922,6 +970,7 @@ export type Database = {
         Args: { p_crew: string; p_enabled: boolean }
         Returns: undefined
       }
+      unsubscribe: { Args: { p_token: string }; Returns: Json }
     }
     Enums: {
       [_ in never]: never

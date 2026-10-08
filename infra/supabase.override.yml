@@ -28,6 +28,9 @@ services:
       # Ce délai vaut aussi pour les liens d'invitation : expirés, l'invité se connecte simplement par code.
       GOTRUE_MAILER_OTP_LENGTH: "6"
       GOTRUE_MAILER_OTP_EXP: "600"
+      # Toute connexion envoie un e-mail : le plafond par défaut (30 e-mails par heure pour tout le site)
+      # bloquerait les connexions. Chaque adresse reste limitée à un code par minute.
+      GOTRUE_RATE_LIMIT_EMAIL_SENT: "300"
       # Les mots de passe ne servent plus (aucun écran ne les propose) ; minimum gardé si l'API est appelée.
       GOTRUE_PASSWORD_MIN_LENGTH: "10"
       # Emails en français, servis par notre conteneur `web` (générés depuis apps/web/src/lib/email-templates.ts).

@@ -64,6 +64,14 @@ Branche : `generaliste`. Le site en ligne reste en pause tant que Julien ne vali
   point, « à traiter » = départ ≤ 3 j sans GPS, batterie < 15 % en route, remboursement récent ; `admin_list_trips()` :
   propriétaire, statut, km), testées en pgTAP. Pas de « cagnottes » ni de « signalements » (n'existent pas) : ventes du
   mois à la place. Paiements, codes et comptes gardés.
+- [x] E-mails : gabarit « Balise » (600 px, en-tête nuit, crème ou nuit, pilules, `card`, `stats`) dans
+  `apps/web/src/lib/email-templates.ts` ET sa copie `apps/tracker/src/email-layout.ts`. Nouveaux e-mails (migrations
+  `20261008000007_trip_emails` + `…08_trip_mail_start`, testées) : file `private.trip_mails` envoyée par le tracker
+  (`trip-emails.ts`, testé) — invitation d'un proche (`invite_relatives`, 20 adresses/envoi, 50/24 h, page visible
+  par lien), « C'est parti » au premier « Je pars » (déclencheur), résumé du soir après 21 h Paris
+  (`queue_evening_digests`). Destinataires = abonnés (`follows.emails`) + proches invités (`crew_subscribers`) ;
+  désinscription en un clic `/desabonnement?t=` (`unsubscribe`, anonyme) + en-tête List-Unsubscribe. Formulaire
+  « Inviter des proches » dans Partage. `GOTRUE_RATE_LIMIT_EMAIL_SENT=300` (toute connexion envoie un e-mail).
 
 ## À faire, dans l'ordre
 
@@ -97,7 +105,7 @@ Branche : `generaliste`. Le site en ligne reste en pause tant que Julien ne vali
    (Infos, GPS, Étapes, Journal, Photos, Sponsors, Membres, QR, Suppression) dans cette structure. « Importer un GPX ».
 7. ~~**Administration**~~ (fait) (`Administration.dc.html`) : barre latérale, KPI, tableau des road trips avec filtres, points GPS
    reçus sur 24 h, « À traiter », état des services ; garder nos onglets paiements et codes.
-8. **E-mails** (`E-mails.dc.html`) : nouveau gabarit (600 px, crème, en-tête nuit) pour tous les e-mails existants ;
+8. ~~**E-mails**~~ (fait) (`E-mails.dc.html`) : nouveau gabarit (600 px, crème, en-tête nuit) pour tous les e-mails existants ;
    nouveaux : invitation d'un proche, « C'est parti » (bouton « Je pars »), résumé du soir aux abonnés (désinscription).
 9. **Visuels QR** (`Visuels QR.dc.html`) : autocollant carré 12 cm, story 1080×1920 sur fond satellite avec la trace,
    autocollant rond 8 cm (`lib/qr-poster.ts`).

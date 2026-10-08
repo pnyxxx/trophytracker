@@ -3,7 +3,9 @@
  * serveur que les emails du site) :
  *   - relances « configurez votre GPS » aux road trips (private.pending_gps_reminders),
  *     dont l'envoi ajoute une notification pour les admins ;
- *   - emails aux admins (file private.admin_notifications).
+ *   - emails aux admins (file private.admin_notifications) ;
+ *   - e-mails du voyage aux proches (file private.trip_mails : invitation, « C'est parti », résumé du soir,
+ *     ce dernier ajouté à la file chaque soir à partir de 21 h, heure de Paris).
  * Un échec est retenté au tour suivant (5 essais au plus, compté par la base) ;
  * les tours ne se chevauchent jamais.
  */
@@ -11,6 +13,7 @@ import nodemailer from 'nodemailer';
 import type { Db } from './db.js';
 import { buildAdminEmail } from './admin-emails.js';
 import { buildGpsReminderEmail } from './crew-emails.js';
+import { buildTripEmail } from './trip-emails.js';
 
 export type SmtpConfig = {
   host: string;
@@ -75,6 +78,30 @@ export function startAdminNotifier(db: Db, smtp: SmtpConfig, siteUrl: string, po
       }
     } catch (e) {
       log(`file des emails admin illisible : ${(e as Error).message}`);
+    }
+    try {
+      const queued = await db.queueEveningDigests();
+      if (queued) log(`${queued} résumé(s) du soir ajouté(s) à la file`);
+      for (const m of await db.pendingTripMails()) {
+        const email = buildTripEmail(m, siteUrl);
+        try {
+          await transport.sendMail({
+            from: { name: smtp.fromName, address: smtp.from },
+            to: m.email,
+            subject: email.subject,
+            text: email.text,
+            html: email.html,
+            headers: email.unsubscribeUrl ? { 'List-Unsubscribe': `<${email.unsubscribeUrl}>` } : undefined,
+          });
+          await db.tripMailDone(m.id, null);
+          log(`e-mail du voyage envoyé (${m.kind} #${m.id})`);
+        } catch (e) {
+          await db.tripMailDone(m.id, (e as Error).message);
+          log(`e-mail du voyage #${m.id} non envoyé : ${(e as Error).message}`);
+        }
+      }
+    } catch (e) {
+      log(`file des e-mails du voyage illisible : ${(e as Error).message}`);
     }
     if (!stopped) timer = setTimeout(tick, pollSeconds * 1000);
   }
