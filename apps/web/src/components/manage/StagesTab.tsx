@@ -7,7 +7,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Navigation, Pencil, Plus, Sparkles, Trash2, X } from 'lucide-react';
+import { FileUp, Navigation, Pencil, Plus, Sparkles, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -17,6 +17,7 @@ import { useLiveTrack } from '@/hooks/useLiveTrack';
 import { toastError, unwrap } from '@/lib/errors';
 import { describePosition } from '@/lib/geocode';
 import { detectStays, formatDuration, newStays, stayKey, type Stay } from '@/lib/stage-detect';
+import { parseGpx } from '@/lib/gpx';
 import { STAGE_STYLE, stageStyle } from '@/components/crew/mapIcons';
 import { Field, orNull, Panel, selectClass, textareaClass } from './shared';
 import { LocationPicker, type Coords } from './LocationPicker';
@@ -198,6 +199,24 @@ export function StagesTab({ crew }: { crew: Crew }) {
     onError: toastError,
   });
 
+  // Import d'un fichier GPX (Komoot, Google My Maps…) : ses points nommés deviennent des étapes.
+  const importGpx = useMutation({
+    mutationFn: async (file: File) => {
+      if (file.size > 20 * 1024 * 1024) throw new Error('Fichier trop lourd (20 Mo maximum)');
+      const found = parseGpx(await file.text());
+      if (!found.length) throw new Error('Aucun point trouvé dans ce fichier GPX');
+      if (!confirm(`Ajouter ${found.length} étape${found.length > 1 ? 's' : ''} depuis « ${file.name} » ?`)) return 0;
+      unwrap(await supabase.from('trip_stages').insert(found.map((g) => ({ ...g, crew_id: crew.id, source: 'manual' as const }))));
+      return found.length;
+    },
+    onSuccess: (n) => {
+      if (!n) return;
+      toast.success(`${n} étape${n > 1 ? 's' : ''} importée${n > 1 ? 's' : ''}`);
+      void queryClient.invalidateQueries({ queryKey: keys.stages(crew.id) });
+    },
+    onError: toastError,
+  });
+
   const dismiss = (s: Stay) => {
     const next = [...dismissed, stayKey(s)];
     setDismissed(next);
@@ -223,7 +242,17 @@ export function StagesTab({ crew }: { crew: Crew }) {
       <Panel
         title="Le carnet de route"
         description={<>Vos étapes, dans l’ordre du voyage : elles apparaissent sur la carte et dans le carnet de route de votre page. C’est vous qui décidez de tout : rien n’est imposé.</>}
-        action={<Button onClick={() => setDialog({ stage: null, initial: emptyDraft })}><Plus />Ajouter une étape</Button>}
+        action={
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={() => setDialog({ stage: null, initial: emptyDraft })}><Plus />Ajouter une étape</Button>
+            <Button asChild variant="outline" disabled={importGpx.isPending}>
+              <label className="cursor-pointer">
+                <FileUp />{importGpx.isPending ? 'Import…' : 'Importer un GPX'}
+                <input type="file" accept=".gpx,application/gpx+xml" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) importGpx.mutate(f); e.target.value = ''; }} />
+              </label>
+            </Button>
+          </div>
+        }
       >
         {stages.length === 0 ? (
           <div className="flex flex-col items-start gap-3 border border-dashed border-cream/20 p-6 text-dust-300">

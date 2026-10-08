@@ -7,7 +7,7 @@
  *    nouveaux points (paramètre p_since) → très économe en données mobiles.
  * 3. Filet de sécurité : rafraîchissement toutes les 2 minutes (connexion instable).
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase, type Crew } from '@/lib/supabase';
 import { keys } from './queries';
@@ -23,6 +23,9 @@ export function useLiveTrack(crew: Crew | null | undefined) {
   const pointsRef = useRef<TrackPoint[]>([]);
   const inFlight = useRef(false);
   const crewId = crew?.id;
+  // Nom de canal propre à chaque utilisation : deux composants affichés ensemble (étapes et journal)
+  // ne doivent pas partager le même canal Realtime.
+  const instance = useId();
 
   const fetchNew = useCallback(async () => {
     if (!crewId || inFlight.current) return;
@@ -56,7 +59,7 @@ export function useLiveTrack(crew: Crew | null | undefined) {
     void fetchNew();
 
     const channel = supabase
-      .channel(`crew-live-${crewId}`)
+      .channel(`crew-live-${crewId}-${instance}`)
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'crews', filter: `id=eq.${crewId}` },
@@ -84,7 +87,7 @@ export function useLiveTrack(crew: Crew | null | undefined) {
       clearInterval(interval);
       void supabase.removeChannel(channel);
     };
-  }, [crewId, fetchNew, queryClient]);
+  }, [crewId, fetchNew, queryClient, instance]);
 
   return { points, loading, error };
 }

@@ -96,22 +96,22 @@ export function CrewCard({ crew }: { crew: CrewSummary }) {
   return (
     <Link
       to={`/t/${crew.slug}`}
-      className="group grid grid-cols-[auto_1fr_auto] items-center gap-4 border border-cream/[0.08] bg-ink-800 px-4 py-3.5 text-cream transition duration-200 hover:translate-x-1 hover:border-primary hover:text-cream"
+      className="group grid grid-cols-[auto_1fr_auto] items-center gap-4 rounded-[20px] border-[1.5px] border-ink-700 bg-ink-800 px-4 py-3.5 text-cream transition duration-200 hover:border-dust-600 hover:text-cream"
     >
       <CrewAvatar name={crew.name} path={crew.avatar_path} />
       <div className="flex min-w-0 flex-col gap-[3px]">
         <div className="flex min-w-0 items-center gap-2">
           {crew.car_number && (
-            <span className="shrink-0 rounded-full bg-primary px-1.5 py-0.5 font-mono text-[11px] font-bold text-white">#{crew.car_number}</span>
+            <span className="shrink-0 rounded-full bg-signal px-1.5 py-0.5 font-mono text-[11px] font-bold text-white">#{crew.car_number}</span>
           )}
-          <h3 className="m-0 truncate font-display text-[22px] font-extrabold leading-tight">{crew.name}</h3>
+          <h3 className="tt-display m-0 truncate text-[22px] leading-tight">{crew.name}</h3>
         </div>
         {place && <p className="m-0 truncate text-[13px] text-dust-400">{place}</p>}
       </div>
       <div className="flex flex-col items-end gap-1 text-right">
         <span className="whitespace-nowrap font-mono text-sm font-semibold">{formatKm(crew.total_distance_m / 1000)}</span>
-        <span className={cn('whitespace-nowrap font-mono text-[10px] uppercase tracking-[0.12em]', live ? 'text-live' : 'text-dust-400')}>
-          {live ? '● En direct' : crew.last_fix_at ? `Vu ${formatRelative(crew.last_fix_at)}` : 'Pas encore parti'}
+        <span className={cn('whitespace-nowrap font-mono text-[12px]', live ? 'text-live-text' : 'text-dust-400')}>
+          {live ? '● en direct' : crew.last_fix_at ? `vu ${formatRelative(crew.last_fix_at)}` : 'pas encore parti'}
         </span>
       </div>
     </Link>

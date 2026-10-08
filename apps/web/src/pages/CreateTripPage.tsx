@@ -25,18 +25,10 @@ import { findCity } from '@/lib/geocode';
 import { compressImage, uploadCrewImage } from '@/lib/media';
 import { markShared } from '@/lib/share';
 import { cn } from '@/lib/utils';
+import { TRIP_TYPES, type TripType } from '@/lib/trip-types';
 
 // ── Données du parcours ─────────────────────────────────────────────────────
 
-export const TRIP_TYPES = [
-  { id: 'van', label: 'En van', hint: 'camping-car, bivouac' },
-  { id: 'voiture', label: 'En voiture', hint: 'road trip classique' },
-  { id: 'moto', label: 'À moto', hint: 'cols et virages' },
-  { id: 'raid', label: 'Raid ou rallye', hint: 'avec sponsors' },
-  { id: 'groupe', label: 'Entre amis', hint: 'à plusieurs' },
-  { id: 'monde', label: 'Tour du monde', hint: 'des mois de route' },
-] as const;
-type TripType = (typeof TRIP_TYPES)[number]['id'];
 
 const IDEAS: [string, string][] = [['Bergen', 'Lofoten'], ['Lisbonne', 'Algarve'], ['Lyon', 'Dolomites'], ['Inverness', 'Île de Skye']];
 const WHENS: { label: string; days: number | null }[] = [

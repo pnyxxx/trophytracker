@@ -8,22 +8,23 @@ import { socialUrl, webUrl } from '@/lib/social';
 import { findCity } from '@/lib/geocode';
 import { toastError, unwrap } from '@/lib/errors';
 import { keys } from '@/hooks/queries';
-import { Field, orNull, Panel, textareaClass } from './shared';
+import { Field, orNull, Panel, selectClass, textareaClass } from './shared';
+import { TRIP_TYPES } from '@/lib/trip-types';
 import { AvatarPicker, CoverPicker } from './CrewImages';
 import { CityInput } from './CityInput';
 
 type Editable = Pick<Crew,
   'name' | 'car_number' | 'tagline' | 'story' | 'school' | 'city' | 'contact_email' |
   'instagram_url' | 'facebook_url' | 'fundraiser_url' | 'is_public' | 'is_listed' | 'starts_on' | 'ends_on' |
-  'start_lat' | 'start_lon' | 'start_region'>;
+  'start_lat' | 'start_lon' | 'start_region' | 'destination' | 'trip_type'>;
 
 type Visibility = 'private' | 'link' | 'public';
 const visibilityOf = (c: Pick<Crew, 'is_public' | 'is_listed'>): Visibility => (!c.is_public ? 'private' : c.is_listed ? 'public' : 'link');
 
 const VISIBILITY: { value: Visibility; title: string; text: string }[] = [
-  { value: 'private', title: 'Privé', text: 'Seuls les voyageurs du road trip voient la page et la position.' },
-  { value: 'link', title: 'Par lien', text: 'Toute personne qui a le lien voit la page. Elle n’apparaît nulle part ailleurs, ni sur Google. Recommandé.' },
+  { value: 'link', title: 'Privé, par lien', text: 'Toute personne qui a le lien voit la page. Elle n’apparaît nulle part ailleurs, ni sur Google. Recommandé.' },
   { value: 'public', title: 'Public', text: 'Comme « par lien », et la page peut apparaître dans les moteurs de recherche.' },
+  { value: 'private', title: 'Voyageurs seulement', text: 'Seuls les voyageurs du road trip voient la page et la position.' },
 ];
 
 const toForm = (c: Crew) => ({
@@ -32,6 +33,7 @@ const toForm = (c: Crew) => ({
   instagram_url: c.instagram_url ?? '', facebook_url: c.facebook_url ?? '',
   fundraiser_url: c.fundraiser_url ?? '', visibility: visibilityOf(c),
   starts_on: c.starts_on ?? '', ends_on: c.ends_on ?? '',
+  destination: c.destination ?? '', trip_type: c.trip_type ?? '',
   // Position de la ville de départ (drapeau sur la carte), retenue au choix d'une suggestion.
   spot: c.start_lat != null && c.start_lon != null ? { lat: c.start_lat, lon: c.start_lon, region: c.start_region } : null,
 });
@@ -59,6 +61,7 @@ export function InfoTab({ crew }: { crew: Crew }) {
         fundraiser_url: webUrl('de la cagnotte', form.fundraiser_url),
         is_public: form.visibility !== 'private', is_listed: form.visibility === 'public',
         starts_on: orNull(form.starts_on), ends_on: orNull(form.ends_on),
+        destination: orNull(form.destination), trip_type: (orNull(form.trip_type) as Crew['trip_type']) ?? null,
         start_lat: spot?.lat ?? null, start_lon: spot?.lon ?? null, start_region: spot?.region ?? null,
       };
       unwrap(await supabase.from('crews').update(patch).eq('id', crew.id));
@@ -91,6 +94,15 @@ export function InfoTab({ crew }: { crew: Crew }) {
           <Field id="school" label="École, association ou club" hint="Facultatif."><Input id="school" maxLength={120} value={form.school} onChange={set('school')} /></Field>
           <Field id="city" label="Ville de départ" hint="Un drapeau la marque sur la carte de votre page (le drapeau breton si vous partez de Bretagne).">
             <CityInput id="city" value={form.city} spot={form.spot} onChange={(city, spot) => setForm((f) => ({ ...f, city, spot }))} />
+          </Field>
+          <Field id="destination" label="Destination" hint="Où vous allez : affiché « départ → destination » sur votre page.">
+            <Input id="destination" maxLength={80} value={form.destination} onChange={set('destination')} />
+          </Field>
+          <Field id="trip-type" label="Type de voyage" hint="Adapte les conseils du guide « Prêt au départ ».">
+            <select id="trip-type" className={selectClass} value={form.trip_type} onChange={(e) => setForm({ ...form, trip_type: e.target.value })}>
+              <option value="">Non précisé</option>
+              {TRIP_TYPES.map((t) => <option key={t.id} value={t.id}>{t.label} · {t.hint}</option>)}
+            </select>
           </Field>
           <div className="md:col-span-2">
             <Field id="story" label="Votre aventure" hint="Qui êtes-vous, où allez-vous, pourquoi ce voyage, votre projet solidaire…">
@@ -130,10 +142,10 @@ export function InfoTab({ crew }: { crew: Crew }) {
               role="radio"
               aria-checked={form.visibility === v.value}
               onClick={() => setForm({ ...form, visibility: v.value })}
-              className={`flex flex-col gap-1.5 border p-4 text-left transition ${form.visibility === v.value ? 'border-primary bg-primary/10' : 'border-cream/15 hover:border-cream/40'}`}
+              className={`flex flex-col gap-1.5 rounded-2xl border-2 p-4 text-left transition ${form.visibility === v.value ? 'border-signal bg-signal/10' : 'border-ink-600 hover:border-dust-600'}`}
             >
-              <span className="font-mono text-xs font-bold uppercase tracking-[0.14em] text-cream">{form.visibility === v.value ? '● ' : '○ '}{v.title}</span>
-              <span className="text-sm text-dust-300">{v.text}</span>
+              <span className="font-bold text-cream">{v.title}</span>
+              <span className="text-[15px] text-dust-300">{v.text}</span>
             </button>
           ))}
         </div>

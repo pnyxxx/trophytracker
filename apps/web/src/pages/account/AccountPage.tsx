@@ -1,9 +1,12 @@
-import { useEffect, useState, type FormEvent } from 'react';
+/**
+ * Mon compte : mes road trips (vers leur espace voyageur, et « Créer un road trip » → /creer),
+ * les road trips que je suis, mon prénom, la sécurité (e-mail, double authentification) et la suppression.
+ */
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { ArrowRight, CircleCheck, Flag, Plus, Satellite, Settings, Share2, Users } from 'lucide-react';
-import { Container, PageHero } from '@/components/common/Brand';
+import { LogOut, Plus } from 'lucide-react';
 import { Panel } from '@/components/manage/shared';
 import { PageShell } from '@/components/layout/PageShell';
 import { Seo } from '@/components/common/Seo';
@@ -15,112 +18,16 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { CrewAvatar, CrewCard } from '@/components/crew/CrewBits';
+import { CrewCard } from '@/components/crew/CrewBits';
 import { SecuritySection } from '@/components/account/SecuritySection';
-import { CrewAccessPurchase } from '@/components/account/CrewAccessPurchase';
 import { useAuth } from '@/hooks/auth';
 import { useFollowedCrews, useMyCrews } from '@/hooks/queries';
+import { mediaUrl } from '@/lib/media';
 import { supabase } from '@/lib/supabase';
 import { toastError, unwrap } from '@/lib/errors';
-import { formatRelative } from '@/lib/format';
-
-/** La suite après le paiement, montrée dans la fenêtre de bienvenue. */
-const NEXT_STEPS = [
-  { icon: Flag, title: 'Créer la page du road trip', text: 'Un nom, et c’est parti. Le reste se complète quand vous voulez.' },
-  { icon: Users, title: 'Inviter vos compagnons de route', text: 'Onglet « Membres » : ils rejoignent la page gratuitement.' },
-  { icon: Satellite, title: 'Brancher le GPS', text: 'Onglet « GPS » : un téléphone dans le véhicule suffit, on vous guide pas à pas.' },
-  { icon: Share2, title: 'Partager avec vos proches', text: 'Onglet « QR code » : le lien à envoyer à la famille et aux sponsors.' },
-];
-
-/**
- * Création du road trip. Au retour de Stripe (`welcome`), la fenêtre s'ouvre
- * d'abord sur un remerciement et la suite en quelques étapes, puis le formulaire.
- */
-function CreateCrewDialog({ welcome = false, onClose }: { welcome?: boolean; onClose?: () => void }) {
-  const [open, setOpen] = useState(welcome);
-  const [step, setStep] = useState<'welcome' | 'form'>(welcome ? 'welcome' : 'form');
-  const [form, setForm] = useState({ name: '', starts: '', tagline: '' });
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-
-  const create = useMutation({
-    mutationFn: async () =>
-      unwrap(await supabase.rpc('create_crew', { p_name: form.name.trim(), p_starts_on: form.starts || undefined, p_tagline: form.tagline.trim() })),
-    onSuccess: (crew) => {
-      toast.success('Road trip créé ! Complétez maintenant sa page.');
-      void queryClient.invalidateQueries({ queryKey: ['my-crews'] });
-      setOpen(false);
-      navigate(`/mon-compte/road-trips/${crew.slug}`);
-    },
-    onError: toastError,
-  });
-
-  return (
-    <Dialog
-      open={open}
-      onOpenChange={(next) => {
-        setOpen(next);
-        if (!next) { setStep('form'); onClose?.(); }
-      }}
-    >
-      <DialogTrigger asChild>
-        <Button><Plus />Créer mon road trip</Button>
-      </DialogTrigger>
-      <DialogContent>
-        {step === 'welcome' ? (
-          <>
-            <DialogHeader>
-              <p className="tt-kicker m-0 flex items-center justify-center gap-2 text-live sm:justify-start">
-                <CircleCheck className="h-4 w-4" />Paiement reçu
-              </p>
-              <DialogTitle className="font-display text-4xl font-extrabold leading-none">Merci, et bienvenue&nbsp;!</DialogTitle>
-              <DialogDescription className="text-dust-300">
-                Votre accès road trip est activé. Stripe vous envoie le reçu par email. Voici la suite :
-              </DialogDescription>
-            </DialogHeader>
-            <ol className="m-0 list-none space-y-3 p-0">
-              {NEXT_STEPS.map(({ icon: Icon, title, text }, i) => (
-                <li key={title} className="flex gap-3">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center border border-cream/15 text-ochre">
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  <span className="min-w-0">
-                    <strong className="block text-sm text-cream">{i + 1}. {title}</strong>
-                    <span className="text-xs leading-relaxed text-dust-400">{text}</span>
-                  </span>
-                </li>
-              ))}
-            </ol>
-            <Button className="w-full" onClick={() => setStep('form')}>Créer mon road trip<ArrowRight /></Button>
-          </>
-        ) : (
-          <>
-            <DialogHeader><DialogTitle>Nouveau road trip</DialogTitle></DialogHeader>
-            <form
-              onSubmit={(e: FormEvent) => { e.preventDefault(); create.mutate(); }}
-              className="space-y-4"
-            >
-              <div className="space-y-2">
-                <Label htmlFor="crew-name">Nom du road trip</Label>
-                <Input id="crew-name" required minLength={2} maxLength={80} placeholder="ex. Les Alpes en van" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="crew-starts">Date de départ <span className="text-muted-foreground">(optionnel)</span></Label>
-                <Input id="crew-starts" type="date" value={form.starts} onChange={(e) => setForm({ ...form, starts: e.target.value })} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="crew-tagline">Slogan <span className="text-muted-foreground">(optionnel)</span></Label>
-                <Input id="crew-tagline" maxLength={140} value={form.tagline} onChange={(e) => setForm({ ...form, tagline: e.target.value })} />
-              </div>
-              <Button type="submit" className="w-full" disabled={create.isPending}>{create.isPending ? 'Création…' : 'Créer'}</Button>
-            </form>
-          </>
-        )}
-      </DialogContent>
-    </Dialog>
-  );
-}
+import { formatKm, isLive } from '@/lib/format';
+import { tripStatus } from '@/lib/traveller';
+import { cn } from '@/lib/utils';
 
 export default function AccountPage() {
   const { user, profile, signOut } = useAuth();
@@ -128,34 +35,27 @@ export default function AccountPage() {
   const navigate = useNavigate();
   const { data: followed, isLoading: loadingFollowed } = useFollowedCrews();
   const { data: myCrews, isLoading: loadingMine } = useMyCrews();
-  const [showNew, setShowNew] = useState(false);
   const [name, setName] = useState<string | null>(null);
 
-  // Accès road trip payé et pas encore utilisé ? Au retour de Stripe (?paiement=ok), on
-  // réinterroge quelques secondes le temps que Stripe confirme le paiement au serveur.
+  // Retour de Stripe sur cette page (paiement lancé ailleurs que dans /creer) : on reprend le parcours.
   const [params, setParams] = useSearchParams();
   const payment = params.get('paiement');
-  const [waitingSince] = useState(() => (payment === 'ok' ? Date.now() : 0));
-  const { data: hasAccess, isLoading: loadingAccess } = useQuery({
-    queryKey: ['crew-access', user?.id],
-    queryFn: async () =>
-      unwrap(await supabase.from('crew_purchases').select('id').eq('status', 'paid').is('used_at', null).limit(1)).length > 0,
-    refetchInterval: (q) => (payment === 'ok' && !q.state.data && Date.now() - waitingSince < 60_000 ? 2_000 : false),
-  });
   useEffect(() => {
-    if (payment !== 'annule') return;
-    toast('Paiement annulé : rien n’a été débité.');
-    setParams({}, { replace: true });
-  }, [payment, setParams]);
+    if (payment === 'ok') navigate('/creer?paiement=ok', { replace: true });
+    if (payment === 'annule') { toast('Paiement annulé : rien n’a été débité.'); setParams({}, { replace: true }); }
+  }, [payment, navigate, setParams]);
+  const { data: hasAccess } = useQuery({
+    queryKey: ['crew-access', user?.id],
+    queryFn: async () => unwrap(await supabase.from('crew_purchases').select('id').eq('status', 'paid').is('used_at', null).limit(1)).length > 0,
+  });
 
   const saveName = useMutation({
     mutationFn: async (displayName: string) => {
       unwrap(await supabase.from('profiles').update({ display_name: displayName }).eq('id', user!.id));
-      // Garde aussi le nom dans les métadonnées du compte.
       await supabase.auth.updateUser({ data: { display_name: displayName } });
     },
     onSuccess: () => {
-      toast.success('Nom mis à jour');
+      toast.success('Prénom mis à jour');
       setName(null);
       void queryClient.invalidateQueries({ queryKey: ['profile'] });
     },
@@ -166,7 +66,7 @@ export default function AccountPage() {
     mutationFn: async () => unwrap(await supabase.rpc('delete_my_account')),
     onSuccess: async () => {
       await signOut();
-      toast.success('Votre compte et vos données ont été supprimés.');
+      toast.success('Ton compte et tes données ont été supprimés.');
       navigate('/');
     },
     onError: toastError,
@@ -175,79 +75,66 @@ export default function AccountPage() {
   return (
     <PageShell>
       <Seo title="Mon compte" noindex />
-      <PageHero kicker={<>Mon compte · <span className="normal-case tracking-normal text-dust-300">{user?.email}</span></>} title={<>Bonjour<br />{profile?.display_name ?? ''}</>} />
-      <Container className="max-w-5xl space-y-6 border-t border-cream/[0.12] py-12 md:py-16">
+      <div className="mx-auto flex max-w-[1180px] flex-col gap-6 px-5 pb-16 pt-10">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="flex flex-col gap-2">
+            <span className="font-mono text-[14px] text-dust-400">mon compte · {user?.email}</span>
+            <h1 className="tt-display m-0 text-[clamp(40px,6vw,80px)] leading-none text-cream">Salut {profile?.display_name ?? ''}</h1>
+          </div>
+          <Button asChild size="lg"><Link to="/creer"><Plus />{myCrews?.length ? 'Nouveau road trip' : 'Créer mon road trip'}</Link></Button>
+        </div>
 
-        <Panel title="Mes road trips" description="Un accès (paiement unique ou code offert) par road trip. Vos compagnons de route les rejoignent gratuitement.">
-          {loadingMine || loadingAccess ? <Spinner /> : (
-            <div className="space-y-4">
-              {myCrews?.map((m) => (
-                <div key={m.crew.id} className="flex flex-wrap items-center gap-5 border border-cream/[0.12] p-4">
-                  <CrewAvatar name={m.crew.name} path={m.crew.avatar_path} className="h-16 w-16 text-2xl" />
-                  <div className="min-w-0 flex-1">
-                    <Link to={`/t/${m.crew.slug}`} className="font-display text-3xl font-extrabold leading-none text-cream hover:text-primary">
-                      {m.crew.name}
-                    </Link>
-                    <p className="mb-0 mt-2 font-mono text-[11px] uppercase tracking-[0.1em] text-dust-400">
-                      {m.role === 'owner' ? 'Propriétaire' : 'Compagnon de route'} · {!m.crew.is_public ? 'Privé' : m.crew.is_listed ? 'Public' : 'Par lien'} · GPS {m.crew.last_fix_at ? formatRelative(m.crew.last_fix_at) : 'jamais reçu'}
-                    </p>
-                    {!m.crew.tracking_enabled && (
-                      <p className="mb-0 mt-2 text-xs text-dust-300">
-                        <span className="text-ochre">Suivi GPS arrêté (mode essai).</span>{' '}
-                        <Link to={`/mon-compte/road-trips/${m.crew.slug}?onglet=gps`} className="underline hover:text-cream">Le lancer en partant</Link>
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Button asChild variant="outline"><Link to={`/t/${m.crew.slug}`}>Voir la page</Link></Button>
-                    <Button asChild><Link to={`/mon-compte/road-trips/${m.crew.slug}`}><Settings />Gérer</Link></Button>
-                  </div>
-                </div>
-              ))}
-
-              {hasAccess || profile?.role === 'admin' ? (
-                <div className="flex flex-wrap items-center justify-between gap-4 border border-primary/40 bg-primary/5 p-4">
-                  <p className="m-0 max-w-[520px] text-dust-300">
-                    {payment === 'ok' ? <><strong className="text-cream">Paiement reçu, merci !</strong> </> : null}
-                    Votre accès est prêt : créez votre {myCrews?.length ? 'nouveau ' : ''}road trip.
-                  </p>
-                  <CreateCrewDialog welcome={payment === 'ok'} onClose={() => setParams({}, { replace: true })} />
-                </div>
-              ) : payment === 'ok' ? (
-                <div className="flex items-center gap-3 text-dust-200">
-                  <Spinner />
-                  Paiement en cours de confirmation… Cela prend quelques secondes. Si rien ne se passe, rechargez la page.
-                </div>
-              ) : !myCrews?.length || showNew ? (
-                <CrewAccessPurchase />
-              ) : (
-                <Button variant="outline" onClick={() => setShowNew(true)}><Plus />Préparer un nouveau road trip</Button>
-              )}
+        <section className="flex flex-col gap-3" aria-label="Mes road trips">
+          <h2 className="tt-display m-0 text-[32px] text-cream">Mes road trips</h2>
+          {loadingMine ? <Spinner /> : !myCrews?.length ? (
+            <div className="flex flex-col items-start gap-3 rounded-[28px] border-[1.5px] border-dashed border-ink-600 p-6">
+              <span className="tt-display text-[26px] text-cream">Tu pars bientôt ?</span>
+              <span className="max-w-[560px] text-[16px] text-dust-300">
+                Crée la page de ton road trip en 5 minutes : position en direct, trace, photos et sponsors, sur un lien privé.
+                {hasAccess ? ' Ton accès est déjà réglé.' : ''}
+              </span>
+              <Button asChild><Link to="/creer">Créer mon road trip →</Link></Button>
+            </div>
+          ) : (
+            <div className="grid gap-3 md:grid-cols-2">
+              {myCrews.map(({ crew, role }) => {
+                const cover = mediaUrl(crew.cover_path);
+                const live = isLive(crew.last_fix_at);
+                return (
+                  <Link key={crew.id} to={`/mon-compte/road-trips/${crew.slug}`} className="group flex min-h-[148px] overflow-hidden rounded-[28px] border-[1.5px] border-ink-700 bg-ink-800 text-cream hover:border-dust-600 hover:text-cream">
+                    <div className="relative w-28 flex-none bg-ink-700 sm:w-36">
+                      {cover && <img src={cover} alt="" className="h-full w-full object-cover" loading="lazy" />}
+                    </div>
+                    <div className="flex min-w-0 flex-1 flex-col gap-1.5 p-4">
+                      <span className={cn('font-mono text-[13px]', live ? 'text-live-text' : 'text-signal-text')}>{live ? '● en direct' : tripStatus(crew)}</span>
+                      <span className="tt-display text-[24px] leading-tight">{crew.name}</span>
+                      <span className="text-[14px] text-dust-400">
+                        {role === 'owner' ? 'capitaine' : 'compagnon de route'} · {formatKm(crew.total_distance_m / 1000)} · {!crew.is_public ? 'voyageurs seulement' : crew.is_listed ? 'public' : 'privé, par lien'}
+                      </span>
+                      <span className="mt-auto text-[15px] font-bold text-signal-text group-hover:text-cream">Ouvrir mon espace →</span>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           )}
-        </Panel>
+        </section>
 
-        <Panel title="Road trips suivis">
+        <Panel title="Road trips que je suis">
           {loadingFollowed ? <Spinner /> : !followed?.length ? (
-            <p className="text-dust-300">
-              Vous ne suivez aucun road trip. Ouvrez le lien qu’un voyageur vous a envoyé, puis « Suivre ».
-            </p>
+            <p className="m-0 text-dust-300">Tu ne suis aucun road trip. Ouvre le lien qu’un voyageur t’a envoyé, puis « Suivre ».</p>
           ) : (
             <div className="grid gap-2 md:grid-cols-2">{followed.map((c) => <CrewCard key={c.id} crew={c} />)}</div>
           )}
         </Panel>
 
-
-        <Panel title="Profil">
-          <form
-            onSubmit={(e) => { e.preventDefault(); if (name) saveName.mutate(name.trim()); }}
-            className="flex flex-col gap-3 sm:flex-row sm:items-end"
-          >
+        <Panel title="Mon prénom" description="C’est le nom que voient tes compagnons de route et tes proches.">
+          <form onSubmit={(e) => { e.preventDefault(); if (name) saveName.mutate(name.trim()); }} className="flex flex-col gap-3 sm:flex-row sm:items-end">
             <div className="flex-1 space-y-2">
-              <Label htmlFor="display-name">Nom affiché</Label>
+              <Label htmlFor="display-name">Prénom</Label>
               <Input id="display-name" minLength={2} maxLength={60} value={name ?? profile?.display_name ?? ''} onChange={(e) => setName(e.target.value)} />
             </div>
-            <Button type="submit" disabled={!name || saveName.isPending}>Enregistrer</Button>
+            <Button type="submit" className="min-h-14" disabled={!name || saveName.isPending}>Enregistrer</Button>
           </form>
         </Panel>
 
@@ -256,26 +143,26 @@ export default function AccountPage() {
         </Panel>
 
         <Panel title="Zone sensible">
-          <p className="mb-4 text-sm text-dust-300">
-            La suppression de votre compte efface définitivement vos données personnelles et vos abonnements.
-          </p>
-          <AlertDialog>
-            <AlertDialogTrigger asChild><Button variant="destructive">Supprimer mon compte</Button></AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Supprimer définitivement votre compte ?</AlertDialogTitle>
-                <AlertDialogDescription>Cette action est irréversible.</AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Annuler</AlertDialogCancel>
-                <AlertDialogAction onClick={() => deleteAccount.mutate()} className="bg-destructive hover:bg-destructive/85">
-                  Supprimer
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <div className="flex flex-wrap gap-3">
+            <Button variant="outline" onClick={async () => { await signOut(); navigate('/'); }}><LogOut />Me déconnecter</Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild><Button variant="destructive">Supprimer mon compte</Button></AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Supprimer définitivement ton compte ?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Tes données personnelles et tes abonnements sont effacés. Cette action est irréversible.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => deleteAccount.mutate()} className="bg-destructive hover:bg-destructive/85">Supprimer</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </Panel>
-      </Container>
+      </div>
     </PageShell>
   );
 }

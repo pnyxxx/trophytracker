@@ -53,6 +53,12 @@ Branche : `generaliste`. Le site en ligne reste en pause tant que Julien ne vali
   `TripDashboard` (6 tuiles, météo 4 créneaux `fetchForecast`, profil d'altitude) + carte de lieu « J2 · près de… »
   (`hooks/useTrip.ts`) ; « Revivre en 3D » avec export paysage / story / carré ; carnet en onglets Étapes / Journal /
   Histoire ; mosaïque photos ; relief jour par jour repliable ; Soutenir (cagnotte = lien, sponsors, mur « bientôt »).
+- [x] Espace voyageur : `components/layout/TravellerShell.tsx` (barre latérale / onglets téléphone, autres road trips,
+  « Nouveau road trip »), sections `?onglet=tableau|guide|carnet|photos|partage|reglages` (anciens onglets et liens des
+  e-mails redirigés : `gps` → guide « Suivi GPS »…). Guide `TripGuide` + `hooks/useGuide.ts` : 8 étapes, anneau,
+  cases automatiques (données) ou manuelles (localStorage), outil à droite, « Je pars » = `set_tracking`. Import GPX
+  (`lib/gpx.ts`, testé) dans les étapes. Réglages = `InfoTab` (+ destination, type de voyage) + suppression. Panneaux
+  `manage/shared.tsx` au style Balise. « Mon compte » refait (cartes de road trips → espace, « Créer » → `/creer`).
 
 ## À faire, dans l'ordre
 
@@ -80,7 +86,7 @@ Branche : `generaliste`. Le site en ligne reste en pause tant que Julien ne vali
    paysage, story, **carré 1:1** à ajouter) ; Carnet de route avec onglets Étapes / Journal ; mosaïque photos (360°) ;
    Soutenir : cagnotte (lien), sponsors, mur d'encouragements (« bientôt » → phase F). Garder nos extras : photos et
    sponsors sur la carte, visionneuse 360°, contact, réseaux sociaux, relief jour par jour, démo.
-6. **Espace voyageur** (`Espace voyageur.dc.html`) : barre latérale (Tableau de bord, Prêt au départ, Carnet de route,
+6. ~~**Espace voyageur**~~ (fait) (`Espace voyageur.dc.html`) : barre latérale (Tableau de bord, Prêt au départ, Carnet de route,
    Photos, Partage, Réglages) ; guide 8 onglets avec anneau de progression (Voyage, Équipage, Véhicules, Itinéraire,
    Suivi GPS, Partage, Sponsors & cagnotte, Check-list « Je pars » qui lance le suivi). Rebrancher nos onglets existants
    (Infos, GPS, Étapes, Journal, Photos, Sponsors, Membres, QR, Suppression) dans cette structure. « Importer un GPX ».
