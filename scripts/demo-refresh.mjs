@@ -24,4 +24,4 @@ const { error: e2 } = await admin.from('crews').update(DEMO_CREW).eq('id', crew.
 if (e2) throw e2;
 
 console.log(`✅ ${crew.name} est l'équipage de démo : contenu à jour, sa trace sera rejouée par le tracker.
-   ${env.SITE_URL}/road-trips/${DEMO_SLUG}`);
+   ${env.SITE_URL}/t/${DEMO_SLUG}`);

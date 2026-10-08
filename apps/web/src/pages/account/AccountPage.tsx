@@ -185,7 +185,7 @@ export default function AccountPage() {
                 <div key={m.crew.id} className="flex flex-wrap items-center gap-5 border border-cream/[0.12] p-4">
                   <CrewAvatar name={m.crew.name} path={m.crew.avatar_path} className="h-16 w-16 text-2xl" />
                   <div className="min-w-0 flex-1">
-                    <Link to={`/road-trips/${m.crew.slug}`} className="font-display text-3xl font-extrabold leading-none text-cream hover:text-primary">
+                    <Link to={`/t/${m.crew.slug}`} className="font-display text-3xl font-extrabold leading-none text-cream hover:text-primary">
                       {m.crew.name}
                     </Link>
                     <p className="mb-0 mt-2 font-mono text-[11px] uppercase tracking-[0.1em] text-dust-400">
@@ -199,7 +199,7 @@ export default function AccountPage() {
                     )}
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <Button asChild variant="outline"><Link to={`/road-trips/${m.crew.slug}`}>Voir la page</Link></Button>
+                    <Button asChild variant="outline"><Link to={`/t/${m.crew.slug}`}>Voir la page</Link></Button>
                     <Button asChild><Link to={`/mon-compte/road-trips/${m.crew.slug}`}><Settings />Gérer</Link></Button>
                   </div>
                 </div>

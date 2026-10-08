@@ -27,7 +27,7 @@ export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl
   const [error, setError] = useState(false);
 
   const eventLabel = 'Carnet de route en direct';
-  const pageUrl = `${window.location.origin}/road-trips/${crew.slug}`;
+  const pageUrl = `${window.location.origin}/t/${crew.slug}`;
   const fileName = `trophytracker-${crew.slug}-${format === 'sticker' ? 'autocollant' : 'story'}.png`;
 
   useEffect(() => {
@@ -133,7 +133,7 @@ export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl
  */
 export function CrewShareButton({ crew, className }: { crew: CrewForQr; className?: string }) {
   const [open, setOpen] = useState(false);
-  const pageUrl = `${window.location.origin}/road-trips/${crew.slug}`;
+  const pageUrl = `${window.location.origin}/t/${crew.slug}`;
   const canShare = typeof navigator.share === 'function';
 
   const send = async () => {

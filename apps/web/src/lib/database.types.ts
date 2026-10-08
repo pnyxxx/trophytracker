@@ -200,6 +200,7 @@ export type Database = {
           cover_focus_y: number
           cover_path: string | null
           created_at: string
+          destination: string | null
           ends_on: string | null
           facebook_url: string | null
           followers_count: number
@@ -226,6 +227,7 @@ export type Database = {
           total_distance_m: number
           tracking_enabled: boolean
           tracking_stopped_at: string | null
+          trip_type: string | null
           updated_at: string
           website_url: string | null
         }
@@ -238,6 +240,7 @@ export type Database = {
           cover_focus_y?: number
           cover_path?: string | null
           created_at?: string
+          destination?: string | null
           ends_on?: string | null
           facebook_url?: string | null
           followers_count?: number
@@ -264,6 +267,7 @@ export type Database = {
           total_distance_m?: number
           tracking_enabled?: boolean
           tracking_stopped_at?: string | null
+          trip_type?: string | null
           updated_at?: string
           website_url?: string | null
         }
@@ -276,6 +280,7 @@ export type Database = {
           cover_focus_y?: number
           cover_path?: string | null
           created_at?: string
+          destination?: string | null
           ends_on?: string | null
           facebook_url?: string | null
           followers_count?: number
@@ -302,6 +307,7 @@ export type Database = {
           total_distance_m?: number
           tracking_enabled?: boolean
           tracking_stopped_at?: string | null
+          trip_type?: string | null
           updated_at?: string
           website_url?: string | null
         }
@@ -781,6 +787,7 @@ export type Database = {
           cover_focus_y: number
           cover_path: string | null
           created_at: string
+          destination: string | null
           ends_on: string | null
           facebook_url: string | null
           followers_count: number
@@ -807,6 +814,7 @@ export type Database = {
           total_distance_m: number
           tracking_enabled: boolean
           tracking_stopped_at: string | null
+          trip_type: string | null
           updated_at: string
           website_url: string | null
         }

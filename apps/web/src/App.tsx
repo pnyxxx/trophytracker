@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from 'react';
-import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/hooks/auth';
@@ -19,6 +19,7 @@ const LegalNoticePage = lazy(() => import('@/pages/LegalNoticePage'));
 const TermsPage = lazy(() => import('@/pages/TermsPage'));
 const SalesTermsPage = lazy(() => import('@/pages/SalesTermsPage'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
+const CreateTripPage = lazy(() => import('@/pages/CreateTripPage'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -45,11 +46,10 @@ export default function App() {
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/" element={<Landing />} />
-              <Route path="/road-trips/:slug" element={<CrewPage />} />
+              <Route path="/t/:slug" element={<CrewPage />} />
               <Route path="/connexion" element={<LoginPage />} />
               <Route path="/inscription" element={<LoginPage signup />} />
-              {/* Provisoire : le parcours de création (/creer) arrive à l'étape 4 de la refonte. */}
-              <Route path="/creer" element={<Navigate to="/inscription" replace />} />
+              <Route path="/creer" element={<CreateTripPage />} />
               <Route path="/invitation" element={<InvitationPage />} />
               <Route path="/confidentialite" element={<PrivacyPage />} />
               <Route path="/mentions-legales" element={<LegalNoticePage />} />

@@ -90,13 +90,13 @@ http://web {
 		@immutable path /assets/*
 		header @immutable Cache-Control "public, max-age=31536000, immutable"
 
-		# /road-trips/nom/ → /road-trips/nom : une seule adresse par page.
+		# /t/nom/ → /t/nom : une seule adresse par page.
 		@trailing path_regexp trailing ^(.+)/$
 		redir @trailing {re.trailing.1}{?query} 301
 
 		# Page d'un équipage : HTML complété par le service tracker (nom, description, photo).
 		# S'il ne répond pas correctement, coquille neutre : le JavaScript affiche quand même la page.
-		@crew path_regexp ^/road-trips/[^/]+$
+		@crew path_regexp ^/t/[^/]+$
 		handle @crew {
 			reverse_proxy tracker:3000 {
 				@failed status 5xx
@@ -147,7 +147,7 @@ http://web {
 
 	# Service tracker injoignable (redémarrage…) : les pages équipage s'affichent quand même.
 	handle_errors 502 503 504 {
-		@crew path_regexp ^/road-trips/[^/]+$
+		@crew path_regexp ^/t/[^/]+$
 		handle @crew {
 			root * /srv
 			rewrite * /_shell/app.html

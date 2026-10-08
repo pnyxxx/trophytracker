@@ -87,7 +87,7 @@ export function buildAdminEmail(n: AdminNotification, siteUrl: string): Email {
     const members = str(p.members);
     const created = typeof p.crew_created_at === 'string' ? when(new Date(p.crew_created_at)) : '—';
     const title = `Relance GPS envoyée : ${crew}`;
-    const crewUrl = `${siteUrl}/road-trips/${encodeURIComponent(str(p.crew_slug, ''))}`;
+    const crewUrl = `${siteUrl}/t/${encodeURIComponent(str(p.crew_slug, ''))}`;
     return {
       subject: oneLine(`📡 ${title}`),
       text: `« ${crew} » n’a envoyé aucune position GPS depuis la création de sa page (${created}) : un rappel vient d’être envoyé à ${members}.\nLe ${when(n.created_at)}.\n\n${crewUrl}`,
@@ -103,7 +103,7 @@ export function buildAdminEmail(n: AdminNotification, siteUrl: string): Email {
   const followers = typeof p.followers === 'number' ? p.followers : null;
   const title = `Nouvel abonné pour ${crew}`;
   const count = followers === null ? '' : `Le road trip a maintenant ${followers} abonné${followers > 1 ? 's' : ''}.`;
-  const crewUrl = `${siteUrl}/road-trips/${encodeURIComponent(str(p.crew_slug, ''))}`;
+  const crewUrl = `${siteUrl}/t/${encodeURIComponent(str(p.crew_slug, ''))}`;
   return {
     subject: oneLine(`⭐ ${title}`),
     text: `${name} (${email}) suit maintenant le road trip « ${crew} ».\n${count}\nLe ${when(n.created_at)}.\n\n${crewUrl}`,

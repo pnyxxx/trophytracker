@@ -19,9 +19,9 @@ import { errorMessage } from '@/lib/errors';
 /** Délai entre deux envois de code (Supabase Auth refuse plus d'un e-mail par minute et par adresse). */
 const RESEND_DELAY = 60;
 
-type Step = 'email' | 'code' | 'name';
+export type SignInStep = 'email' | 'code' | 'name';
 
-export function EmailCodeSignIn({ askName = false, initialEmail = '', onHold, onDone, emailFooter }: {
+export function EmailCodeSignIn({ askName = false, initialEmail = '', onHold, onDone, onStepChange, emailFooter }: {
   /** Demander le prénom dès le premier écran (inscription). */
   askName?: boolean;
   initialEmail?: string;
@@ -32,11 +32,14 @@ export function EmailCodeSignIn({ askName = false, initialEmail = '', onHold, on
   onHold?: (hold: boolean) => void;
   /** Connexion terminée (prénom compris). */
   onDone?: () => void;
+  /** Changement d'écran (pour les titres et la barre d'avancement de la page), avec l'adresse saisie. */
+  onStepChange?: (step: SignInStep, email: string) => void;
   /** Sous le formulaire e-mail (lien « Déjà inscrit ? »…). */
   emailFooter?: ReactNode;
 }) {
   const queryClient = useQueryClient();
-  const [step, setStep] = useState<Step>('email');
+  const [step, setStepState] = useState<SignInStep>('email');
+  const setStep = (s: SignInStep) => { setStepState(s); onStepChange?.(s, s === 'email' ? '' : email.trim()); };
   const [name, setName] = useState('');
   const [email, setEmail] = useState(initialEmail);
   const [code, setCode] = useState('');

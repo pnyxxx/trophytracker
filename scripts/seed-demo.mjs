@@ -105,4 +105,4 @@ sql(`\\o /dev/null\n${traceSql(ids['les-sables-mouvants'], roadUntil(...SALAMANQ
 
 console.log(`✅ Données de démo créées.
    Compte démo : ${DEMO_EMAIL} (connexion par code, à lire dans Mailpit : http://localhost:${env.MAILPIT_UI_PORT || 8025})
-   Page d'exemple : ${env.SITE_URL}/road-trips/j4l-club`);
+   Page d'exemple : ${env.SITE_URL}/t/j4l-club`);

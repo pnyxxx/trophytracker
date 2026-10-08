@@ -64,7 +64,7 @@ function CrewsAdmin() {
             {data.map((c) => (
               <tr key={c.id}>
                 <td className="py-3 pr-4">
-                  <Link to={`/road-trips/${c.slug}`} className="font-display text-xl font-extrabold text-cream hover:text-primary">{c.name}</Link>
+                  <Link to={`/t/${c.slug}`} className="font-display text-xl font-extrabold text-cream hover:text-primary">{c.name}</Link>
                   <p className="text-xs text-dust-500">{c.car_number ? `#${c.car_number} · ` : ''}{c.is_public ? 'Public' : 'Privé'}</p>
                 </td>
                 <td className="pr-4 text-dust-200">{c.followers_count}</td>
@@ -122,7 +122,7 @@ function PurchasesAdmin() {
                     </td>
                     <td className="pr-4 text-dust-200">{PURCHASE_STATUS[p.status] ?? p.status}</td>
                     <td>
-                      {p.crew_slug ? <Link to={`/road-trips/${p.crew_slug}`} className="text-cream hover:text-primary">{p.crew_name}</Link>
+                      {p.crew_slug ? <Link to={`/t/${p.crew_slug}`} className="text-cream hover:text-primary">{p.crew_name}</Link>
                         : <span className="text-xs text-dust-500">{p.status === 'paid' ? 'Pas encore créé' : '—'}</span>}
                     </td>
                   </tr>

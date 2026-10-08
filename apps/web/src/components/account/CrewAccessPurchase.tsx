@@ -17,43 +17,41 @@ import { toastError, unwrap } from '@/lib/errors';
 import { CONTACT_HREF, currentPriceCents, euros, isLaunchPrice, PRICING } from '@/lib/legal';
 
 const INCLUDED = [
-  'La page de votre road trip, publique ou privée',
+  'La page de ton road trip, privée par lien',
   'Le suivi GPS en direct avec un simple téléphone',
-  'Trace complète, kilomètres et statistiques',
-  'Photos, photos 360° et sponsors sur la carte',
-  'Vos compagnons de route invités gratuitement',
+  'Trace, kilomètres, météo et altitude',
+  'Photos, 360°, sponsors et cagnotte',
+  'Le voyage rejoué en 3D, en vidéo',
+  'Tes compagnons de route invités gratuitement',
 ];
 
 const CODE_REFUSED: Record<string, string> = {
-  invalid: 'Code inconnu : vérifiez qu’il est bien recopié.',
+  invalid: 'Code inconnu : vérifie qu’il est bien recopié.',
   expired: 'Ce code a expiré.',
   exhausted: 'Ce code a déjà été utilisé.',
-  already_used: 'Vous avez déjà utilisé ce code.',
-  too_many: 'Trop d’essais : réessayez dans une heure.',
+  already_used: 'Tu as déjà utilisé ce code.',
+  too_many: 'Trop d’essais : réessaie dans une heure.',
 };
 
 /** « J'ai un code d'accès » : un code offert remplace le paiement. */
-function AccessCodeForm() {
+export function AccessCodeForm() {
   const queryClient = useQueryClient();
   const [code, setCode] = useState('');
   const redeem = useMutation({
     mutationFn: async () => unwrap(await supabase.rpc('redeem_access_code', { p_code: code })),
     onSuccess: (result) => {
       if (result !== 'ok') { toast.error(CODE_REFUSED[result] ?? 'Code refusé.'); return; }
-      toast.success('Code accepté : votre accès road trip est offert !');
+      toast.success('Code accepté : ton accès road trip est offert !');
       void queryClient.invalidateQueries({ queryKey: ['crew-access'] });
     },
     onError: toastError,
   });
   return (
-    <form
-      onSubmit={(e) => { e.preventDefault(); redeem.mutate(); }}
-      className="mt-5 border-t border-cream/[0.1] pt-4"
-    >
-      <label htmlFor="access-code" className="flex items-center gap-2 text-xs font-semibold text-dust-200">
-        <Gift className="h-4 w-4 text-ochre" />On vous a offert un code d’accès ?
+    <form onSubmit={(e) => { e.preventDefault(); redeem.mutate(); }} className="flex flex-col gap-2 border-t-[1.5px] border-ink-700 pt-5">
+      <label htmlFor="access-code" className="flex items-center gap-2 text-[15px] font-bold text-cream">
+        <Gift className="h-4 w-4 text-signal-text" />On t’a offert un code d’accès ?
       </label>
-      <div className="mt-2 flex gap-2">
+      <div className="flex gap-2">
         <Input
           id="access-code"
           required
@@ -64,13 +62,14 @@ function AccessCodeForm() {
           spellCheck={false}
           className="font-mono uppercase tracking-[0.08em]"
         />
-        <Button type="submit" variant="secondary" disabled={!code.trim() || redeem.isPending}>Utiliser</Button>
+        <Button type="submit" variant="secondary" className="min-h-14" disabled={!code.trim() || redeem.isPending}>Utiliser</Button>
       </div>
     </form>
   );
 }
 
-export function CrewAccessPurchase() {
+/** `returnTo` : page où Stripe ramène après le paiement (le parcours /creer, ou l'espace du compte par défaut). */
+export function CrewAccessPurchase({ returnTo }: { returnTo?: 'creer' } = {}) {
   const [terms, setTerms] = useState(false);
   const [immediate, setImmediate] = useState(false);
   const price = currentPriceCents();
@@ -78,7 +77,7 @@ export function CrewAccessPurchase() {
   const checkout = useMutation({
     mutationFn: async () => {
       const { data, error } = await supabase.functions.invoke<{ url: string }>('create-checkout', {
-        body: { termsAccepted: terms, immediateStart: immediate },
+        body: { termsAccepted: terms, immediateStart: immediate, returnTo },
       });
       if (error) {
         const body = error instanceof FunctionsHttpError ? await error.context.json().catch(() => null) : null;
@@ -91,68 +90,61 @@ export function CrewAccessPurchase() {
   });
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)]">
-      <div>
-        <p className="m-0 max-w-[520px] text-dust-300">
-          Vous partez bientôt ? Créez la page de votre road trip pour la partager à vos proches et sponsors. Vos compagnons de route la
-          rejoindront ensuite par invitation, gratuitement.
-        </p>
-        <ul className="m-0 mt-5 list-none space-y-2 p-0">
-          {INCLUDED.map((item) => (
-            <li key={item} className="flex gap-2.5 text-sm text-dust-200">
-              <Check className="mt-0.5 h-4 w-4 shrink-0 text-live" />
-              {item}
-            </li>
-          ))}
-        </ul>
+    <div className="flex flex-col gap-5 rounded-[28px] border-[1.5px] border-ink-700 bg-ink-800 p-5 sm:p-7">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-col gap-1.5">
+          <span className="font-mono text-[13px] text-signal-text">accès road trip · paiement unique</span>
+          <p className="m-0 flex items-baseline gap-3">
+            <span className="tt-display text-[56px] leading-none text-cream">{euros(price)}</span>
+            {isLaunchPrice() && <span className="text-lg text-dust-500 line-through">{euros(PRICING.regularCents)}</span>}
+          </p>
+          <p className="m-0 text-[14px] text-dust-400">
+            {isLaunchPrice() ? <>Tarif de lancement jusqu’au {PRICING.launchLastDay}, puis {euros(PRICING.regularCents)}. </> : null}
+            TTC, sans abonnement. Gratuit pour tes proches.
+          </p>
+        </div>
       </div>
+      <ul className="m-0 grid list-none gap-2 p-0 sm:grid-cols-2">
+        {INCLUDED.map((item) => (
+          <li key={item} className="flex gap-2.5 text-[15px] text-dust-200">
+            <Check className="mt-0.5 h-4 w-4 shrink-0 text-live" />
+            {item}
+          </li>
+        ))}
+      </ul>
 
-      <div className="border border-cream/[0.14] bg-black/30 p-5">
-        <p className="tt-kicker m-0 text-ochre">Accès road trip · paiement unique</p>
-        <p className="m-0 mt-3 flex items-baseline gap-3">
-          <span className="font-display text-6xl font-extrabold leading-none text-cream">{euros(price)}</span>
-          {isLaunchPrice() && <span className="text-lg text-dust-500 line-through">{euros(PRICING.regularCents)}</span>}
-        </p>
-        <p className="mb-0 mt-2 text-xs text-dust-400">
-          {isLaunchPrice()
-            ? <>Tarif de lancement jusqu’au {PRICING.launchLastDay}, puis {euros(PRICING.regularCents)}. </>
-            : null}
-          TTC, sans abonnement.
-        </p>
-
-        {paymentsEnabled ? (
-          <form
-            onSubmit={(e) => { e.preventDefault(); checkout.mutate(); }}
-            className="mt-5 space-y-3 border-t border-cream/[0.1] pt-4 text-xs leading-relaxed text-dust-300"
-          >
-            <label className="flex cursor-pointer items-start gap-2.5">
-              <input type="checkbox" required checked={terms} onChange={(e) => setTerms(e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-primary" />
-              <span>
-                J’ai lu et j’accepte les <Link to="/conditions-vente" className="underline hover:text-cream">conditions de vente</Link>.
-              </span>
-            </label>
-            <label className="flex cursor-pointer items-start gap-2.5">
-              <input type="checkbox" required checked={immediate} onChange={(e) => setImmediate(e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-primary" />
-              <span>
-                Je demande l’accès immédiat au service. Si j’exerce mon droit de rétractation dans les 14 jours, je paierai la part du
-                service déjà fournie.
-              </span>
-            </label>
-            <Button type="submit" className="w-full" disabled={!terms || !immediate || checkout.isPending}>
-              <CreditCard />{checkout.isPending ? 'Redirection…' : `Payer ${euros(price)}`}
-            </Button>
-            <p className="m-0 text-center text-[11px] text-dust-500">Paiement sécurisé par carte bancaire (Stripe).</p>
-          </form>
-        ) : (
-          <div className="mt-5 border-t border-cream/[0.1] pt-4">
-            <Button className="w-full" disabled><CreditCard />Paiement bientôt disponible</Button>
-            <p className="mb-0 mt-3 text-xs leading-relaxed text-dust-400">
-              Le paiement en ligne ouvre dans quelques jours. Une question ? <a href={CONTACT_HREF} className="underline hover:text-cream">Écrivez-nous</a>.
-            </p>
-          </div>
-        )}
-        <AccessCodeForm />
-      </div>
+      {paymentsEnabled ? (
+        <form
+          onSubmit={(e) => { e.preventDefault(); checkout.mutate(); }}
+          className="flex flex-col gap-3 border-t-[1.5px] border-ink-700 pt-5 text-[14px] leading-relaxed text-dust-300"
+        >
+          <label className="flex cursor-pointer items-start gap-3">
+            <input type="checkbox" required checked={terms} onChange={(e) => setTerms(e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-signal" />
+            <span>
+              J’ai lu et j’accepte les <Link to="/conditions-vente" className="underline hover:text-cream">conditions de vente</Link>.
+            </span>
+          </label>
+          <label className="flex cursor-pointer items-start gap-3">
+            <input type="checkbox" required checked={immediate} onChange={(e) => setImmediate(e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-signal" />
+            <span>
+              Je demande l’accès immédiat au service. Si j’exerce mon droit de rétractation dans les 14 jours, je paierai la part du
+              service déjà fournie.
+            </span>
+          </label>
+          <Button type="submit" size="lg" className="w-full" disabled={!terms || !immediate || checkout.isPending}>
+            <CreditCard />{checkout.isPending ? 'Redirection…' : `Payer ${euros(price)}`}
+          </Button>
+          <p className="m-0 text-center text-[13px] text-dust-500">Paiement sécurisé par carte bancaire (Stripe).</p>
+        </form>
+      ) : (
+        <div className="border-t-[1.5px] border-ink-700 pt-5">
+          <Button size="lg" className="w-full" disabled><CreditCard />Paiement bientôt disponible</Button>
+          <p className="mb-0 mt-3 text-[14px] leading-relaxed text-dust-400">
+            Le paiement en ligne ouvre dans quelques jours. Une question ? <a href={CONTACT_HREF} className="underline hover:text-cream">Écris-nous</a>.
+          </p>
+        </div>
+      )}
+      <AccessCodeForm />
     </div>
   );
 }

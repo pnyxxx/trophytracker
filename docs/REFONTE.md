@@ -14,7 +14,7 @@ Branche : `generaliste`. Le site en ligne reste en pause tant que Julien ne vali
   `verifyOtp({ email, token, type: 'email' })` ; modèles d'e-mail GoTrue avec `{{ .Token }}` ; supprimer les pages
   mot de passe oublié / nouveau mot de passe / composant password-input ; la double authentification (TOTP) des admins reste.
 - **Cagnotte = juste le lien** (bouton « Participer »), sans montant ni barre de progression.
-- Adresse publique d'un road trip : `/t/<slug>` comme la maquette (remplace `/road-trips/<slug>`, sans redirection).
+- Adresse publique d'un road trip : `/t/<slug>` comme la maquette (remplace `/t/<slug>`, sans redirection).
   Domaine : garder trophytracker.fr (la maquette dit .app).
 
 ## Fait
@@ -39,6 +39,13 @@ Branche : `generaliste`. Le site en ligne reste en pause tant que Julien ne vali
   devenu « Ce qui change vraiment » (pas de nom de concurrent : publicité comparative encadrée). Plus de « gratuit »
   sauf pour les proches ; prix affiché dans le bloc rouge et la FAQ. « 1 carte, tous les véhicules » remplacé par
   « Toute la bande » (1 véhicule), cagnotte « 1 lien » (pas de pourcentage).
+- [x] Parcours `/creer` (`pages/CreateTripPage.tsx`) : 9 écrans (compte, code, type, d'où à où, quand + durée, équipage
+  avec e-mails d'invitation, nom + couverture + privé, accès, lien prêt), aperçu en direct à droite / compact + bouton
+  collant sur téléphone, brouillon en localStorage (couverture compressée en data URL, survit à Stripe). Migration
+  `20261008000005_trip_setup` : `crews.trip_type` et `crews.destination` (le départ = `city` + position géocodée).
+  Stripe revient sur `/creer?paiement=ok` (`returnTo: 'creer'` dans create-checkout). Adresses publiques `/t/<slug>`
+  partout (site, Caddy, tracker, e-mails, plan du site), sans redirection. Bloc d'achat `CrewAccessPurchase` au style
+  Balise. « Voyage privé » = visibilité « par lien » ; décoché = public.
 
 ## À faire, dans l'ordre
 
@@ -53,7 +60,7 @@ Branche : `generaliste`. Le site en ligne reste en pause tant que Julien ne vali
    privé à copier), « Prêt en 5 minutes », « Ce qui change de Polarsteps » (4 panneaux), « Quel que soit le véhicule »
    (pilules inclinées), grand bloc rouge « Le compteur démarre quand tu pars », FAQ et charte à garder (on les avait).
    Utiliser le tracé Galibier + IGN existant (`example-trip.json`, `lib/route-anim.ts`) plutôt que Bergen/Esri.
-4. **Parcours de création** `/creer` (`Creer un road trip.dc.html`) : compte (prénom + e-mail) → code → type de voyage
+4. ~~**Parcours de création**~~ (fait) `/creer` (`Creer un road trip.dc.html`) : compte (prénom + e-mail) → code → type de voyage
    (van, voiture, moto, raid, entre amis, tour du monde) → d'où à où (+ idées) → quand + durée → équipage (prénoms,
    invitations par e-mail facultatives ; véhicules : 1 seul pour l'instant) → nom, couverture, privé → **Accès
    (paiement Stripe ou code TT-)** → lien prêt (copier, WhatsApp, SMS, e-mail, 3 prochaines étapes). Aperçu en direct à

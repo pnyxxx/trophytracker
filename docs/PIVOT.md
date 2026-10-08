@@ -100,7 +100,7 @@ commune, lancement auto du GPS) à remplacer par les dates de chaque voyage à l
 
 ## 6. Choix du 7 octobre au soir : « road trip » et « Mission control »
 
-- **Vocabulaire** : « road trip » (site en français). Adresses `/road-trips/<nom>` ; les anciennes `/equipages/<nom>`
+- **Vocabulaire** : « road trip » (site en français). Adresses `/t/<nom>` ; les anciennes `/equipages/<nom>`
   redirigent (QR codes déjà imprimés).
 - **Style « Mission control »** : sombre, satellite et 3D, télémétrie façon tableau de bord, nouveau logo sans 4L,
   nouvelles polices.

@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
   if (!user?.email) return json(401, { error: 'Connexion requise' });
 
   // 2. Les deux cases obligatoires du parcours de commande
-  let body: { termsAccepted?: unknown; immediateStart?: unknown };
+  let body: { termsAccepted?: unknown; immediateStart?: unknown; returnTo?: unknown };
   try {
     body = await req.json();
   } catch {
@@ -46,6 +46,9 @@ Deno.serve(async (req) => {
   if (body.termsAccepted !== true || body.immediateStart !== true) {
     return json(400, { error: 'Veuillez accepter les conditions de vente et l’accès immédiat au service.' });
   }
+
+  // Retour après paiement : le parcours de création (/creer) ou l'espace du compte. Liste fermée (pas de redirection ouverte).
+  const back = body.returnTo === 'creer' ? '/creer' : '/mon-compte';
 
   // 3. Achat « en attente » en base (vérifie : pas déjà d'équipage, pas d'accès inutilisé)
   const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
@@ -63,15 +66,15 @@ Deno.serve(async (req) => {
     'metadata[purchase_id]': purchaseId,
     'metadata[user_id]': user.id,
     'payment_intent_data[metadata][purchase_id]': purchaseId,
-    'payment_intent_data[description]': 'TrophyTracker — accès équipage',
+    'payment_intent_data[description]': 'trophytracker — accès road trip',
     'line_items[0][quantity]': '1',
     'line_items[0][price_data][currency]': 'eur',
     'line_items[0][price_data][unit_amount]': String(amount),
-    'line_items[0][price_data][product_data][name]': 'TrophyTracker — accès équipage',
+    'line_items[0][price_data][product_data][name]': 'trophytracker — accès road trip',
     'line_items[0][price_data][product_data][description]':
-      'Page d’équipage, suivi GPS en direct, photos et sponsors. Paiement unique.',
-    success_url: `${SITE_URL}/mon-compte?paiement=ok`,
-    cancel_url: `${SITE_URL}/mon-compte?paiement=annule`,
+      'Page de road trip, suivi GPS en direct, photos et sponsors. Paiement unique.',
+    success_url: `${SITE_URL}${back}?paiement=ok`,
+    cancel_url: `${SITE_URL}${back}?paiement=annule`,
   });
   const res = await fetch('https://api.stripe.com/v1/checkout/sessions', {
     method: 'POST',

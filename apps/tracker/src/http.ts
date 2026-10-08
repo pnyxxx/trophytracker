@@ -4,9 +4,9 @@
  *                                (ouverte dans un navigateur : page « Régler Traccar Client », cf. setup-page.ts)
  *   GET      /health          ← santé du service (Docker healthcheck)
  *   GET      /sitemap.xml     ← plan du site pour Google (équipages publics)
- *   GET      /road-trips/:slug ← HTML d'une page équipage, avec son titre et son aperçu de partage
+ *   GET      /t/:slug ← HTML d'une page équipage, avec son titre et son aperçu de partage
  *
- * Exposé publiquement via Caddy sous /ingest/, /sitemap.xml et /road-trips/….
+ * Exposé publiquement via Caddy sous /ingest/, /sitemap.xml et /t/….
  */
 import Fastify from 'fastify';
 import rateLimit from '@fastify/rate-limit';
@@ -49,7 +49,7 @@ export async function buildHttp(db: Db, opts: { trustProxy: boolean; logger: boo
 
   // Équipage privé ou inconnu : coquille neutre, la page React affiche ce qu'il faut (sans rien révéler ici).
   // En cas d'erreur, Caddy sert lui-même la coquille neutre (apps/web/Caddyfile).
-  app.get<{ Params: { slug: string } }>('/road-trips/:slug', async (req, reply) => {
+  app.get<{ Params: { slug: string } }>('/t/:slug', async (req, reply) => {
     const { slug } = req.params;
     const crew = CREW_SLUG.test(slug) ? await db.crewPageMeta(slug) : null;
     const html = crew ? renderCrewPage(await shell('crew'), opts.siteUrl ?? 'http://localhost', slug, crew) : await shell('app');

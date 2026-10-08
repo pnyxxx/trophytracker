@@ -52,7 +52,7 @@ export default function ManageCrewPage() {
           <div className="flex flex-wrap gap-2">
             <CrewShareButton crew={crew} />
             <Button asChild variant="secondary">
-              <Link to={`/road-trips/${crew.slug}`}>Voir la page <ExternalLink /></Link>
+              <Link to={`/t/${crew.slug}`}>Voir la page <ExternalLink /></Link>
             </Button>
           </div>
         }
