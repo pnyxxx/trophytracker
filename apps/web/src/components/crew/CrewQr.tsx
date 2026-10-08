@@ -131,7 +131,7 @@ export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl
  * Bouton « Partager » de la page publique : une seule fenêtre pour envoyer le lien
  * (partage du téléphone ou copie) et créer l'image avec QR code (autocollant, story).
  */
-export function CrewShareButton({ crew, className }: { crew: CrewForQr; className?: string }) {
+export function CrewShareButton({ crew, className, variant = 'outline' }: { crew: CrewForQr; className?: string; variant?: 'outline' | 'default' }) {
   const [open, setOpen] = useState(false);
   const pageUrl = `${window.location.origin}/t/${crew.slug}`;
   const canShare = typeof navigator.share === 'function';
@@ -148,7 +148,7 @@ export function CrewShareButton({ crew, className }: { crew: CrewForQr; classNam
     markShared(crew.id);
     try {
       await navigator.clipboard.writeText(pageUrl);
-      toast.success('Lien copié ! Partagez-le à vos proches et sponsors.');
+      toast.success('Lien copié ! Envoie-le à tes proches et sponsors.');
     } catch {
       toast.error('Copie impossible : sélectionnez le lien à la main.');
     }
@@ -157,7 +157,7 @@ export function CrewShareButton({ crew, className }: { crew: CrewForQr; classNam
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className={className}>
+        <Button variant={variant} className={className}>
           <Share2 /> Partager
         </Button>
       </DialogTrigger>

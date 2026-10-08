@@ -46,6 +46,13 @@ Branche : `generaliste`. Le site en ligne reste en pause tant que Julien ne vali
   Stripe revient sur `/creer?paiement=ok` (`returnTo: 'creer'` dans create-checkout). Adresses publiques `/t/<slug>`
   partout (site, Caddy, tracker, e-mails, plan du site), sans redirection. Bloc d'achat `CrewAccessPurchase` au style
   Balise. « Voyage privé » = visibilité « par lien » ; décoché = public.
+- [x] Page road trip `/t/:slug` (`pages/CrewPage.tsx`) : en-tête collant avec Suivre / Partager (+ Gérer), pastilles
+  (direct / hors réseau / pas encore parti, visibilité, voyageurs, exemple), titre « A → B », avatars ; bandeau
+  « Pas de réseau, c'est normal » ; carte MapLibre `TripMap` (Satellite IGN/Esri, Plan OpenFreeMap, Relief 3D, trace,
+  balise, départ avec drapeau breton, étapes, sponsors, photos, centrer, plein écran) — Leaflet retiré du projet ;
+  `TripDashboard` (6 tuiles, météo 4 créneaux `fetchForecast`, profil d'altitude) + carte de lieu « J2 · près de… »
+  (`hooks/useTrip.ts`) ; « Revivre en 3D » avec export paysage / story / carré ; carnet en onglets Étapes / Journal /
+  Histoire ; mosaïque photos ; relief jour par jour repliable ; Soutenir (cagnotte = lien, sponsors, mur « bientôt »).
 
 ## À faire, dans l'ordre
 
@@ -66,7 +73,7 @@ Branche : `generaliste`. Le site en ligne reste en pause tant que Julien ne vali
    (paiement Stripe ou code TT-)** → lien prêt (copier, WhatsApp, SMS, e-mail, 3 prochaines étapes). Aperçu en direct à
    droite (ordinateur) / compact en haut + bouton collant en bas (téléphone). Brouillon gardé en localStorage pour
    reprendre après Stripe. Base : nouvelles colonnes `trip_type`, `from_place`, `to_place` sur `crews` (migration).
-5. **Page road trip** `/t/:slug` (`Road trip.dc.html`) : en-tête (Suivre, Partager), pastilles (en direct / hors réseau,
+5. ~~**Page road trip**~~ (fait) `/t/:slug` (`Road trip.dc.html`) : en-tête (Suivre, Partager), pastilles (en direct / hors réseau,
    privé, nb voyageurs), titre « A → B », avatars ; bandeau hors réseau ; carte MapLibre (remplace Leaflet) avec
    Satellite / Plan / Relief 3D, carte de lieu « J9 … » ; colonne télémétrie (6 tuiles), météo 4 créneaux (maintenant,
    +3 h, +6 h, demain : prévision Open-Meteo `hourly`), profil d'altitude ; bloc « Revivre en 3D » (lancer, exporter :

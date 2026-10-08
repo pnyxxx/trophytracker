@@ -1,7 +1,7 @@
 /**
  * « Revivre le road trip » : survol 3D de toute la trace, caméra « drone » qui suit la position,
  * en satellite (orthophotos IGN si le voyage est en France, sinon Esri).
- * Lecture / pause, frise pour se déplacer, trois vitesses, et export en VIDÉO (paysage ou story 9:16)
+ * Lecture / pause, frise pour se déplacer, trois vitesses, et export en VIDÉO (paysage, story 9:16 ou carré 1:1)
  * avec le nom, la date et les kilomètres incrustés : la carte est recopiée image par image dans un
  * canevas 2D qui porte aussi les textes, et ce canevas est enregistré (MediaRecorder).
  * Chargé à part (MapLibre est volumineux).
@@ -18,7 +18,11 @@ import { formatNumber } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { stageStyle } from './mapIcons';
 
-type Format = 'wide' | 'story';
+export type ReplayFormat = 'wide' | 'story' | 'square';
+type Format = ReplayFormat;
+/** Grossissement des textes incrustés : plus grands sur les formats étroits (lus sur téléphone). */
+const TEXT_SCALE: Record<Format, number> = { wide: 1, story: 1.6, square: 1.3 };
+const FORMAT_LABEL: Record<Format, string> = { wide: 'Paysage 16:9', story: 'Story 9:16', square: 'Carré 1:1' };
 const SPEEDS = [{ label: '×1', seconds: 60 }, { label: '×2', seconds: 30 }, { label: '×4', seconds: 15 }];
 
 /** Trace allégée (≈ 3 000 points au plus) avec l'heure de chaque point, pour l'affichage. */
@@ -37,15 +41,15 @@ function pickRecorderType() {
   return types.find((t) => typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported(t)) ?? null;
 }
 
-export default function TripReplay({ name, slug, points, stages, onClose }: {
-  name: string; slug: string; points: TrackPoint[]; stages: TripStage[]; onClose: () => void;
+export default function TripReplay({ name, slug, points, stages, onClose, initialFormat = 'wide' }: {
+  name: string; slug: string; points: TrackPoint[]; stages: TripStage[]; onClose: () => void; initialFormat?: Format;
 }) {
   // Trace figée à l'ouverture : les positions qui arrivent en direct ne relancent pas le film.
   const [{ route, times }] = useState(() => prepare(points));
   const [stagesAtOpen] = useState(stages);
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MlMap | null>(null);
-  const [format, setFormat] = useState<Format>('wide');
+  const [format, setFormat] = useState<Format>(initialFormat);
   const [speed, setSpeed] = useState(0);
   const [playing, setPlaying] = useState(true);
   const [progress, setProgress] = useState(0); // 0 → 1
@@ -133,11 +137,11 @@ export default function TripReplay({ name, slug, points, stages, onClose }: {
         const hud = hudAt(progressRef.current);
         const s = w / 1280;
         ctx.fillStyle = '#F4ECDF';
-        ctx.font = `800 ${Math.round(56 * s * (formatRef.current === 'story' ? 1.6 : 1))}px "Bricolage Grotesque Variable", sans-serif`;
-        ctx.fillText(name.toUpperCase(), 40 * s, 90 * s * (formatRef.current === 'story' ? 1.4 : 1));
+        ctx.font = `800 ${Math.round(56 * s * TEXT_SCALE[formatRef.current])}px "Bricolage Grotesque Variable", sans-serif`;
+        ctx.fillText(name, 40 * s, 90 * s * (formatRef.current === 'wide' ? 1 : 1.4));
         ctx.fillStyle = '#D98A3D';
-        ctx.font = `500 ${Math.round(22 * s * (formatRef.current === 'story' ? 1.6 : 1))}px "DM Mono", monospace`;
-        ctx.fillText(`${hud.date.toUpperCase()} · ${hud.km} KM`, 40 * s, 130 * s * (formatRef.current === 'story' ? 1.55 : 1));
+        ctx.font = `500 ${Math.round(22 * s * TEXT_SCALE[formatRef.current])}px "DM Mono", monospace`;
+        ctx.fillText(`${hud.date} · ${hud.km} km`, 40 * s, 130 * s * (formatRef.current === 'wide' ? 1 : 1.55));
         ctx.fillStyle = 'rgba(244,236,223,.8)';
         ctx.fillText('trophytracker.fr', 40 * s, h - 36 * s);
       }
@@ -202,7 +206,7 @@ export default function TripReplay({ name, slug, points, stages, onClose }: {
       const blob = new Blob(chunks, { type: type.split(';')[0] });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = `${slug}-${format === 'story' ? 'story' : 'video'}.${type.includes('mp4') ? 'mp4' : 'webm'}`;
+      a.download = `${slug}-${format === 'wide' ? 'video' : format === 'story' ? 'story' : 'carre'}.${type.includes('mp4') ? 'mp4' : 'webm'}`;
       a.click();
       setTimeout(() => URL.revokeObjectURL(a.href), 10_000);
     };
@@ -218,9 +222,9 @@ export default function TripReplay({ name, slug, points, stages, onClose }: {
       <div className="flex flex-wrap items-center gap-3 border-b border-cream/10 px-4 py-3">
         <p className="m-0 flex-1 font-display text-2xl font-extrabold leading-none text-cream">Revivre {name}</p>
         <div className="flex gap-1" role="group" aria-label="Format">
-          {(['wide', 'story'] as const).map((f) => (
+          {(['wide', 'story', 'square'] as const).map((f) => (
             <Button key={f} size="sm" variant={format === f ? 'default' : 'ghost'} disabled={recording} onClick={() => setFormat(f)}>
-              {f === 'wide' ? 'Paysage' : 'Story 9:16'}
+              {FORMAT_LABEL[f]}
             </Button>
           ))}
         </div>
@@ -228,7 +232,7 @@ export default function TripReplay({ name, slug, points, stages, onClose }: {
       </div>
 
       <div className="flex min-h-0 flex-1 items-center justify-center p-3">
-        <div className={cn('relative h-full max-w-full overflow-hidden border border-cream/10', format === 'story' ? 'aspect-[9/16]' : 'aspect-video w-full max-h-full')}>
+        <div className={cn('relative h-full max-w-full overflow-hidden border border-cream/10', format === 'story' ? 'aspect-[9/16]' : format === 'square' ? 'aspect-square' : 'aspect-video w-full max-h-full')}>
           <div ref={containerRef} className="h-full w-full" />
           <div className="pointer-events-none absolute left-4 top-4 bg-ink/75 px-3 py-1.5 font-mono text-xs uppercase tracking-[0.14em] text-cream">
             {hudAt(progress).date} · {hudAt(progress).km} km

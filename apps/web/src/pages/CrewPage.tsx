@@ -1,20 +1,25 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+/**
+ * Page publique d'un road trip, /t/:slug (privée par lien par défaut) :
+ * en-tête (statut, visibilité, voyageurs), bandeau « pas de réseau, c'est normal », carte + tableau de bord,
+ * « Revivre en 3D », carnet de route et photos, puis « Soutenir » (cagnotte, sponsors, encouragements).
+ */
+import { lazy, Suspense, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ChevronDown, Clapperboard, HandHeart, Mail, Settings } from 'lucide-react';
+import { Clapperboard, Settings } from 'lucide-react';
 import { PageShell } from '@/components/layout/PageShell';
 import { FacebookIcon, InstagramIcon } from '@/components/common/SocialIcons';
 import { Seo } from '@/components/common/Seo';
-import { Container, Kicker, LiveDot, SectionTitle } from '@/components/common/Brand';
 import { PageLoader } from '@/components/common/Spinner';
 import { Button } from '@/components/ui/button';
-import { CrewAvatar, FollowButton, LiveBadge } from '@/components/crew/CrewBits';
-import { CrewStats } from '@/components/crew/CrewStats';
-import { CrewTelemetry } from '@/components/crew/CrewTelemetry';
+import { FollowButton } from '@/components/crew/CrewBits';
 import { CrewGallery } from '@/components/crew/CrewGallery';
-import { CrewSponsors } from '@/components/crew/CrewSponsors';
 import { CrewLogbook } from '@/components/crew/CrewLogbook';
 import { CrewShareButton } from '@/components/crew/CrewQr';
-import { useCrew, useCrewStats, useJournal, useMyRole, usePhotos, useSponsors, useStages } from '@/hooks/queries';
+import { PlaceCard, TripDashboard } from '@/components/crew/TripDashboard';
+import { tripDay, usePlaceName, useTelemetry } from '@/hooks/useTrip';
+import { TripSupport } from '@/components/crew/TripSupport';
+import type { ReplayFormat } from '@/components/crew/TripReplay';
+import { useCrew, useCrewMembers, useCrewStats, useJournal, useMyRole, usePhotos, useSponsors, useStages } from '@/hooks/queries';
 import { useLiveTrack } from '@/hooks/useLiveTrack';
 import { formatRelative, isLive } from '@/lib/format';
 import { localDate } from '@/lib/days';
@@ -23,89 +28,25 @@ import { mediaUrl } from '@/lib/media';
 import { cn } from '@/lib/utils';
 import NotFound from './NotFound';
 
-const CrewMap = lazy(() => import('@/components/crew/CrewMap').then((m) => ({ default: m.CrewMap })));
+const TripMap = lazy(() => import('@/components/crew/TripMap').then((m) => ({ default: m.TripMap })));
 const TripReplay = lazy(() => import('@/components/crew/TripReplay'));
 const CrewElevation = lazy(() => import('@/components/crew/CrewElevation').then((m) => ({ default: m.CrewElevation })));
 
-const TONES = {
-  dark: 'bg-ink text-cream',
-  sand: 'bg-sand text-coal',
-  cream: 'bg-cream text-coal',
-};
+const AVATARS = ['bg-signal text-white', 'bg-cream text-ink', 'bg-ink-700 text-cream', 'bg-dust-600 text-cream'];
+const FORMATS: { id: ReplayFormat; title: string; text: string }[] = [
+  { id: 'wide', title: 'Paysage 16:9', text: 'pour YouTube, un écran, un diaporama' },
+  { id: 'story', title: 'Story 9:16', text: 'Instagram, TikTok, WhatsApp' },
+  { id: 'square', title: 'Carré 1:1', text: 'publication Instagram, Facebook' },
+];
 
-function Section({ id, kicker, title, subtitle, tone = 'dark', first = false, children }: {
-  id: string; kicker?: ReactNode; title: ReactNode; subtitle?: string; tone?: keyof typeof TONES;
-  /** Première section, juste sous l'en-tête plein écran : moins d'espace au-dessus. */
-  first?: boolean; children: ReactNode;
-}) {
-  const dark = tone === 'dark';
-  return (
-    <section id={id} className={cn('scroll-mt-[84px] pb-20 md:pb-[120px]', first ? 'pt-8 md:pt-10' : 'pt-20 md:pt-[120px]', TONES[tone])}>
-      <Container className="flex flex-col gap-10 md:gap-14">
-        <div className="flex flex-wrap items-end justify-between gap-6">
-          <div className="flex flex-col gap-3.5">
-            {kicker && <Kicker className={dark ? undefined : 'text-primary'}>{kicker}</Kicker>}
-            <SectionTitle>{title}</SectionTitle>
-          </div>
-          {subtitle && <p className={cn('m-0 max-w-[420px] text-base leading-relaxed', dark ? 'text-dust-300' : 'text-dust-700')}>{subtitle}</p>}
-        </div>
-        {children}
-      </Container>
-    </section>
-  );
+/** « Léa, Sam & Noé » */
+const joinNames = (names: string[]) => (names.length <= 1 ? names.join('') : `${names.slice(0, -1).join(', ')} & ${names.at(-1)}`);
+const longDate = (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+const daysBetween = (iso: string) => Math.round((new Date(`${iso}T00:00:00`).getTime() - new Date(new Date().toDateString()).getTime()) / 864e5);
+
+function Pill({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <span className={cn('flex items-center gap-2 rounded-full px-[13px] py-[7px] font-mono text-[14px]', className)}>{children}</span>;
 }
-
-/**
- * « Défilez » en bas au centre de l'écran, tant que la page n'a pas bougé. Masqué s'il
- * recouvrirait un bouton : sur téléphone, l'en-tête dépasse souvent l'écran.
- */
-function ScrollHint({ target }: { target: string }) {
-  const ref = useRef<HTMLAnchorElement>(null);
-  const [atTop, setAtTop] = useState(() => window.scrollY < 40);
-  const [covers, setCovers] = useState(false);
-  useEffect(() => {
-    const onScroll = () => setAtTop(window.scrollY < 40);
-    const check = () => {
-      const hint = ref.current?.getBoundingClientRect();
-      const header = ref.current?.closest('header');
-      if (!hint || !header) return;
-      setCovers([...header.querySelectorAll('a[href], button')].some((el) => {
-        if (el === ref.current) return false;
-        const r = el.getBoundingClientRect();
-        return r.left < hint.right && r.right > hint.left && r.top < hint.bottom && r.bottom > hint.top;
-      }));
-    };
-    const late = setTimeout(check, 800); // après le chargement des polices et des images
-    check();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', check);
-    return () => {
-      clearTimeout(late);
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', check);
-    };
-  }, []);
-  const visible = atTop && !covers;
-  return (
-    <a
-      ref={ref}
-      href={`#${target}`}
-      aria-hidden={!visible}
-      tabIndex={visible ? 0 : -1}
-      className={cn(
-        'fixed bottom-3 left-1/2 z-[850] flex -translate-x-1/2 items-center gap-2 rounded-full bg-ink/70 px-4 py-2 font-mono text-sm font-semibold uppercase tracking-[0.2em] text-cream backdrop-blur-sm transition-opacity duration-500 hover:text-cream',
-        visible ? 'opacity-100' : 'pointer-events-none opacity-0',
-      )}
-    >
-      Défilez
-      <ChevronDown className="h-5 w-5 text-primary motion-safe:animate-bounce" />
-    </a>
-  );
-}
-
-/** « 31.085°N · 4.023°O » */
-const coords = (lat: number, lon: number) =>
-  `${Math.abs(lat).toFixed(3)}°${lat >= 0 ? 'N' : 'S'} · ${Math.abs(lon).toFixed(3)}°${lon < 0 ? 'O' : 'E'}`;
 
 export default function CrewPage() {
   const { slug } = useParams();
@@ -115,206 +56,213 @@ export default function CrewPage() {
   const { data: sponsors = [] } = useSponsors(crew?.id);
   const { data: stages = [] } = useStages(crew?.id);
   const { data: journal = [] } = useJournal(crew?.id);
-  const published = journal.filter((j) => j.published);
+  const { data: members = [] } = useCrewMembers(crew?.id);
   const { canEdit } = useMyRole(crew?.id);
   const { points } = useLiveTrack(crew);
-  const [replay, setReplay] = useState(false);
-  // Jour 1 du road trip = jour du premier point de la trace.
-  const startedAt = points[0]?.[2] ?? null;
-  const profile = useMemo(() => altitudeProfile(points, startedAt != null ? localDate(startedAt) : null), [points, startedAt]);
+  const [replay, setReplay] = useState<ReplayFormat | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
+  const published = journal.filter((j) => j.published);
+  // Jour 1 du road trip = date de départ prévue, sinon jour du premier point de la trace.
+  const firstFix = points[0]?.[2] ?? null;
+  const startDate = crew?.starts_on ?? (firstFix != null ? localDate(firstFix) : null);
+  const profile = useMemo(() => altitudeProfile(points, startDate), [points, startDate]);
+  const { data: telemetry } = useTelemetry(crew ?? undefined);
+  const place = usePlaceName(crew?.last_lat, crew?.last_lon);
 
   if (isLoading) return <PageShell><PageLoader /></PageShell>;
   if (!crew) return <NotFound />;
 
   const cover = mediaUrl(crew.cover_path);
   const live = isLive(crew.last_fix_at);
+  const offline = !live && !!crew.last_fix_at && crew.tracking_enabled;
+  const notStarted = !crew.last_fix_at;
+  const { day, total } = tripDay(crew, firstFix);
+  const names = members.map((m) => m.display_name).filter(Boolean);
+  const until = crew.starts_on ? daysBetween(crew.starts_on) : null;
+  const visibility = !crew.is_public ? 'privé · voyageurs seulement' : crew.is_listed ? 'public' : 'privé · accès par lien';
+  const [titleFrom, titleTo] = crew.name.includes('→') ? crew.name.split('→').map((x) => x.trim()) : [crew.name, null];
+  const route = crew.city && crew.destination && !crew.name.includes('→') ? `${crew.city} → ${crew.destination}` : null;
+
+  const headerActions = (
+    <>
+      {canEdit && (
+        <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+          <Link to={`/mon-compte/road-trips/${crew.slug}`}><Settings />Gérer</Link>
+        </Button>
+      )}
+      <FollowButton quiet crewId={crew.id} slug={crew.slug} className="min-h-11 px-[18px] text-[16px]" />
+      <CrewShareButton crew={crew} variant="default" className="min-h-11 px-[18px] text-[16px]" />
+    </>
+  );
 
   return (
-    <PageShell>
+    <PageShell headerActions={headerActions}>
       <Seo
         title={crew.name}
-        description={crew.tagline ?? `Suivez le road trip ${crew.name} en direct.`}
+        description={crew.tagline ?? `Suis le road trip ${crew.name} en direct.`}
         image={cover ?? mediaUrl(crew.avatar_path)}
-        noindex={!crew.is_public}
-        jsonLd={{
-          '@context': 'https://schema.org',
-          '@type': 'BreadcrumbList',
-          itemListElement: [
-            { '@type': 'ListItem', position: 1, name: 'Accueil', item: `${window.location.origin}/` },
-            { '@type': 'ListItem', position: 2, name: crew.name },
-          ],
-        }}
+        noindex={!crew.is_listed}
       />
 
-      {/* ── En-tête : remplit l'écran, la carte arrive juste en dessous.
-          Numéro, nom et ville en haut ; le reste en bas. ── */}
-      <header className="relative flex min-h-[100svh] flex-col overflow-hidden bg-[radial-gradient(120%_80%_at_80%_0%,#3A2215_0%,#1B1310_45%,#120F0C_75%)]">
-        {cover && (
-          <img src={cover} alt="" className="absolute inset-0 h-full w-full object-cover opacity-35"
-            style={{ objectPosition: `${crew.cover_focus_x}% ${crew.cover_focus_y}%` }} />
-        )}
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(18,15,12,.55)_0%,rgba(18,15,12,.3)_40%,#120F0C_100%)]" />
-        <Container className="relative flex w-full flex-1 flex-col justify-between gap-10 pb-14 pt-24 md:pb-16 md:pt-32">
-          <div className="flex min-w-0 flex-col gap-7">
-            <Kicker className="flex-wrap gap-x-4 gap-y-2">
-              {crew.car_number && (
-                <span className="rounded-full bg-primary px-2 py-1 font-mono text-xs font-bold tracking-normal text-white">#{crew.car_number}</span>
-              )}
-              <span>Road trip</span>
-              <LiveBadge lastFixAt={crew.last_fix_at} />
-              {!live && crew.last_fix_at && <span className="text-dust-400">Dernière position {formatRelative(crew.last_fix_at)}</span>}
-              {!crew.is_public && <span className="border border-cream/25 px-2 py-1 text-dust-100">Page privée</span>}
-              {crew.is_demo && <span className="border border-ochre/60 px-2 py-1 text-ochre">Road trip de démonstration</span>}
-            </Kicker>
-            <div className="flex flex-col gap-3">
-              <h1 className="m-0 break-words font-display text-[clamp(56px,9vw,152px)] font-extrabold leading-[0.92] text-cream">
-                {crew.name}
-              </h1>
-              {(crew.school || crew.city) && (
-                <span className="font-mono text-xs uppercase tracking-[0.12em] text-dust-400">{[crew.school, crew.city].filter(Boolean).join(' · ')}</span>
-              )}
-            </div>
+      {/* ── En-tête ──────────────────────────────────────────────────────── */}
+      <section className="mx-auto flex max-w-[1440px] flex-col gap-3.5 px-5 pb-5 pt-7">
+        <div className="flex flex-wrap gap-2">
+          {live && (
+            <Pill className="bg-live/[0.16] text-live-text">
+              <span className="relative h-2 w-2"><span className="absolute inset-0 animate-ping rounded-full bg-live" /><span className="absolute inset-0 rounded-full bg-live" /></span>
+              en direct · {formatRelative(crew.last_fix_at)}
+            </Pill>
+          )}
+          {offline && (
+            <Pill className="bg-gold/[0.16] text-gold-text">
+              <span className="h-2 w-2 rounded-full border-2 border-gold" />hors réseau · dernier signal {formatRelative(crew.last_fix_at)}
+            </Pill>
+          )}
+          {notStarted && (
+            <Pill className="bg-ink-800 text-dust-200">{until != null && until > 0 ? `départ dans ${until} jour${until > 1 ? 's' : ''}` : 'pas encore parti'}</Pill>
+          )}
+          <Pill className="bg-cream text-ink">{visibility}</Pill>
+          <Pill className="border-[1.5px] border-ink-700 py-1.5 text-dust-300">1 véhicule · {Math.max(1, members.length)} voyageur{members.length > 1 ? 's' : ''}</Pill>
+          {crew.is_demo && <Pill className="border-[1.5px] border-gold/60 py-1.5 text-gold-text">road trip d’exemple</Pill>}
+        </div>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="flex min-w-0 flex-col gap-2">
+            <h1 className="tt-display m-0 break-words text-[clamp(44px,6vw,92px)] leading-[0.95] text-cream">
+              {titleTo ? <>{titleFrom} → <span className="text-signal">{titleTo}</span></> : crew.name}
+            </h1>
+            {(route || crew.tagline) && <p className="m-0 max-w-[720px] text-[19px] leading-snug text-dust-200">{[route, crew.tagline].filter(Boolean).join(' · ')}</p>}
           </div>
-
-          <div className="grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end">
-            <div className="flex min-w-0 flex-col gap-7">
-              {crew.tagline && <p className="m-0 max-w-[640px] text-pretty text-xl leading-snug text-dust-100">{crew.tagline}</p>}
-              {(crew.fundraiser_url || crew.instagram_url || crew.facebook_url) && (
-                <div className="flex flex-wrap gap-3">
-                  {crew.fundraiser_url && (
-                    <Button asChild>
-                      <a href={crew.fundraiser_url} target="_blank" rel="noopener noreferrer"><HandHeart />Participer à la cagnotte</a>
-                    </Button>
-                  )}
-                  {crew.instagram_url && (
-                    <Button asChild variant="outline">
-                      <a href={crew.instagram_url} target="_blank" rel="noopener noreferrer"><InstagramIcon />Instagram</a>
-                    </Button>
-                  )}
-                  {crew.facebook_url && (
-                    <Button asChild variant="outline">
-                      <a href={crew.facebook_url} target="_blank" rel="noopener noreferrer"><FacebookIcon />Facebook</a>
-                    </Button>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-5 lg:items-end">
-              {/* Logo et position à droite, même sur téléphone : l'en-tête ne s'empile pas tout à gauche. */}
-              <CrewAvatar name={crew.name} path={crew.avatar_path} className="h-24 w-24 self-end border-2 border-cream/20 text-4xl md:h-32 md:w-32 md:text-5xl" />
-              {crew.last_lat != null && crew.last_lon != null && (
-                <span className="flex items-center gap-2 self-end font-mono text-[11px] uppercase tracking-[0.12em] text-cream">
-                  <span className="h-[7px] w-[7px] rounded-full bg-primary shadow-[0_0_10px_#DB4740]" />
-                  {coords(crew.last_lat, crew.last_lon)}
-                </span>
-              )}
-              <div className="flex flex-wrap gap-2">
-                <FollowButton crewId={crew.id} slug={crew.slug} count={crew.followers_count} />
-                <CrewShareButton crew={crew} />
-                {canEdit && (
-                  <Button asChild variant="secondary">
-                    <Link to={`/mon-compte/road-trips/${crew.slug}`}><Settings />Gérer</Link>
-                  </Button>
-                )}
+          {names.length > 0 && (
+            <div className="flex items-center gap-3">
+              <div className="flex">
+                {names.slice(0, 5).map((n, i) => (
+                  <span key={i} className={cn('flex h-10 w-10 items-center justify-center rounded-full border-2 border-ink font-bold', i > 0 && '-ml-2.5', AVATARS[i % 4])}>
+                    {(n[0] ?? '?').toUpperCase()}
+                  </span>
+                ))}
               </div>
+              <span className="text-[16px] text-dust-300">
+                {joinNames(names)}{startDate && !notStarted ? ` · depuis le ${longDate(startDate)}` : ''}
+              </span>
             </div>
-          </div>
-        </Container>
-        <ScrollHint target="carte" />
-      </header>
-
-      {/* ── Carte ────────────────────────────────────────────────────────── */}
-      <Section
-        id="carte"
-        first
-        kicker={live ? <><LiveDot />Suivi en direct</> : 'Suivi GPS'}
-        title="Où en sont-ils ?"
-        subtitle={crew.is_demo
-          ? 'Démonstration : un trajet rejoué en boucle et en temps réel.'
-          : 'Position en temps réel et trace complète depuis le départ. Pas de nouvelle position ? Souvent, il n’y a simplement pas de réseau.'}
-      >
-        {points.length >= 20 && (
-          <div className="flex flex-wrap items-center justify-between gap-3 border border-cream/[0.14] bg-ink-900/60 p-4">
-            <p className="m-0 text-sm text-dust-300">Survolez tout le road trip en 3D, et enregistrez-en une vidéo à partager.</p>
-            <Button onClick={() => setReplay(true)}><Clapperboard />Revivre le road trip en 3D</Button>
+          )}
+        </div>
+        {(crew.instagram_url || crew.facebook_url) && (
+          <div className="flex flex-wrap gap-2">
+            {crew.instagram_url && <Button asChild variant="outline" size="sm"><a href={crew.instagram_url} target="_blank" rel="noopener noreferrer"><InstagramIcon />Instagram</a></Button>}
+            {crew.facebook_url && <Button asChild variant="outline" size="sm"><a href={crew.facebook_url} target="_blank" rel="noopener noreferrer"><FacebookIcon />Facebook</a></Button>}
           </div>
         )}
-        {replay && (
-          <Suspense fallback={null}>
-            <TripReplay name={crew.name} slug={crew.slug} points={points} stages={stages} onClose={() => setReplay(false)} />
-          </Suspense>
-        )}
-        <Suspense fallback={<div className="h-[600px] animate-pulse border border-cream/[0.14] bg-ink-900" />}>
-          <CrewMap crew={crew} points={points} stages={stages} sponsors={sponsors} photos={photos} />
-        </Suspense>
-      </Section>
-
-      {/* ── Statistiques ─────────────────────────────────────────────────── */}
-      <section id="stats" className="scroll-mt-[84px] border-t border-cream/[0.12] bg-ink pb-20 pt-16 md:pb-[120px]">
-        <Container className="flex flex-col gap-10">
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <div className="flex flex-col gap-3.5">
-              <Kicker>{crew.last_fix_at && isLive(crew.last_fix_at) ? <><LiveDot />En direct du véhicule</> : 'Tableau de bord'}</Kicker>
-              <SectionTitle>Le tableau de bord</SectionTitle>
-            </div>
-            <p className="m-0 max-w-[420px] text-base leading-relaxed text-dust-300">Mis à jour à chaque nouvelle position, météo comprise.</p>
-          </div>
-          <CrewTelemetry crew={crew} />
-          <CrewStats stats={stats} startedAt={startedAt} />
-        </Container>
       </section>
 
-      {/* ── Relief (altitude envoyée par le téléphone) ─────────────────────── */}
-      {profile && (
-        <Section id="relief" tone="sand" kicker="Profil d’altitude" title="Le relief" subtitle="Montées, descentes et point culminant, jour par jour.">
-          <Suspense fallback={<div className="h-[260px] animate-pulse border-2 border-coal bg-cream" />}>
-            <CrewElevation profile={profile} />
-          </Suspense>
-        </Section>
-      )}
-
-      {/* ── Carnet de route : étapes (et journal) ───────────────────────────── */}
-      {(stages.length > 0 || published.length > 0) && (
-        <Section id="carnet" tone="cream" kicker="Carnet de route" title="Jour après jour" subtitle="Étapes et journal de bord, racontés par les voyageurs.">
-          <CrewLogbook stages={stages} photos={photos} journal={published} />
-        </Section>
-      )}
-
-      {/* ── Histoire ─────────────────────────────────────────────────────── */}
-      {crew.story && (
-        <Section id="histoire" tone="cream" kicker="Carnet de bord" title="Notre aventure">
-          <div className="max-w-3xl whitespace-pre-line border-l-[3px] border-primary pl-6 text-lg leading-relaxed text-dust-800 md:text-xl">
-            {crew.story}
-          </div>
-        </Section>
-      )}
-
-      {/* ── Photos ───────────────────────────────────────────────────────── */}
-      {photos.length > 0 && (
-        <Section id="photos" kicker="Depuis la route" title="Photos & 360°" subtitle="Cliquez pour agrandir. Les photos 360° se parcourent en glissant.">
-          <CrewGallery photos={photos} />
-        </Section>
-      )}
-
-      {/* ── Sponsors ─────────────────────────────────────────────────────── */}
-      {sponsors.length > 0 && (
-        <Section id="sponsors" tone="sand" kicker="Merci à eux" title="Nos sponsors" subtitle="Sans eux, pas d’aventure !">
-          <CrewSponsors sponsors={sponsors} />
-        </Section>
-      )}
-
-      {/* ── Contact ──────────────────────────────────────────────────────── */}
-      {crew.contact_email && (
-        <section className="border-t border-cream/[0.12] bg-ink py-14">
-          <Container className="flex flex-wrap items-center justify-between gap-6">
-            <p className="m-0 font-display text-4xl font-extrabold leading-none">Un message pour les voyageurs ?</p>
-            <div className="flex flex-wrap gap-3">
-              <Button asChild variant="secondary"><a href={`mailto:${crew.contact_email}`}><Mail />Leur écrire</a></Button>
+      {/* ── Pas de réseau, c'est normal ──────────────────────────────────── */}
+      {offline && (
+        <section className="mx-auto max-w-[1440px] px-5 pb-4">
+          <div role="status" className="flex items-start gap-4 rounded-[24px] bg-cream px-[22px] py-5 text-ink">
+            <span className="h-11 w-11 flex-none rounded-full border-[2.5px] border-dashed border-ink" aria-hidden="true" />
+            <div className="flex flex-col gap-1.5">
+              <span className="text-[20px] font-bold">Pas de réseau, c’est normal.</span>
+              <span className="text-[17px] leading-normal text-dust-800">
+                Les voyageurs traversent sans doute une zone sans couverture, ou le téléphone est éteint pour la nuit. Il garde la trace en
+                mémoire et l’enverra dès qu’il capte. Dernière position{place ? ` : près de ${place}` : ''}, {formatRelative(crew.last_fix_at)}.
+                En cas de doute, contacte directement les voyageurs.
+              </span>
             </div>
-          </Container>
+          </div>
         </section>
       )}
+
+      {/* ── Carte + tableau de bord ──────────────────────────────────────── */}
+      <section id="carte" className="mx-auto grid max-w-[1440px] scroll-mt-20 gap-4 px-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(340px,1fr)]">
+        <Suspense fallback={<div className="h-[62vh] animate-pulse rounded-[28px] bg-ink-800 lg:h-[640px]" />}>
+          <TripMap
+            crew={crew}
+            points={points}
+            stages={stages}
+            sponsors={sponsors}
+            photos={photos}
+            className="h-[62vh] min-h-[420px] lg:h-[640px]"
+            overlay={<PlaceCard crew={crew} place={place} day={day} />}
+          />
+        </Suspense>
+        <TripDashboard crew={crew} stats={stats} telemetry={telemetry} profile={profile} day={day} total={total} place={place} />
+      </section>
+      {!offline && !live && !notStarted && (
+        <p className="mx-auto mb-0 mt-3 max-w-[1440px] px-5 text-[15px] text-dust-400">
+          Pas de nouvelle position ? Souvent, il n’y a simplement pas de réseau : la trace se complète dès que le téléphone capte.
+        </p>
+      )}
+
+      {/* ── Revivre en 3D ────────────────────────────────────────────────── */}
+      {points.length >= 20 && (
+        <section className="mx-auto max-w-[1440px] px-5 pt-4">
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-[28px] border-[1.5px] border-signal/35 bg-[linear-gradient(100deg,#2A1416_0%,#1F2026_60%)] px-6 py-[22px]">
+            <div className="flex max-w-[560px] flex-col gap-1.5">
+              <span className="font-mono text-[13px] text-signal-text">revivre en 3D</span>
+              <span className="tt-display text-[30px] leading-[1.05] text-cream">Rejouez tout le voyage en survol satellite.</span>
+              <span className="text-[16px] text-dust-300">Exportable en vidéo, en paysage, en story ou en carré, avec la trace et les étapes.</span>
+            </div>
+            <div className="flex flex-wrap gap-2.5">
+              <Button onClick={() => setReplay('wide')}><Clapperboard />Lancer le replay</Button>
+              <Button variant="outline" onClick={() => setExportOpen((v) => !v)} aria-expanded={exportOpen}>Exporter en vidéo</Button>
+            </div>
+            {exportOpen && (
+              <div className="grid flex-[1_1_100%] grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-2">
+                {FORMATS.map((f) => (
+                  <button key={f.id} type="button" onClick={() => setReplay(f.id)} className="flex flex-col gap-1 rounded-[18px] bg-ink-700 px-4 py-3.5 text-left text-cream hover:bg-cream hover:text-ink">
+                    <span className="text-[16px] font-bold">{f.title}</span>
+                    <span className="font-mono text-[13px] opacity-80">{f.text}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          {replay && (
+            <Suspense fallback={null}>
+              <TripReplay name={crew.name} slug={crew.slug} points={points} stages={stages} initialFormat={replay} onClose={() => setReplay(null)} />
+            </Suspense>
+          )}
+        </section>
+      )}
+
+      {/* ── Carnet de route + photos ─────────────────────────────────────── */}
+      {(stages.length > 0 || published.length > 0 || crew.story || photos.length > 0) && (
+        <section className="mx-auto grid max-w-[1440px] grid-cols-[repeat(auto-fit,minmax(min(100%,420px),1fr))] items-start gap-8 px-5 pt-9">
+          {(stages.length > 0 || published.length > 0 || crew.story) && (
+            <div id="carnet" className="scroll-mt-24">
+              <CrewLogbook stages={stages} photos={photos} journal={published} story={crew.story} points={points} startDate={startDate} />
+            </div>
+          )}
+          {photos.length > 0 && (
+            <div id="photos" className="flex scroll-mt-24 flex-col gap-4">
+              <CrewGallery photos={photos} />
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* ── Relief jour par jour ─────────────────────────────────────────── */}
+      {profile && (
+        <section id="relief" className="mx-auto max-w-[1440px] scroll-mt-24 px-5 pt-9">
+          <details className="group rounded-[28px] bg-cream p-5 text-ink sm:p-7">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
+              <span className="tt-display text-[28px]">Le relief, jour par jour</span>
+              <span className="font-mono text-[14px] text-dust-700 group-open:hidden">ouvrir +</span>
+              <span className="hidden font-mono text-[14px] text-dust-700 group-open:inline">fermer −</span>
+            </summary>
+            <div className="mt-5">
+              <Suspense fallback={<div className="h-[260px] animate-pulse rounded-2xl bg-sand" />}>
+                <CrewElevation profile={profile} />
+              </Suspense>
+            </div>
+          </details>
+        </section>
+      )}
+
+      {/* ── Soutenir ─────────────────────────────────────────────────────── */}
+      <div className="mx-auto max-w-[1440px] px-5 pb-[72px] pt-9">
+        <TripSupport fundraiserUrl={crew.fundraiser_url} sponsors={sponsors} contactEmail={crew.contact_email} />
+      </div>
     </PageShell>
   );
 }

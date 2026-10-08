@@ -106,18 +106,10 @@
 .maplibregl-ctrl-attrib a {
   color: inherit;
 }
-/* ─── Marqueurs de carte (Leaflet) ───────────────────────────────────────── */
+/* ─── Marqueurs de carte (MapLibre, components/crew/mapIcons.ts) ─────────── */
 .tt-marker {
   background: transparent !important;
   border: none !important;
-}
-
-/* Numéro d'un équipage à côté de sa 4L (carte de tous les équipages) */
-.tt-crew-label {
-  left: 24px;
-  background: #e1262c;
-  color: #fff;
-  font-weight: 700;
 }
 
 /* Point du parcours : pastille + étiquette mono */
@@ -197,9 +189,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   overflow: hidden;
 }
-/* Leaflet impose « width: auto » aux images des marqueurs (règle plus précise que la nôtre) :
-   une photo en hauteur ne remplissait alors que la moitié de la vignette. */
-.leaflet-container .tt-photo img {
+.tt-photo img {
   display: block;
   width: 100% !important;
   height: 100% !important;
@@ -214,7 +204,7 @@
   text-align: center;
 }
 
-/* La 4L : point rouge cerclé de blanc, qui pulse quand l'équipage est en direct */
+/* La balise du voyageur : point rouge cerclé de blanc, qui pulse en direct (grise hors réseau) */
 .tt-car {
   position: relative;
   width: 100%;
@@ -232,6 +222,13 @@
   border: 3px solid #fff;
   box-shadow: 0 0 18px 4px rgba(255, 74, 61, 0.7);
 }
+.tt-car--off::before,
+.tt-car--off::after {
+  background: #8e8a83;
+}
+.tt-car--off::after {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
 .tt-car--live::before {
   animation: tt-pulse 1.6s ease-out infinite;
 }
@@ -240,16 +237,26 @@
   to { transform: scale(3.2); opacity: 0; }
 }
 
-.leaflet-container {
-  font-family: 'Atkinson Hyperlegible', system-ui, sans-serif;
-  background: #1f2026;
-}
-.leaflet-popup-content-wrapper {
+/* Bulles d'information des cartes (étapes, photos, sponsors) */
+.maplibregl-popup-content {
   border-radius: 16px;
-  border-left: 3px solid #e1262c;
+  padding: 12px 14px;
+  background: #f5f1ea;
+  color: #15161a;
+  font-family: 'Atkinson Hyperlegible', system-ui, sans-serif;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
 }
-.leaflet-control-attribution {
-  font-size: 10px;
+.maplibregl-popup-tip {
+  border-top-color: #f5f1ea !important;
+  border-bottom-color: #f5f1ea !important;
+}
+.maplibregl-popup-close-button {
+  font-size: 20px;
+  width: 32px;
+  height: 32px;
+}
+.tt-marker[role='button'] {
+  cursor: pointer;
 }
 
 @media (prefers-reduced-motion: reduce) {

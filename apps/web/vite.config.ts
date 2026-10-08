@@ -16,7 +16,7 @@ const SUPABASE_GATEWAY = 'http://127.0.0.1:8000';
 const VENDOR_CHUNKS: Record<string, string[]> = {
   react: ['react', 'react-dom', 'react-router', 'react-router-dom', 'scheduler'],
   supabase: ['@supabase'],
-  map: ['leaflet', 'react-leaflet', '@react-leaflet', 'maplibre-gl', '@maplibre'],
+  map: ['maplibre-gl', '@maplibre'],
   motion: ['framer-motion', 'motion-dom', 'motion-utils'],
   panorama: ['@photo-sphere-viewer', 'three'],
 };
@@ -95,7 +95,7 @@ export default defineConfig(({ mode }) => {
         output: {
           // Découpe les grosses bibliothèques en fichiers séparés (mieux mis en cache).
           // Sans includeDependenciesRecursively: false, le groupe « map » aspirerait React
-          // (dépendance de react-leaflet) et MapLibre serait préchargé sur toutes les pages.
+          // et MapLibre serait préchargé sur toutes les pages.
           codeSplitting: {
             includeDependenciesRecursively: false,
             groups: Object.entries(VENDOR_CHUNKS).map(([name, pkgs]) => ({

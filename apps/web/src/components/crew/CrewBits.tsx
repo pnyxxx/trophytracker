@@ -33,7 +33,11 @@ export function CrewAvatar({ name, path, className }: { name: string; path: stri
 }
 
 /** Bouton « Suivre » : demande de se connecter si besoin, met à jour instantanément. */
-export function FollowButton({ crewId, slug, count, className }: { crewId: string; slug: string; count?: number; className?: string }) {
+export function FollowButton({ crewId, slug, count, className, quiet = false }: {
+  crewId: string; slug: string; count?: number; className?: string;
+  /** En-tête : contour discret tant qu'on ne suit pas (le bouton rouge, c'est « Partager »). */
+  quiet?: boolean;
+}) {
   const { user } = useAuth();
   const { data: followed } = useFollowedIds();
   const queryClient = useQueryClient();
@@ -58,7 +62,7 @@ export function FollowButton({ crewId, slug, count, className }: { crewId: strin
       });
     },
     onSuccess: (_d, follow) => {
-      toast.success(follow ? 'Road trip ajouté à vos favoris' : 'Vous ne suivez plus ce road trip');
+      toast.success(follow ? 'C’est noté : tu retrouveras ce road trip dans ton compte' : 'Tu ne suis plus ce road trip');
     },
     onError: (err) => toastError(err),
     onSettled: () => {
@@ -69,7 +73,7 @@ export function FollowButton({ crewId, slug, count, className }: { crewId: strin
 
   const onClick = () => {
     if (!user) {
-      toast.info('Créez un compte gratuit pour suivre vos road trips favoris');
+      toast.info('Un compte gratuit (juste ton e-mail) suffit pour suivre ce road trip');
       navigate(`/connexion?next=${encodeURIComponent(location.pathname)}`);
       return;
     }
@@ -77,7 +81,7 @@ export function FollowButton({ crewId, slug, count, className }: { crewId: strin
   };
 
   return (
-    <Button onClick={onClick} disabled={mutation.isPending} variant={isFollowed ? 'secondary' : 'default'} className={className}>
+    <Button onClick={onClick} disabled={mutation.isPending} variant={isFollowed ? 'secondary' : quiet ? 'outline' : 'default'} className={className}>
       <Heart className={cn(isFollowed && 'fill-current')} />
       {isFollowed ? 'Suivi' : 'Suivre'}
       {count != null && <span className="opacity-70">{count}</span>}

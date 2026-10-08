@@ -1,10 +1,18 @@
 /**
- * Carnet de route d'un road trip : une frise chronologique des étapes (créées par les voyageurs)
- * et des pages du journal de bord, avec les photos prises à chaque étape.
+ * Carnet de route d'un road trip, en onglets :
+ *  - Étapes : créées par les voyageurs, jour du voyage, lieu, durée et kilomètre de la trace où elles tombent ;
+ *  - Journal : les pages du journal de bord publiées ;
+ *  - Histoire : le récit libre des voyageurs (crews.story).
  */
+import { useMemo, useState } from 'react';
 import type { Photo, TripStage } from '@/lib/supabase';
+import type { TrackPoint } from '@/hooks/useLiveTrack';
 import { thumbUrl } from '@/lib/media';
+import { formatNumber } from '@/lib/format';
+import { haversineKm } from '@/lib/geo';
+import { dayOfTrip } from '@/lib/days';
 import { formatDuration } from '@/lib/stage-detect';
+import { cn } from '@/lib/utils';
 import { stageStyle } from './mapIcons';
 
 export interface JournalItem {
@@ -14,16 +22,11 @@ export interface JournalItem {
   body: string;
 }
 
-type Item =
-  | { type: 'stage'; at: number; stage: TripStage }
-  | { type: 'journal'; at: number; entry: JournalItem };
-
 const time = (iso: string | null) => (iso ? new Date(iso).getTime() : Number.POSITIVE_INFINITY);
-const dayLabel = (ms: number) =>
-  new Date(ms).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
 const hour = (iso: string) => new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+const longDay = (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
 
-/** Photos prises pendant une étape (ou ce jour-là si l'étape n'a pas d'heure de départ). */
+/** Photos prises pendant une étape (ou dans les 12 h si l'étape n'a pas d'heure de départ). */
 function photosOf(stage: TripStage, photos: Photo[]) {
   if (!stage.arrived_at) return [];
   const from = time(stage.arrived_at) - 30 * 60_000;
@@ -31,68 +34,116 @@ function photosOf(stage: TripStage, photos: Photo[]) {
   return photos.filter((p) => p.taken_at && time(p.taken_at) >= from && time(p.taken_at) <= to).slice(0, 4);
 }
 
-export function CrewLogbook({ stages, photos, journal = [] }: { stages: TripStage[]; photos: Photo[]; journal?: JournalItem[] }) {
-  const items: Item[] = [
-    ...stages.map((stage) => ({ type: 'stage' as const, at: time(stage.arrived_at), stage })),
-    ...journal.map((entry) => ({ type: 'journal' as const, at: new Date(`${entry.day}T21:00:00`).getTime(), entry })),
-  ].sort((a, b) => a.at - b.at);
-
-  let lastDay = '';
-  return (
-    <ol className="relative m-0 list-none border-l-2 border-coal/20 p-0 pl-6 md:pl-10">
-      {items.map((it) => {
-        const day = Number.isFinite(it.at) ? dayLabel(it.at) : 'Sans date';
-        const header = day !== lastDay ? day : null;
-        lastDay = day;
-        return (
-          <li key={it.type === 'stage' ? it.stage.id : it.entry.id} className="relative pb-10 last:pb-0">
-            {header && <p className="tt-kicker -ml-6 mb-4 mt-2 text-primary md:-ml-10">{header}</p>}
-            {it.type === 'stage' ? <StageCard stage={it.stage} photos={photosOf(it.stage, photos)} /> : <JournalCard entry={it.entry} />}
-          </li>
-        );
-      })}
-    </ol>
-  );
+/** Kilomètre de la trace à un instant donné (premier point à cette heure ou après). */
+function kmAt(points: readonly TrackPoint[], cum: number[], at: number) {
+  if (!points.length || !Number.isFinite(at)) return null;
+  const s = at / 1000;
+  const i = points.findIndex((p) => p[2] >= s);
+  return cum[i < 0 ? points.length - 1 : i] ?? null;
 }
 
-function StageCard({ stage, photos }: { stage: TripStage; photos: Photo[] }) {
-  const style = stageStyle(stage.kind);
-  const duration = stage.arrived_at && stage.left_at ? (time(stage.left_at) - time(stage.arrived_at)) / 1000 : null;
+type Tab = 'etapes' | 'journal' | 'histoire';
+
+export function CrewLogbook({ stages, photos, journal = [], story, points, startDate }: {
+  stages: TripStage[];
+  photos: Photo[];
+  journal?: JournalItem[];
+  story?: string | null;
+  points: readonly TrackPoint[];
+  /** Jour 1 du voyage (« AAAA-MM-JJ »), pour numéroter les étapes. */
+  startDate: string | null;
+}) {
+  const tabs = ([
+    ['etapes', 'Étapes', stages.length > 0],
+    ['journal', 'Journal', journal.length > 0],
+    ['histoire', 'Histoire', !!story],
+  ] as const).filter((t) => t[2]);
+  const [tab, setTab] = useState<Tab>(tabs[0]?.[0] ?? 'etapes');
+  const cum = useMemo(() => {
+    const out = [0];
+    for (let i = 1; i < points.length; i++) out.push(out[i - 1]! + haversineKm(points[i - 1]![0], points[i - 1]![1], points[i]![0], points[i]![1]));
+    return out;
+  }, [points]);
+  const sorted = useMemo(() => [...stages].sort((a, b) => time(b.arrived_at) - time(a.arrived_at)), [stages]);
+  const entries = useMemo(() => [...journal].sort((a, b) => b.day.localeCompare(a.day)), [journal]);
+  if (!tabs.length) return null;
+
   return (
-    <article className="relative">
-      <span
-        className="absolute -left-[33px] top-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-cream text-xs md:-left-[49px]"
-        style={{ background: style.color }}
-        aria-hidden="true"
-      >
-        {style.emoji}
-      </span>
-      <p className="m-0 font-mono text-[11px] uppercase tracking-[0.14em] text-dust-700">
-        {[style.label, stage.place !== stage.name ? stage.place : null, stage.arrived_at ? hour(stage.arrived_at) : null,
-          duration && duration >= 600 ? formatDuration(duration) : null].filter(Boolean).join(' · ')}
-      </p>
-      <h3 className="m-0 mt-1 font-display text-3xl font-extrabold leading-none text-coal md:text-4xl">{stage.name}</h3>
-      {stage.note && <p className="mb-0 mt-3 max-w-2xl whitespace-pre-line text-base leading-relaxed text-dust-800">{stage.note}</p>}
-      {photos.length > 0 && (
-        <div className="mt-4 flex gap-2 overflow-x-auto">
-          {photos.map((p) => (
-            <a key={p.id} href="#photos" className="block shrink-0">
-              <img src={thumbUrl(p.storage_path, 320) ?? ''} alt={p.title} loading="lazy" className="h-28 w-40 border-2 border-coal object-cover" />
-            </a>
-          ))}
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="tt-display m-0 text-[36px] text-cream">Carnet de route</h2>
+        {tabs.length > 1 && (
+          <div role="tablist" aria-label="Carnet de route" className="flex gap-1 rounded-full bg-ink-800 p-1">
+            {tabs.map(([id, label]) => (
+              <button
+                key={id}
+                role="tab"
+                type="button"
+                aria-selected={tab === id}
+                onClick={() => setTab(id)}
+                className={cn('flex min-h-10 items-center rounded-full px-4 text-[15px] font-bold', tab === id ? 'bg-cream text-ink' : 'text-dust-100 hover:text-white')}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {tab === 'etapes' && (
+        <ol className="m-0 flex list-none flex-col p-0">
+          {sorted.map((w, i) => {
+            const style = stageStyle(w.kind);
+            const day = startDate && w.arrived_at ? dayOfTrip(startDate, new Date(w.arrived_at)) : null;
+            const km = kmAt(points, cum, time(w.arrived_at));
+            const duration = w.arrived_at && w.left_at ? (time(w.left_at) - time(w.arrived_at)) / 1000 : null;
+            const pics = photosOf(w, photos);
+            const sub = [style.label, w.place !== w.name ? w.place : null, w.arrived_at ? hour(w.arrived_at) : null,
+              duration && duration >= 600 ? formatDuration(duration) : null].filter(Boolean).join(' · ');
+            return (
+              <li key={w.id} className="grid grid-cols-[52px_1fr_auto] items-center gap-3.5 border-t-[1.5px] border-ink-700 py-3.5">
+                <span className={cn('flex h-11 items-center justify-center rounded-[14px] font-mono text-[14px]', i === 0 ? 'bg-signal text-white' : 'bg-ink-700 text-dust-100')}>
+                  {day && day >= 1 ? `J${day}` : style.emoji}
+                </span>
+                <div className="flex min-w-0 flex-col gap-0.5">
+                  <span className="text-[18px] font-bold text-cream">{w.name}</span>
+                  <span className="text-[15px] text-dust-400">{sub}</span>
+                  {w.note && <p className="mb-0 mt-1.5 whitespace-pre-line text-[15px] leading-relaxed text-dust-200">{w.note}</p>}
+                  {pics.length > 0 && (
+                    <div className="mt-2 flex gap-2 overflow-x-auto">
+                      {pics.map((p) => (
+                        <a key={p.id} href="#photos" className="block shrink-0">
+                          <img src={thumbUrl(p.storage_path, 320) ?? ''} alt={p.title} loading="lazy" className="h-20 w-28 rounded-xl object-cover" />
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <span className="self-start whitespace-nowrap pt-2.5 font-mono text-[14px] text-dust-300">{km != null ? `km ${formatNumber(km)}` : ''}</span>
+              </li>
+            );
+          })}
+        </ol>
+      )}
+
+      {tab === 'journal' && (
+        <div className="flex flex-col gap-3">
+          {entries.map((j) => {
+            const day = startDate ? dayOfTrip(startDate, new Date(`${j.day}T12:00:00`)) : null;
+            return (
+              <article key={j.id} className="flex flex-col gap-2.5 rounded-[24px] bg-ink-800 p-5">
+                <span className="font-mono text-[13px] text-signal-text">{day && day >= 1 ? `J${day} · ` : ''}{longDay(j.day)}</span>
+                <h3 className="tt-display m-0 text-[24px] text-cream">{j.title}</h3>
+                <p className="m-0 whitespace-pre-line text-[17px] leading-relaxed text-dust-100">{j.body}</p>
+              </article>
+            );
+          })}
         </div>
       )}
-    </article>
-  );
-}
 
-function JournalCard({ entry }: { entry: JournalItem }) {
-  return (
-    <article className="relative border-2 border-coal bg-cream p-5 md:p-6">
-      <span className="absolute -left-[33px] top-5 flex h-6 w-6 items-center justify-center rounded-full border-2 border-cream bg-coal text-xs md:-left-[49px]" aria-hidden="true">✍️</span>
-      <p className="tt-kicker m-0 text-ochre">Journal de bord</p>
-      <h3 className="m-0 mt-1 font-display text-2xl font-extrabold leading-none text-coal md:text-3xl">{entry.title}</h3>
-      <p className="mb-0 mt-3 whitespace-pre-line text-base leading-relaxed text-dust-800">{entry.body}</p>
-    </article>
+      {tab === 'histoire' && story && (
+        <div className="whitespace-pre-line rounded-[24px] bg-ink-800 p-5 text-[17px] leading-relaxed text-dust-100">{story}</div>
+      )}
+    </div>
   );
 }
