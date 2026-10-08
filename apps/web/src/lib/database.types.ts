@@ -710,6 +710,7 @@ export type Database = {
         Args: { p_expires_at?: string; p_max_uses?: number; p_note?: string }
         Returns: string
       }
+      admin_dashboard: { Args: never; Returns: Json }
       admin_grant_crew_access: { Args: { p_email: string }; Returns: undefined }
       admin_list_access_codes: {
         Args: never
@@ -753,6 +754,27 @@ export type Database = {
           refunded_cents: number
           source: string
           status: string
+        }[]
+      }
+      admin_list_trips: {
+        Args: never
+        Returns: {
+          ends_on: string
+          followers_count: number
+          has_device_key: boolean
+          id: string
+          is_demo: boolean
+          is_listed: boolean
+          is_public: boolean
+          last_fix_at: string
+          name: string
+          owner_email: string
+          owner_name: string
+          slug: string
+          starts_on: string
+          total_distance_m: number
+          traccar_device_id: string
+          tracking_enabled: boolean
         }[]
       }
       admin_list_users: {

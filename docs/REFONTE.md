@@ -59,6 +59,11 @@ Branche : `generaliste`. Le site en ligne reste en pause tant que Julien ne vali
   cases automatiques (données) ou manuelles (localStorage), outil à droite, « Je pars » = `set_tracking`. Import GPX
   (`lib/gpx.ts`, testé) dans les étapes. Réglages = `InfoTab` (+ destination, type de voyage) + suppression. Panneaux
   `manage/shared.tsx` au style Balise. « Mon compte » refait (cartes de road trips → espace, « Créer » → `/creer`).
+- [x] Administration : barre latérale, `?section=vue|trips|paiements|codes|comptes`. Vue d'ensemble = migration
+  `20261008000006_admin_dashboard` (`admin_dashboard()` : chiffres clés, points GPS reçus par heure sur 24 h, dernier
+  point, « à traiter » = départ ≤ 3 j sans GPS, batterie < 15 % en route, remboursement récent ; `admin_list_trips()` :
+  propriétaire, statut, km), testées en pgTAP. Pas de « cagnottes » ni de « signalements » (n'existent pas) : ventes du
+  mois à la place. Paiements, codes et comptes gardés.
 
 ## À faire, dans l'ordre
 
@@ -90,7 +95,7 @@ Branche : `generaliste`. Le site en ligne reste en pause tant que Julien ne vali
    Photos, Partage, Réglages) ; guide 8 onglets avec anneau de progression (Voyage, Équipage, Véhicules, Itinéraire,
    Suivi GPS, Partage, Sponsors & cagnotte, Check-list « Je pars » qui lance le suivi). Rebrancher nos onglets existants
    (Infos, GPS, Étapes, Journal, Photos, Sponsors, Membres, QR, Suppression) dans cette structure. « Importer un GPX ».
-7. **Administration** (`Administration.dc.html`) : barre latérale, KPI, tableau des road trips avec filtres, points GPS
+7. ~~**Administration**~~ (fait) (`Administration.dc.html`) : barre latérale, KPI, tableau des road trips avec filtres, points GPS
    reçus sur 24 h, « À traiter », état des services ; garder nos onglets paiements et codes.
 8. **E-mails** (`E-mails.dc.html`) : nouveau gabarit (600 px, crème, en-tête nuit) pour tous les e-mails existants ;
    nouveaux : invitation d'un proche, « C'est parti » (bouton « Je pars »), résumé du soir aux abonnés (désinscription).
