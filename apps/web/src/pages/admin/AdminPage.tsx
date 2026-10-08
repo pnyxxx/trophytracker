@@ -315,7 +315,7 @@ function UsersAdmin() {
 
 export default function AdminPage() {
   return (
-    <PageShell padTop={false}>
+    <PageShell>
       <Seo title="Administration" noindex />
       <PageHero kicker="Direction de course" title="Administration">
         Pour les opérations avancées sur la base, utilisez Supabase Studio (voir docs/ADMINISTRATION.md).

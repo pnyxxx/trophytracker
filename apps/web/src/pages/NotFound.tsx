@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 
 export default function NotFound() {
   return (
-    <PageShell padTop={false}>
+    <PageShell>
       <Seo title="Page introuvable" noindex />
       <section className="relative flex min-h-[88vh] items-center overflow-hidden bg-[radial-gradient(120%_80%_at_80%_0%,#3A2215_0%,#1B1310_45%,#120F0C_75%)]">
         <div aria-hidden="true" className="pointer-events-none absolute -bottom-24 -right-6 font-display text-[min(60vw,520px)] font-extrabold leading-none text-transparent [-webkit-text-stroke:1px_rgba(244,236,223,.08)]">

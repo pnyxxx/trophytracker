@@ -130,7 +130,7 @@ export default function CrewPage() {
   const live = isLive(crew.last_fix_at);
 
   return (
-    <PageShell padTop={false}>
+    <PageShell>
       <Seo
         title={crew.name}
         description={crew.tagline ?? `Suivez le road trip ${crew.name} en direct.`}

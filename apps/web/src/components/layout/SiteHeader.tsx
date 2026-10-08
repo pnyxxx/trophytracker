@@ -1,30 +1,44 @@
-import { useEffect, useState } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { useEffect, useState, type ReactNode } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { LogOut, Menu, User, X } from 'lucide-react';
-import { Logo } from '@/components/common/Logo';
+import { LogOut, Menu, X } from 'lucide-react';
+import { LogoMark, Wordmark } from '@/components/common/Logo';
 import { useAuth } from '@/hooks/auth';
 import { cn } from '@/lib/utils';
 
-const links = [
+export type HeaderVariant = 'floating' | 'sticky';
+
+/** Liens de découverte : seulement sur l'accueil, en-tête flottant. */
+const discover = [
   { to: '/#comment', label: 'Comment ça marche' },
+  { to: '/#exemple', label: 'Exemple de voyage' },
 ];
 
+const navLink = 'text-[15px] font-medium text-dust-200 hover:text-white';
 const cta =
-  'inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-[0.08em] text-white hover:bg-primary-dark hover:text-white';
+  'inline-flex min-h-[44px] items-center whitespace-nowrap rounded-full bg-signal px-[18px] text-[15px] font-bold text-white hover:bg-signal-hover hover:text-white active:bg-signal-press';
+const iconBtn = 'flex h-11 w-11 items-center justify-center rounded-full text-dust-200 hover:bg-cream/[0.06] hover:text-white';
 
-export function SiteHeader() {
-  const { user, profile, isAdmin, signOut } = useAuth();
+/**
+ * En-tête du site.
+ * - `floating` (accueil) : pilule floutée posée au-dessus du récit, qui se fonce au défilement.
+ * - `sticky` (ailleurs) : barre collante simple ; `actions` remplace les boutons par défaut
+ *   (ex. « Suivre » / « Partager » sur la page d'un road trip).
+ */
+export function SiteHeader({ variant = 'sticky', actions }: { variant?: HeaderVariant; actions?: ReactNode }) {
+  const { user, isAdmin, signOut } = useAuth();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
+  const floating = variant === 'floating';
 
   useEffect(() => {
+    if (!floating) return;
     const onScroll = () => setScrolled(window.scrollY > 20);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  }, [floating]);
 
   const logout = async () => {
     setOpen(false);
@@ -32,97 +46,108 @@ export function SiteHeader() {
     navigate('/');
   };
 
-  const navClass = ({ isActive }: { isActive: boolean }) =>
-    cn('text-sm font-semibold hover:text-white', isActive ? 'text-white' : 'text-dust-100');
+  const main = user ? { to: '/mon-compte', label: 'Mes road trips' } : { to: '/creer', label: 'Créer mon trip' };
+  const menuLinks = [
+    ...(floating ? discover : []),
+    ...(isAdmin ? [{ to: '/admin', label: 'Administration' }] : []),
+    user ? { to: '/mon-compte', label: 'Mon compte' } : { to: '/connexion', label: 'Connexion' },
+  ];
+
+  const brand = (
+    <Link to="/" className="flex items-center gap-[9px] text-cream no-underline hover:text-cream" aria-label="trophytracker, accueil">
+      <LogoMark />
+      <Wordmark className={cn(actions ? 'hidden sm:inline' : 'hidden min-[420px]:inline')} />
+    </Link>
+  );
+
+  const defaultActions = (
+    <>
+      <nav className="hidden items-center gap-[22px] md:flex" aria-label="Navigation principale">
+        {floating && discover.map((l) => (
+          <Link key={l.to} to={l.to} className={navLink}>{l.label}</Link>
+        ))}
+        {isAdmin && <Link to="/admin" className={navLink}>Admin</Link>}
+        {!user && <Link to="/connexion" className={navLink}>Connexion</Link>}
+      </nav>
+      <Link to={main.to} className={cta}>{main.label}</Link>
+      {user && (
+        <button onClick={logout} title="Se déconnecter" aria-label="Se déconnecter" className={cn(iconBtn, 'hidden md:flex')}>
+          <LogOut className="h-[18px] w-[18px]" />
+        </button>
+      )}
+      <button
+        className={cn(iconBtn, 'md:hidden')}
+        onClick={() => setOpen((o) => !o)}
+        aria-label={open ? 'Fermer le menu' : 'Ouvrir le menu'}
+        aria-expanded={open}
+        aria-controls="menu-mobile"
+      >
+        {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+      </button>
+    </>
+  );
+
+  const menu = (
+    <AnimatePresence>
+      {open && (
+        <motion.nav
+          id="menu-mobile"
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.18 }}
+          className={cn(
+            'flex flex-col px-5 py-2 md:hidden',
+            floating
+              ? 'mx-auto mt-2 max-w-[1400px] rounded-[24px] border-[1.5px] border-cream/[0.14] bg-ink/[0.94] backdrop-blur-[16px]'
+              : 'border-t-[1.5px] border-ink-700',
+          )}
+          aria-label="Navigation mobile"
+        >
+          {menuLinks.map((l) => (
+            <Link
+              key={l.to}
+              to={l.to}
+              onClick={() => setOpen(false)}
+              className="border-b border-ink-700 py-4 font-display text-[26px] font-extrabold tracking-[-0.02em] text-cream last:border-b-0 hover:text-signal-text"
+            >
+              {l.label}
+            </Link>
+          ))}
+          {user && (
+            <button onClick={logout} className="flex min-h-[48px] items-center gap-2 text-left text-[15px] font-medium text-dust-400 hover:text-cream">
+              <LogOut className="h-4 w-4" /> Se déconnecter
+            </button>
+          )}
+        </motion.nav>
+      )}
+    </AnimatePresence>
+  );
+
+  if (floating) {
+    return (
+      <header className="fixed inset-x-0 top-0 z-[1000] px-4 pt-3.5 sm:px-5">
+        <div
+          className={cn(
+            'mx-auto flex h-[58px] max-w-[1400px] items-center justify-between gap-3 rounded-full border-[1.5px] border-cream/[0.14] pl-[18px] pr-2 backdrop-blur-[16px] backdrop-saturate-[140%] transition-colors duration-300',
+            scrolled || open ? 'bg-ink/[0.86]' : 'bg-ink/[0.55]',
+          )}
+        >
+          {brand}
+          <div className="flex items-center gap-1.5 md:gap-[22px]">{defaultActions}</div>
+        </div>
+        {menu}
+      </header>
+    );
+  }
 
   return (
-    <header
-      className={cn(
-        'fixed inset-x-0 top-0 z-[1000] border-b border-cream/[0.08] backdrop-blur-[14px] backdrop-saturate-[160%] transition-colors duration-300',
-        scrolled || open ? 'bg-ink/[0.86]' : 'bg-ink/[0.35]',
-      )}
-    >
-      <div className="mx-auto flex h-[68px] max-w-[1400px] items-center justify-between gap-6 px-4 sm:px-7">
-        <Logo />
-
-        <nav className="hidden items-center gap-7 md:flex" aria-label="Navigation principale">
-          {links.map((l) =>
-            l.to.includes('#') ? (
-              <Link key={l.to} to={l.to} className={navClass({ isActive: false })}>
-                {l.label}
-              </Link>
-            ) : (
-              <NavLink key={l.to} to={l.to} className={navClass}>
-                {l.label}
-              </NavLink>
-            ),
-          )}
-          {isAdmin && (
-            <NavLink to="/admin" className={navClass}>
-              Admin
-            </NavLink>
-          )}
-          {user ? (
-            <div className="flex items-center gap-2">
-              <Link to="/mon-compte" className={cta}>
-                <User className="h-4 w-4" />
-                {profile?.display_name ?? 'Mon compte'}
-              </Link>
-              <button onClick={logout} title="Se déconnecter" aria-label="Se déconnecter" className="rounded-full p-2.5 text-dust-100 hover:bg-cream/5 hover:text-white">
-                <LogOut className="h-4 w-4" />
-              </button>
-            </div>
-          ) : (
-            <>
-              <NavLink to="/connexion" className={navClass}>Connexion</NavLink>
-              <Link to="/inscription" className={cta}>Créer un compte</Link>
-            </>
-          )}
-        </nav>
-
-        <button
-          className="rounded-full p-2 text-cream md:hidden"
-          onClick={() => setOpen((o) => !o)}
-          aria-label={open ? 'Fermer le menu' : 'Ouvrir le menu'}
-          aria-expanded={open}
-        >
-          {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+    <header className="sticky top-0 z-[1000] border-b-[1.5px] border-ink-700 bg-ink/[0.88] backdrop-blur-[14px]">
+      <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-3 px-5 py-2.5">
+        {brand}
+        <div className="flex items-center gap-2 md:gap-[22px]">{actions ?? defaultActions}</div>
       </div>
-
-      <AnimatePresence>
-        {open && (
-          <motion.nav
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden border-t border-cream/[0.08] md:hidden"
-            aria-label="Navigation mobile"
-          >
-            <div className="flex flex-col px-4 py-3 sm:px-7">
-              {[...links, ...(isAdmin ? [{ to: '/admin', label: 'Administration' }] : []), ...(user ? [{ to: '/mon-compte', label: 'Mon compte' }] : [{ to: '/connexion', label: 'Connexion' }])].map((l) => (
-                <Link
-                  key={l.to}
-                  to={l.to}
-                  onClick={() => setOpen(false)}
-                  className="border-b border-cream/[0.08] py-4 font-display text-3xl font-extrabold text-cream hover:text-primary"
-                >
-                  {l.label}
-                </Link>
-              ))}
-              {user ? (
-                <button onClick={logout} className="py-4 text-left font-mono text-xs uppercase tracking-[0.14em] text-dust-400 hover:text-cream">
-                  Se déconnecter
-                </button>
-              ) : (
-                <Link to="/inscription" onClick={() => setOpen(false)} className={cn(cta, 'mt-4 justify-center py-4')}>
-                  Créer un compte
-                </Link>
-              )}
-            </div>
-          </motion.nav>
-        )}
-      </AnimatePresence>
+      {!actions && menu}
     </header>
   );
 }

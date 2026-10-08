@@ -23,10 +23,13 @@ Branche : `generaliste`. Le site en ligne reste en pause tant que Julien ne vali
   variables shadcn, logo balise (`components/common/Logo.tsx`, `logo-svg.ts`), favicon, icône, logo e-mail, image de partage,
   boutons pilule 48 px (`ui/button.tsx`), champs (`ui/input.tsx`), `Brand.tsx` (Kicker, SectionTitle, PageHero, Container),
   conversion automatique des titres (plus de capitales ni de police pochoir).
+- [x] En-tête et pied de page : `PageShell header="floating"` (accueil, pilule floutée) ou collant par défaut ;
+  `headerActions` = boutons propres à la page (à utiliser pour Suivre / Partager à l'étape 5). Ancre `/#exemple`.
+  Route provisoire `/creer` → `/inscription` (dans `App.tsx`, à remplacer à l'étape 4).
 
 ## À faire, dans l'ordre
 
-1. **En-tête et pied de page** (`SiteHeader`, `SiteFooter`, `PageShell`) : en-tête flottant en pilule floutée sur
+1. ~~**En-tête et pied de page**~~ (fait) (`SiteHeader`, `SiteFooter`, `PageShell`) : en-tête flottant en pilule floutée sur
    l'accueil (logo, Comment ça marche, Exemple de voyage, Connexion, « Créer mon trip »), en-tête collant simple ailleurs ;
    pied de page sobre (logo, Comment ça marche, Confidentialité, Contact, mentions, CGU, CGV, © année).
 2. **Connexion par code** (pages auth, `hooks/auth.tsx`, modèles d'e-mails `email-templates.ts`, config GoTrue

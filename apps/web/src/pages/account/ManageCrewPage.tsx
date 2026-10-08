@@ -43,7 +43,7 @@ export default function ManageCrewPage() {
   const tab = params.get('onglet') ?? 'infos';
 
   return (
-    <PageShell padTop={false}>
+    <PageShell>
       <Seo title={`Gérer ${crew.name}`} noindex />
       <PageHero
         kicker={<><Link to="/mon-compte" className="inline-flex items-center gap-1 text-dust-300 hover:text-cream"><ArrowLeft className="h-3.5 w-3.5" />Mon compte</Link><span className="text-dust-600">/</span>Espace road trip</>}

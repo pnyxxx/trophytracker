@@ -1,13 +1,21 @@
 import type { ReactNode } from 'react';
-import { SiteHeader } from './SiteHeader';
+import { SiteHeader, type HeaderVariant } from './SiteHeader';
 import { SiteFooter } from './SiteFooter';
 
-/** Gabarit commun : en-tête fixe, contenu, pied de page. */
-export function PageShell({ children, padTop = true }: { children: ReactNode; padTop?: boolean }) {
+/**
+ * Gabarit commun : en-tête, contenu, pied de page.
+ * `header="floating"` (accueil) : l'en-tête flotte au-dessus du contenu, qui commence tout en haut.
+ * `headerActions` : boutons propres à la page à la place de la navigation par défaut.
+ */
+export function PageShell({ children, header = 'sticky', headerActions }: {
+  children: ReactNode;
+  header?: HeaderVariant;
+  headerActions?: ReactNode;
+}) {
   return (
     <div className="flex min-h-screen flex-col bg-ink">
-      <SiteHeader />
-      <main id="contenu" className={padTop ? 'flex-1 pt-[68px]' : 'flex-1'}>
+      <SiteHeader variant={header} actions={headerActions} />
+      <main id="contenu" className="flex-1">
         {children}
       </main>
       <SiteFooter />

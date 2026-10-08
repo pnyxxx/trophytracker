@@ -79,7 +79,7 @@ export default function Landing() {
   const mapSeen = useSeen(mapRef);
 
   return (
-    <PageShell padTop={false}>
+    <PageShell header="floating">
       {/* Le site lui-même (WebSite, Organization) est décrit dans le HTML statique de l'accueil : seo-plugin.ts. */}
       <Seo />
 
@@ -144,7 +144,7 @@ export default function Landing() {
       </section>
 
       {/* ── 02 Un exemple en 3D ──────────────────────────────────────────── */}
-      <section ref={mapRef} className="relative h-[min(820px,100svh)] overflow-hidden bg-ink-900">
+      <section id="exemple" ref={mapRef} className="relative h-[min(820px,100svh)] scroll-mt-[88px] overflow-hidden bg-ink-900">
         {mapSeen && (
           <Suspense fallback={null}>
             <div className="absolute inset-0"><ExampleTripMap /></div>
@@ -210,7 +210,7 @@ export default function Landing() {
       </section>
 
       {/* ── 04 Comment ça marche ─────────────────────────────────────────── */}
-      <section id="comment" className="scroll-mt-[68px] bg-cream px-4 py-[120px] text-coal sm:px-7">
+      <section id="comment" className="scroll-mt-[88px] bg-cream px-4 py-[120px] text-coal sm:px-7">
         <div className="mx-auto flex max-w-[1240px] flex-col gap-16">
           <SectionTitle className="leading-[0.88]">
             Comment

@@ -16,7 +16,7 @@ export function LegalPage({ seoTitle, title, intro, children }: {
   children: ReactNode;
 }) {
   return (
-    <PageShell padTop={false}>
+    <PageShell>
       <Seo title={seoTitle} />
       <PageHero kicker="Informations" title={title} />
       <Container className="border-t border-cream/[0.12] py-14 md:py-20">
