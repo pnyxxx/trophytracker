@@ -1,41 +1,57 @@
 /**
- * QR code du road trip, aux couleurs de TrophyTracker : aperçu, téléchargement PNG et partage.
- * Proposé sur la page publique (dans la fenêtre « Partager », avec le lien de la page)
- * et dans l'espace équipage (onglet « QR code »).
+ * Visuels QR code du road trip (autocollant, story, rond) : aperçu, téléchargement PNG et partage.
+ * Proposés sur la page publique (fenêtre « Partager ») et dans l'espace voyageur (« Partage »).
  */
 import { useEffect, useState } from 'react';
 import { Copy, Download, Send, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import type { Crew } from '@/lib/supabase';
-import { thumbUrl } from '@/lib/media';
+import { supabase, type Crew } from '@/lib/supabase';
+import { useQuery } from '@tanstack/react-query';
+import { isLive } from '@/lib/format';
+import { dayOfTrip } from '@/lib/days';
 import { canvasToBlob, drawPoster, POSTER_SIZE, type PosterFormat } from '@/lib/qr-poster';
 import { markShared } from '@/lib/share';
 import { cn } from '@/lib/utils';
 
 const FORMATS: { id: PosterFormat; label: string; hint: string }[] = [
-  { id: 'sticker', label: 'Autocollant', hint: 'Carré 1600 px, coins arrondis : pour le véhicule, un sticker, une affiche.' },
-  { id: 'story', label: 'Story réseaux', hint: '1080 × 1920 px : Instagram, Facebook, WhatsApp.' },
+  { id: 'sticker', label: 'Autocollant véhicule', hint: 'Carré 12 × 12 cm (1440 px) : à coller sur la vitre arrière ou la carrosserie.' },
+  { id: 'story', label: 'Story', hint: '1080 × 1920 sur la vue satellite de ta trace : Instagram, WhatsApp, Facebook.' },
+  { id: 'round', label: 'Autocollant rond', hint: 'Rond de 8 cm (960 px) : pour une gourde, un casque, une valise.' },
 ];
+const FILE: Record<PosterFormat, string> = { sticker: 'autocollant', story: 'story', round: 'rond' };
 
-type CrewForQr = Pick<Crew, 'id' | 'slug' | 'name' | 'car_number' | 'avatar_path' | 'is_public'>;
+type CrewForQr = Pick<Crew, 'id' | 'slug' | 'name' | 'is_public' | 'city' | 'destination' | 'starts_on' | 'ends_on' | 'last_fix_at' | 'total_distance_m' | 'start_lat' | 'start_lon'>;
 
 export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl?: boolean }) {
   const [format, setFormat] = useState<PosterFormat>('sticker');
   const [image, setImage] = useState<{ blob: Blob; url: string } | null>(null);
   const [error, setError] = useState(false);
-
-  const eventLabel = 'Carnet de route en direct';
   const pageUrl = `${window.location.origin}/t/${crew.slug}`;
-  const fileName = `trophytracker-${crew.slug}-${format === 'sticker' ? 'autocollant' : 'story'}.png`;
+  const fileName = `trophytracker-${crew.slug}-${FILE[format]}.png`;
+  // La trace ne sert qu'à la story (vue satellite) : chargée seulement pour elle.
+  const { data: track, isFetched } = useQuery({
+    queryKey: ['poster-track', crew.id],
+    enabled: format === 'story',
+    staleTime: 5 * 60_000,
+    queryFn: async () => ((await supabase.rpc('get_track', { p_crew: crew.id })).data ?? []) as unknown as number[][],
+  });
+  const ready = format !== 'story' || isFetched;
+  const live = isLive(crew.last_fix_at);
+  const day = crew.starts_on ? dayOfTrip(crew.starts_on, new Date()) : null;
 
   useEffect(() => {
+    if (!ready) return;
     let alive = true;
     let url: string | null = null;
     setImage(null);
     setError(false);
-    drawPoster(format, { name: crew.name, carNumber: crew.car_number, url: pageUrl, eventLabel, avatarUrl: thumbUrl(crew.avatar_path, 512) })
+    drawPoster(format, {
+      name: crew.name, url: pageUrl, city: crew.city, destination: crew.destination, starts_on: crew.starts_on, ends_on: crew.ends_on,
+      live, day: day && day >= 1 ? day : null, distanceKm: crew.total_distance_m / 1000, track: track ?? [],
+      start: crew.start_lat != null && crew.start_lon != null ? { lat: crew.start_lat, lon: crew.start_lon } : null,
+    })
       .then(canvasToBlob)
       .then((blob) => {
         url = URL.createObjectURL(blob);
@@ -47,11 +63,10 @@ export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl
       alive = false;
       if (url) URL.revokeObjectURL(url);
     };
-  }, [format, crew.name, crew.car_number, crew.avatar_path, pageUrl, eventLabel]);
+  }, [ready, format, track, crew.name, crew.city, crew.destination, crew.starts_on, crew.ends_on, crew.total_distance_m, crew.start_lat, crew.start_lon, live, day, pageUrl]);
 
   const file = image ? new File([image.blob], fileName, { type: 'image/png' }) : null;
   const canShareFile = !!file && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] });
-
   const share = async () => {
     if (!file) return;
     markShared(crew.id);
@@ -61,17 +76,16 @@ export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl
       /* partage annulé */
     }
   };
-
   const [w, h] = POSTER_SIZE[format];
 
   return (
     <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] md:items-start">
       {/* Cadre de taille fixe, image en absolu : Safari (iPhone) ignore sinon le max-height
           d'une image dans un bloc à aspect-ratio et affiche la story à 1080 px de large. */}
-      <div className="relative aspect-square rounded-md bg-[repeating-conic-gradient(#2A221B_0%_25%,#1B1713_0%_50%)] bg-[length:20px_20px]">
+      <div className="relative aspect-square rounded-[20px] bg-[repeating-conic-gradient(#2B2C33_0%_25%,#1F2026_0%_50%)] bg-[length:20px_20px]">
         <div className="absolute inset-4 flex items-center justify-center">
           {image ? (
-            <img src={image.url} alt={`QR code de ${crew.name}`} className="h-full w-full object-contain drop-shadow-xl" />
+            <img src={image.url} alt={`Visuel QR code de ${crew.name}`} className="h-full w-full object-contain drop-shadow-xl" />
           ) : error ? (
             <p className="m-0 text-center text-sm text-dust-300">Impossible de créer l’image dans ce navigateur.</p>
           ) : (
@@ -89,21 +103,19 @@ export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl
               role="radio"
               aria-checked={format === f.id}
               onClick={() => setFormat(f.id)}
-              className={cn(
-                'flex flex-col gap-0.5 rounded-md border px-4 py-3 text-left transition-colors',
-                format === f.id ? 'border-primary bg-primary/10' : 'border-cream/15 hover:border-cream/40',
-              )}
+              className={cn('flex flex-col gap-0.5 rounded-2xl border-2 px-4 py-3 text-left transition-colors',
+                format === f.id ? 'border-signal bg-signal/10' : 'border-ink-600 hover:border-dust-600')}
             >
-              <span className="font-display text-xl font-extrabold text-cream">{f.label}</span>
-              <span className="text-sm text-dust-300">{f.hint}</span>
+              <span className="text-[17px] font-bold text-cream">{f.label}</span>
+              <span className="text-[14px] text-dust-300">{f.hint}</span>
             </button>
           ))}
         </div>
 
-        {showUrl && <p className="m-0 break-all font-mono text-xs text-dust-400">Le QR code ouvre : {pageUrl}</p>}
+        {showUrl && <p className="m-0 break-all font-mono text-[13px] text-dust-400">Le QR code ouvre : {pageUrl}</p>}
         {!crew.is_public && (
-          <p className="m-0 rounded-md border border-gold/40 bg-gold/10 px-3 py-2 text-sm text-gold">
-            Votre page est privée : le QR code ne marchera que pour les membres du road trip. Rendez-la publique dans « Infos » avant de l’imprimer.
+          <p className="m-0 rounded-2xl border border-gold/40 bg-gold/10 px-3 py-2 text-[14px] text-gold-text">
+            Ta page est réservée aux voyageurs : le QR code ne marchera que pour vous. Rends-la « privée, par lien » dans les réglages avant de l’imprimer.
           </p>
         )}
 
@@ -119,8 +131,8 @@ export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl
             </Button>
           )}
         </div>
-        <p className="m-0 text-xs text-dust-500">
-          Astuce impression : pour un autocollant extérieur, choisissez un vinyle mat laminé, 10 cm de côté minimum pour être scanné à 1 m.
+        <p className="m-0 text-[13px] text-dust-500">
+          Astuce impression : pour un autocollant extérieur, choisis un vinyle mat laminé ; à 12 cm, le QR se scanne à plus d’un mètre.
         </p>
       </div>
     </div>

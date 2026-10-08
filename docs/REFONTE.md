@@ -72,6 +72,8 @@ Branche : `generaliste`. Le site en ligne reste en pause tant que Julien ne vali
   (`queue_evening_digests`). Destinataires = abonnés (`follows.emails`) + proches invités (`crew_subscribers`) ;
   désinscription en un clic `/desabonnement?t=` (`unsubscribe`, anonyme) + en-tête List-Unsubscribe. Formulaire
   « Inviter des proches » dans Partage. `GOTRUE_RATE_LIMIT_EMAIL_SENT=300` (toute connexion envoie un e-mail).
+- [x] Visuels QR (`lib/qr-poster.ts`, testé) : autocollant carré 12 cm (1440 px), story 1080 × 1920 sur l'imagerie
+  satellite Esri (CORS ouvert) avec la trace et la balise, autocollant rond 8 cm (960 px). QR vérifiés au décodage.
 
 ## À faire, dans l'ordre
 
@@ -107,7 +109,7 @@ Branche : `generaliste`. Le site en ligne reste en pause tant que Julien ne vali
    reçus sur 24 h, « À traiter », état des services ; garder nos onglets paiements et codes.
 8. ~~**E-mails**~~ (fait) (`E-mails.dc.html`) : nouveau gabarit (600 px, crème, en-tête nuit) pour tous les e-mails existants ;
    nouveaux : invitation d'un proche, « C'est parti » (bouton « Je pars »), résumé du soir aux abonnés (désinscription).
-9. **Visuels QR** (`Visuels QR.dc.html`) : autocollant carré 12 cm, story 1080×1920 sur fond satellite avec la trace,
+9. ~~**Visuels QR**~~ (fait) (`Visuels QR.dc.html`) : autocollant carré 12 cm, story 1080×1920 sur fond satellite avec la trace,
    autocollant rond 8 cm (`lib/qr-poster.ts`).
 10. **Pages restantes** : mentions, CGU, CGV, confidentialité, 404, page pause (`public/pause.html`), compte,
     invitation, au nouveau style (fond nuit, plus de sections crème).
