@@ -165,15 +165,22 @@ const RAD = Math.PI / 180;
 const merc = (lat: number) => Math.log(Math.tan(Math.PI / 4 + (Math.max(-85, Math.min(85, lat)) * RAD) / 2));
 const invMerc = (y: number) => (2 * Math.atan(Math.exp(y)) - Math.PI / 2) / RAD;
 
-/** Cadrage : la trace occupe le milieu de l'image (entre le titre en haut et le QR en bas). */
-export function storyFrame(points: { lat: number; lon: number }[], w: number, h: number) {
+/** Cadrage de la story : la trace occupe le milieu de l'image (entre le titre en haut et le QR en bas). */
+export const storyFrame = (points: { lat: number; lon: number }[], w: number, h: number) => fitFrame(points, w, h, 0.82, 0.36);
+
+/**
+ * Cadre une trace dans une image Web Mercator de w × h pixels : la trace prend au plus `fx` de la largeur
+ * et `fy` de la hauteur, centrée. Renvoie l'emprise (lon/lat) à demander à l'imagerie et la conversion
+ * position → pixel, pour dessiner la trace par-dessus.
+ */
+export function fitFrame(points: { lat: number; lon: number }[], w: number, h: number, fx: number, fy: number) {
   const xs = points.map((p) => p.lon * RAD);
   const ys = points.map((p) => merc(p.lat));
   const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
   const minSpan = 0.006; // ≈ 35 km : une trace très courte reste lisible
   const spanX = Math.max(x1 - x0, minSpan);
   const spanY = Math.max(y1 - y0, minSpan);
-  const s = Math.min((w * 0.82) / spanX, (h * 0.36) / spanY);
+  const s = Math.min((w * fx) / spanX, (h * fy) / spanY);
   const widthM = w / s;
   const heightM = h / s;
   const cx = (x0 + x1) / 2;

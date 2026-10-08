@@ -24,6 +24,7 @@ import { keys, useCrew, useCrewStats, useMyCrews, useMyRole, usePhotos, useStage
 import { supabase, type Crew } from '@/lib/supabase';
 import { toastError, unwrap } from '@/lib/errors';
 import { formatNumber, formatRelative, isLive } from '@/lib/format';
+import { lastDays, useVisibility } from '@/hooks/useTrip';
 
 const GUIDE_STEPS: GuideStepId[] = ['voyage', 'equipage', 'vehicule', 'itineraire', 'gps', 'partage', 'sponsors', 'checklist'];
 /** Anciennes adresses (onglets d'avant la refonte, liens des e-mails) → section et étape. */
@@ -38,6 +39,9 @@ function Overview({ crew, onGo }: { crew: Crew; onGo: (s: Section, step?: GuideS
   const { data: photos = [] } = usePhotos(crew.id);
   const { data: stages = [] } = useStages(crew.id);
   const g = useGuide(crew);
+  const { data: vis } = useVisibility(crew.id);
+  const days = lastDays(vis?.days ?? []);
+  const maxDay = Math.max(1, ...days.map((d) => d.views));
   const live = isLive(crew.last_fix_at);
   const next = g.steps.find((s) => s.items.some((i) => !i.done));
   const stop = useMutation({
@@ -106,6 +110,23 @@ function Overview({ crew, onGo }: { crew: Crew; onGo: (s: Section, step?: GuideS
           </div>
         ))}
       </dl>
+
+      <section className="flex flex-col gap-4 rounded-[28px] bg-ink-800 p-6" aria-label="Visibilité pour les sponsors">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div className="flex flex-col gap-1">
+            <span className="font-mono text-[13px] text-dust-400">visibilité · pour tes sponsors</span>
+            <span className="tt-display text-[28px] leading-none text-cream">{formatNumber(vis?.totalViews ?? 0)} visite{(vis?.totalViews ?? 0) > 1 ? 's' : ''} de ta page</span>
+            <span className="text-[15px] text-dust-300">
+              {formatNumber(crew.followers_count + (vis?.invited ?? 0))} proches abonnés · {formatNumber(vis?.cheers ?? 0)} encouragement{(vis?.cheers ?? 0) > 1 ? 's' : ''}
+            </span>
+          </div>
+          <Button asChild variant="secondary"><Link to={`/mon-compte/road-trips/${crew.slug}/rapport`}>Rapport pour les sponsors (PDF)</Link></Button>
+        </div>
+        <div className="flex h-[70px] items-end gap-[3px]" role="img" aria-label="Visites par jour sur les 30 derniers jours">
+          {days.map((d) => <span key={d.day} className="flex-1 rounded-t-[3px] bg-signal" style={{ height: `${Math.max(3, (d.views / maxDay) * 100)}%`, opacity: d.views ? 1 : 0.25 }} title={`${d.day} : ${d.views}`} />)}
+        </div>
+        <span className="text-[13px] text-dust-500">Visites anonymes des 30 derniers jours (une par navigateur et par jour, sans toi ni tes compagnons de route).</span>
+      </section>
     </div>
   );
 }

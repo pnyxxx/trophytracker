@@ -45,6 +45,41 @@ export type Database = {
         }
         Relationships: []
       }
+      cheers: {
+        Row: {
+          author_name: string
+          created_at: string
+          crew_id: string
+          id: string
+          message: string
+          user_id: string | null
+        }
+        Insert: {
+          author_name: string
+          created_at?: string
+          crew_id: string
+          id?: string
+          message: string
+          user_id?: string | null
+        }
+        Update: {
+          author_name?: string
+          created_at?: string
+          crew_id?: string
+          id?: string
+          message?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cheers_crew_id_fkey"
+            columns: ["crew_id"]
+            isOneToOne: false
+            referencedRelation: "crews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crew_devices: {
         Row: {
           crew_id: string
@@ -105,6 +140,32 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "crew_members_crew_id_fkey"
+            columns: ["crew_id"]
+            isOneToOne: false
+            referencedRelation: "crews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crew_page_views: {
+        Row: {
+          crew_id: string
+          day: string
+          views: number
+        }
+        Insert: {
+          crew_id: string
+          day?: string
+          views?: number
+        }
+        Update: {
+          crew_id?: string
+          day?: string
+          views?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crew_page_views_crew_id_fkey"
             columns: ["crew_id"]
             isOneToOne: false
             referencedRelation: "crews"
@@ -842,6 +903,7 @@ export type Database = {
         Args: { p_crew: string; p_device: string }
         Returns: undefined
       }
+      count_page_view: { Args: { p_crew: string }; Returns: undefined }
       create_crew: {
         Args: { p_name: string; p_starts_on?: string; p_tagline?: string }
         Returns: {
@@ -928,6 +990,10 @@ export type Database = {
       invite_relatives: {
         Args: { p_crew: string; p_emails: string[] }
         Returns: number
+      }
+      post_cheer: {
+        Args: { p_crew: string; p_message: string; p_name: string }
+        Returns: string
       }
       purchase_attach_session: {
         Args: { p_purchase: string; p_session: string }

@@ -24,6 +24,7 @@ export function TripSupport({ fundraiserUrl, sponsors, contactEmail, wall }: {
   wall?: ReactNode;
 }) {
   return (
+    <>
     <section id="soutenir" className="grid scroll-mt-24 grid-cols-[repeat(auto-fit,minmax(min(100%,320px),1fr))] items-stretch gap-4">
       {fundraiserUrl && (
         <Card label="cagnotte">
@@ -61,5 +62,11 @@ export function TripSupport({ fundraiserUrl, sponsors, contactEmail, wall }: {
         </Card>
       )}
     </section>
+    {wall && contactEmail && (
+      <p className="m-0 mt-4 text-[15px] text-dust-400">
+        Un message plus personnel ? <a href={`mailto:${contactEmail}`} className="font-bold text-signal-text hover:text-cream">Écrire aux voyageurs</a>
+      </p>
+    )}
+    </>
   );
 }

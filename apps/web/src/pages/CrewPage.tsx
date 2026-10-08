@@ -3,7 +3,7 @@
  * en-tête (statut, visibilité, voyageurs), bandeau « pas de réseau, c'est normal », carte + tableau de bord,
  * « Revivre en 3D », carnet de route et photos, puis « Soutenir » (cagnotte, sponsors, encouragements).
  */
-import { lazy, Suspense, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Clapperboard, Settings } from 'lucide-react';
 import { PageShell } from '@/components/layout/PageShell';
@@ -18,6 +18,8 @@ import { CrewShareButton } from '@/components/crew/CrewQr';
 import { PlaceCard, TripDashboard } from '@/components/crew/TripDashboard';
 import { tripDay, usePlaceName, useTelemetry } from '@/hooks/useTrip';
 import { TripSupport } from '@/components/crew/TripSupport';
+import { CheersWall } from '@/components/crew/CheersWall';
+import { supabase } from '@/lib/supabase';
 import type { ReplayFormat } from '@/components/crew/TripReplay';
 import { useCrew, useCrewMembers, useCrewStats, useJournal, useMyRole, usePhotos, useSponsors, useStages } from '@/hooks/queries';
 import { useLiveTrack } from '@/hooks/useLiveTrack';
@@ -68,6 +70,18 @@ export default function CrewPage() {
   const profile = useMemo(() => altitudeProfile(points, startDate), [points, startDate]);
   const { data: telemetry } = useTelemetry(crew ?? undefined);
   const place = usePlaceName(crew?.last_lat, crew?.last_lon);
+
+  // Une visite par navigateur et par jour, anonyme (rapport aux sponsors) ; les voyageurs ne sont pas comptés.
+  const crewId = crew?.id;
+  useEffect(() => {
+    if (!crewId || canEdit) return;
+    const key = `tt-vue-${crewId}-${new Date().toISOString().slice(0, 10)}`;
+    try {
+      if (localStorage.getItem(key)) return;
+      localStorage.setItem(key, '1');
+    } catch { /* stockage indisponible : on compte quand même */ }
+    void supabase.rpc('count_page_view', { p_crew: crewId }).then(() => {});
+  }, [crewId, canEdit]);
 
   if (isLoading) return <PageShell><PageLoader /></PageShell>;
   if (!crew) return <NotFound />;
@@ -261,7 +275,12 @@ export default function CrewPage() {
 
       {/* ── Soutenir ─────────────────────────────────────────────────────── */}
       <div className="mx-auto max-w-[1440px] px-5 pb-[72px] pt-9">
-        <TripSupport fundraiserUrl={crew.fundraiser_url} sponsors={sponsors} contactEmail={crew.contact_email} />
+        <TripSupport
+          fundraiserUrl={crew.fundraiser_url}
+          sponsors={sponsors}
+          contactEmail={crew.contact_email}
+          wall={<CheersWall crewId={crew.id} canEdit={canEdit} isDemo={crew.is_demo} />}
+        />
       </div>
     </PageShell>
   );

@@ -55,3 +55,36 @@ export function tripDay(crew: Pick<Crew, 'starts_on' | 'ends_on'>, firstFix: num
   const total = crew.ends_on ? dayOfTrip(start, new Date(`${crew.ends_on}T12:00:00`)) : null;
   return { day: day >= 1 ? day : null, total };
 }
+
+/** Visibilité d'un road trip, pour les sponsors : visites de la page (par jour), proches et encouragements. */
+export function useVisibility(crewId: string | undefined) {
+  return useQuery({
+    queryKey: ['visibility', crewId],
+    enabled: !!crewId,
+    staleTime: 60_000,
+    queryFn: async () => {
+      const [views, subs, cheers] = await Promise.all([
+        supabase.from('crew_page_views').select('day, views').eq('crew_id', crewId!).order('day'),
+        supabase.from('crew_subscribers').select('id', { count: 'exact', head: true }).eq('crew_id', crewId!).is('unsubscribed_at', null),
+        supabase.from('cheers').select('id', { count: 'exact', head: true }).eq('crew_id', crewId!),
+      ]);
+      const days = unwrap(views);
+      return {
+        days,
+        totalViews: days.reduce((n, d) => n + d.views, 0),
+        invited: subs.count ?? 0,
+        cheers: cheers.count ?? 0,
+      };
+    },
+  });
+}
+
+/** Les 30 derniers jours de visites, jour par jour (0 les jours sans visite). */
+export function lastDays(days: { day: string; views: number }[], n = 30, today = new Date()) {
+  const byDay = new Map(days.map((d) => [d.day, d.views]));
+  return Array.from({ length: n }, (_, i) => {
+    const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - (n - 1 - i));
+    const iso = localDate(d.getTime() / 1000);
+    return { day: iso, views: byDay.get(iso) ?? 0 };
+  });
+}

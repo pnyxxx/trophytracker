@@ -13,6 +13,7 @@ const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
 const InvitationPage = lazy(() => import('@/pages/auth/InvitationPage'));
 const AccountPage = lazy(() => import('@/pages/account/AccountPage'));
 const ManageCrewPage = lazy(() => import('@/pages/account/ManageCrewPage'));
+const TripReportPage = lazy(() => import('@/pages/account/TripReportPage'));
 const AdminPage = lazy(() => import('@/pages/admin/AdminPage'));
 const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'));
 const LegalNoticePage = lazy(() => import('@/pages/LegalNoticePage'));
@@ -59,6 +60,7 @@ export default function App() {
               <Route path="/conditions-vente" element={<SalesTermsPage />} />
               <Route path="/mon-compte" element={<RequireAuth><AccountPage /></RequireAuth>} />
               <Route path="/mon-compte/road-trips/:slug" element={<RequireAuth><ManageCrewPage /></RequireAuth>} />
+              <Route path="/mon-compte/road-trips/:slug/rapport" element={<RequireAuth><TripReportPage /></RequireAuth>} />
               <Route path="/admin" element={<RequireAuth admin><AdminPage /></RequireAuth>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
