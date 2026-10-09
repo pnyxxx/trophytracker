@@ -28,7 +28,7 @@ export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl
   const [format, setFormat] = useState<PosterFormat>('sticker');
   const [image, setImage] = useState<{ blob: Blob; url: string } | null>(null);
   const [error, setError] = useState(false);
-  const pageUrl = `${window.location.origin}/t/${crew.slug}`;
+  const pageUrl = `${window.location.origin}/road-trip/${crew.slug}`;
   const fileName = `trophytracker-${crew.slug}-${FILE[format]}.png`;
   // La trace ne sert qu'à la story (vue satellite) : chargée seulement pour elle.
   const { data: track, isFetched } = useQuery({
@@ -145,7 +145,7 @@ export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl
  */
 export function CrewShareButton({ crew, className, variant = 'outline' }: { crew: CrewForQr; className?: string; variant?: 'outline' | 'default' }) {
   const [open, setOpen] = useState(false);
-  const pageUrl = `${window.location.origin}/t/${crew.slug}`;
+  const pageUrl = `${window.location.origin}/road-trip/${crew.slug}`;
   const canShare = typeof navigator.share === 'function';
 
   const send = async () => {

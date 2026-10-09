@@ -6,7 +6,7 @@
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Mic } from 'lucide-react';
 import { Seo } from '@/components/common/Seo';
 import { PageLoader } from '@/components/common/Spinner';
 import { Button } from '@/components/ui/button';
@@ -65,7 +65,7 @@ function Overview({ crew, onGo }: { crew: Crew; onGo: (s: Section, step?: GuideS
         </div>
         <div className="flex flex-wrap gap-2">
           <CrewShareButton crew={crew} />
-          <Button asChild><Link to={`/t/${crew.slug}`}>Voir ma page <ExternalLink /></Link></Button>
+          <Button asChild><Link to={`/road-trip/${crew.slug}`}>Voir ma page <ExternalLink /></Link></Button>
         </div>
       </div>
 
@@ -101,6 +101,20 @@ function Overview({ crew, onGo }: { crew: Crew; onGo: (s: Section, step?: GuideS
           </span>
         </button>
       </div>
+
+      <button type="button" onClick={() => onGo('carnet')}
+        className="relative flex flex-wrap items-center gap-5 overflow-hidden rounded-[28px] bg-ink-800 p-6 text-left ring-signal hover:bg-ink-700 focus-visible:ring-2">
+        <span className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-signal/20 blur-3xl" aria-hidden="true" />
+        <span className="relative flex h-[72px] w-[72px] flex-none items-center justify-center rounded-full bg-signal text-white shadow-[0_14px_30px_rgba(225,38,44,.35)]">
+          <Mic className="h-9 w-9" />
+        </span>
+        <span className="relative flex min-w-[220px] flex-1 flex-col gap-1">
+          <span className="font-mono text-[13px] text-dust-400">carnet de bord · avec l’IA</span>
+          <span className="tt-display text-[30px] leading-none text-cream">Ce soir, raconte ta journée.</span>
+          <span className="text-[16px] text-dust-300">2 minutes au micro, comme à un ami : l’IA en fait une belle page pour tes proches.</span>
+        </span>
+        <span className="relative text-[16px] font-bold text-signal-text">Raconter →</span>
+      </button>
 
       <dl className="m-0 grid grid-cols-2 gap-2 md:grid-cols-4">
         {tiles.map((t) => (

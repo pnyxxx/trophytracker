@@ -1,5 +1,5 @@
 /**
- * Road trip d'EXEMPLE (crews.is_demo, /t/exemple) : sa page vit en permanence.
+ * Road trip d'EXEMPLE (crews.is_demo, /road-trip/exemple) : sa page vit en permanence.
  *
  * Le tracker lui fait rejouer en boucle un vrai trajet (la Route des Grandes Alpes, de Thonon-les-Bains
  * à Menton, construit par scripts/build-demo-route.mjs) comme si son téléphone envoyait sa position

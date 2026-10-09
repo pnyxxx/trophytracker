@@ -38,7 +38,7 @@ http://web {
 		X-Content-Type-Options "nosniff"
 		X-Frame-Options "DENY"
 		Referrer-Policy "strict-origin-when-cross-origin"
-		Permissions-Policy "camera=(), microphone=(), geolocation=(self), payment=()"
+		Permissions-Policy "camera=(), microphone=(self), geolocation=(self), payment=()"
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		# Seules nos ressources + les tuiles de carte sont autorisées : bloque les injections de scripts.
 		# (OpenFreeMap : fond de carte ; IGN et Esri : imagerie satellite ; s3.amazonaws.com : relief ; Open-Meteo : météo)
@@ -90,13 +90,13 @@ http://web {
 		@immutable path /assets/*
 		header @immutable Cache-Control "public, max-age=31536000, immutable"
 
-		# /t/nom/ → /t/nom : une seule adresse par page.
+		# /road-trip/nom/ → /road-trip/nom : une seule adresse par page.
 		@trailing path_regexp trailing ^(.+)/$
 		redir @trailing {re.trailing.1}{?query} 301
 
 		# Page d'un équipage : HTML complété par le service tracker (nom, description, photo).
 		# S'il ne répond pas correctement, coquille neutre : le JavaScript affiche quand même la page.
-		@crew path_regexp ^/t/[^/]+$
+		@crew path_regexp ^/road-trip/[^/]+$
 		handle @crew {
 			reverse_proxy tracker:3000 {
 				@failed status 5xx
@@ -147,7 +147,7 @@ http://web {
 
 	# Service tracker injoignable (redémarrage…) : les pages équipage s'affichent quand même.
 	handle_errors 502 503 504 {
-		@crew path_regexp ^/t/[^/]+$
+		@crew path_regexp ^/road-trip/[^/]+$
 		handle @crew {
 			root * /srv
 			rewrite * /_shell/app.html

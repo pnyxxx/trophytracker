@@ -9,12 +9,15 @@ Branche : `generaliste`. Le site en ligne reste en pause tant que Julien ne vali
 - **Garder le payant** (15 € puis 19 €, Stripe + codes `TT-`) : ajouter une étape « Accès » dans le parcours de création,
   retirer les « gratuit » de la maquette sauf « gratuit pour les proches ».
 - **Un seul véhicule** pour l'instant (multi-véhicules plus tard) : afficher « 1 véhicule », pas de 2ᵉ trace.
-- **Connexion UNIQUEMENT par code à 6 chiffres envoyé par e-mail** : plus de mot de passe, plus de Google, pas d'Apple.
+- ~~Connexion UNIQUEMENT par code~~ → depuis le 2026-10-09 : **e-mail + mot de passe par défaut, code par e-mail au
+  choix** (et pour le mot de passe oublié), voir `components/auth/SignInForm.tsx`. Pas de Google, pas d'Apple.
+  Historique :
   Supabase : `signInWithOtp({ email, options: { shouldCreateUser, data: { display_name } } })` puis
   `verifyOtp({ email, token, type: 'email' })` ; modèles d'e-mail GoTrue avec `{{ .Token }}` ; supprimer les pages
   mot de passe oublié / nouveau mot de passe / composant password-input ; la double authentification (TOTP) des admins reste.
 - **Cagnotte = juste le lien** (bouton « Participer »), sans montant ni barre de progression.
-- Adresse publique d'un road trip : `/t/<slug>` comme la maquette (remplace `/t/<slug>`, sans redirection).
+- Adresse publique d'un road trip : `trophytracker.fr/road-trip/<slug>` (2026-10-09 : `/t/<slug>` de la maquette
+  jugé moche par Julien), sans redirection.
   Domaine : garder trophytracker.fr (la maquette dit .app).
 
 ## Fait
@@ -34,7 +37,7 @@ Branche : `generaliste`. Le site en ligne reste en pause tant que Julien ne vali
   « vous » : à trancher avec Julien).
 - [x] Accueil : récit défilant `components/landing/story.ts` (images-clés, chapitres, photos) + `StoryMap.tsx` (carte
   IGN 3D pilotée par `prog`), HUD avec altitude réelle lue dans le relief, passage hors réseau, photos = vues aériennes
-  IGN du col (`public/accueil/`), carte du lien vers `EXAMPLE_PATH` (`lib/example.ts` = `/t/exemple`, à créer par la
+  IGN du col (`public/accueil/`), carte du lien vers `EXAMPLE_PATH` (`lib/example.ts` = `/road-trip/exemple`, à créer par la
   démo neutre). Téléphone / animations réduites : vue fixe + chapitres en cartes. « Ce qui change de Polarsteps »
   devenu « Ce qui change vraiment » (pas de nom de concurrent : publicité comparative encadrée). Plus de « gratuit »
   sauf pour les proches ; prix affiché dans le bloc rouge et la FAQ. « 1 carte, tous les véhicules » remplacé par
@@ -43,10 +46,10 @@ Branche : `generaliste`. Le site en ligne reste en pause tant que Julien ne vali
   avec e-mails d'invitation, nom + couverture + privé, accès, lien prêt), aperçu en direct à droite / compact + bouton
   collant sur téléphone, brouillon en localStorage (couverture compressée en data URL, survit à Stripe). Migration
   `20261008000005_trip_setup` : `crews.trip_type` et `crews.destination` (le départ = `city` + position géocodée).
-  Stripe revient sur `/creer?paiement=ok` (`returnTo: 'creer'` dans create-checkout). Adresses publiques `/t/<slug>`
+  Stripe revient sur `/creer?paiement=ok` (`returnTo: 'creer'` dans create-checkout). Adresses publiques `/road-trip/<slug>`
   partout (site, Caddy, tracker, e-mails, plan du site), sans redirection. Bloc d'achat `CrewAccessPurchase` au style
   Balise. « Voyage privé » = visibilité « par lien » ; décoché = public.
-- [x] Page road trip `/t/:slug` (`pages/CrewPage.tsx`) : en-tête collant avec Suivre / Partager (+ Gérer), pastilles
+- [x] Page road trip `/road-trip/:slug` (`pages/CrewPage.tsx`) : en-tête collant avec Suivre / Partager (+ Gérer), pastilles
   (direct / hors réseau / pas encore parti, visibilité, voyageurs, exemple), titre « A → B », avatars ; bandeau
   « Pas de réseau, c'est normal » ; carte MapLibre `TripMap` (Satellite IGN/Esri, Plan OpenFreeMap, Relief 3D, trace,
   balise, départ avec drapeau breton, étapes, sponsors, photos, centrer, plein écran) — Leaflet retiré du projet ;
@@ -82,7 +85,7 @@ Branche : `generaliste`. Le site en ligne reste en pause tant que Julien ne vali
   direct, modération par les voyageurs), visites anonymes (`crew_page_views`, `count_page_view`, une par navigateur
   et par jour, sans les voyageurs), carte « Visibilité » du tableau de bord et rapport imprimable
   `/mon-compte/road-trips/:slug/rapport` (PDF via l'impression du navigateur). Migration `20261008000009`, testée.
-- [x] Démo neutre « Route des Grandes Alpes » (`/t/exemple`) : trajet OSRM Thonon → Menton (675 km, boucle 17 h,
+- [x] Démo neutre « Route des Grandes Alpes » (`/road-trip/exemple`) : trajet OSRM Thonon → Menton (675 km, boucle 17 h,
   `apps/tracker/demo/route.json`), contenu fictif dans `scripts/lib-demo-crew.mjs` (`applyDemo`, idempotent, met de côté SANS RIEN EFFACER
   J4L Club et les autres anciennes démos), photos = vues aériennes IGN (WMS). Correction du tracker : un nouveau road
   trip d'exemple rattrape tout le tour en cours (mémoire d'envoi rattachée au road trip, testé).
@@ -91,6 +94,13 @@ Branche : `generaliste`. Le site en ligne reste en pause tant que Julien ne vali
   orthophotos IGN changeaient de couleur selon le zoom (mosaïque de prises de vue). Comparé aussi à Sentinel-2 cloudless
   d'EOX (couleurs parfaites, mais floue de près). À vérifier avant l'ouverture : conditions d'usage commercial d'Esri
   (compte ArcGIS Location Platform, gratuit jusqu'à 2 millions de tuiles par mois).
+
+- [x] Retours de Julien (9 octobre) : adresses `/road-trip/<slug>` ; connexion par mot de passe par défaut, code au
+  choix (`components/auth/SignInForm.tsx`, mot de passe dans Mon compte → `SecuritySection`) ; météo en images
+  (`components/crew/WeatherCard.tsx` : ciel du moment, pictogrammes animés, course du soleil, 12 h, demain) ;
+  **« Raconte ta journée »** (`components/manage/StoryRecorder.tsx`) : dictée par le navigateur (Web Speech API,
+  `Permissions-Policy microphone=(self)`), récit gardé en localStorage, envoyé à `journal-draft` (`story`) qui le met
+  en forme sans rien inventer ; mis en avant sur l'accueil, le tableau de bord et en tête de l'onglet Carnet.
 
 ## À faire, dans l'ordre
 
@@ -111,7 +121,7 @@ Branche : `generaliste`. Le site en ligne reste en pause tant que Julien ne vali
    (paiement Stripe ou code TT-)** → lien prêt (copier, WhatsApp, SMS, e-mail, 3 prochaines étapes). Aperçu en direct à
    droite (ordinateur) / compact en haut + bouton collant en bas (téléphone). Brouillon gardé en localStorage pour
    reprendre après Stripe. Base : nouvelles colonnes `trip_type`, `from_place`, `to_place` sur `crews` (migration).
-5. ~~**Page road trip**~~ (fait) `/t/:slug` (`Road trip.dc.html`) : en-tête (Suivre, Partager), pastilles (en direct / hors réseau,
+5. ~~**Page road trip**~~ (fait) `/road-trip/:slug` (`Road trip.dc.html`) : en-tête (Suivre, Partager), pastilles (en direct / hors réseau,
    privé, nb voyageurs), titre « A → B », avatars ; bandeau hors réseau ; carte MapLibre (remplace Leaflet) avec
    Satellite / Plan / Relief 3D, carte de lieu « J9 … » ; colonne télémétrie (6 tuiles), météo 4 créneaux (maintenant,
    +3 h, +6 h, demain : prévision Open-Meteo `hourly`), profil d'altitude ; bloc « Revivre en 3D » (lancer, exporter :

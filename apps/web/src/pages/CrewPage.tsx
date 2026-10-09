@@ -1,5 +1,5 @@
 /**
- * Page publique d'un road trip, /t/:slug (privée par lien par défaut) :
+ * Page publique d'un road trip, /road-trip/:slug (privée par lien par défaut) :
  * en-tête (statut, visibilité, voyageurs), bandeau « pas de réseau, c'est normal », carte + tableau de bord,
  * « Revivre en 3D », carnet de route et photos, puis « Soutenir » (cagnotte, sponsors, encouragements).
  */

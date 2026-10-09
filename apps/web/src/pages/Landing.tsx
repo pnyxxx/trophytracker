@@ -46,6 +46,10 @@ const faq = [
     a: 'Avec l’application gratuite Traccar Client (Android et iPhone), installée sur un téléphone du voyage et réglée d’un coup avec un QR code, ou avec un boîtier GPS compatible. Sans réseau, les points sont gardés en mémoire et envoyés dès que le téléphone capte.',
   },
   {
+    q: 'Comment marche le carnet de bord avec l’IA ?',
+    a: 'Le soir, dans ton espace, appuie sur le micro et raconte ta journée à voix haute (ou écris-la). L’IA en fait une page de carnet : elle garde tes anecdotes, retire les hésitations et ajoute tes kilomètres et ton altitude, sans rien inventer. Tu relis, tu corriges si besoin, et tu publies.',
+  },
+  {
     q: 'Pas de nouvelle position : faut-il s’inquiéter ?',
     a: 'Presque toujours, non : en montagne ou dans le désert, il n’y a souvent pas de réseau, et la trace se complète dès que le téléphone en retrouve. Si tu as un doute, contacte directement les voyageurs.',
   },
@@ -325,6 +329,57 @@ export default function Landing() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 03 bis Le carnet de bord raconté ─────────────────────────────── */}
+      <section className="border-t-[1.5px] border-cream/[0.08]" aria-labelledby="carnet-ia">
+        <div className="mx-auto grid max-w-[1400px] grid-cols-[repeat(auto-fit,minmax(min(100%,420px),1fr))] items-center gap-14 px-5 py-[110px]">
+          <div className="flex flex-col gap-5">
+            <span className="self-start rounded-full bg-signal px-3 py-1 font-mono text-[12px] font-medium text-white">carnet de bord · IA</span>
+            <h2 id="carnet-ia" className="tt-display m-0 text-[clamp(44px,5.6vw,84px)] leading-[0.95] text-cream">
+              Le soir, tu racontes.
+              <br />
+              <span className="text-signal">L’IA écrit.</span>
+            </h2>
+            <p className="m-0 max-w-[480px] text-[18px] leading-[1.55] text-dust-300">
+              Plus besoin d’écrire au bivouac. Appuie sur le micro et raconte ta journée comme à un pote : la panne, le col, le resto.
+              L’IA garde toutes tes anecdotes, retire les « euh », remet tout dans l’ordre avec tes kilomètres et ton altitude.
+              Tu relis, tu publies : tes proches reçoivent ta page dans leur résumé du soir.
+            </p>
+            <ul className="m-0 flex list-none flex-wrap gap-2 p-0 font-mono text-[13px] text-dust-200">
+              {['2 minutes au micro', 'rien d’inventé', 'tu relis avant de publier'].map((x) => (
+                <li key={x} className="rounded-full border-[1.5px] border-cream/20 px-3.5 py-1.5">{x}</li>
+              ))}
+            </ul>
+          </div>
+          <div className="flex flex-col gap-3" aria-hidden="true">
+            <div className="flex items-start gap-3.5 rounded-[24px] bg-[#1D1E23] p-5">
+              <span className="flex h-14 w-14 flex-none items-center justify-center rounded-full bg-signal text-white shadow-[0_10px_26px_rgba(225,38,44,.4)]">
+                <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3" /></svg>
+              </span>
+              <div className="flex min-w-0 flex-col gap-1.5">
+                <span className="font-mono text-[12px] text-dust-400">ton récit · 1:48</span>
+                <p className="m-0 text-[16px] italic leading-relaxed text-dust-200">
+                  « Alors euh ce matin on part de Valloire, et là le Galibier euh… la voiture chauffe à mort, on s’arrête en plein virage,
+                  un papi à vélo nous double en rigolant… et en haut, la vue, franchement, on a pleuré. »
+                </p>
+              </div>
+            </div>
+            <div className="mx-auto flex items-center gap-2 font-mono text-[13px] text-signal-text">
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4z" /></svg>
+              l’IA met en forme
+            </div>
+            <div className="flex flex-col gap-2.5 rounded-[24px] bg-cream p-6 text-ink shadow-[0_24px_50px_rgba(0,0,0,.4)]">
+              <span className="font-mono text-[12px] text-dust-700">jour 3 · 42 km · 2 642 m</span>
+              <span className="tt-display text-[30px] leading-[1.05]">Doublés par un papi au Galibier</span>
+              <p className="m-0 text-[16px] leading-relaxed">
+                Départ de Valloire ce matin, direction le Galibier. À mi-montée, la voiture chauffe : arrêt forcé en plein virage,
+                capot ouvert, pendant qu’un papi à vélo nous double en rigolant. Et puis le sommet, à 2 642 mètres. La vue nous a mis
+                les larmes aux yeux.
+              </p>
+            </div>
           </div>
         </div>
       </section>

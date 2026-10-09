@@ -259,6 +259,21 @@
   cursor: pointer;
 }
 
+/* Météo animée (components/crew/WeatherCard.tsx) */
+.tt-wx-spin { animation: tt-wx-spin 24s linear infinite; transform-origin: 50% 50%; transform-box: fill-box; }
+.tt-wx-drift { animation: tt-wx-drift 7s ease-in-out infinite alternate; }
+.tt-wx-drift-slow { animation: tt-wx-drift 11s ease-in-out infinite alternate-reverse; }
+.tt-wx-fall { animation: tt-wx-fall 0.9s linear infinite; }
+.tt-wx-snow { animation: tt-wx-snow 3.2s linear infinite; }
+.tt-wx-flash { animation: tt-wx-flash 4s steps(1) infinite; }
+.tt-wx-twinkle { animation: tt-wx-twinkle 3s ease-in-out infinite alternate; }
+@keyframes tt-wx-spin { to { transform: rotate(360deg); } }
+@keyframes tt-wx-drift { from { transform: translateX(-6px); } to { transform: translateX(8px); } }
+@keyframes tt-wx-fall { from { transform: translate(0, -14px); opacity: 0; } 30% { opacity: 1; } to { transform: translate(-5px, 16px); opacity: 0; } }
+@keyframes tt-wx-snow { from { transform: translate(0, -14px); opacity: 0; } 25% { opacity: 1; } to { transform: translate(6px, 18px); opacity: 0; } }
+@keyframes tt-wx-flash { 0%, 100% { opacity: 0; } 46% { opacity: 1; } 50% { opacity: 0; } 54% { opacity: 1; } 58% { opacity: 0; } }
+@keyframes tt-wx-twinkle { from { opacity: 0.25; } to { opacity: 1; } }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

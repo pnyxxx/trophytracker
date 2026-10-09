@@ -1,5 +1,5 @@
 /**
- * Construit le trajet du road trip d'EXEMPLE (« Route des Grandes Alpes », /t/exemple), rejoué en boucle par le
+ * Construit le trajet du road trip d'EXEMPLE (« Route des Grandes Alpes », /road-trip/exemple), rejoué en boucle par le
  * service tracker (apps/tracker/src/demo.ts) :
  *   node scripts/build-demo-route.mjs
  *

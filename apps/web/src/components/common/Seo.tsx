@@ -37,7 +37,7 @@ export function Seo({ title, description, image, noindex, jsonLd }: {
   useEffect(() => {
     const fullTitle = makeTitle(title);
     const desc = description ?? DEFAULT_DESCRIPTION;
-    // Sans chaîne de requête ni ancre : /t/nom?x=1 et /t/nom sont la même page.
+    // Sans chaîne de requête ni ancre : /road-trip/nom?x=1 et /road-trip/nom sont la même page.
     const url = `${window.location.origin}${window.location.pathname === '/' ? '/' : window.location.pathname.replace(/\/$/, '')}`;
     const img = new URL(image ?? '/og-image.png', window.location.origin).href;
 

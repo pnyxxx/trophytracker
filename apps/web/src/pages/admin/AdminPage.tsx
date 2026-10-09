@@ -84,7 +84,7 @@ function TripsTable({ trips, filter }: { trips: TripRow[]; filter: Status | 'all
           {rows.map((t) => (
             <tr key={t.id} className="border-t-[1.5px] border-ink-700">
               <td className="px-1 py-3">
-                <Link to={`/t/${t.slug}`} className="flex flex-col text-cream hover:text-cream">
+                <Link to={`/road-trip/${t.slug}`} className="flex flex-col text-cream hover:text-cream">
                   <span className="font-bold hover:underline">{t.name}{t.is_demo ? ' · exemple' : ''}</span>
                   <span className="text-[14px] text-dust-400">{t.owner_name ?? '—'}{t.owner_email ? ` · ${t.owner_email}` : ''}</span>
                 </Link>
@@ -179,7 +179,7 @@ function Overview() {
                       <span className="truncate font-bold text-cream">{t.name}</span>
                       <span className="text-[14px] text-dust-400">{t.text}</span>
                     </span>
-                    {t.slug && <Link to={`/t/${t.slug}`} className="whitespace-nowrap text-[14px] font-bold text-signal-text hover:text-cream">Voir</Link>}
+                    {t.slug && <Link to={`/road-trip/${t.slug}`} className="whitespace-nowrap text-[14px] font-bold text-signal-text hover:text-cream">Voir</Link>}
                   </li>
                 ))}
               </ul>
@@ -230,7 +230,7 @@ function CrewsAdmin() {
             {data.map((c) => (
               <tr key={c.id} className="border-t-[1.5px] border-ink-700">
                 <td className="px-1 py-3 pr-4">
-                  <Link to={`/t/${c.slug}`} className="font-bold text-cream hover:underline">{c.name}</Link>
+                  <Link to={`/road-trip/${c.slug}`} className="font-bold text-cream hover:underline">{c.name}</Link>
                   <p className="m-0 text-[13px] text-dust-500">{c.owner_email ?? '—'} · {!c.is_public ? 'voyageurs seulement' : c.is_listed ? 'public' : 'par lien'}</p>
                 </td>
                 <td className="pr-4"><StatusPill s={statusOf(c)} /></td>
@@ -286,7 +286,7 @@ function PurchasesAdmin() {
                     </td>
                     <td className="pr-4 text-dust-200">{PURCHASE_STATUS[p.status] ?? p.status}</td>
                     <td>
-                      {p.crew_slug ? <Link to={`/t/${p.crew_slug}`} className="text-cream hover:text-primary">{p.crew_name}</Link>
+                      {p.crew_slug ? <Link to={`/road-trip/${p.crew_slug}`} className="text-cream hover:text-primary">{p.crew_name}</Link>
                         : <span className="text-xs text-dust-500">{p.status === 'paid' ? 'Pas encore créé' : '—'}</span>}
                     </td>
                   </tr>

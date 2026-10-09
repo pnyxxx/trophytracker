@@ -35,7 +35,7 @@ export function renderCrewPage(template: string, siteUrl: string, slug: string, 
       ? `${base}/storage/v1/object/public/${MEDIA_BUCKET}/${storagePath(crew.avatar_path)}`
       : `${base}/og-image.png`;
 
-  const values = { name: crew.name, description, url: `${base}/t/${slug}`, image };
+  const values = { name: crew.name, description, url: `${base}/road-trip/${slug}`, image };
   let html = template;
   for (const key of Object.keys(TOKENS) as (keyof typeof TOKENS)[]) {
     // Fonction de remplacement : un « $ » dans le nom d'un road trip reste un simple caractère.

@@ -157,7 +157,7 @@ const CODE_NOTE = `Ce code expire dans 10 minutes et ne sert qu’une fois. Ne l
 
 const action = (kicker: string, title: string, text: string, href: string, label: string, note = NOT_YOU) =>
   emailLayout({ siteUrl: SITE, kicker, title, body: paragraph(text) + button(href, label), note });
-/** E-mail « code à 6 chiffres » : connexion et création de compte (pas de mot de passe sur le site). */
+/** E-mail « code à 6 chiffres » : confirmation de l'inscription, et connexion sans mot de passe. */
 const code = (kicker: string, title: string, text: string) =>
   emailLayout({ siteUrl: SITE, kicker, title, body: paragraph(text) + codeBox('{{ .Token }}'), note: CODE_NOTE });
 const alert = (title: string, text: string) =>
@@ -173,7 +173,7 @@ export const AUTH_EMAIL_TEMPLATES: Record<string, string> = {
     'connexion', 'Ton code de connexion',
     'Pour te connecter, saisis ce code sur la page ouverte dans ton navigateur :',
   ),
-  // Aucun écran du site ne demande de « mot de passe oublié » : si l'API est appelée, l'e-mail sert de connexion.
+  // « Mot de passe oublié » = connexion par code (magic-link) ; si l'API recovery est appelée, l'e-mail sert aussi de connexion.
   'recovery.html': code(
     'connexion', 'Ton code de connexion',
     'Pour te connecter, saisis ce code sur la page ouverte dans ton navigateur :',

@@ -1,5 +1,5 @@
 /**
- * Le road trip d'EXEMPLE « Route des Grandes Alpes » (/t/exemple), le seul road trip d'exemple du site :
+ * Le road trip d'EXEMPLE « Route des Grandes Alpes » (/road-trip/exemple), le seul road trip d'exemple du site :
  * du lac Léman à la Méditerranée en van, par les grands cols. Voyageurs, textes, étapes, photos (vues
  * aériennes IGN), sponsors fictifs (« votre marque ici »), journal et encouragements sont inventés.
  * Sa trace, elle, est rejouée en boucle et en temps réel par le service tracker (apps/tracker/src/demo.ts,

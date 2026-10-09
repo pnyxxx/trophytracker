@@ -3,4 +3,4 @@
  * La démo neutre (scripts/seed-demo.mjs) crée le road trip à cette adresse.
  */
 export const EXAMPLE_SLUG = 'exemple';
-export const EXAMPLE_PATH = `/t/${EXAMPLE_SLUG}`;
+export const EXAMPLE_PATH = `/road-trip/${EXAMPLE_SLUG}`;

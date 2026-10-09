@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { PageLoader } from '@/components/common/Spinner';
-import { EmailCodeSignIn } from '@/components/auth/EmailCodeSignIn';
+import { SignInForm } from '@/components/auth/SignInForm';
 import { useAuth } from '@/hooks/auth';
 import { AuthLayout, safeNext } from './AuthLayout';
 import { MfaChallenge } from './MfaChallenge';
 
 /**
- * /connexion et /inscription : le même parcours par code e-mail (l'inscription demande en plus le prénom).
- * Une adresse inconnue crée le compte ; une adresse connue connecte : on ne révèle pas lequel des deux.
+ * /connexion et /inscription : e-mail + mot de passe (l'inscription demande en plus le prénom et confirme
+ * l'adresse par un code), ou au choix un code reçu par e-mail (components/auth/SignInForm.tsx).
  */
 export default function LoginPage({ signup = false }: { signup?: boolean }) {
   const [params] = useSearchParams();
@@ -38,10 +38,10 @@ export default function LoginPage({ signup = false }: { signup?: boolean }) {
   return (
     <AuthLayout
       title={signup ? 'Créer ton compte' : 'Connexion'}
-      subtitle={signup ? 'Ton compte sert à retrouver ton road trip depuis n’importe quel appareil.' : 'Entre ton e-mail : on t’envoie un code pour te connecter.'}
+      subtitle={signup ? 'Ton compte sert à retrouver ton road trip depuis n’importe quel appareil.' : 'Avec ton mot de passe, ou un code reçu par e-mail.'}
       footer={other}
     >
-      <EmailCodeSignIn askName={signup} initialEmail={params.get('email') ?? ''} onHold={setHold} />
+      <SignInForm key={signup ? 'signup' : 'login'} signup={signup} initialEmail={params.get('email') ?? ''} onHold={setHold} />
     </AuthLayout>
   );
 }

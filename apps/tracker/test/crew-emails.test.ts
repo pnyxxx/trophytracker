@@ -34,6 +34,6 @@ describe('relance « configurez votre GPS »', () => {
     }, 'https://site.fr');
     expect(e.subject).toBe('📡 Relance GPS envoyée : Breizh en sables');
     expect(e.text).toContain('Yann (y@exemple.fr)');
-    expect(e.html).toContain('href="https://site.fr/t/breizh-en-sables"');
+    expect(e.html).toContain('href="https://site.fr/road-trip/breizh-en-sables"');
   });
 });

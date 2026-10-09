@@ -14,8 +14,8 @@ describe('buildSitemap', () => {
   });
 
   it('ajoute chaque road trip avec sa date de mise à jour', () => {
-    expect(xml).toContain('<loc>https://exemple.fr/t/j4l-club</loc>\n    <lastmod>2026-09-28</lastmod>');
-    expect(xml).toContain('<loc>https://exemple.fr/t/a-b</loc>\n    <lastmod>2026-09-01</lastmod>');
+    expect(xml).toContain('<loc>https://exemple.fr/road-trip/j4l-club</loc>\n    <lastmod>2026-09-28</lastmod>');
+    expect(xml).toContain('<loc>https://exemple.fr/road-trip/a-b</loc>\n    <lastmod>2026-09-01</lastmod>');
   });
 
   it('n\'expose ni les comptes ni l\'administration', () => {

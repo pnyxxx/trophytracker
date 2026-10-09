@@ -95,7 +95,7 @@ export function CrewCard({ crew }: { crew: CrewSummary }) {
   const place = [crew.school, crew.city].filter(Boolean).join(' · ') || crew.tagline;
   return (
     <Link
-      to={`/t/${crew.slug}`}
+      to={`/road-trip/${crew.slug}`}
       className="group grid grid-cols-[auto_1fr_auto] items-center gap-4 rounded-[20px] border-[1.5px] border-ink-700 bg-ink-800 px-4 py-3.5 text-cream transition duration-200 hover:border-dust-600 hover:text-cream"
     >
       <CrewAvatar name={crew.name} path={crew.avatar_path} />

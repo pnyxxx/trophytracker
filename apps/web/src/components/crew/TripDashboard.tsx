@@ -1,6 +1,6 @@
 /**
- * Colonne « tableau de bord » de la page d'un road trip : 6 tuiles de télémétrie, météo sur place
- * (maintenant, +3 h, +6 h, demain) et profil d'altitude ; plus la carte de lieu posée sur la carte
+ * Colonne « tableau de bord » de la page d'un road trip : 6 tuiles de télémétrie, météo sur place en images
+ * (WeatherCard) et profil d'altitude ; plus la carte de lieu posée sur la carte
  * (« J9 · près de Valloire »). Données : get_telemetry (dernière position + bilan du jour),
  * get_crew_stats, la trace (altitudes envoyées par le téléphone) et Open-Meteo / Photon, qui ne
  * reçoivent que la position arrondie (~1 km).
@@ -11,7 +11,8 @@ import type { CrewStats } from '@/hooks/queries';
 import { round2, type Telemetry } from '@/hooks/useTrip';
 import { formatNumber, formatRelative, isLive } from '@/lib/format';
 import { climbOf, thin, type AltPoint } from '@/lib/elevation';
-import { compassLabel, fetchForecast, shortWeather } from '@/lib/weather';
+import { compassLabel, fetchWeatherBoard } from '@/lib/weather';
+import { WeatherCard } from './WeatherCard';
 import { cn } from '@/lib/utils';
 
 const hm = (minutes: number) => (minutes < 60 ? `${minutes} min` : `${Math.floor(minutes / 60)} h ${String(minutes % 60).padStart(2, '0')}`);
@@ -90,12 +91,12 @@ export function TripDashboard({ crew, stats, telemetry: t, profile, day, total, 
   const live = isLive(crew.last_fix_at);
   const climb = profile ? climbOf(profile) : null;
   const [lat, lon] = [round2(t?.lat ?? crew.last_lat), round2(t?.lon ?? crew.last_lon)];
-  const { data: forecast = [] } = useQuery({
-    queryKey: ['forecast', lat, lon],
+  const { data: weather } = useQuery({
+    queryKey: ['weather-board', lat, lon],
     enabled: lat != null && lon != null,
     staleTime: 15 * 60_000,
     refetchInterval: 15 * 60_000,
-    queryFn: ({ signal }) => fetchForecast(lat!, lon!, signal),
+    queryFn: ({ signal }) => fetchWeatherBoard(lat!, lon!, signal),
   });
 
   const tiles = [
@@ -122,23 +123,7 @@ export function TripDashboard({ crew, stats, telemetry: t, profile, day, total, 
           {extras.join(' · ')}{t?.battery != null && t.battery < 20 ? ' · batterie faible, le suivi peut s’interrompre' : ''}
         </p>
       )}
-      {forecast.length > 0 && (
-        <div className="flex flex-col gap-3 rounded-[20px] bg-ink-800 p-4">
-          <div className="flex items-baseline justify-between gap-3">
-            <span className="text-[17px] font-bold">Météo sur place</span>
-            {place && <span className="truncate font-mono text-[13px] text-dust-400">{place}</span>}
-          </div>
-          <div className="grid grid-cols-4 gap-1.5">
-            {forecast.map((f, i) => (
-              <div key={f.label} className={cn('flex flex-col items-center gap-1 rounded-[14px] px-2 py-2.5', i === 0 ? 'bg-signal text-white' : 'bg-ink-700 text-cream')}>
-                <span className={cn('font-mono text-[12px]', i === 0 ? 'text-white' : 'text-dust-300')}>{f.label}</span>
-                <span className="font-mono text-[20px]">{f.temperature}°</span>
-                <span className={cn('text-[13px]', i === 0 ? 'text-white' : 'text-dust-300')}>{shortWeather(f.code, f.isDay)}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {weather && <WeatherCard board={weather} place={place} />}
       {profile && <MiniProfile profile={profile} from={crew.city ?? 'départ'} to={live ? 'maintenant' : 'dernière position'} />}
     </div>
   );

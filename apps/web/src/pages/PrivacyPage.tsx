@@ -19,7 +19,7 @@ export default function PrivacyPage() {
       <h2>Ce que nous stockons, et pourquoi</h2>
       <h3>Ton compte</h3>
       <p>
-        E-mail, prénom affiché et, si tu l’actives, la double authentification. Pas de mot de passe : tu te connectes avec un code à usage unique envoyé par e-mail.
+        E-mail, prénom affiché, mot de passe si tu en choisis un (jamais stocké en clair : seule une empreinte chiffrée est gardée) et, si tu l’actives, la double authentification. Sans mot de passe, tu te connectes avec un code à usage unique envoyé par e-mail.
         Ils servent à te connecter et à t’envoyer les e-mails liés à ton compte. <em>Base légale : l’exécution du service
         (conditions d’utilisation). Conservation : jusqu’à la suppression du compte.</em>
       </p>
@@ -115,14 +115,16 @@ export default function PrivacyPage() {
         la dernière position du road trip, arrondie à environ 1 km, à{' '}
         <a href="https://open-meteo.com" target="_blank" rel="noopener noreferrer">Open-Meteo</a> (Suisse), un service météo
         gratuit et sans compte. Quand un voyageur demande un brouillon de journal de bord, les faits de la journée (kilomètres,
-        heures, altitudes, noms des étapes et des photos, notes) sont envoyés à Anthropic (États-Unis), qui fournit l’IA Claude, le
-        temps de rédiger le texte ; le voyageur le relit avant toute publication.
+        heures, altitudes, noms des étapes et des photos, notes) et, s’il a raconté sa journée, le texte de son récit sont envoyés à
+        Anthropic (États-Unis), qui fournit l’IA Claude, le temps de rédiger le texte ; le texte ne sert pas à entraîner l’IA et le
+        voyageur relit avant toute publication. Quand il raconte sa journée au micro, la dictée est faite par son navigateur
+        (Google pour Chrome et Android, Apple pour Safari et l’iPhone) : le son ne passe pas par trophytracker et n’est pas enregistré.
       </p>
 
       <h2>Cookies</h2>
       <p>
         Aucun cookie publicitaire, aucun traceur, aucun outil de statistiques tiers. Ton navigateur garde seulement ce qui sert au
-        service : ta session de connexion, le brouillon d’un road trip en cours de création, le prénom que tu as mis sur un mur
+        service : ta session de connexion, le brouillon d’un road trip en cours de création, le récit de ta journée tant que sa page n’est pas écrite, le prénom que tu as mis sur un mur
         d’encouragements et quelques préférences d’affichage. Pour le rapport des voyageurs à leurs sponsors, la page d’un road trip
         compte ses visites de façon anonyme : un simple nombre par jour, sans cookie, sans adresse IP ni identifiant (ton navigateur
         note seulement qu’il a déjà compté sa visite du jour). Rien de tout cela ne demande de bandeau de consentement.
@@ -130,7 +132,7 @@ export default function PrivacyPage() {
 
       <h2>Sécurité</h2>
       <p>
-        Connexion chiffrée (HTTPS), connexion par code à usage unique (pas de mot de passe à voler), double authentification disponible, droits d’accès vérifiés par la base de
+        Connexion chiffrée (HTTPS), mots de passe stockés sous forme d’empreinte (bcrypt), connexion possible par code à usage unique, double authentification disponible, droits d’accès vérifiés par la base de
         données elle-même, clé GPS secrète par road trip. En cas de fuite de données présentant un risque, la CNIL et les personnes
         concernées seront prévenues comme la loi le prévoit.
       </p>

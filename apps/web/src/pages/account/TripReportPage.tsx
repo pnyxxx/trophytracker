@@ -68,7 +68,7 @@ export default function TripReportPage() {
   const climb = (() => { const p = altitudeProfile(points, null); return p ? climbOf(p) : null; })();
   const days = lastDays(vis?.days ?? []);
   const maxDay = Math.max(1, ...days.map((d) => d.views));
-  const url = `${window.location.origin}/t/${crew.slug}`;
+  const url = `${window.location.origin}/road-trip/${crew.slug}`;
   const qr = renderSVG(url, { ecc: 'M', border: 1, blackColor: '#15161A', whiteColor: '#FFFFFF' });
   const range = dateRange(crew.starts_on, crew.ends_on);
 

@@ -13,7 +13,7 @@ import { Check, ImagePlus, Trash2 } from 'lucide-react';
 import { LogoMark, Wordmark } from '@/components/common/Logo';
 import { Seo } from '@/components/common/Seo';
 import { PageLoader } from '@/components/common/Spinner';
-import { EmailCodeSignIn, type SignInStep } from '@/components/auth/EmailCodeSignIn';
+import { SignInForm, type SignInStep } from '@/components/auth/SignInForm';
 import { CrewAccessPurchase } from '@/components/account/CrewAccessPurchase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -326,7 +326,7 @@ export default function CreateTripPage() {
     go(1);
   };
 
-  const pageUrl = d.created ? `${window.location.origin}/t/${d.created.slug}` : '';
+  const pageUrl = d.created ? `${window.location.origin}/road-trip/${d.created.slug}` : '';
   const shareText = `Suis notre road trip « ${d.tripName.trim() || defaultName(d)} » en direct : ${pageUrl}`;
   const shared = () => { if (d.created) markShared(d.created.id); };
   const copy = async () => {
@@ -430,12 +430,12 @@ export default function CreateTripPage() {
                 {user && needsMfa ? (
                   <p className="m-0 text-dust-200">Termine d’abord ta connexion : <Link to="/connexion?next=/creer" className="font-bold text-signal-text">code de double authentification</Link>.</p>
                 ) : (
-                  <EmailCodeSignIn
-                    askName
+                  <SignInForm
+                    signup
+                    switchable
                     onHold={setHold}
                     onStepChange={(step, email) => setSignIn({ step, email })}
                     onDone={() => set({ step: 2 })}
-                    emailFooter={<span className="text-[14px] text-dust-400">Déjà inscrit ? Mets simplement ton e-mail : on te reconnaîtra.</span>}
                   />
                 )}
               </div>

@@ -14,4 +14,4 @@ import { applyDemo, DEMO_SLUG } from './lib-demo-crew.mjs';
 const env = loadEnv();
 const admin = createClient(env.SITE_URL, env.SERVICE_ROLE_KEY, { auth: { persistSession: false } });
 await applyDemo(admin);
-console.log(`✅ Road trip d'exemple à jour : ${env.SITE_URL}/t/${DEMO_SLUG}`);
+console.log(`✅ Road trip d'exemple à jour : ${env.SITE_URL}/road-trip/${DEMO_SLUG}`);

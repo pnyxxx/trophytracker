@@ -22,7 +22,7 @@ describe('emails aux admins', () => {
     const e = buildAdminEmail({ id: 3, kind: 'new_follow', payload: { name: 'Mamie', email: 'm@exemple.fr', crew_name: 'J4L Club', crew_slug: 'j4l-club', followers: 12 }, created_at: at }, 'https://site.fr');
     expect(e.subject).toBe('⭐ Nouvel abonné pour J4L Club');
     expect(e.text).toContain('12 abonnés');
-    expect(e.html).toContain('href="https://site.fr/t/j4l-club"');
+    expect(e.html).toContain('href="https://site.fr/road-trip/j4l-club"');
   });
 
   it('paiement Stripe : montant, total des ventes, lien vers l’administration', () => {

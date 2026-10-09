@@ -19,7 +19,7 @@ describe('e-mails du voyage', () => {
     const e = buildTripEmail(mail('invite', { inviter: 'Léa' }), 'https://site.fr');
     expect(e.subject).toBe('Léa t’invite à suivre son road trip');
     expect(e.text).toContain('Léa part de Bergen le 2 août pour Lofoten en van.');
-    expect(e.html).toContain('href="https://site.fr/t/bergen-lofoten-k7f2"');
+    expect(e.html).toContain('href="https://site.fr/road-trip/bergen-lofoten-k7f2"');
     expect(e.unsubscribeUrl).toBe('https://site.fr/desabonnement?t=tok-123');
     expect(e.html).toContain('Ne plus rien recevoir');
   });
@@ -43,7 +43,7 @@ describe('e-mails du voyage', () => {
     expect(e.html).toContain('jour 9 / 14');
     expect(e.html).toMatch(/1\s434 m/); // Intl met une espace insécable fine
     expect(e.html).toContain('Onze lacets');
-    expect(e.html).toContain('href="https://site.fr/t/bergen-lofoten-k7f2#carnet"');
+    expect(e.html).toContain('href="https://site.fr/road-trip/bergen-lofoten-k7f2#carnet"');
     expect(e.html).toContain('Ne plus le recevoir');
   });
 

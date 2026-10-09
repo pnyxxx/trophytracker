@@ -1,8 +1,9 @@
 /**
  * Sécurité du compte, entièrement basée sur Supabase Auth :
  *  - changement d'email (confirmation envoyée aux deux adresses) ;
- *  - double authentification par application (Google Authenticator, 1Password…), en plus du code e-mail.
- * Pas de mot de passe : on se connecte avec un code reçu par e-mail.
+ *  - mot de passe : le choisir ou le changer (sur une session ancienne, Supabase Auth demande d'abord un code
+ *    envoyé par e-mail : GOTRUE_SECURITY_UPDATE_PASSWORD_REQUIRE_REAUTHENTICATION) ;
+ *  - double authentification par application (Google Authenticator, 1Password…).
  * Chaque modification déclenche un email d'alerte automatique.
  */
 import { useState, type FormEvent } from 'react';
@@ -12,6 +13,9 @@ import { ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PasswordInput } from '@/components/ui/password-input';
+import { CodeInput } from '@/components/auth/CodeInput';
+import { PASSWORD_MIN } from '@/components/auth/SignInForm';
 import { useAuth } from '@/hooks/auth';
 import { supabase } from '@/lib/supabase';
 import { toastError } from '@/lib/errors';
@@ -40,6 +44,57 @@ function EmailForm() {
         <Input id="new-email" type="email" required placeholder="nouvelle@adresse.fr" value={email} onChange={(e) => setEmail(e.target.value)} />
       </div>
       <Button type="submit" disabled={change.isPending}>Changer</Button>
+    </form>
+  );
+}
+
+function PasswordForm() {
+  const [password, setPassword] = useState('');
+  /** Code de confirmation demandé par Supabase Auth (session de plus de 24 h). */
+  const [nonce, setNonce] = useState<string | null>(null);
+  const save = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.auth.updateUser(nonce ? { password, nonce } : { password });
+      if (error?.code === 'reauthentication_needed') {
+        const sent = await supabase.auth.reauthenticate();
+        if (sent.error) throw sent.error;
+        return 'code' as const;
+      }
+      if (error) throw error;
+      return 'ok' as const;
+    },
+    onSuccess: (res) => {
+      if (res === 'code') {
+        setNonce('');
+        toast.info('Par sécurité, saisis le code qu’on vient de t’envoyer par e-mail.');
+        return;
+      }
+      toast.success('Mot de passe enregistré. Tu peux aussi toujours te connecter avec un code.');
+      setPassword('');
+      setNonce(null);
+    },
+    onError: toastError,
+  });
+  return (
+    <form onSubmit={(e: FormEvent) => { e.preventDefault(); save.mutate(); }} className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div className="flex-1 space-y-2">
+          <Label htmlFor="new-password">Nouveau mot de passe <span className="text-dust-500">({PASSWORD_MIN} caractères minimum)</span></Label>
+          <PasswordInput id="new-password" autoComplete="new-password" required minLength={PASSWORD_MIN} value={password} onChange={(e) => setPassword(e.target.value)} />
+        </div>
+        {nonce === null && <Button type="submit" disabled={save.isPending || password.length < PASSWORD_MIN}>Enregistrer</Button>}
+      </div>
+      {nonce !== null && (
+        <div className="flex flex-col gap-3">
+          <Label htmlFor="password-nonce">Code reçu par e-mail</Label>
+          <CodeInput id="password-nonce" value={nonce} onChange={setNonce} autoFocus />
+          <div className="flex gap-3">
+            <Button type="submit" disabled={save.isPending || nonce.length !== 6}>Confirmer</Button>
+            <Button type="button" variant="ghost" onClick={() => setNonce(null)}>Annuler</Button>
+          </div>
+        </div>
+      )}
+      <p className="m-0 text-sm text-dust-400">Pas obligatoire : sans mot de passe, tu te connectes avec un code reçu par e-mail.</p>
     </form>
   );
 }
@@ -119,7 +174,7 @@ function MfaForm() {
   }
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <p className="text-sm text-dust-300">Protège ton compte avec un second code, affiché par une application, en plus du code reçu par e-mail.</p>
+      <p className="text-sm text-dust-300">Protège ton compte avec un second code, affiché par une application, en plus de ton mot de passe ou du code reçu par e-mail.</p>
       <Button variant="secondary" onClick={() => start.mutate()} disabled={start.isPending}>Activer</Button>
     </div>
   );
@@ -129,6 +184,10 @@ export function SecuritySection() {
   return (
     <div className="space-y-8">
       <EmailForm />
+      <div className="border-t border-cream/10 pt-8">
+        <p className="tt-kicker mb-4 font-semibold text-dust-300">Mot de passe</p>
+        <PasswordForm />
+      </div>
       <div className="border-t border-cream/10 pt-8">
         <p className="tt-kicker mb-4 font-semibold text-dust-300">Double authentification</p>
         <MfaForm />

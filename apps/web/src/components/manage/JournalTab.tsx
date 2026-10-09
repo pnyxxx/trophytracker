@@ -1,13 +1,14 @@
 /**
  * Onglet « Journal » : une page de journal de bord par jour de road trip.
- * Pour chaque journée où le GPS a roulé, « Rédiger » propose un brouillon (écrit par l'IA à partir des
- * kilomètres, étapes et photos du jour, ou un brouillon simple sans IA) que l'on relit, corrige et
- * publie. Rien n'est publié sans validation d'un voyageur.
+ * En haut, « Raconte ta journée » (StoryRecorder) : le voyageur raconte sa journée à voix haute, l'IA en fait
+ * la page. Pour chaque journée, « Rédiger » propose aussi un brouillon sans récit (écrit par l'IA à partir des
+ * kilomètres, étapes et photos du jour, ou un brouillon simple sans IA). On relit, on corrige, on publie :
+ * rien n'est publié sans validation d'un voyageur.
  */
 import { useMemo, useState, type FormEvent } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Eye, EyeOff, Loader2, PenLine, Sparkles, Trash2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Mic, PenLine, Sparkles, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -17,12 +18,20 @@ import { useLiveTrack } from '@/hooks/useLiveTrack';
 import { toastError, unwrap } from '@/lib/errors';
 import { localDate } from '@/lib/days';
 import { Field, Panel, textareaClass } from './shared';
+import { forgetStory, StoryRecorder } from './StoryRecorder';
 
-interface Draft { day: string; title: string; body: string; ai: boolean; entry: JournalEntry | null }
+interface Draft { day: string; title: string; body: string; ai: boolean; entry: JournalEntry | null; fromStory?: boolean }
 
 const dayLabel = (day: string) => {
   const s = new Date(`${day}T12:00:00`).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
   return s.charAt(0).toUpperCase() + s.slice(1);
+};
+const shortDayLabel = (day: string, today: string) => {
+  const yesterday = new Date(`${today}T12:00:00`);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (day === today) return 'Aujourd’hui';
+  if (day === localDate(yesterday.getTime() / 1000)) return 'Hier';
+  return dayLabel(day);
 };
 
 function Editor({ crew, draft, onClose }: { crew: Crew; draft: Draft; onClose: () => void }) {
@@ -38,6 +47,7 @@ function Editor({ crew, draft, onClose }: { crew: Crew; draft: Draft; onClose: (
       return published;
     },
     onSuccess: (published) => {
+      if (draft.fromStory) forgetStory(crew.id, draft.day);
       toast.success(published ? 'Page publiée dans le carnet de route' : 'Brouillon enregistré');
       void queryClient.invalidateQueries({ queryKey: keys.journal(crew.id) });
       onClose();
@@ -51,9 +61,13 @@ function Editor({ crew, draft, onClose }: { crew: Crew; draft: Draft; onClose: (
         <DialogHeader>
           <DialogTitle>{dayLabel(draft.day)}</DialogTitle>
           <DialogDescription>
-            {draft.ai
-              ? 'Brouillon rédigé par l’IA à partir de tes kilomètres, étapes et photos du jour. Relis-le : toi seul sais ce qui s’est vraiment passé.'
-              : 'Brouillon écrit à partir des chiffres du jour : raconte la suite !'}
+            {draft.fromStory
+              ? draft.ai
+                ? 'L’IA a mis ton récit en forme, avec les chiffres du jour. Relis-le et corrige ce qui ne va pas.'
+                : 'L’IA n’est pas disponible : voici ton récit, nettoyé. Relis-le avant de le publier.'
+              : draft.ai
+                ? 'Brouillon rédigé par l’IA à partir de tes kilomètres, étapes et photos du jour. Relis-le : toi seul sais ce qui s’est vraiment passé.'
+                : 'Brouillon écrit à partir des chiffres du jour : raconte la suite !'}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={(e: FormEvent) => { e.preventDefault(); save.mutate(true); }} className="space-y-4">
@@ -77,6 +91,8 @@ export function JournalTab({ crew }: { crew: Crew }) {
   const { points } = useLiveTrack(crew);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [writing, setWriting] = useState<string | null>(null);
+  const today = localDate(Date.now() / 1000);
+  const [storyDay, setStoryDay] = useState(today);
 
   // Les journées du road trip : celles où le GPS a enregistré des positions, plus celles déjà écrites.
   const days = useMemo(() => {
@@ -84,19 +100,25 @@ export function JournalTab({ crew }: { crew: Crew }) {
     for (const e of entries) set.add(e.day);
     return [...set].sort().reverse();
   }, [points, entries]);
+  // Jours que l'on peut raconter : aujourd'hui et les journées du road trip.
+  const storyDays = useMemo(
+    () => [...new Set([today, ...days])].sort().reverse().slice(0, 60).map((day) => ({ day, label: shortDayLabel(day, today) })),
+    [days, today],
+  );
   const byDay = useMemo(() => new Map(entries.map((e) => [e.day, e])), [entries]);
 
-  const write = async (day: string) => {
+  const write = async (day: string, story?: string) => {
     setWriting(day);
     try {
       const { data, error } = await supabase.functions.invoke<{ title: string; body: string; ai: boolean }>('journal-draft', {
-        body: { crewId: crew.id, day, tz: Intl.DateTimeFormat().resolvedOptions().timeZone },
+        body: { crewId: crew.id, day, tz: Intl.DateTimeFormat().resolvedOptions().timeZone, story },
       });
       if (error || !data) {
         const body = await (error as { context?: Response } | null)?.context?.json?.().catch(() => null);
         throw new Error(body?.error ?? error?.message ?? 'Brouillon indisponible');
       }
-      setDraft({ day, ...data, entry: null });
+      // Un récit sur un jour déjà écrit remplace le texte de sa page (on relit avant d'enregistrer).
+      setDraft({ day, ...data, entry: byDay.get(day) ?? null, fromStory: !!story });
     } catch (e) {
       toastError(e);
     } finally {
@@ -112,10 +134,19 @@ export function JournalTab({ crew }: { crew: Crew }) {
 
   return (
     <div className="space-y-6">
+      <StoryRecorder
+        crewId={crew.id}
+        day={storyDay}
+        dayLabel={shortDayLabel(storyDay, today)}
+        days={storyDays}
+        onDay={setStoryDay}
+        writing={writing === storyDay}
+        onWrite={(story) => void write(storyDay, story)}
+      />
       <Panel
-        title="Journal de bord"
-        description={<>Une page par jour, publiée dans le carnet de route de ta page. Clique sur <strong className="text-cream">Rédiger</strong> : un
-          brouillon est écrit pour toi à partir des kilomètres, des étapes et des photos du jour. Tu le relis et tu le publies.</>}
+        title="Tes pages"
+        description={<>Une page par jour, publiée dans le carnet de route de ta page. Le plus simple : <strong className="text-cream">raconte</strong> ta
+          journée au micro. Pas le temps ? <strong className="text-cream">Rédiger</strong> écrit un brouillon à partir des kilomètres, des étapes et des photos du jour.</>}
       >
         {days.length === 0 ? (
           <p className="m-0 text-dust-300">Les journées apparaîtront ici dès que le GPS aura enregistré tes premiers kilomètres.</p>
@@ -135,13 +166,16 @@ export function JournalTab({ crew }: { crew: Crew }) {
                       </p>
                     ) : <p className="m-0 text-sm text-dust-400">Pas encore de page pour ce jour.</p>}
                   </div>
+                  <Button size="sm" variant="secondary" onClick={() => { setStoryDay(day); document.querySelector('[aria-label="Raconte ta journée"]')?.scrollIntoView({ behavior: 'smooth' }); }}>
+                    <Mic />Raconter
+                  </Button>
                   {entry ? (
                     <div className="flex gap-1">
                       <Button size="sm" variant="ghost" onClick={() => setDraft({ day, title: entry.title, body: entry.body, ai: entry.ai_generated, entry })}><PenLine />Modifier</Button>
                       <Button size="sm" variant="ghost" aria-label="Supprimer la page" onClick={() => { if (confirm('Supprimer cette page du journal ?')) remove.mutate(entry.id); }}><Trash2 /></Button>
                     </div>
                   ) : (
-                    <Button size="sm" disabled={writing !== null} onClick={() => void write(day)}>
+                    <Button size="sm" variant="ghost" disabled={writing !== null} onClick={() => void write(day)}>
                       {writing === day ? <Loader2 className="animate-spin" /> : <Sparkles />}{writing === day ? 'Rédaction…' : 'Rédiger'}
                     </Button>
                   )}

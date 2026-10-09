@@ -67,7 +67,7 @@ export function heroUrl(p: TripPayload) {
 
 export function buildTripEmail(m: TripMail, siteUrl: string, now = new Date()): Email & { unsubscribeUrl: string | null } {
   const p = m.payload;
-  const page = `${siteUrl}/t/${encodeURIComponent(p.slug)}`;
+  const page = `${siteUrl}/road-trip/${encodeURIComponent(p.slug)}`;
   const unsubscribeUrl = m.unsub_token ? `${siteUrl}/desabonnement?t=${encodeURIComponent(m.unsub_token)}` : null;
   const unsub = unsubscribeUrl ? link(esc(unsubscribeUrl), 'Ne plus rien recevoir') : '';
   const name = p.name.trim() || 'le road trip';

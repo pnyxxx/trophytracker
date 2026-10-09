@@ -169,7 +169,7 @@ function InviteRelatives({ crew }: { crew: Crew }) {
 /** Partage : lien à copier, e-mail aux grands-parents, QR code et visuels. */
 export function SharePanel({ crew }: { crew: Crew }) {
   const [copied, setCopied] = useState(false);
-  const url = `${window.location.origin}/t/${crew.slug}`;
+  const url = `${window.location.origin}/road-trip/${crew.slug}`;
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(url);
@@ -217,7 +217,7 @@ function GoButton({ crew, fairPlayOk, onNeedGps }: { crew: Crew; fairPlayOk: boo
       <div className="flex flex-col gap-3 rounded-[28px] bg-live/[0.14] p-6 text-live-text">
         <span className="font-mono text-[13px]">c’est parti</span>
         <span className="tt-display text-[30px] leading-none text-cream">Le suivi est lancé. Bonne route !</span>
-        <Button asChild variant="secondary" className="self-start"><Link to={`/t/${crew.slug}`}>Voir ma page en direct</Link></Button>
+        <Button asChild variant="secondary" className="self-start"><Link to={`/road-trip/${crew.slug}`}>Voir ma page en direct</Link></Button>
       </div>
     );
   }

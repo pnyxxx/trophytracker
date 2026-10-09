@@ -173,7 +173,7 @@ const { error: startErr } = await alice.rpc('set_tracking', { p_crew: crew.id, p
 check(!startErr, 'suivi lancé');
 // Le service tracker relève la file toutes les 30 s.
 const inviteMail = await waitEmail(mamie, 'alice t’invite', 90);
-check(!!inviteMail && inviteMail.HTML.includes(`${SITE}/t/${crew.slug}`), 'le proche reçoit l’invitation avec le lien du voyage');
+check(!!inviteMail && inviteMail.HTML.includes(`${SITE}/road-trip/${crew.slug}`), 'le proche reçoit l’invitation avec le lien du voyage');
 const departMail = await waitEmail(mamie, 'C’est parti', 90);
 check(!!departMail, 'le proche reçoit « C’est parti » au lancement du suivi');
 const unsubToken = departMail?.HTML.match(/desabonnement\?t=([0-9a-f-]{36})/)?.[1];
@@ -219,6 +219,24 @@ check(bobAgain.ok, `bob se reconnecte avec un nouveau code${bobAgain.error ? ' :
 const { error: noAccount } = await client().auth.signInWithOtp({ email: `inconnu-${run}@test.local`, options: { shouldCreateUser: false } });
 const { data: ghost } = await service.auth.admin.listUsers({ perPage: 1000 });
 check(!!noAccount && !ghost.users.some((u) => u.email === `inconnu-${run}@test.local`), 'connexion seule (sans inscription) : aucun compte créé pour une adresse inconnue');
+
+// Mot de passe : inscription (prénom + e-mail + mot de passe, puis code de confirmation), connexion, choix après coup
+const eveEmail = `eve-${run}@test.local`;
+const eve = client();
+const { data: eveUp, error: eveUpErr } = await eve.auth.signUp({ email: eveEmail, password: 'route-des-alpes-42', options: { data: { display_name: 'Ève' } } });
+check(!eveUpErr && !eveUp.session, `inscription avec mot de passe : pas de session avant la confirmation${eveUpErr ? ' : ' + eveUpErr.message : ''}`);
+const eveCode = await takeCode(eveEmail, 'Ton code pour créer');
+const { data: eveOk, error: eveVErr } = await eve.auth.verifyOtp({ email: eveEmail, token: eveCode ?? '', type: 'email' });
+check(!eveVErr && !!eveOk.session, `le code de l’e-mail confirme l’inscription${eveVErr ? ' : ' + eveVErr.message : ''}`);
+const { data: evePw, error: evePwErr } = await client().auth.signInWithPassword({ email: eveEmail, password: 'route-des-alpes-42' });
+check(!evePwErr && !!evePw.session, `ève se reconnecte avec son mot de passe${evePwErr ? ' : ' + evePwErr.message : ''}`);
+const { error: badPw } = await client().auth.signInWithPassword({ email: eveEmail, password: 'mauvais-mot-de-passe' });
+check(!!badPw, 'un mauvais mot de passe est refusé');
+const { error: shortPw } = await client().auth.signUp({ email: `court-${run}@test.local`, password: 'court' });
+check(!!shortPw, 'un mot de passe de moins de 10 caractères est refusé');
+const { error: setPw } = await bobAgain.c.auth.updateUser({ password: 'bob-mot-de-passe-2027' });
+const { error: bobPwErr } = await client().auth.signInWithPassword({ email: `bob-${run}@test.local`, password: 'bob-mot-de-passe-2027' });
+check(!setPw && !bobPwErr, `un compte créé par code choisit un mot de passe et s’en sert${setPw || bobPwErr ? ' : ' + (setPw ?? bobPwErr).message : ''}`);
 
 // ── Emails intégrés à Supabase ─────────────────────────────────────────────
 await alice.from('crews').update({ is_public: true }).eq('id', crew.id);

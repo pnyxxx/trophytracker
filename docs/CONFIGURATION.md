@@ -48,8 +48,11 @@ Les sujets sont dans `infra/supabase.override.yml` (`GOTRUE_MAILER_SUBJECTS_*`).
 
 ## Connexion
 
-Uniquement par **code à 6 chiffres envoyé par e-mail** (pas de mot de passe, pas de connexion Google) :
-`signInWithOtp` puis `verifyOtp({ type: 'email' })`, voir `apps/web/src/components/auth/EmailCodeSignIn.tsx`.
+Par **e-mail + mot de passe** (par défaut), ou au choix par **code à 6 chiffres envoyé par e-mail** (qui sert aussi
+de « mot de passe oublié ») ; pas de connexion Google. Voir `apps/web/src/components/auth/SignInForm.tsx` :
+inscription = `signUp` (prénom, e-mail, mot de passe de 10 caractères minimum) puis code de confirmation
+`verifyOtp({ type: 'email' })` ; code seul = `signInWithOtp` puis `verifyOtp({ type: 'email' })`. Le mot de passe se
+choisit ou se change dans Mon compte (sur une session de plus de 24 h, un code de confirmation est demandé).
 Le code vaut 10 minutes (`GOTRUE_MAILER_OTP_EXP`, qui vaut aussi pour les liens d'invitation et de changement
 d'adresse) ; un nouveau code par minute au plus par adresse, et 300 e-mails d'Auth par heure pour tout le site
 (`GOTRUE_RATE_LIMIT_EMAIL_SENT`, à garder sous le quota du fournisseur SMTP). Les admins gardent la double authentification (TOTP).

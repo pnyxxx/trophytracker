@@ -51,7 +51,7 @@ export function TravellerShell({ crew, section, badges, onSection, children }: {
           <span className="font-mono text-[12px] text-dust-400">road trip</span>
           <span className="text-[17px] font-bold leading-snug">{crew.name}</span>
           <span className="font-mono text-[13px] text-signal-text">{tripStatus(crew)}</span>
-          <Link to={`/t/${crew.slug}`} className="mt-1.5 inline-flex items-center gap-1.5 text-[14px] font-bold text-dust-200 hover:text-white">Voir ma page <ExternalLink className="h-3.5 w-3.5" /></Link>
+          <Link to={`/road-trip/${crew.slug}`} className="mt-1.5 inline-flex items-center gap-1.5 text-[14px] font-bold text-dust-200 hover:text-white">Voir ma page <ExternalLink className="h-3.5 w-3.5" /></Link>
         </div>
         <nav aria-label="Espace voyageur" className="flex flex-col gap-1">{nav(false)}</nav>
         {others.length > 0 && (
@@ -80,7 +80,7 @@ export function TravellerShell({ crew, section, badges, onSection, children }: {
             <span className="truncate text-[16px] font-bold">{crew.name}</span>
             <span className="font-mono text-[12px] text-signal-text">{tripStatus(crew)}</span>
           </div>
-          <Link to={`/t/${crew.slug}`} className="flex min-h-11 items-center gap-1.5 rounded-full border-[1.5px] border-cream/40 px-3.5 text-[14px] font-bold text-cream hover:text-cream">Ma page <ExternalLink className="h-3.5 w-3.5" /></Link>
+          <Link to={`/road-trip/${crew.slug}`} className="flex min-h-11 items-center gap-1.5 rounded-full border-[1.5px] border-cream/40 px-3.5 text-[14px] font-bold text-cream hover:text-cream">Ma page <ExternalLink className="h-3.5 w-3.5" /></Link>
           <Link to="/mon-compte" aria-label="Mon compte" className="flex h-10 w-10 items-center justify-center rounded-full bg-signal font-bold text-white hover:text-white">{(name[0] ?? '?').toUpperCase()}</Link>
         </div>
         <nav aria-label="Espace voyageur" className="-mx-4 flex gap-1.5 overflow-x-auto px-4">{nav(true)}</nav>

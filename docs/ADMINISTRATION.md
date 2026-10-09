@@ -77,7 +77,7 @@ where slug = 'nom-equipage';
 
 ### L'équipage de démo roule en continu
 
-« Route des Grandes Alpes » (`/t/exemple`) est **le road trip d'exemple** (colonne `crews.is_demo`, un seul
+« Route des Grandes Alpes » (`/road-trip/exemple`) est **le road trip d'exemple** (colonne `crews.is_demo`, un seul
 possible) : sa page doit toujours vivre. Le service `tracker` lui fait rejouer **en boucle et en temps réel** un vrai
 trajet (Thonon-les-Bains → Colombière → Aravis → Roselend → Iseran → Galibier → Izoard → Bonette → Menton, 675 km),
 une position toutes les 15 s, par les mêmes fonctions que les vrais téléphones (`apps/tracker/src/demo.ts`) :

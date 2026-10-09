@@ -39,6 +39,12 @@ export function errorMessage(err: unknown): string {
     'Email rate limit exceeded': 'Trop d’e-mails envoyés, réessaie dans quelques minutes',
     'Request rate limit reached': 'Trop de tentatives, réessaie dans quelques minutes',
     'For security purposes': 'Par sécurité, patiente une minute avant de redemander un code',
+    'Invalid login credentials': 'E-mail ou mot de passe incorrect. Tu n’as pas encore de mot de passe ? Reçois un code par e-mail.',
+    'User already registered': 'Tu as déjà un compte avec cette adresse : connecte-toi.',
+    'Password should be at least': 'Mot de passe trop court : 10 caractères minimum.',
+    'Password should contain': 'Mot de passe trop simple : mélange lettres et chiffres.',
+    'New password should be different': 'C’est déjà ton mot de passe actuel.',
+    'Signups not allowed for otp': 'Aucun compte avec cette adresse.',
     'Failed to fetch': 'Connexion au serveur impossible. Vérifie ta connexion Internet.',
   };
   for (const [en, fr] of Object.entries(auth)) if (msg.includes(en)) return fr;

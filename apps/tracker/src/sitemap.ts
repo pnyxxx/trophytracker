@@ -30,7 +30,7 @@ export function buildSitemap(siteUrl: string, crews: SitemapCrew[]): string {
 
   const urls = [
     ...PAGES.map((p) => entry(p.path, p.priority, p.changefreq)),
-    ...crews.map((c) => entry(`/t/${c.slug}`, '0.8', 'daily', c.updated_at)),
+    ...crews.map((c) => entry(`/road-trip/${c.slug}`, '0.8', 'daily', c.updated_at)),
   ];
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`;
 }
