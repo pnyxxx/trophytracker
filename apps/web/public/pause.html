@@ -16,6 +16,7 @@
     @font-face { font-family: 'Bricolage Grotesque'; font-weight: 200 800; font-display: swap; src: url(/pause/bricolage-grotesque-latin-wght-normal.woff2) format('woff2'); }
     @font-face { font-family: 'Atkinson Hyperlegible'; font-weight: 400; font-display: swap; src: url(/pause/atkinson-hyperlegible-latin-400-normal.woff2) format('woff2'); }
     @font-face { font-family: 'Atkinson Hyperlegible'; font-weight: 700; font-display: swap; src: url(/pause/atkinson-hyperlegible-latin-700-normal.woff2) format('woff2'); }
+    @font-face { font-family: 'Big Shoulders Display'; font-weight: 900; font-display: swap; src: url(/pause/big-shoulders-display-latin-900-normal.woff2) format('woff2'); }
     @font-face { font-family: 'DM Mono'; font-weight: 400; font-display: swap; src: url(/pause/dm-mono-latin-400-normal.woff2) format('woff2'); }
 
     :root {
@@ -34,9 +35,9 @@
       -webkit-font-smoothing: antialiased;
     }
     .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--cream); }
-    .brand img { width: 30px; height: 30px; }
-    .brand span { font-family: var(--display); font-weight: 800; font-size: 24px; letter-spacing: -.03em; }
-    .brand b { font-weight: 800; color: var(--red); }
+    .brand img { width: 38px; height: 38px; }
+    .brand span { font-family: 'Big Shoulders Display', Impact, sans-serif; font-weight: 900; font-size: 28px; text-transform: uppercase; line-height: .85; }
+    .brand b { font-weight: 900; color: var(--red); }
 
     main { width: 100%; max-width: 560px; background: var(--surface); border: 1.5px solid var(--line); border-radius: 28px; padding: 34px; }
     .pill { display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; padding: 7px 13px; background: rgba(232, 163, 61, .16); color: #F2C27A; font-family: var(--mono); font-size: 14px; }
@@ -55,7 +56,7 @@
   </style>
 </head>
 <body>
-  <div class="brand"><img src="/pause/logo.svg" alt=""><span>trophy<b>tracker</b></span></div>
+  <div class="brand"><img src="/pause/logo.svg" alt=""><span>Trophy<b>Tracker</b></span></div>
   <main>
     <span class="pill"><i></i>hors réseau · pour un moment</span>
     <h1>On fait une <em>pause.</em></h1>

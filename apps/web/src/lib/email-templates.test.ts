@@ -31,12 +31,11 @@ describe('modèles d’emails de Supabase Auth', () => {
     }
   });
 
-  it('mise en page commune : logo, nom en minuscules, pied de page, sans emoji', () => {
+  it('mise en page commune : logo, nom de la marque, pied de page, sans emoji', () => {
     for (const html of Object.values(AUTH_EMAIL_TEMPLATES)) {
       expect(html).toContain('src="{{ .SiteURL }}/email-logo.png"');
-      expect(html).toContain('trophy<span style="color:#E1262C">tracker</span>');
+      expect(html).toContain('Trophy<span style="color:#E1262C">Tracker</span>');
       expect(html).toContain('le carnet de route en direct de tes road trips');
-      expect(html).not.toContain('TrophyTracker');
       expect(html).not.toMatch(/\p{Extended_Pictographic}/u);
     }
   });

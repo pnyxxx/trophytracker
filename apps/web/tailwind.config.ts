@@ -28,6 +28,8 @@ export default {
 				sans: ['"Atkinson Hyperlegible"', 'system-ui', 'sans-serif'],
 				display: ['"Bricolage Grotesque Variable"', '"Bricolage Grotesque"', 'system-ui', 'sans-serif'],
 				mono: ['"DM Mono"', 'ui-monospace', 'monospace'],
+				// Nom de la marque seulement (logo « la trace dessine la 4L »).
+				logo: ['"Big Shoulders Display"', 'Impact', '"Arial Narrow"', 'sans-serif'],
 			},
 			colors: {
 				// Palette « Balise »

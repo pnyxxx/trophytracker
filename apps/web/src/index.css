@@ -1,3 +1,12 @@
+/* Police du nom de la marque (logo), graisse 900 seulement, alphabet latin. */
+@font-face {
+  font-family: 'Big Shoulders Display';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('./assets/fonts/big-shoulders-display-latin-900-normal.woff2') format('woff2');
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

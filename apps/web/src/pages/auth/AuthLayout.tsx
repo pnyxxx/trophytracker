@@ -13,7 +13,7 @@ export function AuthLayout({ title, subtitle, children, footer }: {
         {/* Colonne d'accroche (grand écran) */}
         <div className="hidden flex-col gap-8 lg:flex">
           <Link to="/" className="flex items-center gap-3 text-cream hover:text-cream" aria-label="trophytracker, accueil">
-            <LogoMark className="h-9 w-9" /> <Wordmark className="text-[30px]" />
+            <LogoMark className="h-14 w-14" /> <Wordmark className="text-[38px]" />
           </Link>
           <p className="tt-display m-0 text-[clamp(64px,7vw,112px)] text-cream">
             Tes proches

@@ -123,7 +123,7 @@ export function emailLayout(e: EmailLayout): string {
     <tr><td style="background:${C.night};padding:24px 36px" class="tt-pad">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
         <td style="vertical-align:middle;white-space:nowrap">
-          <img src="${e.siteUrl}/email-logo.png" width="24" height="24" alt="" style="vertical-align:middle;border:0;margin-right:10px"><span style="vertical-align:middle;font-family:${F.display};font-size:20px;font-weight:800;letter-spacing:-.6px;line-height:1;color:${C.cream}">trophy<span style="color:${C.red}">tracker</span></span>
+          <img src="${e.siteUrl}/email-logo.png" width="34" height="34" alt="" style="vertical-align:middle;border:0;margin-right:8px"><span style="vertical-align:middle;font-family:'Big Shoulders Display',Impact,'Arial Narrow',sans-serif;font-size:24px;font-weight:900;line-height:1;text-transform:uppercase;color:${C.cream}">Trophy<span style="color:${C.red}">Tracker</span></span>
         </td>
         ${e.headerRight ? `<td align="right" style="vertical-align:middle;font-family:${F.mono};font-size:14px;color:#A9A59D">${e.headerRight}</td>` : ''}
       </tr></table>

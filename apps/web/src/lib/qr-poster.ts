@@ -31,6 +31,8 @@ export interface PosterCrew {
 
 const C = { night: '#15161A', cream: '#F5F1EA', red: '#E1262C', white: '#FFFFFF', dust: '#C9C5BD', muted: '#5C5850' };
 const DISPLAY = '"Bricolage Grotesque Variable", "Bricolage Grotesque", sans-serif';
+/** Nom de la marque (logo « la trace dessine la 4L »). */
+const LOGO_FONT = '"Big Shoulders Display", Impact, sans-serif';
 const MONO = '"DM Mono", ui-monospace, monospace';
 
 export const POSTER_SIZE: Record<PosterFormat, [number, number]> = { sticker: [1440, 1440], story: [1080, 1920], round: [960, 960] };
@@ -89,8 +91,8 @@ async function drawQr(ctx: CanvasRenderingContext2D, value: string, x: number, y
     ctx.roundRect(ex + 2 * m, ey + 2 * m, 3 * m, 3 * m, m);
     ctx.fill();
   }
-  // Balise au centre (≈ 22 % de la largeur : bien en dessous des 30 % que la correction H rattrape).
-  const logo = await svgImage(logoMarkSvg('signal'));
+  // Logo au centre (≈ 22 % de la largeur : bien en dessous des 30 % que la correction H rattrape).
+  const logo = await svgImage(logoMarkSvg(panel === C.cream || panel === C.white ? 'light' : 'dark'));
   const box = Math.round((n * 0.22)) * m;
   const bx = ox + (n * m - box) / 2;
   const by = oy + (n * m - box) / 2;
@@ -101,19 +103,19 @@ async function drawQr(ctx: CanvasRenderingContext2D, value: string, x: number, y
   ctx.drawImage(logo, bx + box * 0.06, by + box * 0.06, box * 0.88, box * 0.88);
 }
 
-/** Balise + « trophytracker » en minuscules (« tracker » en rouge), depuis (x, baseline). */
+/** Logo + « TROPHYTRACKER » en capitales (« TRACKER » en rouge), depuis (x, baseline). */
 async function drawBrand(ctx: CanvasRenderingContext2D, x: number, baseline: number, px: number) {
-  const mark = await svgImage(logoMarkSvg('signal'));
+  const mark = await svgImage(logoMarkSvg('dark'));
   const s = px * 1.3;
   ctx.drawImage(mark, x, baseline - s * 0.82, s, s);
-  ctx.font = `800 ${px}px ${DISPLAY}`;
-  ctx.letterSpacing = `${-px * 0.03}px`;
+  ctx.font = `900 ${px}px ${LOGO_FONT}`;
+  ctx.letterSpacing = `${px * 0.01}px`;
   ctx.textAlign = 'left';
   const tx = x + s + px * 0.35;
   ctx.fillStyle = C.cream;
-  ctx.fillText('trophy', tx, baseline);
+  ctx.fillText('TROPHY', tx, baseline);
   ctx.fillStyle = C.red;
-  ctx.fillText('tracker', tx + ctx.measureText('trophy').width, baseline);
+  ctx.fillText('TRACKER', tx + ctx.measureText('TROPHY').width, baseline);
   ctx.letterSpacing = '0px';
 }
 
@@ -235,7 +237,7 @@ async function drawStoryBackground(ctx: CanvasRenderingContext2D, c: PosterCrew,
 
 /** Dessine le visuel et renvoie le canvas. */
 export async function drawPoster(format: PosterFormat, crew: PosterCrew): Promise<HTMLCanvasElement> {
-  await Promise.all([document.fonts.load(`800 100px ${DISPLAY}`), document.fonts.load(`500 40px ${MONO}`), document.fonts.load(`400 40px ${MONO}`)]);
+  await Promise.all([document.fonts.load(`800 100px ${DISPLAY}`), document.fonts.load(`900 100px ${LOGO_FONT}`), document.fonts.load(`500 40px ${MONO}`), document.fonts.load(`400 40px ${MONO}`)]);
   const [w, h] = POSTER_SIZE[format];
   const canvas = document.createElement('canvas');
   canvas.width = w;
