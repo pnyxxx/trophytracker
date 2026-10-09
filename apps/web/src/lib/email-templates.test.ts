@@ -35,7 +35,7 @@ describe('modèles d’emails de Supabase Auth', () => {
     for (const html of Object.values(AUTH_EMAIL_TEMPLATES)) {
       expect(html).toContain('src="{{ .SiteURL }}/email-logo.png"');
       expect(html).toContain('trophy<span style="color:#E1262C">tracker</span>');
-      expect(html).toContain('le carnet de route en direct de vos road trips');
+      expect(html).toContain('le carnet de route en direct de tes road trips');
       expect(html).not.toContain('TrophyTracker');
       expect(html).not.toMatch(/\p{Extended_Pictographic}/u);
     }

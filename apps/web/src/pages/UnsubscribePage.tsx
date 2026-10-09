@@ -42,10 +42,10 @@ export default function UnsubscribePage() {
             </h1>
             <p className="m-0 text-[19px] leading-relaxed text-dust-200">
               {state.status === 'ok'
-                ? `Vous ne recevrez plus d’e-mail de « ${state.name ?? 'ce road trip'} ». Le lien du voyage marche toujours, si vous voulez le suivre de temps en temps.`
+                ? `Tu ne recevras plus d’e-mail de « ${state.name ?? 'ce road trip'} ». Le lien du voyage marche toujours, si tu veux le suivre de temps en temps.`
                 : state.status === 'unknown'
-                  ? 'Ce lien de désinscription n’est plus valable : vous êtes sans doute déjà désinscrit.'
-                  : 'La désinscription n’a pas abouti. Réessayez dans un instant, ou répondez simplement à l’e-mail reçu.'}
+                  ? 'Ce lien de désinscription n’est plus valable : tu es sans doute déjà désinscrit.'
+                  : 'La désinscription n’a pas abouti. Réessaie dans un instant, ou réponds simplement à l’e-mail reçu.'}
             </p>
             <Button asChild variant="outline"><Link to="/">Découvrir trophytracker</Link></Button>
           </>

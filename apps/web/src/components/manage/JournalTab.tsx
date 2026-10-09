@@ -52,8 +52,8 @@ function Editor({ crew, draft, onClose }: { crew: Crew; draft: Draft; onClose: (
           <DialogTitle>{dayLabel(draft.day)}</DialogTitle>
           <DialogDescription>
             {draft.ai
-              ? 'Brouillon rédigé par l’IA à partir de vos kilomètres, étapes et photos du jour. Relisez-le : vous seuls savez ce qui s’est vraiment passé.'
-              : 'Brouillon écrit à partir des chiffres du jour : racontez la suite !'}
+              ? 'Brouillon rédigé par l’IA à partir de tes kilomètres, étapes et photos du jour. Relis-le : toi seul sais ce qui s’est vraiment passé.'
+              : 'Brouillon écrit à partir des chiffres du jour : raconte la suite !'}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={(e: FormEvent) => { e.preventDefault(); save.mutate(true); }} className="space-y-4">
@@ -114,11 +114,11 @@ export function JournalTab({ crew }: { crew: Crew }) {
     <div className="space-y-6">
       <Panel
         title="Journal de bord"
-        description={<>Une page par jour, publiée dans le carnet de route de votre page. Cliquez sur <strong className="text-cream">Rédiger</strong> : un
-          brouillon est écrit pour vous à partir des kilomètres, des étapes et des photos du jour. Vous le relisez et le publiez.</>}
+        description={<>Une page par jour, publiée dans le carnet de route de ta page. Clique sur <strong className="text-cream">Rédiger</strong> : un
+          brouillon est écrit pour toi à partir des kilomètres, des étapes et des photos du jour. Tu le relis et tu le publies.</>}
       >
         {days.length === 0 ? (
-          <p className="m-0 text-dust-300">Les journées apparaîtront ici dès que le GPS aura enregistré vos premiers kilomètres.</p>
+          <p className="m-0 text-dust-300">Les journées apparaîtront ici dès que le GPS aura enregistré tes premiers kilomètres.</p>
         ) : (
           <ul className="m-0 list-none space-y-2 p-0">
             {days.map((day) => {

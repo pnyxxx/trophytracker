@@ -68,11 +68,11 @@ function SponsorDialog({ crew, sponsor, open, onClose }: { crew: Crew; sponsor?:
         <DialogHeader><DialogTitle>{sponsor ? 'Modifier le sponsor' : 'Nouveau sponsor'}</DialogTitle></DialogHeader>
         <form onSubmit={(e: FormEvent) => { e.preventDefault(); save.mutate(); }} className="space-y-4">
           <Field id="s-name" label="Nom"><Input id="s-name" required maxLength={100} value={form.name} onChange={set('name')} /></Field>
-          <Field id="s-logo" label="Logo" hint={sponsor?.logo_path ? 'Laissez vide pour garder le logo actuel.' : 'PNG avec fond transparent idéalement.'}>
+          <Field id="s-logo" label="Logo" hint={sponsor?.logo_path ? 'Laisse vide pour garder le logo actuel.' : 'PNG avec fond transparent idéalement.'}>
             <Input id="s-logo" type="file" accept="image/*" onChange={(e) => setLogo(e.target.files?.[0] ?? null)} />
           </Field>
           <Field id="s-web" label="Site web"><Input id="s-web" inputMode="url" placeholder="monsponsor.fr" value={form.website_url} onChange={set('website_url')} /></Field>
-          <Field id="s-place" label="Adresse" hint="Pour placer le sponsor sur votre carte. Facultatif.">
+          <Field id="s-place" label="Adresse" hint="Pour placer le sponsor sur ta carte. Facultatif.">
             <LocationPicker
               id="s-place"
               value={coords}
@@ -114,7 +114,7 @@ export function SponsorsTab({ crew }: { crew: Crew }) {
   return (
     <Panel
       title={`Sponsors (${sponsors.length})`}
-      description="Vos sponsors apparaissent sur votre page et, s’ils ont une position, sur votre carte."
+      description="Tes sponsors apparaissent sur ta page et, s’ils ont une position, sur ta carte."
     >
       <Button onClick={() => setEditing('new')} className="mb-6"><Plus />Ajouter un sponsor</Button>
       {isLoading ? <Spinner /> : sponsors.length === 0 ? <p className="text-dust-400">Aucun sponsor pour l’instant.</p> : (

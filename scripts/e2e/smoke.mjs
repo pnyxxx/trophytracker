@@ -66,7 +66,7 @@ async function requestCode(c, email, options) {
 async function signInWithCode(email) {
   const c = client();
   const error = await requestCode(c, email, { shouldCreateUser: false });
-  const code = await takeCode(email, 'Votre code de connexion');
+  const code = await takeCode(email, 'Ton code de connexion');
   const { data, error: vErr } = await c.auth.verifyOtp({ email, token: code ?? '', type: 'email' });
   return { c, ok: !error && !!code && !vErr && !!data.session, error: error ?? vErr };
 }
@@ -76,8 +76,8 @@ async function signUpConfirmed(name, { checkCodes = false } = {}) {
   const c = client();
   const error = await requestCode(c, email, { shouldCreateUser: true, data: { display_name: name } });
   check(!error, `inscription de ${name} : code demandé${error ? ' : ' + error.message : ''}`);
-  const code = await takeCode(email, 'Votre code pour créer');
-  check(/^\d{6}$/.test(code ?? ''), 'e-mail « Votre code pour créer votre compte » reçu, avec un code à 6 chiffres');
+  const code = await takeCode(email, 'Ton code pour créer');
+  check(/^\d{6}$/.test(code ?? ''), 'e-mail « Ton code pour créer ton compte » reçu, avec un code à 6 chiffres');
   if (checkCodes) {
     const { error: bad } = await client().auth.verifyOtp({ email, token: code === '000000' ? '111111' : '000000', type: 'email' });
     check(!!bad, 'un mauvais code est refusé');
@@ -172,7 +172,7 @@ check(!!strangerInv, 'bob ne peut pas inviter de proches dans le road trip d’a
 const { error: startErr } = await alice.rpc('set_tracking', { p_crew: crew.id, p_enabled: true });
 check(!startErr, 'suivi lancé');
 // Le service tracker relève la file toutes les 30 s.
-const inviteMail = await waitEmail(mamie, 'alice vous invite', 90);
+const inviteMail = await waitEmail(mamie, 'alice t’invite', 90);
 check(!!inviteMail && inviteMail.HTML.includes(`${SITE}/t/${crew.slug}`), 'le proche reçoit l’invitation avec le lien du voyage');
 const departMail = await waitEmail(mamie, 'C’est parti', 90);
 check(!!departMail, 'le proche reçoit « C’est parti » au lancement du suivi');
@@ -213,7 +213,7 @@ const { data: hidden } = await anon.from('crews').select('id').eq('id', crew.id)
 const { data: hiddenTrack } = await anon.rpc('get_track', { p_crew: crew.id });
 check(hidden?.length === 0 && hiddenTrack?.length === 0, 'page privée : invisible, trace comprise, pour un visiteur');
 
-// Connexion d'un compte existant : e-mail « Votre code de connexion »
+// Connexion d'un compte existant : e-mail « Ton code de connexion »
 const bobAgain = await signInWithCode(`bob-${run}@test.local`);
 check(bobAgain.ok, `bob se reconnecte avec un nouveau code${bobAgain.error ? ' : ' + bobAgain.error.message : ''}`);
 const { error: noAccount } = await client().auth.signInWithOtp({ email: `inconnu-${run}@test.local`, options: { shouldCreateUser: false } });
@@ -228,7 +228,7 @@ const aliceEmail = `alice-${run}@test.local`;
 const carolEmail = `carol-${run}@test.local`;
 const { data: inv, error: invErr } = await alice.functions.invoke('invite-member', { body: { crewId: crew.id, email: carolEmail } });
 check(!invErr && inv?.status === 'invited', `invitation envoyée à carol${invErr ? ' : ' + invErr.message : ''}`);
-const invMail = await waitEmail(carolEmail, 'Vous êtes invité');
+const invMail = await waitEmail(carolEmail, 'Tu es invité');
 const tokenHash = invMail?.HTML.match(/token_hash=([^&"]+)/)?.[1];
 check(!!tokenHash && invMail.HTML.includes(`${SITE}/invitation?token_hash=`), 'email d’invitation reçu, avec lien vers notre page /invitation');
 const carol = client();
@@ -248,7 +248,7 @@ const { data: inv3 } = await alice.functions.invoke('invite-member', { body: { c
 check(inv3?.status === 'invited', 'invitation envoyée à dave');
 const dave = client();
 const daveErr = await requestCode(dave, daveEmail, { shouldCreateUser: true });
-const daveCode = await takeCode(daveEmail, 'Votre code');
+const daveCode = await takeCode(daveEmail, 'Ton code');
 const { data: daveSession, error: daveVErr } = await dave.auth.verifyOtp({ email: daveEmail, token: daveCode ?? '', type: 'email' });
 check(!daveErr && !daveVErr && !!daveSession.session, `dave (invité) se connecte par code, sans le lien${daveErr || daveVErr ? ' : ' + (daveErr ?? daveVErr).message : ''}`);
 const { data: daveCrew } = await dave.from('crew_members').select('role').eq('crew_id', crew.id).eq('user_id', daveSession.user?.id ?? '');

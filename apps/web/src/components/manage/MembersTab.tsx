@@ -54,7 +54,7 @@ export function MembersTab({ crew }: { crew: Crew }) {
     onSuccess: (_d, userId) => {
       refresh();
       if (userId === user?.id) {
-        toast.success('Vous avez quitté le road trip');
+        toast.success('Tu as quitté le road trip');
         navigate('/mon-compte');
       } else toast.success('Membre retiré');
     },
@@ -77,7 +77,7 @@ export function MembersTab({ crew }: { crew: Crew }) {
           {members.map((m) => (
             <li key={m.user_id ?? m.display_name} className="flex flex-wrap items-center gap-3 py-3">
               <div className="flex-1">
-                <p className="font-display text-xl font-extrabold leading-tight text-cream">{m.display_name}{m.user_id === user?.id && <span className="text-dust-500"> (vous)</span>}</p>
+                <p className="font-display text-xl font-extrabold leading-tight text-cream">{m.display_name}{m.user_id === user?.id && <span className="text-dust-500"> (toi)</span>}</p>
                 <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-dust-400">{m.role === 'owner' ? 'Propriétaire' : 'Membre'}</p>
               </div>
               {isOwner && m.user_id && m.user_id !== user?.id && (

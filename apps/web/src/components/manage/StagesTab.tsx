@@ -76,7 +76,7 @@ function StageDialog({ crew, stage, initial, last, onClose }: {
 
   const save = useMutation({
     mutationFn: async () => {
-      if (!d.coords) throw new Error('Choisissez où se trouve l’étape');
+      if (!d.coords) throw new Error('Choisis où se trouve l’étape');
       const row = {
         kind: d.kind, name: d.name.trim(), note: orNull(d.note), place: orNull(d.place),
         lat: d.coords.lat, lon: d.coords.lon, arrived_at: fromLocalInput(d.arrived), left_at: fromLocalInput(d.left),
@@ -228,7 +228,7 @@ export function StagesTab({ crew }: { crew: Crew }) {
       {suggestions.length > 0 && (
         <Panel
           title="Étapes repérées par le GPS"
-          description="Le site a remarqué ces arrêts dans votre trace. Ajoutez-les en un clic : le lieu, l’heure et la durée sont déjà remplis."
+          description="Le site a remarqué ces arrêts dans ta trace. Ajoute-les en un clic : le lieu, l’heure et la durée sont déjà remplis."
         >
           <ul className="m-0 list-none space-y-2 p-0">
             {suggestions.slice(0, 8).map((s) => (
@@ -241,7 +241,7 @@ export function StagesTab({ crew }: { crew: Crew }) {
 
       <Panel
         title="Le carnet de route"
-        description={<>Vos étapes, dans l’ordre du voyage : elles apparaissent sur la carte et dans le carnet de route de votre page. C’est vous qui décidez de tout : rien n’est imposé.</>}
+        description={<>Tes étapes, dans l’ordre du voyage : elles apparaissent sur la carte et dans le carnet de route de ta page. C’est toi qui décides de tout : rien n’est imposé.</>}
         action={
           <div className="flex flex-wrap gap-2">
             <Button onClick={() => setDialog({ stage: null, initial: emptyDraft })}><Plus />Ajouter une étape</Button>
@@ -258,7 +258,7 @@ export function StagesTab({ crew }: { crew: Crew }) {
           <div className="flex flex-col items-start gap-3 border border-dashed border-cream/20 p-6 text-dust-300">
             <Sparkles className="h-6 w-6 text-ochre" />
             <p className="m-0 max-w-[560px]">
-              Pas encore d’étape. Ajoutez votre point de départ, vos nuits prévues ou vos coups de cœur… ou laissez le GPS les repérer pendant le
+              Pas encore d’étape. Ajoute ton point de départ, tes nuits prévues ou tes coups de cœur… ou laisse le GPS les repérer pendant le
               voyage : elles s’afficheront ici en suggestions.
             </p>
           </div>

@@ -26,7 +26,7 @@ const when = (d: Date) =>
 const money = (cents: number, currency: string) =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: currency.toUpperCase() }).format(cents / 100);
 
-const FOOTER = 'Vous recevez cet email parce que vous êtes administrateur de trophytracker.';
+const FOOTER = 'Tu reçois cet e-mail parce que tu es administrateur de trophytracker.';
 
 /** Mise en page commune : celle des emails du site, avec les détails en lignes « étiquette : valeur ». */
 function layout(siteUrl: string, kicker: string, title: string, intro: string, details: [string, string][], href: string, label: string) {

@@ -47,7 +47,7 @@ export function LocationPicker({ id, value, onChange, placeholder = 'Adresse, vi
     const timer = setTimeout(() => {
       setSearching(true);
       searchPlaces(q, ctrl.signal)
-        .then((r) => { setResults(r); setError(r.length ? null : 'Aucun lieu trouvé : essayez avec la ville, ou placez le point à la main.'); })
+        .then((r) => { setResults(r); setError(r.length ? null : 'Aucun lieu trouvé : essaie avec la ville, ou place le point à la main.'); })
         .catch((e: Error) => { if (e.name !== 'AbortError') setError(e.message); })
         .finally(() => setSearching(false));
     }, 350);
@@ -147,7 +147,7 @@ export function LocationPicker({ id, value, onChange, placeholder = 'Adresse, vi
           <div className="flex items-center gap-2 px-3 py-2 text-xs text-dust-300">
             <MapPin className="h-3.5 w-3.5 shrink-0 text-primary" />
             <span className="min-w-0 flex-1 font-mono">{value.lat.toFixed(5)}, {value.lon.toFixed(5)}</span>
-            <span className="hidden text-dust-500 sm:inline">Glissez l’épingle pour ajuster</span>
+            <span className="hidden text-dust-500 sm:inline">Glisse l’épingle pour ajuster</span>
             <button type="button" onClick={() => onChange(null, null)} className="inline-flex items-center gap-1 text-dust-400 hover:text-primary-light">
               <X className="h-3.5 w-3.5" />Retirer
             </button>

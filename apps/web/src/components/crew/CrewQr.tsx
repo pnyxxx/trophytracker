@@ -115,7 +115,7 @@ export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl
         {showUrl && <p className="m-0 break-all font-mono text-[13px] text-dust-400">Le QR code ouvre : {pageUrl}</p>}
         {!crew.is_public && (
           <p className="m-0 rounded-2xl border border-gold/40 bg-gold/10 px-3 py-2 text-[14px] text-gold-text">
-            Ta page est réservée aux voyageurs : le QR code ne marchera que pour vous. Rends-la « privée, par lien » dans les réglages avant de l’imprimer.
+            Ta page est réservée aux voyageurs : le QR code ne marchera que pour toi et tes compagnons de route. Rends-la « privée, par lien » dans les réglages avant de l’imprimer.
           </p>
         )}
 
@@ -162,7 +162,7 @@ export function CrewShareButton({ crew, className, variant = 'outline' }: { crew
       await navigator.clipboard.writeText(pageUrl);
       toast.success('Lien copié ! Envoie-le à tes proches et sponsors.');
     } catch {
-      toast.error('Copie impossible : sélectionnez le lien à la main.');
+      toast.error('Copie impossible : sélectionne le lien à la main.');
     }
   };
 
@@ -176,7 +176,7 @@ export function CrewShareButton({ crew, className, variant = 'outline' }: { crew
       <DialogContent className="max-h-[92vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Partager {crew.name}</DialogTitle>
-          <DialogDescription>Envoyez le lien de la page, ou créez une image avec QR code à coller sur le véhicule ou à poster en story.</DialogDescription>
+          <DialogDescription>Envoie le lien de la page, ou crée une image avec QR code à coller sur le véhicule ou à poster en story.</DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-3 rounded-md border border-cream/15 p-4">
           <p className="m-0 select-all break-all font-mono text-sm text-cream">{pageUrl}</p>

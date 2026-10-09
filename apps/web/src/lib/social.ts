@@ -26,7 +26,7 @@ export function socialUrl(network: Network, input: string): string | null {
     throw new Error(`Lien ${label} invalide`);
   }
   if (!hosts.test(url.hostname) || url.pathname.length < 2) {
-    throw new Error(`Le lien ${label} doit ressembler à ${base}votre-compte`);
+    throw new Error(`Le lien ${label} doit ressembler à ${base}ton-compte`);
   }
   url.protocol = 'https:';
   return url.toString();

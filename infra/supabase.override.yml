@@ -34,18 +34,18 @@ services:
       # Les mots de passe ne servent plus (aucun écran ne les propose) ; minimum gardé si l'API est appelée.
       GOTRUE_PASSWORD_MIN_LENGTH: "10"
       # Emails en français, servis par notre conteneur `web` (générés depuis apps/web/src/lib/email-templates.ts).
-      GOTRUE_MAILER_SUBJECTS_CONFIRMATION: "Votre code pour créer votre compte trophytracker"
-      GOTRUE_MAILER_SUBJECTS_RECOVERY: "Votre code de connexion trophytracker"
-      GOTRUE_MAILER_SUBJECTS_MAGIC_LINK: "Votre code de connexion trophytracker"
-      GOTRUE_MAILER_SUBJECTS_EMAIL_CHANGE: "Confirmez votre nouvelle adresse email"
-      GOTRUE_MAILER_SUBJECTS_INVITE: "Vous êtes invité dans un road trip sur trophytracker"
+      GOTRUE_MAILER_SUBJECTS_CONFIRMATION: "Ton code pour créer ton compte trophytracker"
+      GOTRUE_MAILER_SUBJECTS_RECOVERY: "Ton code de connexion trophytracker"
+      GOTRUE_MAILER_SUBJECTS_MAGIC_LINK: "Ton code de connexion trophytracker"
+      GOTRUE_MAILER_SUBJECTS_EMAIL_CHANGE: "Confirme ta nouvelle adresse e-mail"
+      GOTRUE_MAILER_SUBJECTS_INVITE: "Tu es invité dans un road trip sur trophytracker"
       GOTRUE_MAILER_TEMPLATES_CONFIRMATION: http://web/email-templates/confirmation.html
       GOTRUE_MAILER_TEMPLATES_RECOVERY: http://web/email-templates/recovery.html
       GOTRUE_MAILER_TEMPLATES_MAGIC_LINK: http://web/email-templates/magic-link.html
       GOTRUE_MAILER_TEMPLATES_EMAIL_CHANGE: http://web/email-templates/email-change.html
       GOTRUE_MAILER_TEMPLATES_INVITE: http://web/email-templates/invite.html
       GOTRUE_MAILER_TEMPLATES_REAUTHENTICATION: http://web/email-templates/reauthentication.html
-      GOTRUE_MAILER_SUBJECTS_REAUTHENTICATION: "Votre code de confirmation trophytracker"
+      GOTRUE_MAILER_SUBJECTS_REAUTHENTICATION: "Ton code de confirmation trophytracker"
       # Changement d'email : confirmation demandée sur l'ancienne ET la nouvelle adresse.
       GOTRUE_MAILER_SECURE_EMAIL_CHANGE_ENABLED: "true"
       # Changer de mot de passe exige un code reçu par email (sauf juste après connexion).
@@ -59,9 +59,9 @@ services:
       GOTRUE_MAILER_NOTIFICATIONS_IDENTITY_UNLINKED_ENABLED: "true"
       GOTRUE_MAILER_NOTIFICATIONS_MFA_FACTOR_ENROLLED_ENABLED: "true"
       GOTRUE_MAILER_NOTIFICATIONS_MFA_FACTOR_UNENROLLED_ENABLED: "true"
-      GOTRUE_MAILER_SUBJECTS_PASSWORD_CHANGED_NOTIFICATION: "Votre mot de passe a été modifié"
-      GOTRUE_MAILER_SUBJECTS_EMAIL_CHANGED_NOTIFICATION: "L'adresse email de votre compte a été modifiée"
-      GOTRUE_MAILER_SUBJECTS_PHONE_CHANGED_NOTIFICATION: "Le téléphone de votre compte a été modifié"
+      GOTRUE_MAILER_SUBJECTS_PASSWORD_CHANGED_NOTIFICATION: "Ton mot de passe a été modifié"
+      GOTRUE_MAILER_SUBJECTS_EMAIL_CHANGED_NOTIFICATION: "L'adresse e-mail de ton compte a été modifiée"
+      GOTRUE_MAILER_SUBJECTS_PHONE_CHANGED_NOTIFICATION: "Le téléphone de ton compte a été modifié"
       GOTRUE_MAILER_SUBJECTS_IDENTITY_LINKED_NOTIFICATION: "Nouvelle méthode de connexion ajoutée"
       GOTRUE_MAILER_SUBJECTS_IDENTITY_UNLINKED_NOTIFICATION: "Méthode de connexion retirée"
       GOTRUE_MAILER_SUBJECTS_MFA_FACTOR_ENROLLED_NOTIFICATION: "Double authentification activée"

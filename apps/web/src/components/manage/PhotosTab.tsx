@@ -86,7 +86,7 @@ function PositionDialog({ crew, initial, onSave, onClose }: {
   const car = crew.last_lat != null && crew.last_lon != null ? { lat: crew.last_lat, lon: crew.last_lon } : null;
 
   const myPosition = () => {
-    if (!navigator.geolocation) return toast.error('Votre navigateur ne donne pas sa position.');
+    if (!navigator.geolocation) return toast.error('Ton navigateur ne donne pas sa position.');
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
       (p) => { setCoords({ lat: p.coords.latitude, lon: p.coords.longitude }); setPlace(null); setLocating(false); },
@@ -173,7 +173,7 @@ export function PhotosTab({ crew }: { crew: Crew }) {
 
   function addFiles(files: FileList | File[]) {
     const images = [...files].filter((f) => f.type.startsWith('image/'));
-    if (!images.length) return toast.error('Choisissez des images (JPG, PNG, HEIC…)');
+    if (!images.length) return toast.error('Choisis des images (JPG, PNG, HEIC…)');
     const fresh: Draft[] = images.map((file) => ({
       key: crypto.randomUUID(), file, preview: URL.createObjectURL(file), reading: true,
       title: '', description: '', panorama: false, takenAt: null, coords: null, source: null, place: '', error: null,
@@ -225,7 +225,7 @@ export function PhotosTab({ crew }: { crew: Crew }) {
     },
     onSuccess: ({ ok, total }) => {
       if (ok) toast.success(ok > 1 ? `${ok} photos publiées` : 'Photo publiée');
-      if (ok < total) toast.error('Certaines photos n’ont pas pu être envoyées : réessayez.');
+      if (ok < total) toast.error('Certaines photos n’ont pas pu être envoyées : réessaie.');
       void refresh();
     },
     onError: toastError,
@@ -273,7 +273,7 @@ export function PhotosTab({ crew }: { crew: Crew }) {
     <div className="space-y-6">
       <Panel
         title="Ajouter des photos"
-        description="Choisissez une ou plusieurs photos : on retrouve tout seul quand et où elles ont été prises pour les placer sur votre carte. Vérifiez, puis publiez."
+        description="Choisis une ou plusieurs photos : on retrouve tout seul quand et où elles ont été prises pour les placer sur ta carte. Vérifie, puis publie."
       >
         <label
           onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
@@ -285,7 +285,7 @@ export function PhotosTab({ crew }: { crew: Crew }) {
         >
           <ImagePlus className="h-7 w-7 text-primary" />
           <span className="font-display text-xl font-extrabold text-cream">Choisir des photos</span>
-          <span className="text-xs text-dust-400">ou glissez-les ici · photos classiques et 360°</span>
+          <span className="text-xs text-dust-400">ou glisse-les ici · photos classiques et 360°</span>
           <input
             type="file"
             accept="image/*"
@@ -367,7 +367,7 @@ export function PhotosTab({ crew }: { crew: Crew }) {
               </Button>
               <p className="m-0 max-w-md text-xs text-dust-500">
                 Les photos sont allégées avant l’envoi (rapide même en 4G). Le fichier publié ne contient plus aucune donnée cachée :
-                seule la position que vous voyez ici apparaît sur la carte.
+                seule la position que tu vois ici apparaît sur la carte.
               </p>
             </div>
           </div>
@@ -384,7 +384,7 @@ export function PhotosTab({ crew }: { crew: Crew }) {
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-cream">{p.title}</p>
                     <p className="text-xs text-dust-500">
-                      {p.kind === 'panorama' ? '360°' : 'Photo'}{p.created_by === user?.id ? ' · par vous' : ''}
+                      {p.kind === 'panorama' ? '360°' : 'Photo'}{p.created_by === user?.id ? ' · par toi' : ''}
                     </p>
                     <button
                       type="button"

@@ -28,7 +28,7 @@ function EmailForm() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success('Confirmez le changement via les liens envoyés à vos deux adresses email.');
+      toast.success('Confirme le changement avec les liens envoyés à tes deux adresses e-mail.');
       setEmail('');
     },
     onError: toastError,
@@ -79,7 +79,7 @@ function MfaForm() {
       void refetch();
       void queryClient.invalidateQueries({ queryKey: ['aal'] });
     },
-    onError: () => toast.error('Code incorrect, réessayez'),
+    onError: () => toast.error('Code incorrect, réessaie'),
   });
 
   const disable = useMutation({
@@ -106,9 +106,9 @@ function MfaForm() {
   if (enrolling) {
     return (
       <form onSubmit={(e: FormEvent) => { e.preventDefault(); verify.mutate(); }} className="space-y-4">
-        <p className="text-sm text-dust-200">Scannez ce QR code avec votre application (Google Authenticator, 1Password, Bitwarden…), puis saisissez le code affiché.</p>
+        <p className="text-sm text-dust-200">Scanne ce QR code avec ton application (Google Authenticator, 1Password, Bitwarden…), puis saisis le code affiché.</p>
         <img src={enrolling.qr} alt="QR code de double authentification" className="h-48 w-48 rounded-full bg-white p-2" />
-        <p className="text-xs text-dust-500">Ou saisissez cette clé : <code className="break-all">{enrolling.secret}</code></p>
+        <p className="text-xs text-dust-500">Ou saisis cette clé : <code className="break-all">{enrolling.secret}</code></p>
         <div className="flex gap-3">
           <Input inputMode="numeric" maxLength={6} required value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} aria-label="Code à 6 chiffres" className="max-w-[160px] text-center font-mono tracking-widest" />
           <Button type="submit" disabled={code.length !== 6 || verify.isPending}>Activer</Button>
@@ -119,7 +119,7 @@ function MfaForm() {
   }
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <p className="text-sm text-dust-300">Protégez votre compte avec un second code, affiché par une application, en plus du code reçu par e-mail.</p>
+      <p className="text-sm text-dust-300">Protège ton compte avec un second code, affiché par une application, en plus du code reçu par e-mail.</p>
       <Button variant="secondary" onClick={() => start.mutate()} disabled={start.isPending}>Activer</Button>
     </div>
   );

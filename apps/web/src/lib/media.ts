@@ -34,7 +34,7 @@ export async function compressImage(file: File, preset: ImagePreset): Promise<Co
   try {
     bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
   } catch {
-    throw new Error('Format non lisible par votre navigateur (essayez JPG ou PNG)');
+    throw new Error('Format non lisible par ton navigateur (essaie JPG ou PNG)');
   }
   const { maxW, maxH, quality } = PRESETS[preset];
   const scale = Math.min(1, maxW / bitmap.width, maxH / bitmap.height);

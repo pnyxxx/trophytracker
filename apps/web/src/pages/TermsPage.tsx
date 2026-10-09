@@ -8,7 +8,7 @@ export default function TermsPage() {
     <LegalPage
       seoTitle={PAGES['/conditions-utilisation'].title}
       title={<>Conditions<br />d’utilisation</>}
-      intro="Les règles du jeu, en clair. En créant un compte ou la page d’un road trip, vous les acceptez."
+      intro="Les règles du jeu, en clair. En créant un compte ou la page d’un road trip, tu les acceptes."
     >
       <h2>1. Le service</h2>
       <p>
@@ -24,11 +24,11 @@ export default function TermsPage() {
         par les <Link to="/conditions-vente">conditions de vente</Link>. Les compagnons de route invités n’ont rien à payer.
       </p>
 
-      <h2>2. Votre compte</h2>
+      <h2>2. Ton compte</h2>
       <ul>
         <li>Il faut avoir au moins <strong>15 ans</strong> pour créer un compte, et <strong>18 ans</strong> pour créer ou gérer la page d’un road trip.</li>
-        <li>Vous donnez des informations exactes et gardez pour vous l’accès à votre adresse e-mail (on se connecte avec un code qui y est envoyé). Vous êtes responsable de ce qui est fait depuis votre compte.</li>
-        <li>Vous pouvez supprimer votre compte à tout moment depuis « Mon compte ».</li>
+        <li>Tu donnes des informations exactes et tu gardes pour toi l’accès à ton adresse e-mail (on se connecte avec un code qui y est envoyé). Tu es responsable de ce qui est fait depuis ton compte.</li>
+        <li>Tu peux supprimer ton compte à tout moment depuis « Mon compte ».</li>
       </ul>
 
       <h2>3. Les road trips</h2>
@@ -68,29 +68,29 @@ export default function TermsPage() {
         nous pouvons suspendre son suivi.
       </p>
       <p>
-        Une page publique montre la position à tout le monde : pensez à lancer le suivi une fois partis de chez vous et à
+        Une page publique montre la position à tout le monde : pense à lancer le suivi une fois parti de chez toi et à
         l’arrêter au retour. Une page privée n’est visible que par les personnes qui ont son lien.
       </p>
 
-      <h2>5. Ce que vous publiez</h2>
-      <p>Vous restez propriétaire de vos textes et photos. Vous nous autorisez simplement à les stocker et à les afficher pour faire fonctionner le service, tant qu’ils sont en ligne.</p>
-      <p>Vous ne publiez que ce que vous avez le droit de publier :</p>
+      <h2>5. Ce que tu publies</h2>
+      <p>Tu restes propriétaire de tes textes et photos. Tu nous autorises simplement à les stocker et à les afficher pour faire fonctionner le service, tant qu’ils sont en ligne.</p>
+      <p>Tu ne publies que ce que tu as le droit de publier :</p>
       <ul>
-        <li>vos propres photos, ou celles dont l’auteur est d’accord ;</li>
+        <li>tes propres photos, ou celles dont l’auteur est d’accord ;</li>
         <li>
           pas de <strong>personne reconnaissable sans son accord</strong>, et jamais d’enfant sans l’accord de ses parents, y compris
           à l’étranger ;
         </li>
-        <li>les logos de vos sponsors avec leur autorisation ;</li>
+        <li>les logos de tes sponsors avec leur autorisation ;</li>
         <li>
           rien d’illégal, d’insultant, de haineux, de violent, de pornographique ou de trompeur, ni de publicité sans rapport avec
-          votre road trip.
+          ton road trip.
         </li>
       </ul>
 
       <h2>6. Signaler un contenu</h2>
       <p>
-        Un contenu vous semble illégal ou contraire à ces règles ? <a href={REPORT_HREF}>Signalez-le par email</a> en indiquant
+        Un contenu te semble illégal ou contraire à ces règles ? <a href={REPORT_HREF}>Signale-le par e-mail</a> en indiquant
         l’adresse de la page ou de la photo et la raison. Chaque signalement est examiné rapidement. Un contenu peut être retiré et un
         compte suspendu en cas de manquement ; la personne concernée en est informée avec la raison et peut contester en répondant
         à ce message.
@@ -117,7 +117,7 @@ export default function TermsPage() {
 
       <h2>10. Droit applicable</h2>
       <p>
-        Ces conditions sont soumises au droit français. En cas de désaccord, écrivez d’abord à <a href={CONTACT_HREF}>{EDITOR.email}</a> :
+        Ces conditions sont soumises au droit français. En cas de désaccord, écris d’abord à <a href={CONTACT_HREF}>{EDITOR.email}</a> :
         nous chercherons une solution à l’amiable avant tout recours.
       </p>
     </LegalPage>

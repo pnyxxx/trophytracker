@@ -53,7 +53,7 @@ export function TripSupport({ fundraiserUrl, sponsors, contactEmail, wall }: {
       )}
       {wall ?? (
         <Card dashed label={<span className="flex items-center justify-between gap-3">mur d’encouragements <span className="rounded-full bg-ink-700 px-2.5 py-1 text-[12px] text-dust-300">bientôt</span></span>}>
-          <span className="tt-display text-[26px] leading-[1.1] text-cream">Laissez un mot aux voyageurs, ils le liront au bivouac.</span>
+          <span className="tt-display text-[26px] leading-[1.1] text-cream">Laisse un mot aux voyageurs, ils le liront au bivouac.</span>
           {contactEmail && (
             <Button asChild variant="outline" className="mt-auto self-start">
               <a href={`mailto:${contactEmail}`}>En attendant, leur écrire</a>

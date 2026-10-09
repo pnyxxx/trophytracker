@@ -55,7 +55,7 @@ export function CheersWall({ crewId, canEdit, isDemo }: { crewId: string; canEdi
   return (
     <div className="flex flex-col gap-3.5 rounded-[28px] bg-ink-800 p-6">
       <span className="font-mono text-[13px] text-dust-400">mur d’encouragements{cheers.length ? ` · ${cheers.length}` : ''}</span>
-      <span className="tt-display text-[26px] leading-[1.1] text-cream">Laissez un mot aux voyageurs, ils le liront au bivouac.</span>
+      <span className="tt-display text-[26px] leading-[1.1] text-cream">Laisse un mot aux voyageurs, ils le liront au bivouac.</span>
       {!isDemo && (
         <form onSubmit={(e: FormEvent) => { e.preventDefault(); post.mutate(); }} className="flex flex-col gap-2">
           <Input aria-label="Ton prénom" placeholder="Ton prénom" maxLength={40} required value={name} onChange={(e) => setName(e.target.value)} />

@@ -77,19 +77,19 @@ export function buildTripEmail(m: TripMail, siteUrl: string, now = new Date()): 
     const who = p.inviter?.trim() || names(p.travellers);
     const route = [p.city ? `part de ${p.city}` : 'part', p.starts_on ? `le ${shortDate(p.starts_on)}` : null,
       p.destination ? `pour ${p.destination}` : null, p.trip_type ? VEHICLE[p.trip_type] : null].filter(Boolean).join(' ');
-    const intro = `Bonjour, ${who} ${route}. Vous pourrez voir où en est le voyage, ses photos et son carnet de route, en direct.`;
+    const intro = `Bonjour, ${who} ${route}. Tu pourras voir où en est le voyage, ses photos et son carnet de route, en direct.`;
     const calm = 'Si la carte ne bouge plus pendant quelques heures, pas d’inquiétude : sans réseau, la trace arrive plus tard.';
     return {
-      subject: oneLine(`${who} vous invite à suivre son road trip`),
-      text: `${intro}\n\nSuivre le voyage : ${page}\n\nRien à installer : le lien s’ouvre sur votre téléphone ou votre ordinateur, sans compte ni mot de passe.\n\n${calm}\n\nCe voyage est privé : ne transférez ce lien qu’aux personnes de confiance.${unsubscribeUrl ? `\nNe plus rien recevoir : ${unsubscribeUrl}` : ''}`,
+      subject: oneLine(`${who} t’invite à suivre son road trip`),
+      text: `${intro}\n\nSuivre le voyage : ${page}\n\nRien à installer : le lien s’ouvre sur ton téléphone ou ton ordinateur, sans compte ni mot de passe.\n\n${calm}\n\nCe voyage est privé : ne transfère ce lien qu’aux personnes de confiance.${unsubscribeUrl ? `\nNe plus rien recevoir : ${unsubscribeUrl}` : ''}`,
       html: emailLayout({
         siteUrl: site,
         kicker: esc(name),
-        title: `${esc(who)} vous invite à suivre son road trip.`,
+        title: `${esc(who)} t’invite à suivre son road trip.`,
         body: paragraph(esc(intro)) + button(esc(page), 'Suivre le voyage')
-          + card('Rien à installer', 'Le lien s’ouvre sur votre téléphone ou votre ordinateur. Pas de compte, pas de mot de passe.'),
+          + card('Rien à installer', 'Le lien s’ouvre sur ton téléphone ou ton ordinateur. Pas de compte, pas de mot de passe.'),
         note: esc(calm),
-        footer: `Ce voyage est privé : ne transférez ce lien qu’aux personnes de confiance. Vous recevrez aussi un e-mail au départ et un résumé chaque soir de route. ${unsub}`,
+        footer: `Ce voyage est privé : ne transfère ce lien qu’aux personnes de confiance. Tu recevras aussi un e-mail au départ et un résumé chaque soir de route. ${unsub}`,
       }),
       unsubscribeUrl,
     };
@@ -111,7 +111,7 @@ export function buildTripEmail(m: TripMail, siteUrl: string, now = new Date()): 
         title: 'C’est parti !',
         body: paragraph(esc(intro), true) + button(esc(page), 'Voir la carte en direct'),
         note: 'Si la carte ne bouge plus pendant quelques heures, pas d’inquiétude : sans réseau, la trace arrive plus tard.',
-        footer: `Vous suivez ${esc(name)}. Un résumé arrivera chaque soir de route. ${unsub}`,
+        footer: `Tu suis ${esc(name)}. Un résumé arrivera chaque soir de route. ${unsub}`,
       }),
       unsubscribeUrl,
     };
@@ -137,7 +137,7 @@ export function buildTripEmail(m: TripMail, siteUrl: string, now = new Date()): 
       body: stats(items)
         + (p.journal ? card('le mot du journal', `<strong>${esc(p.journal.title)}</strong><br>${esc(p.journal.body)}`, true) : '')
         + button(`${esc(page)}#carnet`, 'Lire le carnet de route', true),
-      footer: `Vous recevez ce résumé chaque soir de route. ${unsubscribeUrl ? link(esc(unsubscribeUrl), 'Ne plus le recevoir') : ''}`,
+      footer: `Tu reçois ce résumé chaque soir de route. ${unsubscribeUrl ? link(esc(unsubscribeUrl), 'Ne plus le recevoir') : ''}`,
     }),
     unsubscribeUrl,
   };

@@ -49,7 +49,7 @@ export function createDb(url: string, opts: { minDistanceM: number; maxSilenceS:
       await sql`select private.admin_notification_done(${id}, ${error})`;
     },
 
-    /** Équipages à relancer (« configurez votre GPS »), avec leurs membres et les admins. */
+    /** Équipages à relancer (« configure ton GPS »), avec leurs membres et les admins. */
     pendingGpsReminders() {
       return sql<GpsReminder[]>`select * from private.pending_gps_reminders(10)`;
     },

@@ -77,7 +77,7 @@ export function InfoTab({ crew }: { crew: Crew }) {
 
   return (
     <form onSubmit={(e: FormEvent) => { e.preventDefault(); save.mutate(); }} className="space-y-6">
-      <Panel title="Images" description="Le logo apparaît sur la carte et dans vos road trips ; la couverture en fond du haut de votre page.">
+      <Panel title="Images" description="Le logo apparaît sur la carte et dans tes road trips ; la couverture en fond du haut de ta page.">
         <div className="flex flex-col gap-4 sm:flex-row">
           <AvatarPicker crew={crew} />
           <CoverPicker crew={crew} />
@@ -87,15 +87,15 @@ export function InfoTab({ crew }: { crew: Crew }) {
       <Panel title="Présentation">
         <div className="grid gap-4 md:grid-cols-2">
           <Field id="name" label="Nom du road trip"><Input id="name" required minLength={2} maxLength={80} value={form.name} onChange={set('name')} /></Field>
-          <Field id="car" label="Numéro de course" hint="Facultatif : votre numéro si vous participez à un rallye."><Input id="car" maxLength={10} value={form.car_number} onChange={set('car_number')} /></Field>
+          <Field id="car" label="Numéro de course" hint="Facultatif : ton numéro si tu participes à un rallye."><Input id="car" maxLength={10} value={form.car_number} onChange={set('car_number')} /></Field>
           <div className="md:col-span-2">
             <Field id="tagline" label="Slogan" hint="Une phrase courte affichée sous le nom."><Input id="tagline" maxLength={140} value={form.tagline} onChange={set('tagline')} /></Field>
           </div>
           <Field id="school" label="École, association ou club" hint="Facultatif."><Input id="school" maxLength={120} value={form.school} onChange={set('school')} /></Field>
-          <Field id="city" label="Ville de départ" hint="Un drapeau la marque sur la carte de votre page (le drapeau breton si vous partez de Bretagne).">
+          <Field id="city" label="Ville de départ" hint="Un drapeau la marque sur la carte de ta page (le drapeau breton si tu pars de Bretagne).">
             <CityInput id="city" value={form.city} spot={form.spot} onChange={(city, spot) => setForm((f) => ({ ...f, city, spot }))} />
           </Field>
-          <Field id="destination" label="Destination" hint="Où vous allez : affiché « départ → destination » sur votre page.">
+          <Field id="destination" label="Destination" hint="Où tu vas : affiché « départ → destination » sur ta page.">
             <Input id="destination" maxLength={80} value={form.destination} onChange={set('destination')} />
           </Field>
           <Field id="trip-type" label="Type de voyage" hint="Adapte les conseils du guide « Prêt au départ ».">
@@ -105,35 +105,35 @@ export function InfoTab({ crew }: { crew: Crew }) {
             </select>
           </Field>
           <div className="md:col-span-2">
-            <Field id="story" label="Votre aventure" hint="Qui êtes-vous, où allez-vous, pourquoi ce voyage, votre projet solidaire…">
+            <Field id="story" label="Ton aventure" hint="Qui es-tu, où vas-tu, pourquoi ce voyage, ton projet solidaire…">
               <textarea id="story" maxLength={5000} className={textareaClass} value={form.story} onChange={set('story')} />
             </Field>
           </div>
         </div>
       </Panel>
 
-      <Panel title="Dates" description="Le jour du départ, le suivi GPS se lance tout seul si vous avez oublié de le faire. Les photos sont datées « Jour 3 », « Jour 4 »…">
+      <Panel title="Dates" description="Le jour du départ, le suivi GPS se lance tout seul si tu as oublié de le faire. Les photos sont datées « Jour 3 », « Jour 4 »…">
         <div className="grid gap-4 md:grid-cols-2">
           <Field id="starts" label="Départ"><Input id="starts" type="date" value={form.starts_on} onChange={set('starts_on')} /></Field>
           <Field id="ends" label="Retour" hint="Facultatif."><Input id="ends" type="date" min={form.starts_on || undefined} value={form.ends_on} onChange={set('ends_on')} /></Field>
         </div>
       </Panel>
 
-      <Panel title="Contact & réseaux" description="Instagram et Facebook s’affichent en boutons bien visibles en haut de votre page ; l’email, en bas, dans « Un message pour les voyageurs ? ».">
+      <Panel title="Contact & réseaux" description="Instagram et Facebook s’affichent en boutons bien visibles en haut de ta page ; l’e-mail, en bas, dans « Un message pour les voyageurs ? ».">
         <div className="grid gap-4 md:grid-cols-3">
           <Field id="email" label="Email de contact"><Input id="email" type="email" value={form.contact_email} onChange={set('contact_email')} /></Field>
-          <Field id="insta" label="Instagram"><Input id="insta" inputMode="url" placeholder="@votre-compte ou lien" value={form.instagram_url} onChange={set('instagram_url')} /></Field>
-          <Field id="facebook" label="Facebook"><Input id="facebook" inputMode="url" placeholder="Lien de votre page" value={form.facebook_url} onChange={set('facebook_url')} /></Field>
+          <Field id="insta" label="Instagram"><Input id="insta" inputMode="url" placeholder="@ton-compte ou lien" value={form.instagram_url} onChange={set('instagram_url')} /></Field>
+          <Field id="facebook" label="Facebook"><Input id="facebook" inputMode="url" placeholder="Lien de ta page" value={form.facebook_url} onChange={set('facebook_url')} /></Field>
         </div>
       </Panel>
 
-      <Panel title="Cagnotte" description="Le lien de votre cagnotte en ligne (Leetchi, HelloAsso, Lydia…) : un bouton « Participer à la cagnotte » s’affiche en haut de votre page.">
+      <Panel title="Cagnotte" description="Le lien de ta cagnotte en ligne (Leetchi, HelloAsso, Lydia…) : un bouton « Participer » s’affiche sur ta page.">
         <Field id="fundraiser" label="Lien de la cagnotte">
           <Input id="fundraiser" inputMode="url" maxLength={300} placeholder="https://www.leetchi.com/…" value={form.fundraiser_url} onChange={set('fundraiser_url')} />
         </Field>
       </Panel>
 
-      <Panel title="Visibilité" description="Qui peut voir la page et la position GPS. Vous pouvez changer d’avis à tout moment.">
+      <Panel title="Visibilité" description="Qui peut voir la page et la position GPS. Tu peux changer d’avis à tout moment.">
         <div role="radiogroup" aria-label="Visibilité" className="grid gap-3 md:grid-cols-3">
           {VISIBILITY.map((v) => (
             <button

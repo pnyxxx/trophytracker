@@ -213,7 +213,7 @@ export default function CrewPage() {
           <div className="flex flex-wrap items-center justify-between gap-4 rounded-[28px] border-[1.5px] border-signal/35 bg-[linear-gradient(100deg,#2A1416_0%,#1F2026_60%)] px-6 py-[22px]">
             <div className="flex max-w-[560px] flex-col gap-1.5">
               <span className="font-mono text-[13px] text-signal-text">revivre en 3D</span>
-              <span className="tt-display text-[30px] leading-[1.05] text-cream">Rejouez tout le voyage en survol satellite.</span>
+              <span className="tt-display text-[30px] leading-[1.05] text-cream">Rejoue tout le voyage en survol satellite.</span>
               <span className="text-[16px] text-dust-300">Exportable en vidéo, en paysage, en story ou en carré, avec la trace et les étapes.</span>
             </div>
             <div className="flex flex-wrap gap-2.5">

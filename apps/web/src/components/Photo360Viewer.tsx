@@ -86,7 +86,7 @@ export const Photo360Viewer = ({ imageUrl, title, description, onClose }: Photo3
         viewerRef.current.addEventListener('panorama-error', (error) => {
           // console.error('Erreur de chargement du panorama:', error);
           setIsLoading(false);
-          setError('Impossible de charger l\'image 360°. Vérifiez l\'URL ou le format de l\'image.');
+          setError('Impossible de charger l\'image 360°. Vérifie l\'adresse ou le format de l\'image.');
         });
 
       } catch (err) {
@@ -213,8 +213,8 @@ export const Photo360Viewer = ({ imageUrl, title, description, onClose }: Photo3
       {!isLoading && !error && (
         <div className="absolute bottom-0 left-0 right-0 z-20 p-4 bg-gradient-to-t from-black/60 to-transparent">
           <p className="text-center text-white/80 text-sm">
-            <span className="hidden md:inline">🖱️ Glissez pour explorer</span>
-            <span className="md:hidden">👆 Glissez pour explorer</span>
+            <span className="hidden md:inline">🖱️ Glisse pour explorer</span>
+            <span className="md:hidden">👆 Glisse pour explorer</span>
           </p>
         </div>
       )}

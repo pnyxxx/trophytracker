@@ -257,15 +257,15 @@ export function GpsTab({ crew }: { crew: Crew }) {
               {enabled ? <><LiveDot className="h-2 w-2" />Suivi lancé</> : <><FlaskConical className="h-3.5 w-3.5" />Mode essai</>}
             </p>
             <h2 className="m-0 mt-2 font-display text-[32px] font-extrabold leading-none text-cream md:text-[38px]">
-              {enabled ? 'Votre trace s’enregistre' : 'Suivi arrêté'}
+              {enabled ? 'Ta trace s’enregistre' : 'Suivi arrêté'}
             </h2>
             <p className="mb-0 mt-3 text-sm leading-relaxed text-dust-200">
               {enabled ? (
                 <>Chaque position envoyée par le téléphone s’ajoute à la trace et apparaît sur la page du road trip.</>
               ) : (
                 <>
-                  Testez votre téléphone tranquillement chez vous : vous seuls voyez sa position ici, rien n’apparaît sur la page du
-                  road trip. <strong className="text-cream">Lancez le suivi au moment de partir pour de bon.</strong>
+                  Teste ton téléphone tranquillement chez toi : toi et tes compagnons de route êtes les seuls à voir sa position ici, rien n’apparaît sur la page du
+                  road trip. <strong className="text-cream">Lance le suivi au moment de partir pour de bon.</strong>
                   {startLabel && <> Un oubli ? Il se lancera tout seul le jour du départ prévu, le {startLabel}.</>}
                 </>
               )}
@@ -350,7 +350,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
       <Step n="01" title="Installer Traccar Client">
         <p className="mb-4 mt-0 text-dust-200">
           Sur le téléphone qui restera <strong className="text-cream">dans le véhicule</strong> (idéalement un téléphone dédié, branché sur
-          l’allume-cigare), installez l’appli gratuite <strong className="text-cream">Traccar Client</strong>.
+          l’allume-cigare), installe l’appli gratuite <strong className="text-cream">Traccar Client</strong>.
         </p>
         <div className="flex flex-wrap gap-2">
           {STORES.map((s) => (
@@ -364,7 +364,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
       {/* ── 02 Clé ─────────────────────────────────────────────────────── */}
       <Step n="02" title="Générer la clé du road trip">
         <p className="mb-4 mt-0 text-dust-200">
-          La clé identifie votre road trip : c’est elle que le téléphone envoie avec chaque position. Sans elle, les positions sont refusées.
+          La clé identifie ton road trip : c’est elle que le téléphone envoie avec chaque position. Sans elle, les positions sont refusées.
         </p>
 
         {/* La charte reste affichée (cochée) jusqu'au prochain chargement : la page ne saute pas. */}
@@ -422,7 +422,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
         </div>
         {hasKey && !newKey && (
           <p className="mb-0 mt-3 text-sm leading-relaxed text-dust-300">
-            Par sécurité, le QR code n’est affiché qu’une fois. Pour régler un téléphone (nouveau ou à refaire), générez-en un nouveau :
+            Par sécurité, le QR code n’est affiché qu’une fois. Pour régler un téléphone (nouveau ou à refaire), génères-en un nouveau :
             l’ancien réglage cessera de fonctionner.
           </p>
         )}
@@ -441,8 +441,8 @@ export function GpsTab({ crew }: { crew: Crew }) {
           <div className="flex flex-col items-center gap-3 border border-dashed border-cream/20 bg-black/20 p-6 text-center">
             <QrCodeIcon className="h-10 w-10 text-dust-500" />
             <p className="m-0 max-w-[460px] text-sm leading-relaxed text-dust-300">
-              Générez la clé à l’étape 02 : le <strong className="text-cream">QR code</strong> qui règle l’appli d’un coup apparaîtra ici.
-              {tracking?.has_device_key && ' (Par sécurité, une clé déjà active n’est jamais réaffichée : générez un nouveau QR code à l’étape 02.)'}
+              Génère la clé à l’étape 02 : le <strong className="text-cream">QR code</strong> qui règle l’appli d’un coup apparaîtra ici.
+              {tracking?.has_device_key && ' (Par sécurité, une clé déjà active n’est jamais réaffichée : génère un nouveau QR code à l’étape 02.)'}
             </p>
           </div>
         ) : onPhone ? (
@@ -490,7 +490,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
                 fr="Identifiant de l’appareil"
                 must
                 value={newKey ? <Value tone="secret" copy={newKey} label="Clé">{newKey}</Value> : <Value tone="muted">La clé de l’étape 02</Value>}
-                why="Effacez le numéro rempli par défaut et collez votre clé. C’est l’erreur la plus fréquente : avec le numéro par défaut, rien n’arrive."
+                why="Efface le numéro rempli par défaut et colle ta clé. C’est l’erreur la plus fréquente : avec le numéro par défaut, rien n’arrive."
               />
               <SettingRow
                 name="Server URL"
@@ -500,12 +500,12 @@ export function GpsTab({ crew }: { crew: Crew }) {
                 why={
                   address.local ? (
                     <>
-                      Adresse de ce PC sur votre réseau : le téléphone doit être <strong className="text-cream">sur le même Wi-Fi</strong>.
-                      {!address.known && <> Remplacez <code className="text-cream">IP-DE-VOTRE-PC</code> par l’IP du PC (commande <code className="text-cream">hostname -I</code>).</>}
-                      {' '}Si rien n’arrive, ouvrez le port dans le pare-feu du PC (<code className="text-cream">sudo ufw allow {window.__TT_CONFIG__?.lanPort ?? '80'}/tcp</code>).
+                      Adresse de ce PC sur ton réseau : le téléphone doit être <strong className="text-cream">sur le même Wi-Fi</strong>.
+                      {!address.known && <> Remplace <code className="text-cream">IP-DE-TON-PC</code> par l’IP du PC (commande <code className="text-cream">hostname -I</code>).</>}
+                      {' '}Si rien n’arrive, ouvre le port dans le pare-feu du PC (<code className="text-cream">sudo ufw allow {window.__TT_CONFIG__?.lanPort ?? '80'}/tcp</code>).
                     </>
                   ) : (
-                    'Copiez-la telle quelle, en entier (avec https:// et /ingest/osmand).'
+                    'Copie-la telle quelle, en entier (avec https:// et /ingest/osmand).'
                   )
                 }
               />
@@ -514,7 +514,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
                 fr="Précision de la position"
                 must
                 value={<Value>High</Value>}
-                why="Par défaut l’appli est sur « Medium » : passez sur « High » pour une trace propre qui suit la route. Évitez « Highest », qui ignore le réglage de distance et vide la batterie."
+                why="Par défaut l’appli est sur « Medium » : passe sur « High » pour une trace propre qui suit la route. Évite « Highest », qui ignore le réglage de distance et vide la batterie."
               />
               <SettingRow
                 name="Distance"
@@ -527,7 +527,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
                 fr="Signal de vie à l’arrêt (secondes)"
                 must
                 value={<Value>{SETTINGS.heartbeat}</Value>}
-                why="Désactivé par défaut ! À l’arrêt (pause, bivouac), il envoie une position toutes les 5 minutes pour que la page reste « En direct ». Le site considère le road trip hors ligne après 10 minutes sans nouvelles : restez entre 60 et 600."
+                why="Désactivé par défaut ! À l’arrêt (pause, bivouac), il envoie une position toutes les 5 minutes pour que la page reste « En direct ». Le site considère le road trip hors ligne après 10 minutes sans nouvelles : reste entre 60 et 600."
               />
             </ul>
 
@@ -553,7 +553,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
                   <>
                     Un verrou <strong className="text-cream">sur le téléphone uniquement</strong> : il est demandé pour couper le suivi ou ouvrir
                     les réglages. Pratique pour qu’un équipier ne désactive pas le suivi par erreur. Il n’est jamais envoyé, n’a rien à voir avec
-                    votre compte trophytracker, et le QR code ne le remplit pas : à saisir à la main si vous en voulez un.
+                    ton compte trophytracker, et le QR code ne le remplit pas : à saisir à la main si tu en veux un.
                   </>
                 }
               />
@@ -576,7 +576,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
                 'Position exacte : activée',
                 'Mouvements et forme : activé',
                 'Actualisation en arrière-plan : activée',
-                'Ne fermez pas l’appli en la balayant vers le haut',
+                'Ne ferme pas l’appli en la balayant vers le haut',
               ],
             },
             {
@@ -627,9 +627,9 @@ export function GpsTab({ crew }: { crew: Crew }) {
             <p className="mb-0 mt-1 text-sm text-dust-300">
               {live
                 ? enabled
-                  ? `Dernière position ${formatRelative(lastFix)}. Votre position apparaît sur la page du road trip.`
-                  : `Dernière position ${formatRelative(lastFix)}. Tout fonctionne ! Elle n’est visible qu’ici : lancez le suivi en partant.`
-                : 'Rien après 2 minutes ? Vérifiez la clé (Device identifier), l’adresse (Server URL) et les autorisations.'}
+                  ? `Dernière position ${formatRelative(lastFix)}. Ta position apparaît sur la page du road trip.`
+                  : `Dernière position ${formatRelative(lastFix)}. Tout fonctionne ! Elle n’est visible qu’ici : lance le suivi en partant.`
+                : 'Rien après 2 minutes ? Vérifie la clé (Device identifier), l’adresse (Server URL) et les autorisations.'}
             </p>
           </div>
         </div>
@@ -663,20 +663,20 @@ export function GpsTab({ crew }: { crew: Crew }) {
           )}
         </div>
         <p className="mb-0 mt-2 text-xs text-dust-400">
-          Le point n’est pas où est le téléphone ? Vérifiez que la localisation est en « Position exacte » et que l’appli n’envoie pas une ancienne position gardée en mémoire.
+          Le point n’est pas où est le téléphone ? Vérifie que la localisation est en « Position exacte » et que l’appli n’envoie pas une ancienne position gardée en mémoire.
         </p>
         <p className="mb-0 mt-2 text-xs text-dust-400">
-          Tant que le suivi est arrêté, rien n’est publié : testez sans crainte, puis lancez-le en partant de chez vous (en haut de
-          cet onglet). Et sur un raid ou un rallye, vérifiez que le règlement autorise le partage de position : la carte n’est jamais faite pour s’orienter en course.
+          Tant que le suivi est arrêté, rien n’est publié : teste sans crainte, puis lance-le en partant de chez toi (en haut de
+          cet onglet). Et sur un raid ou un rallye, vérifie que le règlement autorise le partage de position : la carte n’est jamais faite pour s’orienter en course.
         </p>
       </Step>
 
-      <Panel title="Vous avez un boîtier GPS ou un serveur Traccar ?">
+      <Panel title="Tu as un boîtier GPS ou un serveur Traccar ?">
         <p className="m-0 flex items-start gap-2 text-sm text-dust-200">
           <Smartphone className="mt-0.5 h-4 w-4 shrink-0" />
           {tracking?.traccar_device_id
-            ? <>Votre road trip est relié à l’appareil Traccar <code className="rounded bg-black/40 px-1.5">{tracking.traccar_device_id}</code>.</>
-            : <>Un administrateur de la plateforme peut relier votre road trip à un appareil existant sur un serveur Traccar. Contactez-le en indiquant son identifiant.</>}
+            ? <>Ton road trip est relié à l’appareil Traccar <code className="rounded bg-black/40 px-1.5">{tracking.traccar_device_id}</code>.</>
+            : <>Un administrateur de la plateforme peut relier ton road trip à un appareil existant sur un serveur Traccar. Contacte-le en indiquant son identifiant.</>}
         </p>
       </Panel>
     </div>

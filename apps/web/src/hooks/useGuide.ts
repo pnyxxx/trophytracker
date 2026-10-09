@@ -54,7 +54,7 @@ export function useGuide(crew: Crew) {
     ] },
     { id: 'equipage', label: 'Équipage', title: 'Ton équipage', intro: 'Invite tes compagnons de route : chacun pourra publier des photos et écrire dans le journal, gratuitement.', items: [
       { id: 'invite', t: 'Inviter les coéquipiers', d: members.length > 1 ? `${members.length} voyageurs` : 'facultatif, si tu ne pars pas seul', done: members.length > 1 },
-      m('contact', 'Un proche sait où vous allez', 'quelqu’un à prévenir en cas de souci'),
+      m('contact', 'Un proche sait où tu vas', 'quelqu’un à prévenir en cas de souci'),
     ] },
     { id: 'vehicule', label: 'Véhicule', title: 'Ton véhicule', intro: 'Un téléphone dans le véhicule suffit pour le suivi. (Plusieurs véhicules sur la même carte : bientôt.)', items: [
       { id: 'phone', t: 'Choisir le téléphone du véhicule', d: tracking?.has_device_key ? 'téléphone relié' : 'celui qui restera à bord', done: !!tracking?.has_device_key },

@@ -17,7 +17,7 @@ describe('e-mails du voyage', () => {
 
   it('invitation d’un proche : qui, où, le lien et la désinscription', () => {
     const e = buildTripEmail(mail('invite', { inviter: 'Léa' }), 'https://site.fr');
-    expect(e.subject).toBe('Léa vous invite à suivre son road trip');
+    expect(e.subject).toBe('Léa t’invite à suivre son road trip');
     expect(e.text).toContain('Léa part de Bergen le 2 août pour Lofoten en van.');
     expect(e.html).toContain('href="https://site.fr/t/bergen-lofoten-k7f2"');
     expect(e.unsubscribeUrl).toBe('https://site.fr/desabonnement?t=tok-123');

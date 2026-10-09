@@ -186,7 +186,7 @@ export default function TripReplay({ name, slug, points, stages, onClose, initia
     const type = pickRecorderType();
     const map = mapRef.current;
     if (!type || !map) {
-      alert('Ce navigateur ne sait pas enregistrer de vidéo. Essayez avec Chrome, Edge ou Firefox sur ordinateur.');
+      alert('Ce navigateur ne sait pas enregistrer de vidéo. Essaie avec Chrome, Edge ou Firefox sur ordinateur.');
       return;
     }
     const src = map.getCanvas();

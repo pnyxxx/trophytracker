@@ -72,9 +72,9 @@ export const CONTACT_HREF = `mailto:${EDITOR.email}?subject=${encodeURIComponent
  */
 export const FAIR_PLAY = {
   spirit:
-    'trophytracker est là pour que vos proches vivent l’aventure avec vous, pas pour remplacer une carte, un roadbook ou les secours.',
+    'trophytracker est là pour que tes proches vivent l’aventure avec toi, pas pour remplacer une carte, un roadbook ou les secours.',
   rules: [
-    { title: 'Votre événement l’autorise', text: 'Raid, rallye, course : vérifiez que le règlement de votre épreuve autorise le partage de position. Certains l’interdisent pendant l’épreuve. Vous êtes seuls responsables de son respect.' },
+    { title: 'Ton événement l’autorise', text: 'Raid, rallye, course : vérifie que le règlement de ton épreuve autorise le partage de position. Certains l’interdisent pendant l’épreuve. Toi et tes compagnons de route êtes seuls responsables de son respect.' },
     { title: 'Jamais pour tricher', text: 'En course, on n’utilise pas trophytracker pour trouver son chemin ni pour suivre d’autres concurrents.' },
     { title: 'Tous les voyageurs sont d’accord', text: 'Le téléphone localise le véhicule et donc tous ses occupants : chaque voyageur accepte de partager la position.' },
     { title: 'Pas un outil de sécurité', text: 'Les positions peuvent arriver en retard ou pas du tout. En cas d’urgence : les secours (112 en Europe) et, sur un événement, l’organisation.' },

@@ -18,11 +18,12 @@ export default function SalesTermsPage() {
       </p>
       <p>trophytracker est un service indépendant, affilié à aucun organisateur de raid, de rallye ou d’événement.</p>
 
-      <h2>2. Ce que vous achetez</h2>
+      <h2>2. Ce que tu achètes</h2>
       <p>
         L’<strong>accès road trip</strong> permet de créer <strong>la page d’un road trip</strong> sur trophytracker et d’utiliser ses
-        services : page publique ou privée, suivi GPS en direct avec l’application gratuite Traccar Client, trace et statistiques,
-        photos et photos 360°, sponsors, invitation des compagnons de route (gratuite pour eux).
+        services : page privée par lien (ou publique), suivi GPS en direct avec l’application gratuite Traccar Client, trace, télémétrie
+        et météo, carnet de route, photos et photos 360°, replay 3D en vidéo, sponsors et lien de cagnotte, mur d’encouragements,
+        e-mails aux proches, invitation des compagnons de route (gratuite pour eux).
       </p>
       <ul>
         <li>Un accès = une page de road trip. Il est lié au compte qui l’achète, qui devient propriétaire de la page.</li>
@@ -51,35 +52,35 @@ export default function SalesTermsPage() {
 
       <h2>4. Commande</h2>
       <p>
-        La commande se passe depuis « Mon compte », connecté à un compte trophytracker. Avant de payer, vous acceptez ces conditions et
-        demandez l’accès immédiat au service (article 7), puis vous êtes redirigé vers la page de paiement sécurisée. Le contrat est
-        conclu dès que le paiement est accepté. Vous recevez une confirmation par email, et ces conditions restent disponibles sur
+        La commande se passe à l’étape « Accès » du parcours « Créer mon trip », connecté à un compte trophytracker. Avant de payer, tu
+        acceptes ces conditions et demandes l’accès immédiat au service (article 7), puis tu es redirigé vers la page de paiement
+        sécurisée. Le contrat est conclu dès que le paiement est accepté. Tu reçois une confirmation par e-mail, et ces conditions restent disponibles sur
         cette page. Les commandes sont archivées pendant 10 ans.
       </p>
 
       <h2>5. Paiement</h2>
       <p>
         Le paiement se fait par carte bancaire via <strong>Stripe</strong>, prestataire de paiement agréé. trophytracker ne voit ni ne
-        conserve jamais vos coordonnées bancaires. Le montant est débité au moment de la commande.
+        conserve jamais tes coordonnées bancaires. Le montant est débité au moment de la commande.
       </p>
 
       <h2>6. Accès au service</h2>
       <p>
-        L’accès est disponible dès la confirmation du paiement : vous pouvez créer la page de votre road trip depuis « Mon compte ». En
-        cas de problème, écrivez à <a href={CONTACT_HREF}>{EDITOR.email}</a>.
+        L’accès est disponible dès la confirmation du paiement : le parcours « Créer mon trip » crée alors la page de ton road trip. En
+        cas de problème, écris à <a href={CONTACT_HREF}>{EDITOR.email}</a>.
       </p>
 
       <h2>7. Droit de rétractation</h2>
       <p>
-        Vous disposez de <strong>14 jours</strong> à compter de la commande pour vous rétracter, sans avoir à vous justifier.
+        Tu disposes de <strong>14 jours</strong> à compter de la commande pour te rétracter, sans avoir à te justifier.
       </p>
       <p>
-        En commandant, vous demandez expressément que le service commence immédiatement. Si vous vous rétractez ensuite, vous payez
-        la part du service déjà fournie jusqu’à votre demande (article L.221-25 du Code de la consommation), calculée au prorata du
-        temps écoulé entre la commande et la fin du road trip ; le reste vous est remboursé.
+        En commandant, tu demandes expressément que le service commence immédiatement. Si tu te rétractes ensuite, tu paies
+        la part du service déjà fournie jusqu’à ta demande (article L.221-25 du Code de la consommation), calculée au prorata du
+        temps écoulé entre la commande et la fin du road trip ; le reste t’est remboursé.
       </p>
       <p>
-        Pour vous rétracter, envoyez une déclaration claire à <a href={CONTACT_HREF}>{EDITOR.email}</a>, par exemple avec le modèle
+        Pour te rétracter, envoie une déclaration claire à <a href={CONTACT_HREF}>{EDITOR.email}</a>, par exemple avec le modèle
         ci-dessous. Le remboursement est fait sous 14 jours, sur la carte utilisée pour le paiement. La page du road trip est alors
         dépubliée et le suivi GPS désactivé.
       </p>
@@ -87,8 +88,8 @@ export default function SalesTermsPage() {
       <h2>8. Garantie légale de conformité</h2>
       <p>
         Le service bénéficie de la garantie légale de conformité des contenus et services numériques (articles L.224-25-1 et suivants
-        du Code de la consommation). Si le service n’est pas conforme, écrivez-nous : nous le remettrons en conformité et, à défaut,
-        vous pourrez obtenir une réduction du prix ou la résolution du contrat.
+        du Code de la consommation). Si le service n’est pas conforme, écris-nous : nous le remettrons en conformité et, à défaut,
+        tu pourras obtenir une réduction du prix ou la résolution du contrat.
       </p>
       <p>
         Le suivi GPS dépend du téléphone du road trip et des réseaux mobiles : une position retardée dans une zone sans réseau n’est
@@ -103,10 +104,10 @@ export default function SalesTermsPage() {
 
       <h2>10. Réclamations et médiation</h2>
       <p>
-        Pour toute réclamation, écrivez d’abord à <a href={CONTACT_HREF}>{EDITOR.email}</a> : nous répondons rapidement.
+        Pour toute réclamation, écris d’abord à <a href={CONTACT_HREF}>{EDITOR.email}</a> : nous répondons rapidement.
       </p>
       <p>
-        Si le désaccord persiste, vous pouvez recourir gratuitement au médiateur de la consommation
+        Si le désaccord persiste, tu peux recourir gratuitement au médiateur de la consommation
         {BUSINESS.mediator ? (
           <>
             {' '}: <a href={BUSINESS.mediator.url} target="_blank" rel="noopener noreferrer">{BUSINESS.mediator.name}</a>
@@ -119,7 +120,7 @@ export default function SalesTermsPage() {
 
       <h2>11. Droit applicable</h2>
       <p>
-        Ces conditions sont soumises au droit français. En cas de litige, vous pouvez saisir le tribunal de votre domicile ou celui du
+        Ces conditions sont soumises au droit français. En cas de litige, tu peux saisir le tribunal de ton domicile ou celui du
         vendeur.
       </p>
 

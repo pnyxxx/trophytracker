@@ -23,7 +23,7 @@ const F = {
   mono: `'DM Mono',Menlo,Consolas,'Courier New',monospace`,
 };
 
-const TAGLINE = 'trophytracker · le carnet de route en direct de vos road trips.';
+const TAGLINE = 'trophytracker · le carnet de route en direct de tes road trips.';
 
 export interface EmailLayout {
   /** Adresse du site (ou `{{ .SiteURL }}`), pour le logo. */
@@ -33,7 +33,7 @@ export interface EmailLayout {
   title: string;
   /** Contenu principal, déjà en HTML. */
   body: string;
-  /** Petit texte gris sous le contenu (« Si vous n'êtes pas à l'origine… »), déjà en HTML. */
+  /** Petit texte gris sous le contenu (« Si tu n'es pas à l'origine… »), déjà en HTML. */
   note?: string;
   /** Ligne de pied de page (désinscription…), déjà en HTML. */
   footer?: string;

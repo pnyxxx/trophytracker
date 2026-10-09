@@ -220,7 +220,7 @@ function CrewsAdmin() {
 
   if (isLoading) return <Spinner />;
   return (
-    <Panel title={`Road trips (${data.length})`} description="Associez un road trip à un appareil du serveur Traccar (identifiant, id numérique ou nom) s'il voyage avec un boîtier GPS.">
+    <Panel title={`Road trips (${data.length})`} description="Associe un road trip à un appareil du serveur Traccar (identifiant, id numérique ou nom) s'il voyage avec un boîtier GPS.">
       <div className="-mx-1 overflow-x-auto">
         <table className="w-full min-w-[720px] text-left text-[15px]">
           <thead className="font-mono text-[12px] uppercase tracking-[0.1em] text-dust-400">
@@ -381,7 +381,7 @@ function AccessCodesAdmin() {
         )}
       </Panel>
 
-      <Panel title={`Codes (${data.length})`} description="Un code utilisé ne peut plus être annulé : désactivez-le pour empêcher les prochaines utilisations.">
+      <Panel title={`Codes (${data.length})`} description="Un code utilisé ne peut plus être annulé : désactive-le pour empêcher les prochaines utilisations.">
         {isLoading ? <Spinner /> : !data.length ? <p className="m-0 text-dust-300">Aucun code pour l’instant.</p> : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
