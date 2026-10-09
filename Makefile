@@ -46,6 +46,7 @@ test: ## Tous les tests (unitaires, base de données, bout en bout)
 	npm test
 	sh scripts/test-db.sh
 	node scripts/e2e/smoke.mjs
+	node scripts/e2e/pages.mjs
 
 check: ## Vérifications rapides : types + lint + tests unitaires
 	npm run typecheck

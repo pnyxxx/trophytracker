@@ -14,7 +14,9 @@ import { emailTemplates } from './email-plugin';
 const SUPABASE_GATEWAY = 'http://127.0.0.1:8000';
 
 const VENDOR_CHUNKS: Record<string, string[]> = {
-  react: ['react', 'react-dom', 'react-router', 'react-router-dom', 'scheduler'],
+  // Sans react-router : il contient des import() dynamiques, dont l'aide de préchargement de Vite vit dans un
+  // autre fichier → dépendance circulaire entre fichiers et page blanche en production (9 octobre 2026).
+  react: ['react', 'react-dom', 'scheduler'],
   supabase: ['@supabase'],
   map: ['maplibre-gl', '@maplibre'],
   motion: ['framer-motion', 'motion-dom', 'motion-utils'],
