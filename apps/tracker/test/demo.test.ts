@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest';
-import { cycleStart, demoPosition, demoTimes, loadDemoRoute, type DemoRoute } from '../src/demo.js';
+import { describe, expect, it, vi } from 'vitest';
+import { cycleStart, demoPosition, demoTimes, loadDemoRoute, startDemoDriver, type DemoRoute } from '../src/demo.js';
+import type { Db } from '../src/db.js';
 
 // 0 → 100 s : 1 km vers le nord (36 km/h) ; 100 → 160 s : pause ; puis encore 1 km en 100 s.
 const ROUTE: DemoRoute = {
@@ -61,9 +62,13 @@ describe('démo : trajet généré', () => {
   const route = loadDemoRoute();
   const near = (p: number[], lon: number, lat: number) => Math.abs(p[0]! - lon) < 0.05 && Math.abs(p[1]! - lat) < 0.05;
 
-  it('part de Saint-Quentin et arrive à Merzouga', () => {
-    expect(near(route.points[0]!, 3.2876, 49.8474)).toBe(true);
-    expect(near(route.points.at(-1)!, -3.9976, 31.2152)).toBe(true);
+  it('part de Thonon-les-Bains et arrive à Menton', () => {
+    expect(near(route.points[0]!, 6.4797, 46.3705)).toBe(true);
+    expect(near(route.points.at(-1)!, 7.4977, 43.7747)).toBe(true);
+  });
+
+  it('passe par les grands cols (altitude)', () => {
+    expect(Math.max(...route.points.map((p) => p[2]))).toBeGreaterThan(2600);
   });
 
   it('avance dans le temps et tient dans un tour', () => {
@@ -71,8 +76,32 @@ describe('démo : trajet généré', () => {
     expect(route.points.at(-1)![3]).toBeLessThanOrEqual(route.cycleS);
   });
 
-  it('ne roule jamais plus vite qu’une 4L (sauf erreur du trajet)', () => {
+  it('ne roule jamais plus vite qu’un van en montagne (sauf erreur du trajet)', () => {
     const fastest = Math.max(...Array.from({ length: Math.floor(route.cycleS / 60) }, (_, k) => demoPosition(route, k * 60).speedKmh ?? 0));
-    expect(fastest).toBeLessThanOrEqual(110);
+    expect(fastest).toBeLessThanOrEqual(90);
+  });
+});
+
+describe('démo : nouveau road trip d’exemple', () => {
+  it('rattrape tout le tour en cours, même juste après avoir fait rouler l’ancien', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(Date.parse(ROUTE.epoch) + 200_000)); // 200 s dans le tour
+    let crew = { id: 'ancien', last_fix_at: null as Date | null };
+    const ingested: { crew: string; at: number }[] = [];
+    const db = {
+      demoCrew: async () => crew,
+      demoRestart: async () => {},
+      ingest: async (id: string, p: { recordedAt: Date }) => { ingested.push({ crew: id, at: p.recordedAt.getTime() }); },
+    } as unknown as Db;
+    const stop = startDemoDriver(db, ROUTE, () => {});
+    await vi.advanceTimersByTimeAsync(0);
+    expect(ingested.at(0)?.crew).toBe('ancien');
+    // Un nouvel exemple remplace l'ancien (demo-refresh) : sa trace repart du début du tour.
+    crew = { id: 'nouveau', last_fix_at: null };
+    await vi.advanceTimersByTimeAsync(15_000);
+    const first = ingested.find((x) => x.crew === 'nouveau');
+    expect(first?.at).toBe(Date.parse(ROUTE.epoch));
+    stop();
+    vi.useRealTimers();
   });
 });

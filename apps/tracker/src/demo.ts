@@ -1,13 +1,12 @@
 /**
- * Équipage de DÉMONSTRATION (crews.is_demo) : sa page vit en permanence.
+ * Road trip d'EXEMPLE (crews.is_demo, /t/exemple) : sa page vit en permanence.
  *
- * Le tracker lui fait rejouer en boucle un vrai trajet (Saint-Quentin → Le Mans → Royan → Bayonne →
- * Biarritz → … → Merzouga, construit par scripts/build-demo-route.mjs) comme si son téléphone
- * envoyait sa position toutes les 15 s : mêmes fonctions de réception que les vrais équipages, donc
- * trace, compteurs, temps réel et carte se comportent exactement comme pendant le raid.
+ * Le tracker lui fait rejouer en boucle un vrai trajet (la Route des Grandes Alpes, de Thonon-les-Bains
+ * à Menton, construit par scripts/build-demo-route.mjs) comme si son téléphone envoyait sa position
+ * toutes les 15 s : mêmes fonctions de réception que les vrais road trips, donc trace, compteurs,
+ * temps réel et carte se comportent exactement comme pendant un vrai voyage.
  *
- * Vitesses réelles (pas d'accéléré) ; seules les nuits et le village départ sont raccourcis à
- * quelques minutes. Les tours s'enchaînent depuis une date fixe (epoch) : en cas de redémarrage, le
+ * Vitesses réelles (pas d'accéléré) ; seules les nuits sont raccourcies à quelques minutes. Les tours s'enchaînent depuis une date fixe (epoch) : en cas de redémarrage, le
  * tracker rattrape les positions manquées, et au début d'un tour il efface la trace du précédent.
  */
 import { readFileSync } from 'node:fs';
@@ -50,7 +49,7 @@ function bearing(lat1: number, lon1: number, lat2: number, lon2: number) {
   return ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
 }
 
-/** Position de la 4L à la seconde `s` du tour, entre deux points du trajet. */
+/** Position du véhicule à la seconde `s` du tour, entre deux points du trajet. */
 export function demoPosition(route: DemoRoute, s: number): Omit<IncomingPoint, 'recordedAt' | 'source'> {
   const pts = route.points;
   // Dernier point du trajet atteint à la seconde s (recherche dichotomique).
@@ -89,11 +88,14 @@ export function demoTimes(last: number | null, start: number, now: number): numb
   return times;
 }
 
-/** Fait rouler l'équipage de démo (s'il y en a un). Renvoie la fonction d'arrêt. */
+/** Fait rouler le road trip d'exemple (s'il y en a un). Renvoie la fonction d'arrêt. */
 export function startDemoDriver(db: Db, route: DemoRoute, log: (msg: string) => void): () => void {
   let busy = false;
-  /** Dernière position envoyée : évite de renvoyer le même rattrapage si le suivi a été arrêté. */
-  let sent: number | null = null;
+  /**
+   * Dernière position envoyée, et pour quel road trip : évite de renvoyer le même rattrapage si le suivi
+   * a été arrêté. Un nouveau road trip d'exemple (demo-refresh) repart de zéro et rattrape le tour en cours.
+   */
+  let sent: { crewId: string; at: number } | null = null;
 
   const tick = async () => {
     if (busy) return;
@@ -103,17 +105,18 @@ export function startDemoDriver(db: Db, route: DemoRoute, log: (msg: string) => 
       if (!crew) return;
       const now = Date.now();
       const start = cycleStart(route, now);
-      let last = Math.max(crew.last_fix_at?.getTime() ?? -Infinity, sent ?? -Infinity);
+      if (sent && sent.crewId !== crew.id) sent = null;
+      let last = Math.max(crew.last_fix_at?.getTime() ?? -Infinity, sent?.at ?? -Infinity);
       if (!Number.isFinite(last) || last < start) {
         await db.demoRestart();
-        log('démo : nouveau tour, départ de Saint-Quentin');
+        log('démo : nouveau tour, départ de Thonon-les-Bains');
         last = NaN;
       }
       const times = demoTimes(Number.isNaN(last) ? null : last, start, now);
       if (times.length > 20) log(`démo : rattrapage de ${times.length} positions`);
       for (const t of times) {
         await db.ingest(crew.id, { ...demoPosition(route, (t - start) / 1000), recordedAt: new Date(t), source: 'device' });
-        sent = t;
+        sent = { crewId: crew.id, at: t };
       }
     } catch (e) {
       log(`démo : ${e instanceof Error ? e.message : String(e)}`);

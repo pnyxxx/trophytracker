@@ -58,7 +58,9 @@ export function CrewLogbook({ stages, photos, journal = [], story, points, start
     ['journal', 'Journal', journal.length > 0],
     ['histoire', 'Histoire', !!story],
   ] as const).filter((t) => t[2]);
-  const [tab, setTab] = useState<Tab>(tabs[0]?.[0] ?? 'etapes');
+  // Choix de l'onglet gardé ; par défaut le premier disponible (les étapes peuvent arriver après le récit).
+  const [picked, setTab] = useState<Tab | null>(null);
+  const tab: Tab = picked && tabs.some((t) => t[0] === picked) ? picked : tabs[0]?.[0] ?? 'etapes';
   const cum = useMemo(() => {
     const out = [0];
     for (let i = 1; i < points.length; i++) out.push(out[i - 1]! + haversineKm(points[i - 1]![0], points[i - 1]![1], points[i]![0], points[i]![1]));

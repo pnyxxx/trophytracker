@@ -1,86 +1,49 @@
 /**
- * Construit le trajet de l'équipage de DÉMONSTRATION (J4L Club), rejoué en boucle par le
+ * Construit le trajet du road trip d'EXEMPLE (« Route des Grandes Alpes », /t/exemple), rejoué en boucle par le
  * service tracker (apps/tracker/src/demo.ts) :
  *   node scripts/build-demo-route.mjs
  *
  * À relancer seulement pour changer le trajet ou l'horaire : le résultat est commité.
- *  - Routes : calculées par OSRM (router.project-osrm.org) en passant par les points du tracé de
- *    l'accueil (road-path.json), pour suivre les vraies routes au mètre près.
+ *  - Routes : calculées par OSRM (router.project-osrm.org) en passant par les cols de la Route des Grandes Alpes.
  *  - Altitude : Open-Meteo (modèle Copernicus 90 m), pour le profil d'élévation.
- *  - Horaire : vraie durée de conduite (vitesse plafonnée à celle d'une 4L), pause déjeuner,
- *    nuits et village départ raccourcis.
+ *  - Horaire : vraie durée de conduite (vitesse plafonnée à celle d'un van), pause déjeuner, nuits raccourcies.
  *
- * Écrit :
- *  - apps/tracker/demo/route.json : points [lon, lat, altitude m, seconde du cycle] ; deux points
- *    au même endroit = une pause.
- *  - apps/web/src/lib/demo-clock.json : correspondance « seconde du cycle → heure du raid » qui
- *    permet à la page de l'équipage de démo d'afficher le bon jour du raid et la bonne étape.
+ * Écrit apps/tracker/demo/route.json : points [lon, lat, altitude m, seconde du cycle] ; deux points au même
+ * endroit = une pause.
  */
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const ROAD = JSON.parse(readFileSync(new URL('../apps/web/src/components/landing/road-path.json', import.meta.url), 'utf8'));
-
-// ─── Le voyage, jour par jour (jour 1 = premier jour du raid, village départ) ─────────────────
-const SAINT_QUENTIN = [3.28757, 49.84737];
-const LE_MANS = [0.19844, 48.00769];
-const ROYAN = [-1.02811, 45.62415];
-const BAYONNE = [-1.47486, 43.49292];
-const at = (name) => {
-  const stops = { biarritz: [-1.53571, 43.46484], salamanque: [-5.66642, 40.96821], algesiras: [-5.41098, 36.21315], boulajoul: [-4.98768, 32.88438], merzouga: [-3.99763, 31.21516] };
-  const [lon, lat] = stops[name];
-  const i = ROAD.findIndex(([x, y]) => x === lon && y === lat);
-  if (i < 0) throw new Error(`${name} absent du tracé`);
-  return i;
+// ─── Le voyage, jour par jour : Thonon-les-Bains → Menton par les grands cols ──────────────────
+const P = {
+  thonon: [6.47970, 46.37050], morzine: [6.70890, 46.17950], cluses: [6.57970, 46.06060], colombiere: [6.47040, 45.99480],
+  laClusaz: [6.42390, 45.90450], aravis: [6.46300, 45.87460], flumet: [6.51540, 45.81870], beaufort: [6.57170, 45.71860],
+  roselend: [6.69640, 45.68690], bourgStMaurice: [6.76950, 45.61830],
+  valDIsere: [6.97970, 45.44850], iseran: [7.03060, 45.41700], bonneval: [7.04640, 45.37130], lanslebourg: [6.87800, 45.28600],
+  modane: [6.66500, 45.20030], stMichel: [6.46970, 45.21770], telegraphe: [6.44450, 45.20220], valloire: [6.42930, 45.16550],
+  galibier: [6.40780, 45.06410], lautaret: [6.40400, 45.03490], briancon: [6.64360, 44.89860], izoard: [6.73500, 44.82030],
+  guillestre: [6.64850, 44.65960], vars: [6.70320, 44.53890], barcelonnette: [6.65190, 44.38700],
+  bonette: [6.80760, 44.32140], stEtienneTinee: [6.92300, 44.25650], stSauveur: [7.10460, 44.08490], stMartinVesubie: [7.25570, 44.06870],
+  turini: [7.38970, 43.97750], sospel: [7.44780, 43.87700], menton: [7.49770, 43.77470],
 };
-/** Points du tracé de l'accueil entre deux étapes (inclus) : la route suit le même chemin. */
-const road = (from, to) => ROAD.slice(at(from), at(to) + 1);
-
-// Ferry Algésiras → Tanger Med : le port, puis la traversée du détroit (OSRM ne route pas les ferries).
-const PORT_ALGECIRAS = [-5.43665, 36.12986];
-const SEA = [[-5.425, 36.1], [-5.42, 36.03], [-5.455, 35.94], [-5.49, 35.9]];
-const PORT_TANGER_MED = [-5.50272, 35.88752];
-const TANGER_MED_TO_BOULAJOUL = road('algesiras', 'boulajoul').slice(3); // après le port d'arrivée
-
-/** heure « 08:30 » → secondes */
-const hm = (s) => {
-  const [h, m] = s.split(':').map(Number);
-  return h * 3600 + m * 60;
-};
-const DAY = 86_400;
+const via = (...names) => names.map((n) => P[n]);
 
 const LEGS = [
-  { day: -2, depart: '08:30', parts: [{ road: [SAINT_QUENTIN, LE_MANS] }] },
-  { day: -1, depart: '09:00', parts: [{ road: [LE_MANS, ROYAN] }] },
-  { day: 0, depart: '09:00', parts: [{ road: [ROYAN, BAYONNE] }] },
-  { day: 1, depart: '10:00', parts: [{ road: [BAYONNE, ROAD[at('biarritz')]] }] },
-  { day: 3, depart: '06:30', parts: [{ road: road('biarritz', 'salamanque') }] },
-  { day: 4, depart: '06:30', parts: [{ road: road('salamanque', 'algesiras') }] },
-  {
-    day: 5, depart: '06:00', lunch: false,
-    parts: [
-      { road: [ROAD[at('algesiras')], PORT_ALGECIRAS] },
-      { wait: 45 * 60 }, // embarquement
-      { sea: [PORT_ALGECIRAS, ...SEA, PORT_TANGER_MED], kmh: 32 },
-      { wait: 40 * 60 }, // débarquement et douane
-      { road: [PORT_TANGER_MED, ...TANGER_MED_TO_BOULAJOUL], lunch: true },
-    ],
-  },
-  { day: 6, depart: '07:00', parts: [{ road: road('boulajoul', 'merzouga') }] },
+  { day: 1, parts: [{ road: via('thonon', 'morzine', 'cluses', 'colombiere', 'laClusaz', 'aravis', 'flumet', 'beaufort', 'roselend', 'bourgStMaurice') }] },
+  { day: 2, parts: [{ road: via('bourgStMaurice', 'valDIsere', 'iseran', 'bonneval', 'lanslebourg', 'modane', 'stMichel', 'telegraphe', 'valloire') }] },
+  { day: 3, parts: [{ road: via('valloire', 'galibier', 'lautaret', 'briancon', 'izoard', 'guillestre', 'vars', 'barcelonnette') }] },
+  { day: 4, parts: [{ road: via('barcelonnette', 'bonette', 'stEtienneTinee', 'stSauveur', 'stMartinVesubie', 'turini', 'sospel', 'menton') }] },
 ];
 
-/** Réveil à Merzouga le lendemain de l'arrivée : la boucle 1 est « au départ ». */
-const END = { day: 7, at: '08:00' };
-/** Durée RÉELLE des nuits et du village départ (en vrai : une quinzaine d'heures, ou deux jours). */
+/** Durée RÉELLE des nuits (en vrai : une quinzaine d'heures). */
 const NIGHT_REAL = 20 * 60;
-const VILLAGE_REAL = 45 * 60;
 const LUNCH = 30 * 60;
-/** Vitesse de croisière d'une 4L. */
-const MAX_KMH = 100;
-/** Premier départ de la boucle : 2026-10-05 06:00 (Paris). Les cycles s'enchaînent depuis. */
-const EPOCH = '2026-10-05T04:00:00Z';
+/** Vitesse de croisière d'un van sur les routes de montagne. */
+const MAX_KMH = 80;
+/** Premier départ de la boucle : 2026-10-05 09:00 (Paris). Les cycles s'enchaînent depuis. */
+const EPOCH = '2026-10-05T07:00:00Z';
 
 // ─── Outils ─────────────────────────────────────────────────────────────────
 const toRad = (d) => (d * Math.PI) / 180;
@@ -119,9 +82,9 @@ async function getJson(url) {
 
 /**
  * Itinéraire routier passant par `pts` : [[lon, lat, secondes depuis le début]].
- * Durées d'OSRM, ralenties à MAX_KMH quand OSRM roule plus vite qu'une 4L.
- * Un point de passage accroché à la mauvaise voie d'une autoroute (ou à une piste isolée) fait faire
- * un grand détour : il est alors retiré et l'itinéraire recalculé.
+ * Durées d'OSRM, ralenties à MAX_KMH quand OSRM roule plus vite qu'un van.
+ * Un point de passage accroché à une route fermée ou à une piste isolée fait faire un grand détour :
+ * il est alors retiré et l'itinéraire recalculé.
  */
 async function route(input) {
   let pts = input;
@@ -130,7 +93,8 @@ async function route(input) {
     const data = await getJson(`https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson&annotations=distance,duration&continue_straight=true`);
     if (data.code !== 'Ok') throw new Error(`OSRM : ${data.code}`);
     const r = data.routes[0];
-    const bad = r.legs.findIndex((leg, i) => leg.distance / 1000 > Math.max(2, km(pts[i], pts[i + 1]) * 1.8));
+    // Routes de montagne : un col fait facilement 2 à 2,5 fois la distance à vol d'oiseau.
+    const bad = r.legs.findIndex((leg, i) => leg.distance / 1000 > Math.max(2, km(pts[i], pts[i + 1]) * 3.2));
     if (bad >= 0) {
       const drop = bad + 1 < pts.length - 1 ? bad + 1 : bad;
       if (drop === 0) throw new Error('détour au premier point : à corriger à la main');
@@ -183,22 +147,17 @@ function simplify(pts, tolM) {
 
 // ─── Construction ───────────────────────────────────────────────────────────
 const nodes = []; // [lon, lat, seconde réelle du cycle]
-const clock = []; // [seconde réelle du cycle, seconde du raid depuis le jour 1 à 00:00]
 let real = 0;
 let totalKm = 0;
 const push = (lon, lat, t) => nodes.push([lon, lat, t]);
 
 for (const [li, leg] of LEGS.entries()) {
-  const virtualDepart = (leg.day - 1) * DAY + hm(leg.depart);
   if (li > 0) {
-    // Nuit (ou village départ) : quelques minutes réelles pour toute la nuit du raid.
+    // Nuit : quelques minutes réelles pour toute la nuit.
     const prev = nodes.at(-1);
-    real += LEGS[li - 1].day === 1 ? VILLAGE_REAL : NIGHT_REAL;
+    real += NIGHT_REAL;
     push(prev[0], prev[1], real);
   }
-  clock.push([real, virtualDepart]);
-  let legDuration = 0;
-  const legStart = real;
   const roads = [];
   for (const part of leg.parts) {
     const t0 = real;
@@ -206,13 +165,6 @@ for (const [li, leg] of LEGS.entries()) {
       const prev = nodes.at(-1);
       real += part.wait;
       push(prev[0], prev[1], real);
-    } else if (part.sea) {
-      for (let k = 1; k < part.sea.length; k++) {
-        real += (km(part.sea[k - 1], part.sea[k]) / part.kmh) * 3600;
-        totalKm += km(part.sea[k - 1], part.sea[k]);
-        push(part.sea[k][0], part.sea[k][1], real);
-      }
-      if (!nodes.length) throw new Error('la traversée ne peut pas ouvrir le voyage');
     } else {
       process.stdout.write(`Jour ${leg.day} : route de ${part.road.length} points… `);
       const r = await route(part.road);
@@ -233,18 +185,14 @@ for (const [li, leg] of LEGS.entries()) {
       real = nodes.at(-1)[2];
       roads.push(r);
     }
-    legDuration = real - legStart;
   }
-  clock.push([real, virtualDepart + legDuration]);
 }
 
-// Arrivée à Merzouga : on y reste jusqu'au matin de la boucle 1, puis le cycle recommence.
+// Arrivée à Menton : trois quarts d'heure au bord de la mer, puis le cycle recommence à Thonon.
 const arrival = real;
-const virtualEnd = (END.day - 1) * DAY + hm(END.at);
 const FINAL_MIN = 45 * 60;
 const cycle = Math.ceil((arrival + FINAL_MIN) / 3600) * 3600;
 push(nodes.at(-1)[0], nodes.at(-1)[1], cycle);
-clock.push([cycle, virtualEnd]);
 
 // Points superflus retirés sur les routes (les pauses et les heures de passage sont gardées).
 const before = nodes.length;
@@ -302,8 +250,4 @@ const out = slim.map(([lon, lat, t], i) => [+lon.toFixed(5), +lat.toFixed(5), Ma
 const meta = { epoch: EPOCH, cycleS: cycle };
 mkdirSync(new URL('../apps/tracker/demo/', import.meta.url), { recursive: true });
 writeFileSync(new URL('../apps/tracker/demo/route.json', import.meta.url), JSON.stringify({ ...meta, points: out }));
-writeFileSync(
-  new URL('../apps/web/src/lib/demo-clock.json', import.meta.url),
-  `${JSON.stringify({ ...meta, clock: clock.map(([r, v]) => [Math.round(r), Math.round(v)]) }, null, 1)}\n`,
-);
-console.log(`✅ ${Math.round(totalKm)} km, arrivée à Merzouga après ${(arrival / 3600).toFixed(1)} h, cycle de ${cycle / 3600} h.`);
+console.log(`✅ ${Math.round(totalKm)} km, arrivée à Menton après ${(arrival / 3600).toFixed(1)} h, cycle de ${cycle / 3600} h.`);

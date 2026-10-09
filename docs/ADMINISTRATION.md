@@ -77,21 +77,20 @@ where slug = 'nom-equipage';
 
 ### L'équipage de démo roule en continu
 
-« J4L Club » est **l'équipage de démonstration** (colonne `crews.is_demo`, un seul possible) : sa page doit
-toujours vivre. Le service `tracker` lui fait rejouer **en boucle et en temps réel** son vrai trajet
-(Saint-Quentin → Le Mans → Royan → Bayonne → Biarritz → Salamanque → Algésiras → ferry → Boulajoul → Merzouga),
+« Route des Grandes Alpes » (`/t/exemple`) est **le road trip d'exemple** (colonne `crews.is_demo`, un seul
+possible) : sa page doit toujours vivre. Le service `tracker` lui fait rejouer **en boucle et en temps réel** un vrai
+trajet (Thonon-les-Bains → Colombière → Aravis → Roselend → Iseran → Galibier → Izoard → Bonette → Menton, 675 km),
 une position toutes les 15 s, par les mêmes fonctions que les vrais téléphones (`apps/tracker/src/demo.ts`) :
 
-- vraies routes et vraies vitesses d'une 4L (≤ 100 km/h), pause déjeuner, embarquement au port ;
-- les nuits (20 min) et le village départ (45 min) sont raccourcis ; un tour dure environ deux jours, puis la
-  trace est effacée et la 4L repart de Saint-Quentin ;
-- sa page affiche le raid à l'heure du raid simulé (« J4 / 12 », étape en cours, dénivelé) et un badge
-  « Équipage de démonstration » (`apps/web/src/lib/demo-clock.ts`).
+- vraies routes et vraies vitesses d'un van en montagne (≤ 80 km/h), pause déjeuner ;
+- les nuits sont raccourcies à 20 min ; un tour dure 17 h, puis la trace est effacée et le van repart de Thonon ;
+- sa page affiche un badge « road trip d'exemple » ; ses voyageurs (Léa, Sam), étapes, photos (vues aériennes IGN),
+  sponsors (« Votre marque ici »), journal et encouragements sont fictifs ; on ne peut pas y laisser de message.
 
 Le trajet est généré une fois et commité : `node scripts/build-demo-route.mjs` (routes OSRM, altitude Open-Meteo)
-écrit `apps/tracker/demo/route.json` et `apps/web/src/lib/demo-clock.json` ; horaires et étapes en tête du script.
-Le texte de la page (« Notre aventure »…) est dans `scripts/lib-demo-crew.mjs` ; `node scripts/demo-refresh.mjs`
-l'applique à l'équipage existant (production comprise) sans toucher aux photos ni aux sponsors.
+écrit `apps/tracker/demo/route.json` ; cols et horaires en tête du script. Le contenu est dans
+`scripts/lib-demo-crew.mjs` ; `node scripts/demo-refresh.mjs` (production comprise) retire les anciennes démos et
+recrée l'exemple à neuf ; le tracker rattrape alors tout le tour en cours dans les 15 secondes.
 Le tracker ne peut effacer **que** la trace de l'équipage marqué `is_demo` (fonctions `private.demo_crew` et
 `private.demo_restart`).
 

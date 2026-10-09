@@ -9,4 +9,5 @@ Plateforme de suivi en direct des équipages du 4L Trophy. Tout en français (UI
 - Après un changement de schéma : `make migrate && make types`.
 - Vérifier : `make check` (types, lint, unitaires) puis `make test` (pgTAP + bout en bout, stack lancée).
 - Jamais de secret dans le code ; la clé ANON est injectée via `/config.js`.
-- J4L Club n'existe que comme équipage d'exemple (`scripts/seed-demo.mjs`).
+- Le seul road trip d'exemple est « Route des Grandes Alpes » (`/t/exemple`, `scripts/lib-demo-crew.mjs`) ;
+  aucune mention du 4L Trophy nulle part (pivot généraliste, `docs/PIVOT.md`).
