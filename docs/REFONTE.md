@@ -83,7 +83,7 @@ Branche : `generaliste`. Le site en ligne reste en pause tant que Julien ne vali
   et par jour, sans les voyageurs), carte « Visibilité » du tableau de bord et rapport imprimable
   `/mon-compte/road-trips/:slug/rapport` (PDF via l'impression du navigateur). Migration `20261008000009`, testée.
 - [x] Démo neutre « Route des Grandes Alpes » (`/t/exemple`) : trajet OSRM Thonon → Menton (675 km, boucle 17 h,
-  `apps/tracker/demo/route.json`), contenu fictif dans `scripts/lib-demo-crew.mjs` (`applyDemo`, idempotent, retire
+  `apps/tracker/demo/route.json`), contenu fictif dans `scripts/lib-demo-crew.mjs` (`applyDemo`, idempotent, met de côté SANS RIEN EFFACER
   J4L Club et les autres anciennes démos), photos = vues aériennes IGN (WMS). Correction du tracker : un nouveau road
   trip d'exemple rattrape tout le tour en cours (mémoire d'envoi rattachée au road trip, testé).
   **En production** : `node scripts/demo-refresh.mjs` après déploiement.

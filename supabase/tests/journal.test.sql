@@ -35,14 +35,14 @@ reset role;
 select pg_temp.as_user('00000000-0000-0000-0000-00000000f0b1');
 select throws_ok($$ select public.get_day_summary('00000000-0000-0000-0000-00000000f0c1', '2027-07-02') $$, '42501', null,
   'tom ne peut pas lire le résumé d''un road trip qui n''est pas le sien');
-select is((select count(*)::int from public.journal_entries), 0, 'tom ne voit pas un brouillon non publié');
+select is((select count(*)::int from public.journal_entries where crew_id = '00000000-0000-0000-0000-00000000f0c1'), 0, 'tom ne voit pas un brouillon non publié');
 select throws_ok($$ insert into public.journal_entries (crew_id, day, title, body) values ('00000000-0000-0000-0000-00000000f0c1', '2027-07-03', 'x', 'y') $$,
   '42501', null, 'tom ne peut pas écrire dans le journal');
 reset role;
 
-update public.journal_entries set published = true;
+update public.journal_entries set published = true where crew_id = '00000000-0000-0000-0000-00000000f0c1';
 set local role anon;
-select is((select title from public.journal_entries), 'Le Galibier', 'une fois publiée, la page est visible avec le lien');
+select is((select title from public.journal_entries where crew_id = '00000000-0000-0000-0000-00000000f0c1'), 'Le Galibier', 'une fois publiée, la page est visible avec le lien');
 select ok(not has_function_privilege('anon', 'public.get_day_summary(uuid, date, text)', 'execute'), 'le résumé est fermé aux visiteurs');
 reset role;
 

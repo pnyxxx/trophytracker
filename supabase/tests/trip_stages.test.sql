@@ -51,7 +51,8 @@ select is((select count(*)::int from public.trip_stages where name = 'Piraté'),
 
 -- Visiteur anonyme.
 set local role anon;
-select is((select count(*)::int from public.trip_stages), 1, 'un visiteur anonyme ne voit que les étapes visibles');
+select is((select count(*)::int from public.trip_stages where crew_id in ('00000000-0000-0000-0000-00000000c5a1', '00000000-0000-0000-0000-00000000c5b1')), 1,
+  'un visiteur anonyme ne voit que les étapes visibles');
 reset role;
 
 select * from finish();

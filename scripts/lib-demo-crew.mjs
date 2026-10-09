@@ -6,11 +6,12 @@
  * trajet scripts/build-demo-route.mjs).
  *
  * applyDemo() installe ou remet à neuf ce road trip (idempotent) : utilisé par seed-demo.mjs (en local)
- * et demo-refresh.mjs (en local comme sur le serveur). Il retire aussi les anciens road trips de démo.
+ * et demo-refresh.mjs (en local comme sur le serveur). Les anciennes démos (J4L Club…) sont mises de côté,
+ * réservées à leurs voyageurs, SANS RIEN EFFACER.
  */
 export const DEMO_SLUG = 'exemple';
 
-/** Anciennes démos (avant le pivot), retirées par applyDemo. */
+/** Anciennes démos (avant le pivot), mises de côté par applyDemo (privées, rien n'est effacé). */
 const OLD_DEMO_SLUGS = ['j4l-club', 'les-sables-mouvants', 'la-4l-du-nord'];
 
 export const DEMO_CREW = {
@@ -116,13 +117,20 @@ async function traveller(admin, users, { email, name }) {
 
 /** Installe ou remet à neuf le road trip d'exemple. Retourne son id. */
 export async function applyDemo(admin, log = console.log) {
-  // 1. Anciennes démos et ancien exemple : retirés (fichiers compris).
+  // 1. Anciennes démos (J4L Club…) : mises de côté SANS RIEN EFFACER (elles peuvent contenir de vraies photos) :
+  //    plus marquées comme démo, réservées à leurs voyageurs, suivi arrêté. Seul l'ancien exemple est recréé.
   const { data: olds } = await admin.from('crews').select('id, slug').or(`is_demo.eq.true,slug.in.(${[...OLD_DEMO_SLUGS, DEMO_SLUG].join(',')})`);
   for (const c of olds ?? []) {
-    await clearFolder(admin, c.id);
-    const { error } = await admin.from('crews').delete().eq('id', c.id);
-    if (error) throw error;
-    log(`  ancien road trip retiré : ${c.slug}`);
+    if (c.slug === DEMO_SLUG) {
+      await clearFolder(admin, c.id);
+      const { error } = await admin.from('crews').delete().eq('id', c.id);
+      if (error) throw error;
+      log('  ancien exemple retiré, recréé à neuf');
+    } else {
+      const { error } = await admin.from('crews').update({ is_demo: false, is_public: false, is_listed: false, tracking_enabled: false }).eq('id', c.id);
+      if (error) throw error;
+      log(`  ancienne démo mise de côté (privée, rien n’est effacé) : ${c.slug}`);
+    }
   }
 
   // 2. Le road trip et ses voyageurs.

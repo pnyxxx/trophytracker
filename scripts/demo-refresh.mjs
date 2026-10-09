@@ -2,7 +2,8 @@
  * Installe ou remet à neuf le road trip d'exemple « Route des Grandes Alpes » (en local comme sur le serveur) :
  *   node scripts/demo-refresh.mjs
  *
- * Retire les anciens road trips de démo, recrée l'exemple avec son contenu (scripts/lib-demo-crew.mjs) ;
+ * Met de côté les anciennes démos (privées, rien n'est effacé), recrée l'exemple avec son contenu
+ * (scripts/lib-demo-crew.mjs) ;
  * le service tracker reprend sa trace depuis le début du tour en cours (apps/tracker/src/demo.ts) dans les
  * 15 secondes.
  */

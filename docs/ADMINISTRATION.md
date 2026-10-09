@@ -89,7 +89,8 @@ une position toutes les 15 s, par les mêmes fonctions que les vrais téléphone
 
 Le trajet est généré une fois et commité : `node scripts/build-demo-route.mjs` (routes OSRM, altitude Open-Meteo)
 écrit `apps/tracker/demo/route.json` ; cols et horaires en tête du script. Le contenu est dans
-`scripts/lib-demo-crew.mjs` ; `node scripts/demo-refresh.mjs` (production comprise) retire les anciennes démos et
+`scripts/lib-demo-crew.mjs` ; `node scripts/demo-refresh.mjs` (production comprise) met de côté les anciennes démos (J4L Club rendu privé,
+**rien n'est effacé**, ses photos restent) et
 recrée l'exemple à neuf ; le tracker rattrape alors tout le tour en cours dans les 15 secondes.
 Le tracker ne peut effacer **que** la trace de l'équipage marqué `is_demo` (fonctions `private.demo_crew` et
 `private.demo_restart`).
