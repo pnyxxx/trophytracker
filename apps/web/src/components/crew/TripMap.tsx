@@ -1,6 +1,6 @@
 /**
  * Carte en direct d'un road trip (MapLibre) : trace parcourue, balise du voyageur, ville de départ,
- * étapes, sponsors et photos placées. Trois vues : satellite (orthophotos IGN en France, Esri ailleurs),
+ * étapes, sponsors et photos placées. Trois vues : satellite (Esri, couleurs homogènes à tous les zooms),
  * plan (OpenFreeMap) et relief 3D. « Centrer » garde la balise au milieu à chaque nouvelle position.
  * Deux doigts pour déplacer la carte sur téléphone (la page défile normalement).
  */
@@ -9,7 +9,7 @@ import type { GeoJSONSource, Map as MlMap, Marker } from 'maplibre-gl';
 import { Crosshair, Maximize } from 'lucide-react';
 import type { Crew, Photo, Sponsor, TripStage } from '@/lib/supabase';
 import type { TrackPoint } from '@/hooks/useLiveTrack';
-import { inFrance, LIBERTY_STYLE, maplibregl, satelliteStyle, webglAvailable } from '@/lib/maplibre';
+import { LIBERTY_STYLE, maplibregl, satelliteStyle, webglAvailable } from '@/lib/maplibre';
 import { formatRelative, isLive } from '@/lib/format';
 import { mediaUrl, thumbUrl } from '@/lib/media';
 import { cn } from '@/lib/utils';
@@ -71,7 +71,8 @@ export function TripMap({ crew, points, stages, sponsors, photos = [], overlay, 
   }, [points, car]);
 
   const around = car ?? (crew.start_lon != null && crew.start_lat != null ? [crew.start_lon, crew.start_lat] as LonLat : null);
-  const imagery = around && inFrance(around[0], around[1]) ? 'ign' : 'esri';
+  // Esri partout : des couleurs homogènes d'un zoom à l'autre (l'IGN est une mosaïque de prises de vue).
+  const imagery = 'esri';
   const coordsRef = useRef(coords);
   coordsRef.current = coords;
 

@@ -23,8 +23,9 @@ export const LIBERTY_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 
 /**
  * Imagerie satellite en relief, pour les vues 3D.
- *  - « ign » : orthophotos de l'IGN (France, ~20 cm, Licence Ouverte : usage commercial autorisé), très nettes ;
- *  - « esri » : imagerie mondiale Esri (repli hors de France).
+ *  - « esri » : imagerie mondiale Esri, utilisée partout : couleurs homogènes d'un zoom à l'autre ;
+ *  - « ign » : orthophotos de l'IGN (France, ~20 cm, Licence Ouverte), très nettes mais faites d'une mosaïque
+ *    de prises de vue qui changent de couleur selon le zoom : plus utilisées pour les cartes animées (choix de Julien).
  * Relief : tuiles d'altitude Terrarium d'AWS Open Data, jusqu'au zoom 14 (~10 m).
  */
 export type Imagery = 'ign' | 'esri';

@@ -87,6 +87,10 @@ Branche : `generaliste`. Le site en ligne reste en pause tant que Julien ne vali
   J4L Club et les autres anciennes démos), photos = vues aériennes IGN (WMS). Correction du tracker : un nouveau road
   trip d'exemple rattrape tout le tour en cours (mémoire d'envoi rattachée au road trip, testé).
   **En production** : `node scripts/demo-refresh.mjs` après déploiement.
+- [x] Cartes 3D sur l'imagerie **Esri partout** (accueil, page road trip, replay) : demande de Julien (9 octobre), les
+  orthophotos IGN changeaient de couleur selon le zoom (mosaïque de prises de vue). Comparé aussi à Sentinel-2 cloudless
+  d'EOX (couleurs parfaites, mais floue de près). À vérifier avant l'ouverture : conditions d'usage commercial d'Esri
+  (compte ArcGIS Location Platform, gratuit jusqu'à 2 millions de tuiles par mois).
 
 ## À faire, dans l'ordre
 

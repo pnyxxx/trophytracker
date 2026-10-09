@@ -1,5 +1,5 @@
 /**
- * Carte satellite 3D du récit de l'accueil (orthophotos IGN + relief) : la caméra suit le défilement de la page
+ * Carte satellite 3D du récit de l'accueil (imagerie Esri, couleurs homogènes à tous les zooms, + relief) : la caméra suit le défilement de la page
  * (`prog`, voir story.ts), la trace rouge se dessine derrière le voyageur, un tronçon pointillé figure le passage
  * hors réseau, et les photos apparaissent au col. Sans animation propre : tout dépend de `prog`.
  * Chargé à part : MapLibre est volumineux.
@@ -70,7 +70,7 @@ export default function StoryMap({ prog, wide, onAltitude }: {
     if (!ref.current || !webglAvailable()) return;
     const map = new maplibregl.Map({
       container: ref.current,
-      style: satelliteStyle('ign'),
+      style: satelliteStyle('esri'),
       ...(latest.current.wide ? cameraAt(latest.current.prog) : STILL_CAMERA),
       maxPitch: 80,
       interactive: false,

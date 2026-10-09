@@ -1,18 +1,18 @@
 /**
  * « Revivre le road trip » : survol 3D de toute la trace, caméra « drone » qui suit la position,
- * en satellite (orthophotos IGN si le voyage est en France, sinon Esri).
+ * en satellite (imagerie Esri, aux couleurs homogènes d'un zoom à l'autre).
  * Lecture / pause, frise pour se déplacer, trois vitesses, et export en VIDÉO (paysage, story 9:16 ou carré 1:1)
  * avec le nom, la date et les kilomètres incrustés : la carte est recopiée image par image dans un
  * canevas 2D qui porte aussi les textes, et ce canevas est enregistré (MediaRecorder).
  * Chargé à part (MapLibre est volumineux).
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { GeoJSONSource, Map as MlMap } from 'maplibre-gl';
 import { Clapperboard, Pause, Play, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { TripStage } from '@/lib/supabase';
 import type { TrackPoint } from '@/hooks/useLiveTrack';
-import { inFrance, maplibregl, satelliteStyle, webglAvailable } from '@/lib/maplibre';
+import { maplibregl, satelliteStyle, webglAvailable } from '@/lib/maplibre';
 import { easeAngle, headingAtDist, makeRoute, pathUntil, pointAtDist, type LonLat } from '@/lib/route-anim';
 import { formatNumber } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -63,10 +63,6 @@ export default function TripReplay({ name, slug, points, stages, onClose, initia
   formatRef.current = format;
   speedRef.current = SPEEDS[speed]!.seconds;
 
-  const france = useMemo(() => {
-    const sample = route.path.filter((_, i) => i % 50 === 0);
-    return sample.filter(([lon, lat]) => inFrance(lon, lat)).length > sample.length / 2;
-  }, [route]);
 
   // Infos affichées (et incrustées dans la vidéo) pour une fraction du trajet.
   const hudAt = useCallback((f: number) => {
@@ -85,7 +81,8 @@ export default function TripReplay({ name, slug, points, stages, onClose, initia
     const start = route.path[0]!;
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: satelliteStyle(france ? 'ign' : 'esri'),
+      // Esri partout : des couleurs homogènes pendant tout le survol (l'IGN change de prise de vue selon le zoom).
+      style: satelliteStyle('esri'),
       center: start,
       zoom: 12.8,
       pitch: 64,
@@ -177,7 +174,7 @@ export default function TripReplay({ name, slug, points, stages, onClose, initia
       mapRef.current = null;
       map.remove();
     };
-  }, [route, stagesAtOpen, france, name, hudAt]);
+  }, [route, stagesAtOpen, name, hudAt]);
 
   // Le format change la taille de la carte.
   useEffect(() => {
