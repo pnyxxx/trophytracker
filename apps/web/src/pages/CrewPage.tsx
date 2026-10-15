@@ -11,7 +11,7 @@ import { FacebookIcon, InstagramIcon } from '@/components/common/SocialIcons';
 import { Seo } from '@/components/common/Seo';
 import { PageLoader } from '@/components/common/Spinner';
 import { Button } from '@/components/ui/button';
-import { FollowButton } from '@/components/crew/CrewBits';
+import { CrewAvatar, FollowButton } from '@/components/crew/CrewBits';
 import { CrewGallery } from '@/components/crew/CrewGallery';
 import { CrewLogbook } from '@/components/crew/CrewLogbook';
 import { CrewShareButton } from '@/components/crew/CrewQr';
@@ -119,54 +119,71 @@ export default function CrewPage() {
       />
 
       {/* ── En-tête ──────────────────────────────────────────────────────── */}
-      <section className="mx-auto flex max-w-[1440px] flex-col gap-3.5 px-5 pb-5 pt-7">
-        <div className="flex flex-wrap gap-2">
-          {live && (
-            <Pill className="bg-live/[0.16] text-live-text">
-              <span className="relative h-2 w-2"><span className="absolute inset-0 animate-ping rounded-full bg-live" /><span className="absolute inset-0 rounded-full bg-live" /></span>
-              en direct · {formatRelative(crew.last_fix_at)}
-            </Pill>
+      <section className="mx-auto max-w-[1440px] px-5 pb-5 pt-7">
+        <div className={cn('relative flex flex-col gap-3.5', cover && 'overflow-hidden rounded-[28px] px-5 pb-6 pt-[clamp(140px,22vw,300px)] sm:px-7 sm:pb-7')}>
+          {/* Image de couverture choisie par les voyageurs, cadrée comme dans « Gérer ». */}
+          {cover && (
+            <>
+              <img src={cover} alt="" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: `${crew.cover_focus_x}% ${crew.cover_focus_y}%` }} />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(21,22,26,.15)_0%,rgba(21,22,26,.6)_55%,rgba(21,22,26,.94)_100%)]" />
+            </>
           )}
-          {offline && (
-            <Pill className="bg-gold/[0.16] text-gold-text">
-              <span className="h-2 w-2 rounded-full border-2 border-gold" />hors réseau · dernier signal {formatRelative(crew.last_fix_at)}
-            </Pill>
-          )}
-          {notStarted && (
-            <Pill className="bg-ink-800 text-dust-200">{until != null && until > 0 ? `départ dans ${until} jour${until > 1 ? 's' : ''}` : 'pas encore parti'}</Pill>
-          )}
-          <Pill className="bg-cream text-ink">{visibility}</Pill>
-          <Pill className="border-[1.5px] border-ink-700 py-1.5 text-dust-300">1 véhicule · {Math.max(1, members.length)} voyageur{members.length > 1 ? 's' : ''}</Pill>
-          {crew.is_demo && <Pill className="border-[1.5px] border-gold/60 py-1.5 text-gold-text">road trip d’exemple</Pill>}
-        </div>
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="flex min-w-0 flex-col gap-2">
-            <h1 className="tt-display m-0 break-words text-[clamp(44px,6vw,92px)] leading-[0.95] text-cream">
-              {titleTo ? <>{titleFrom} → <span className="text-signal">{titleTo}</span></> : crew.name}
-            </h1>
-            {(route || crew.tagline) && <p className="m-0 max-w-[720px] text-[19px] leading-snug text-dust-200">{[route, crew.tagline].filter(Boolean).join(' · ')}</p>}
+          <div className="relative flex flex-wrap gap-2">
+            {live && (
+              <Pill className="bg-live/[0.16] text-live-text">
+                <span className="relative h-2 w-2"><span className="absolute inset-0 animate-ping rounded-full bg-live" /><span className="absolute inset-0 rounded-full bg-live" /></span>
+                en direct · {formatRelative(crew.last_fix_at)}
+              </Pill>
+            )}
+            {offline && (
+              <Pill className="bg-gold/[0.16] text-gold-text">
+                <span className="h-2 w-2 rounded-full border-2 border-gold" />hors réseau · dernier signal {formatRelative(crew.last_fix_at)}
+              </Pill>
+            )}
+            {notStarted && (
+              <Pill className="bg-ink-800 text-dust-200">{until != null && until > 0 ? `départ dans ${until} jour${until > 1 ? 's' : ''}` : 'pas encore parti'}</Pill>
+            )}
+            <Pill className="bg-cream text-ink">{visibility}</Pill>
+            <Pill className="border-[1.5px] border-ink-700 py-1.5 text-dust-300">1 véhicule · {Math.max(1, members.length)} voyageur{members.length > 1 ? 's' : ''}</Pill>
+            {crew.car_number && <Pill className="bg-signal font-bold text-white">#{crew.car_number}</Pill>}
+            {crew.is_demo && <Pill className="border-[1.5px] border-gold/60 py-1.5 text-gold-text">road trip d’exemple</Pill>}
           </div>
-          {names.length > 0 && (
-            <div className="flex items-center gap-3">
-              <div className="flex">
-                {names.slice(0, 5).map((n, i) => (
-                  <span key={i} className={cn('flex h-10 w-10 items-center justify-center rounded-full border-2 border-ink font-bold', i > 0 && '-ml-2.5', AVATARS[i % 4])}>
-                    {(n[0] ?? '?').toUpperCase()}
-                  </span>
-                ))}
+          <div className="relative flex flex-wrap items-end justify-between gap-4">
+            <div className="flex min-w-0 items-end gap-4">
+              {crew.avatar_path && (
+                <CrewAvatar name={crew.name} path={crew.avatar_path} className="h-16 w-16 rounded-[18px] border-2 border-cream/20 text-2xl sm:h-24 sm:w-24 sm:text-4xl" />
+              )}
+              <div className="flex min-w-0 flex-col gap-2">
+                <h1 className="tt-display m-0 break-words text-[clamp(44px,6vw,92px)] leading-[0.95] text-cream">
+                  {titleTo ? <>{titleFrom} → <span className="text-signal">{titleTo}</span></> : crew.name}
+                </h1>
+                {(route || crew.tagline || crew.school) && (
+                  <p className="m-0 max-w-[720px] text-[19px] leading-snug text-dust-200">{[route, crew.tagline, crew.school].filter(Boolean).join(' · ')}</p>
+                )}
               </div>
-              <span className="text-[16px] text-dust-300">
-                {joinNames(names)}{startDate && !notStarted ? ` · depuis le ${longDate(startDate)}` : ''}
-              </span>
+            </div>
+            {names.length > 0 && (
+              <div className="flex items-center gap-3">
+                <div className="flex">
+                  {names.slice(0, 5).map((n, i) => (
+                    <span key={i} className={cn('flex h-10 w-10 items-center justify-center rounded-full border-2 border-ink font-bold', i > 0 && '-ml-2.5', AVATARS[i % 4])}>
+                      {(n[0] ?? '?').toUpperCase()}
+                    </span>
+                  ))}
+                </div>
+                <span className="text-[16px] text-dust-300">
+                  {joinNames(names)}{startDate && !notStarted ? ` · depuis le ${longDate(startDate)}` : ''}
+                </span>
+              </div>
+            )}
+          </div>
+          {(crew.instagram_url || crew.facebook_url) && (
+            <div className="relative flex flex-wrap gap-2">
+              {crew.instagram_url && <Button asChild variant="outline" size="sm"><a href={crew.instagram_url} target="_blank" rel="noopener noreferrer"><InstagramIcon />Instagram</a></Button>}
+              {crew.facebook_url && <Button asChild variant="outline" size="sm"><a href={crew.facebook_url} target="_blank" rel="noopener noreferrer"><FacebookIcon />Facebook</a></Button>}
             </div>
           )}
         </div>
-        {(crew.instagram_url || crew.facebook_url) && (
-          <div className="flex flex-wrap gap-2">
-            {crew.instagram_url && <Button asChild variant="outline" size="sm"><a href={crew.instagram_url} target="_blank" rel="noopener noreferrer"><InstagramIcon />Instagram</a></Button>}
-            {crew.facebook_url && <Button asChild variant="outline" size="sm"><a href={crew.facebook_url} target="_blank" rel="noopener noreferrer"><FacebookIcon />Facebook</a></Button>}
-          </div>
-        )}
       </section>
 
       {/* ── Pas de réseau, c'est normal ──────────────────────────────────── */}
