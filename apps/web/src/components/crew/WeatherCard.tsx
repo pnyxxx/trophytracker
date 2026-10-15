@@ -109,7 +109,7 @@ function SunPath({ sun }: { sun: NonNullable<WeatherBoard['sun']> }) {
   const left = sun.set - sun.now;
   return (
     <div className="flex flex-col gap-1">
-      <svg viewBox="0 0 300 54" className="h-auto max-h-[80px] w-full" role="img"
+      <svg viewBox="0 0 300 54" className="h-auto max-h-[44px] w-full" role="img"
         aria-label={day ? `Soleil levé à ${hhmm(sun.rise)}, couché à ${hhmm(sun.set)}` : `Nuit : le soleil se lève à ${hhmm(sun.rise)}`}>
         <path d="M10 46 A140 38 0 0 1 290 46" fill="none" stroke="rgba(255,255,255,.35)" strokeWidth="2" strokeDasharray="4 6" />
         {day && <path d={`M10 46 A140 38 0 0 1 ${x.toFixed(1)} ${y.toFixed(1)}`} fill="none" stroke="#FFD75E" strokeWidth="3" strokeLinecap="round" />}
@@ -118,7 +118,7 @@ function SunPath({ sun }: { sun: NonNullable<WeatherBoard['sun']> }) {
           ? <circle cx={x} cy={y} r="8" fill="#FFC93C" stroke="#fff" strokeWidth="2.5" />
           : <circle cx={p < 0 ? 10 : 290} cy="46" r="6" fill="#F3E9C6" />}
       </svg>
-      <div className="flex justify-between font-mono text-[12px] text-white/80">
+      <div className="flex justify-between font-mono text-[11px] text-white/80">
         <span>↑ {hhmm(sun.rise)}</span>
         <span>{day ? (left > 0 ? `encore ${Math.floor(left / 60)} h ${String(left % 60).padStart(2, '0')} de jour` : 'coucher du soleil') : 'nuit'}</span>
         <span>{hhmm(sun.set)} ↓</span>
@@ -135,24 +135,24 @@ function Hours({ hours }: { hours: WeatherBoard['hours'] }) {
   const xOf = (i: number) => ((i + 0.5) / hours.length) * 300;
   const line = hours.map((h, i) => `${i ? 'L' : 'M'}${xOf(i).toFixed(1)},${yOf(h.temperature).toFixed(1)}`).join(' ');
   return (
-    <div className="flex flex-col gap-1 rounded-[16px] bg-black/20 px-1 py-3">
+    <div className="flex flex-col gap-0.5 rounded-[14px] bg-black/20 px-1 py-2">
       <div className="grid" style={{ gridTemplateColumns: `repeat(${hours.length},minmax(0,1fr))` }}>
         {hours.map((h) => (
           <div key={h.label} className="flex flex-col items-center gap-1">
-            <span className="font-mono text-[12px] text-white/75">{h.label}</span>
-            <WeatherIcon kind={weatherKind(h.code, h.isDay)} className="h-8 w-8" />
+            <span className="font-mono text-[11px] text-white/75">{h.label}</span>
+            <WeatherIcon kind={weatherKind(h.code, h.isDay)} className="h-6 w-6" />
           </div>
         ))}
       </div>
       <div className="relative">
-        <svg viewBox="0 0 300 30" preserveAspectRatio="none" className="block h-[30px] w-full" aria-hidden="true">
+        <svg viewBox="0 0 300 30" preserveAspectRatio="none" className="block h-[20px] w-full" aria-hidden="true">
           <path d={line} fill="none" stroke="#FFD75E" strokeWidth="2.5" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
         </svg>
       </div>
       <div className="grid" style={{ gridTemplateColumns: `repeat(${hours.length},minmax(0,1fr))` }}>
         {hours.map((h) => (
           <div key={h.label} className="flex flex-col items-center">
-            <span className="font-mono text-[16px] text-white">{h.temperature}°</span>
+            <span className="font-mono text-[14px] text-white">{h.temperature}°</span>
             <span className={cn('font-mono text-[11px]', (h.rain ?? 0) >= 30 ? 'text-[#BFE0FF]' : 'text-transparent')}>💧{h.rain ?? 0} %</span>
           </div>
         ))}
@@ -165,26 +165,26 @@ export function WeatherCard({ board, place }: { board: WeatherBoard; place: stri
   const kind = weatherKind(board.now.code, board.now.isDay);
   const { label } = describeWeather(board.now.code, board.now.isDay);
   return (
-    <section aria-label="Météo sur place" className="relative flex flex-col gap-4 overflow-hidden rounded-[20px] p-4 text-white" style={{ backgroundImage: SKY[kind] }}>
+    <section aria-label="Météo sur place" className="relative flex flex-col gap-2.5 overflow-hidden rounded-[20px] p-3.5 text-white" style={{ backgroundImage: SKY[kind] }}>
       <div className="flex items-baseline justify-between gap-3">
-        <span className="text-[17px] font-bold">Météo sur place</span>
+        <span className="text-[16px] font-bold">Météo sur place</span>
         {place && <span className="truncate font-mono text-[13px] text-white/75">{place}</span>}
       </div>
       <div className="flex items-center gap-3">
-        <WeatherIcon kind={kind} animated className="h-[92px] w-[92px] flex-none drop-shadow-[0_8px_18px_rgba(0,0,0,.25)]" />
+        <WeatherIcon kind={kind} animated className="h-[60px] w-[60px] flex-none drop-shadow-[0_8px_18px_rgba(0,0,0,.25)]" />
         <div className="flex min-w-0 flex-col">
-          <span className="font-mono text-[54px] leading-none">{board.now.temperature}°</span>
-          <span className="mt-1 text-[18px] font-bold">{label}</span>
-          <span className="font-mono text-[13px] text-white/80">ressenti {board.now.feelsLike}° · vent {board.now.windKmh} km/h</span>
+          <span className="font-mono text-[38px] leading-none">{board.now.temperature}°</span>
+          <span className="mt-0.5 text-[16px] font-bold">{label}</span>
+          <span className="font-mono text-[12px] text-white/80">ressenti {board.now.feelsLike}° · vent {board.now.windKmh} km/h</span>
         </div>
       </div>
       {board.sun && <SunPath sun={board.sun} />}
       {board.hours.length > 1 && <Hours hours={board.hours} />}
       {board.tomorrow && (
-        <div className="flex items-center gap-3 rounded-[16px] bg-black/20 px-3 py-2">
-          <WeatherIcon kind={weatherKind(board.tomorrow.code)} className="h-9 w-9 flex-none" />
-          <span className="flex-1 text-[16px]"><b>Demain</b> · {describeWeather(board.tomorrow.code).label.toLowerCase()}</span>
-          <span className="font-mono text-[16px]"><span className="text-white/70">{board.tomorrow.min}°</span> / {board.tomorrow.max}°</span>
+        <div className="flex items-center gap-3 rounded-[14px] bg-black/20 px-3 py-1.5">
+          <WeatherIcon kind={weatherKind(board.tomorrow.code)} className="h-7 w-7 flex-none" />
+          <span className="flex-1 text-[15px]"><b>Demain</b> · {describeWeather(board.tomorrow.code).label.toLowerCase()}</span>
+          <span className="font-mono text-[15px]"><span className="text-white/70">{board.tomorrow.min}°</span> / {board.tomorrow.max}°</span>
         </div>
       )}
     </section>
