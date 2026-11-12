@@ -107,7 +107,7 @@ export default function Landing() {
   const launch = isLaunchPrice();
 
   return (
-    <PageShell header="floating">
+    <PageShell header="floating" relief="dunes">
       {/* Le site lui-même (WebSite, Organization) est décrit dans le HTML statique de l'accueil : seo-plugin.ts. */}
       <Seo />
 
@@ -117,7 +117,7 @@ export default function Landing() {
       <section className="relative overflow-hidden" aria-labelledby="hero-title">
         {/* Décor : désert de dunes au crépuscule (image vectorielle légère) */}
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(90%_60%_at_85%_8%,#4A2A15_0%,#24180F_45%,#121316_100%)]" aria-hidden="true" />
-        <div className="pointer-events-none absolute inset-0 bg-[url('/accueil/dunes.svg')] bg-cover bg-center opacity-60" aria-hidden="true" />
+        <div className="pointer-events-none absolute inset-0 bg-[url('/fonds/dunes.svg')] bg-cover bg-center opacity-60" aria-hidden="true" />
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(18,19,22,.55)_0%,transparent_40%,#15161A_100%)] lg:bg-[linear-gradient(90deg,rgba(18,19,22,.85)_0%,rgba(18,19,22,.35)_55%,transparent_100%),linear-gradient(180deg,transparent_70%,#15161A_100%)]" aria-hidden="true" />
 
         <div className="relative mx-auto flex min-h-[100svh] max-w-[1120px] flex-col gap-5 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-[5.1765rem] sm:px-5 lg:grid lg:min-h-[min(100svh,980px)] lg:grid-cols-[1.1fr_0.9fr] lg:grid-rows-[1fr_auto_1fr] lg:gap-x-16 lg:gap-y-8 lg:pb-16 lg:pt-[7.0588rem]">

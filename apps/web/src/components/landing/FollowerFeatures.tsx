@@ -29,7 +29,7 @@ function MiniMap() {
   const ref = useRef<HTMLDivElement>(null);
   const seen = useSeen(ref, '50%');
   return (
-    <div ref={ref} className="relative h-full min-h-[14rem] w-full overflow-hidden rounded-[18px] bg-[#17130F] bg-[url('/accueil/dunes.svg')] bg-cover bg-center">
+    <div ref={ref} className="relative h-full min-h-[14rem] w-full overflow-hidden rounded-[18px] bg-[#17130F] bg-[url('/fonds/dunes.svg')] bg-cover bg-center">
       <div className="absolute inset-0">
         {seen && (
           <Suspense fallback={null}>

@@ -1,7 +1,7 @@
 /**
  * Carte en direct d'un road trip (MapLibre) : trace parcourue, balise du voyageur, ville de départ,
- * étapes, sponsors et photos placées. Trois vues : satellite (Esri, couleurs homogènes à tous les zooms),
- * plan (OpenFreeMap) et relief 3D. « Centrer » garde la balise au milieu à chaque nouvelle position.
+ * étapes, sponsors et photos placées. Trois vues : carte au thème « sable de nuit » du site (par défaut,
+ * baliseStyle), satellite (Esri, couleurs homogènes à tous les zooms) et relief 3D (sur le satellite). « Centrer » garde la balise au milieu à chaque nouvelle position.
  * Deux doigts pour déplacer la carte sur téléphone (la page défile normalement).
  */
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
@@ -9,7 +9,7 @@ import type { GeoJSONSource, Map as MlMap, Marker } from 'maplibre-gl';
 import { Crosshair, Maximize } from 'lucide-react';
 import type { Crew, Photo, Sponsor, TripStage } from '@/lib/supabase';
 import type { TrackPoint } from '@/hooks/useLiveTrack';
-import { LIBERTY_STYLE, maplibregl, satelliteStyle, webglAvailable } from '@/lib/maplibre';
+import { baliseStyle, maplibregl, satelliteStyle, webglAvailable } from '@/lib/maplibre';
 import { formatRelative, isLive } from '@/lib/format';
 import { mediaUrl, thumbUrl } from '@/lib/media';
 import { cn } from '@/lib/utils';
@@ -17,8 +17,8 @@ import { beaconMarker, escapeHtml, photoMarker, sponsorMarker, stageMarker, stag
 
 export type MapView = 'sat' | 'plan' | '3d';
 const VIEWS: { id: MapView; label: string }[] = [
+  { id: 'plan', label: 'Carte' },
   { id: 'sat', label: 'Satellite' },
-  { id: 'plan', label: 'Plan' },
   { id: '3d', label: 'Relief 3D' },
 ];
 const FOLLOW_ZOOM = 13;
@@ -52,10 +52,10 @@ export function TripMap({ crew, points, stages, sponsors, photos = [], overlay, 
   const extras = useRef<Marker[]>([]);
   const fitted = useRef(false);
   const [ready, setReady] = useState(false);
-  const [view, setView] = useState<MapView>('sat');
+  const [view, setView] = useState<MapView>('plan');
   const [follow, setFollow] = useState(false);
   /** Fond actuellement chargé (le relief 3D se pose sur le satellite). */
-  const baseRef = useRef<'sat' | 'plan'>('sat');
+  const baseRef = useRef<'sat' | 'plan'>('plan');
   const live = isLive(crew.last_fix_at);
 
   const car = useMemo<LonLat | null>(() => {
@@ -90,7 +90,7 @@ export function TripMap({ crew, points, stages, sponsors, photos = [], overlay, 
     if (!mapEl.current || !webglAvailable()) return;
     const map = new maplibregl.Map({
       container: mapEl.current,
-      style: satelliteStyle(imagery),
+      style: baliseStyle(),
       center: around ?? [2.5, 46.6],
       zoom: around ? 9 : 4.5,
       maxPitch: 75,
@@ -99,8 +99,14 @@ export function TripMap({ crew, points, stages, sponsors, photos = [], overlay, 
     });
     map.addControl(new maplibregl.NavigationControl({ showCompass: true, visualizePitch: true }), 'top-right');
     map.on('style.load', () => { addTrace(map); setReady(true); });
+    // Crédits de la carte repliés derrière le petit « i » : ouverts, ils cachent la carte de lieu en bas.
+    map.once('load', () => {
+      const attrib = mapEl.current?.querySelector('.maplibregl-ctrl-attrib');
+      attrib?.classList.remove('maplibregl-compact-show');
+      attrib?.removeAttribute('open');
+    });
     mapRef.current = map;
-    baseRef.current = 'sat';
+    baseRef.current = 'plan';
     return () => {
       mapRef.current = null;
       beaconRef.current = null;
@@ -121,7 +127,7 @@ export function TripMap({ crew, points, stages, sponsors, photos = [], overlay, 
       baseRef.current = base;
       setReady(false);
       // Rechargement complet : sans lui, MapLibre « fusionne » les styles sans prévenir (style.load), et la trace disparaît.
-      map.setStyle(base === 'plan' ? LIBERTY_STYLE : satelliteStyle(imagery), { diff: false });
+      map.setStyle(base === 'plan' ? baliseStyle() : satelliteStyle(imagery), { diff: false });
     }
     const apply = () => {
       if (view === '3d') {

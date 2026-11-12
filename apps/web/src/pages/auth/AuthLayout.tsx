@@ -7,7 +7,7 @@ export function AuthLayout({ title, subtitle, children, footer }: {
   title: string; subtitle?: string; children: ReactNode; footer?: ReactNode;
 }) {
   return (
-    <div className="tt-dunes relative min-h-screen overflow-hidden">
+    <div className="tt-fond tt-fond--collines relative min-h-screen overflow-hidden">
       <Seo title={title} noindex />
       <div className="mx-auto grid min-h-screen max-w-[1120px] grid-cols-1 items-center gap-12 px-4 py-10 sm:px-7 lg:grid-cols-[1fr_minmax(0,500px)] lg:gap-20">
         {/* Colonne d'accroche (grand écran) */}

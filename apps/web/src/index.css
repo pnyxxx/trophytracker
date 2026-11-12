@@ -120,23 +120,32 @@
   }
 }
 
-/* ─── Fond commun du site : dunes en courbes de niveau sur un dégradé chaud de crépuscule ───
+/* ─── Fond commun du site : un relief en courbes de niveau sur un dégradé chaud de crépuscule ───
+   Reliefs générés par scripts/build-reliefs.py (public/fonds) : un par type de page, même palette sable.
+     .tt-fond                 dunes (accueil, par défaut)
+     .tt-fond--montagnes      page d'un road trip, création
+     .tt-fond--canyon         espace voyageur
+     .tt-fond--collines       compte, connexion, pages d'information
    Posé sur un calque fixe (pas `background-attachment: fixed`, mal géré par l'iPhone) : il reste en place
    pendant qu'on fait défiler. Voile sombre par-dessus pour que les textes restent bien lisibles. */
-.tt-dunes {
+.tt-fond {
+  --tt-relief: url('/fonds/dunes.svg');
   position: relative;
   isolation: isolate;
   background-color: #121316;
 }
-.tt-dunes::before {
+.tt-fond--montagnes { --tt-relief: url('/fonds/montagnes.svg'); }
+.tt-fond--canyon { --tt-relief: url('/fonds/canyon.svg'); }
+.tt-fond--collines { --tt-relief: url('/fonds/collines.svg'); }
+.tt-fond::before {
   content: '';
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   background:
-    linear-gradient(180deg, rgba(18, 19, 22, 0.25) 0%, rgba(18, 19, 22, 0.7) 60%, rgba(18, 19, 22, 0.88) 100%),
-    url('/accueil/dunes.svg') center / cover no-repeat,
+    linear-gradient(180deg, rgba(18, 19, 22, 0.2) 0%, rgba(18, 19, 22, 0.66) 60%, rgba(18, 19, 22, 0.86) 100%),
+    var(--tt-relief) center / cover no-repeat,
     radial-gradient(90% 65% at 88% 0%, #4a2a15 0%, #24180f 45%, #121316 100%);
 }
 /* Surface « verre » : cartes et panneaux posés sur le fond de dunes */

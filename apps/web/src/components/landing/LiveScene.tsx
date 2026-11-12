@@ -36,7 +36,7 @@ export function LiveScene({ className }: { className?: string }) {
   return (
     <div className={cn('flex flex-col overflow-hidden rounded-[28px] border-[1.5px] border-cream/[0.14] bg-[#17130F] shadow-[0_40px_90px_rgba(0,0,0,.55)]', className)}>
       {/* La carte */}
-      <div className="relative min-h-0 flex-1 bg-[url('/accueil/dunes.svg')] bg-cover bg-center">
+      <div className="relative min-h-0 flex-1 bg-[url('/fonds/dunes.svg')] bg-cover bg-center">
         <div className="absolute inset-0" aria-hidden="true">
           <Suspense fallback={null}>
             <ExampleMap mode="overview" />

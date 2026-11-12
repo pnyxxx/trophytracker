@@ -199,7 +199,7 @@ function Preview({ d, firstName, tip }: { d: Draft; firstName: string; tip: stri
             <img src={d.cover} alt="" className="block h-full w-full object-cover brightness-[.75]" />
           ) : (
             <div className="h-full w-full bg-[radial-gradient(90%_80%_at_80%_10%,#4A2A15,#17130F)]">
-              <div className="h-full w-full bg-[url('/accueil/dunes.svg')] bg-cover bg-center opacity-80" />
+              <div className="h-full w-full bg-[url('/fonds/dunes.svg')] bg-cover bg-center opacity-80" />
             </div>
           )}
           <div className="absolute left-3.5 top-3.5 flex gap-1.5">
@@ -418,7 +418,7 @@ export default function CreateTripPage() {
   };
 
   return (
-    <div className="tt-dunes min-h-[100dvh] text-cream min-[1000px]:grid min-[1000px]:grid-cols-[minmax(0,1fr)_minmax(400px,0.8fr)]">
+    <div className="tt-fond tt-fond--montagnes min-h-[100dvh] text-cream min-[1000px]:grid min-[1000px]:grid-cols-[minmax(0,1fr)_minmax(400px,0.8fr)]">
       <Seo title="Créer mon road trip" noindex />
       <div className="flex min-h-[100dvh] min-w-0 flex-col">
         {/* En-tête compact : logo, avancement, temps restant */}

@@ -43,7 +43,7 @@ export function TravellerShell({ crew, section, badges, onSection, children }: {
   ));
 
   return (
-    <div className="tt-dunes min-h-screen text-cream lg:grid lg:grid-cols-[260px_minmax(0,1fr)]">
+    <div className="tt-fond tt-fond--canyon min-h-screen text-cream lg:grid lg:grid-cols-[260px_minmax(0,1fr)]">
       {/* Barre latérale (ordinateur) */}
       <aside className="sticky top-0 hidden h-screen flex-col gap-5 overflow-y-auto border-r-[1.5px] border-cream/[0.08] bg-ink-900/70 px-3.5 py-5 backdrop-blur-xl lg:flex">
         <Link to="/" aria-label="trophytracker, accueil" className="flex items-center gap-[0.5294rem] px-2 text-cream hover:text-cream"><LogoMark /><Wordmark /></Link>

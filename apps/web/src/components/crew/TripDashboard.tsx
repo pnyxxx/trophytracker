@@ -39,9 +39,9 @@ export function PlaceCard({ crew, place, day }: { crew: Crew; place: string | nu
 
 function Tile({ label, value, unit }: { label: string; value: string; unit?: string }) {
   return (
-    <div className="flex flex-col gap-1 rounded-[20px] bg-ink-800 px-4 py-3.5">
-      <dt className="font-mono text-[0.7059rem] uppercase tracking-[0.1em] text-dust-400">{label}</dt>
-      <dd className="m-0 whitespace-nowrap font-mono text-[1.5294rem] text-cream">
+    <div className="tt-glass flex flex-col gap-1 rounded-[18px] border-[1.5px] border-cream/[0.06] px-4 py-3">
+      <dt className="font-mono text-[0.6471rem] uppercase tracking-[0.1em] text-dust-400">{label}</dt>
+      <dd className="m-0 whitespace-nowrap font-mono text-[1.35rem] text-cream">
         {value}{unit && <span className="text-[0.8235rem] text-dust-400"> {unit}</span>}
       </dd>
     </div>
@@ -61,7 +61,7 @@ function MiniProfile({ profile, from, to }: { profile: AltPoint[]; from: string;
   const d = pts.map((p, i) => `${i ? 'L' : 'M'}${x(p.km).toFixed(1)},${y(p.alt).toFixed(1)}`).join(' ');
   const last = pts.at(-1)!;
   return (
-    <div className="flex flex-col gap-2.5 rounded-[20px] bg-ink-800 p-4">
+    <div className="tt-glass flex flex-col gap-2.5 rounded-[20px] border-[1.5px] border-cream/[0.06] p-4">
       <div className="flex items-baseline justify-between">
         <span className="text-[1rem] font-bold">Profil d’altitude</span>
         <span className="font-mono text-[0.7647rem] text-dust-400">max {formatNumber(climb.max)} m</span>
@@ -79,7 +79,35 @@ function MiniProfile({ profile, from, to }: { profile: AltPoint[]; from: string;
   );
 }
 
-export function TripDashboard({ crew, stats, telemetry: t, profile, day, total, place }: {
+/** Les chiffres du tableau de bord ; les 4 premiers sont les chiffres clés (bandeau sous la carte sur téléphone). */
+export function dashboardTiles(crew: Crew, stats: CrewStats | null | undefined, t: Telemetry | undefined, profile: AltPoint[] | null, day: number | null, total: number | null) {
+  const live = isLive(crew.last_fix_at);
+  const climb = profile ? climbOf(profile) : null;
+  return [
+    { label: 'distance', value: formatNumber(stats?.total_distance_km ?? crew.total_distance_m / 1000, 0), unit: 'km' },
+    { label: 'vitesse', value: live && t?.speed_kmh != null ? formatNumber(t.speed_kmh) : '—', unit: 'km/h' },
+    { label: 'altitude', value: t?.altitude != null ? formatNumber(t.altitude) : '—', unit: 'm' },
+    { label: 'jour', value: day ? String(day) : '—', unit: total ? `/ ${total}` : undefined },
+    { label: 'dénivelé +', value: climb ? formatNumber(climb.up) : '—', unit: 'm' },
+    { label: 'au volant · auj.', value: t ? hm(t.today.moving_minutes) : '—' },
+  ];
+}
+
+/** Bandeau des chiffres clés, collé sous la carte (téléphone). */
+export function KeyStats({ tiles, className }: { tiles: ReturnType<typeof dashboardTiles>; className?: string }) {
+  return (
+    <dl className={cn('m-0 grid grid-cols-4 gap-px overflow-hidden bg-cream/[0.08]', className)}>
+      {tiles.slice(0, 4).map((x) => (
+        <div key={x.label} className="flex min-w-0 flex-col gap-0.5 bg-[#121316] px-2.5 py-2.5">
+          <dt className="truncate font-mono text-[0.6471rem] uppercase tracking-[0.08em] text-dust-500">{x.label}</dt>
+          <dd className="m-0 truncate font-mono text-[1rem] text-cream">{x.value}{x.unit && <span className="text-[0.6471rem] text-dust-400"> {x.unit}</span>}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+export function TripDashboard({ crew, stats, telemetry: t, profile, day, total, place, withoutKeyStats = false }: {
   crew: Crew;
   stats: CrewStats | null | undefined;
   telemetry: Telemetry | undefined;
@@ -87,9 +115,10 @@ export function TripDashboard({ crew, stats, telemetry: t, profile, day, total, 
   day: number | null;
   total: number | null;
   place: string | null;
+  /** Les chiffres clés sont déjà affichés ailleurs (bandeau sous la carte) : on ne montre que les autres. */
+  withoutKeyStats?: boolean;
 }) {
   const live = isLive(crew.last_fix_at);
-  const climb = profile ? climbOf(profile) : null;
   const [lat, lon] = [round2(t?.lat ?? crew.last_lat), round2(t?.lon ?? crew.last_lon)];
   const { data: weather } = useQuery({
     queryKey: ['weather-board', lat, lon],
@@ -99,14 +128,8 @@ export function TripDashboard({ crew, stats, telemetry: t, profile, day, total, 
     queryFn: ({ signal }) => fetchWeatherBoard(lat!, lon!, signal),
   });
 
-  const tiles = [
-    { label: 'distance', value: formatNumber(stats?.total_distance_km ?? crew.total_distance_m / 1000, 0), unit: 'km' },
-    { label: 'vitesse', value: live && t?.speed_kmh != null ? formatNumber(t.speed_kmh) : '—', unit: 'km/h' },
-    { label: 'altitude', value: t?.altitude != null ? formatNumber(t.altitude) : '—', unit: 'm' },
-    { label: 'dénivelé +', value: climb ? formatNumber(climb.up) : '—', unit: 'm' },
-    { label: 'jour', value: day ? String(day) : '—', unit: total ? `/ ${total}` : undefined },
-    { label: 'au volant · auj.', value: t ? hm(t.today.moving_minutes) : '—' },
-  ];
+  const all = dashboardTiles(crew, stats, t, profile, day, total);
+  const tiles = withoutKeyStats ? all.slice(4) : all;
   const extras = [
     t?.battery != null ? `batterie ${t.battery} %` : null,
     live && t?.course != null ? `cap ${compassLabel(t.course)?.toLowerCase()}` : null,

@@ -30,3 +30,6 @@ npm-debug.log*
 # Sauvegardes locales
 backups/
 supabase/.temp/
+
+# Scripts de test jetables (sessions de développement)
+scripts/.tmp/
