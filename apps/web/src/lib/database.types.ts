@@ -822,6 +822,7 @@ export type Database = {
         Returns: string
       }
       admin_dashboard: { Args: never; Returns: Json }
+      admin_delete_user: { Args: { p_user: string }; Returns: number }
       admin_grant_crew_access: { Args: { p_email: string }; Returns: undefined }
       admin_list_access_codes: {
         Args: never
@@ -908,6 +909,16 @@ export type Database = {
       admin_set_traccar_device: {
         Args: { p_crew: string; p_device: string }
         Returns: undefined
+      }
+      admin_user_crews: {
+        Args: { p_user: string }
+        Returns: {
+          id: string
+          is_demo: boolean
+          members: number
+          name: string
+          slug: string
+        }[]
       }
       count_page_view: { Args: { p_crew: string }; Returns: undefined }
       create_crew: {

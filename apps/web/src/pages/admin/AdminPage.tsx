@@ -16,6 +16,8 @@ import { toastError, unwrap } from '@/lib/errors';
 import { formatDateTime, formatNumber, formatRelative, isLive } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { euros } from '@/lib/legal';
+import { removeCrewFolder } from '@/lib/media';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 type TripRow = {
   id: string; slug: string; name: string; owner_name: string | null; owner_email: string | null; is_public: boolean; is_listed: boolean;
@@ -433,6 +435,77 @@ function AccessCodesAdmin() {
   );
 }
 
+/**
+ * Supprimer un compte et les road trips dont il est le seul propriétaire (comptes de test, demandes par e-mail).
+ * On montre d'abord ce qui partira, puis on fait retaper l'adresse e-mail : c'est irréversible.
+ */
+function DeleteUserDialog({ account, onClose }: { account: { id: string; email: string; display_name: string }; onClose: () => void }) {
+  const queryClient = useQueryClient();
+  const [confirm, setConfirm] = useState('');
+  const { data: crews, isLoading } = useQuery({
+    queryKey: ['admin', 'user-crews', account.id],
+    queryFn: async () => unwrap(await supabase.rpc('admin_user_crews', { p_user: account.id })),
+  });
+  const demo = crews?.some((c) => c.is_demo);
+  const del = useMutation({
+    mutationFn: async () => {
+      // D'abord les photos et logos de ses road trips (l'admin a les droits sur tous les dossiers), puis le compte.
+      for (const c of crews ?? []) await removeCrewFolder(c.id);
+      return unwrap(await supabase.rpc('admin_delete_user', { p_user: account.id }));
+    },
+    onSuccess: (n) => {
+      toast.success(`Compte supprimé${n ? `, avec ${n} road trip${n > 1 ? 's' : ''}` : ''}`);
+      void queryClient.invalidateQueries({ queryKey: ['admin'] });
+      onClose();
+    },
+    onError: toastError,
+  });
+  const ok = confirm.trim().toLowerCase() === account.email.toLowerCase();
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Supprimer ce compte ?</DialogTitle>
+          <DialogDescription>
+            <b className="text-cream">{account.display_name || 'Sans nom'}</b> · {account.email}. Définitif : le compte ne pourra plus se connecter.
+          </DialogDescription>
+        </DialogHeader>
+        {isLoading ? <Spinner /> : demo ? (
+          <p className="m-0 text-[0.9412rem] text-gold-text">Ce compte porte le road trip d’exemple : il ne peut pas être supprimé.</p>
+        ) : (
+          <form onSubmit={(e: FormEvent) => { e.preventDefault(); if (ok) del.mutate(); }} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2 rounded-2xl bg-ink px-4 py-3">
+              <span className="text-[0.8824rem] font-bold text-cream">
+                {crews?.length ? `Road trip${crews.length > 1 ? 's' : ''} supprimé${crews.length > 1 ? 's' : ''} avec lui :` : 'Aucun road trip ne sera supprimé.'}
+              </span>
+              {!!crews?.length && (
+                <ul className="m-0 flex list-none flex-col gap-1 p-0">
+                  {crews.map((c) => (
+                    <li key={c.id} className="flex items-center justify-between gap-3 text-[0.8824rem]">
+                      <Link to={`/road-trip/${c.slug}`} target="_blank" className="min-w-0 truncate text-dust-100 underline-offset-4 hover:underline">{c.name}</Link>
+                      <span className="flex-none font-mono text-[0.7059rem] text-dust-400">{c.members} voyageur{c.members > 1 ? 's' : ''}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <span className="text-[0.7647rem] text-dust-500">Étapes, photos, sponsors et trace GPS partent avec. Les achats restent (comptabilité). Un road trip qui a un autre propriétaire est gardé.</span>
+            </div>
+            <Field id="del-confirm" label="Pour confirmer, tape son adresse e-mail">
+              <Input id="del-confirm" type="email" autoComplete="off" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder={account.email} />
+            </Field>
+            <div className="flex flex-wrap justify-end gap-2">
+              <Button type="button" variant="ghost" onClick={onClose}>Annuler</Button>
+              <Button type="submit" variant="destructive" disabled={!ok || del.isPending}>
+                <Trash2 />{del.isPending ? 'Suppression…' : 'Supprimer définitivement'}
+              </Button>
+            </div>
+          </form>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function UsersAdmin() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -444,6 +517,7 @@ function UsersAdmin() {
     queryKey: ['admin', 'users', debounced],
     queryFn: async () => unwrap(await supabase.rpc('admin_list_users', { p_search: debounced || undefined })),
   });
+  const [toDelete, setToDelete] = useState<{ id: string; email: string; display_name: string } | null>(null);
   const setRole = useMutation({
     mutationFn: async ({ id, role }: { id: string; role: string }) => unwrap(await supabase.rpc('admin_set_role', { p_user: id, p_role: role })),
     onSuccess: () => { toast.success('Rôle modifié'); void queryClient.invalidateQueries({ queryKey: ['admin', 'users'] }); },
@@ -469,10 +543,17 @@ function UsersAdmin() {
                   {u.role === 'admin' ? 'Retirer admin' : 'Nommer admin'}
                 </Button>
               )}
+              {u.id !== user?.id && u.role !== 'admin' && (
+                <Button size="sm" variant="ghost" className="text-signal-text hover:text-white" aria-label={`Supprimer le compte ${u.email}`}
+                  onClick={() => setToDelete({ id: u.id, email: u.email, display_name: u.display_name })}>
+                  <Trash2 />Supprimer
+                </Button>
+              )}
             </li>
           ))}
         </ul>
       )}
+      {toDelete && <DeleteUserDialog account={toDelete} onClose={() => setToDelete(null)} />}
     </Panel>
   );
 }
