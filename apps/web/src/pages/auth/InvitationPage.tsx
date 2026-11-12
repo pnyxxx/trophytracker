@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PageLoader } from '@/components/common/Spinner';
-import { PASSWORD_MIN, SignInForm } from '@/components/auth/SignInForm';
-import { PasswordInput } from '@/components/ui/password-input';
+import { SignInForm } from '@/components/auth/SignInForm';
+import { NewPasswordField } from '@/components/auth/NewPasswordField';
+import { passwordTooShort } from '@/lib/password';
 import { useAuth } from '@/hooks/auth';
 import { supabase } from '@/lib/supabase';
 import { errorMessage } from '@/lib/errors';
@@ -28,6 +29,8 @@ export default function InvitationPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [pwError, setPwError] = useState(false);
+  const passwordRef = useRef<HTMLInputElement>(null);
   const verified = useRef(false);
 
   useEffect(() => {
@@ -58,6 +61,10 @@ export default function InvitationPage() {
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
+    if (passwordTooShort(password, true)) {
+      setPwError(true);
+      return passwordRef.current?.focus();
+    }
     setError(null);
     setBusy(true);
     const displayName = name.trim();
@@ -76,13 +83,18 @@ export default function InvitationPage() {
           <Label htmlFor="name">Ton prénom</Label>
           <Input id="name" autoComplete="given-name" required minLength={2} maxLength={60} autoFocus value={name} onChange={(e) => setName(e.target.value)} />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="password">Choisis un mot de passe <span className="font-normal text-dust-400">(facultatif)</span></Label>
-          <PasswordInput id="password" autoComplete="new-password" minLength={PASSWORD_MIN} value={password} onChange={(e) => setPassword(e.target.value)} />
-          <p className="m-0 text-[14px] text-dust-400">{PASSWORD_MIN} caractères minimum. Sans mot de passe, tu te connecteras avec un code reçu par e-mail.</p>
-        </div>
+        <NewPasswordField
+          ref={passwordRef}
+          id="password"
+          label={<>Choisis un mot de passe <span className="font-normal text-dust-400">(facultatif)</span></>}
+          optional
+          value={password}
+          onChange={setPassword}
+          showError={pwError}
+          note="Sans mot de passe, tu te connecteras avec un code reçu par e-mail."
+        />
         {error && <p role="alert" className="m-0 text-[15px] text-signal-text">{error}</p>}
-        <Button type="submit" size="lg" className="w-full" disabled={busy || name.trim().length < 2 || (password.length > 0 && password.length < PASSWORD_MIN)}>{busy ? 'Activation…' : 'Rejoindre le road trip'}</Button>
+        <Button type="submit" size="lg" className="w-full" disabled={busy}>{busy ? 'Activation…' : 'Rejoindre le road trip'}</Button>
       </form>
     </AuthLayout>
   );

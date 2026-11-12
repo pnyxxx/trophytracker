@@ -6,16 +6,16 @@
  *  - double authentification par application (Google Authenticator, 1Password…).
  * Chaque modification déclenche un email d'alerte automatique.
  */
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { PasswordInput } from '@/components/ui/password-input';
 import { CodeInput } from '@/components/auth/CodeInput';
-import { PASSWORD_MIN } from '@/components/auth/SignInForm';
+import { NewPasswordField } from '@/components/auth/NewPasswordField';
+import { passwordTooShort } from '@/lib/password';
 import { useAuth } from '@/hooks/auth';
 import { supabase } from '@/lib/supabase';
 import { toastError } from '@/lib/errors';
@@ -50,6 +50,8 @@ function EmailForm() {
 
 function PasswordForm() {
   const [password, setPassword] = useState('');
+  const [pwError, setPwError] = useState(false);
+  const passwordRef = useRef<HTMLInputElement>(null);
   /** Code de confirmation demandé par Supabase Auth (session de plus de 24 h). */
   const [nonce, setNonce] = useState<string | null>(null);
   const save = useMutation({
@@ -76,13 +78,20 @@ function PasswordForm() {
     onError: toastError,
   });
   return (
-    <form onSubmit={(e: FormEvent) => { e.preventDefault(); save.mutate(); }} className="flex flex-col gap-3">
+    <form
+      onSubmit={(e: FormEvent) => {
+        e.preventDefault();
+        if (passwordTooShort(password)) {
+          setPwError(true);
+          return passwordRef.current?.focus();
+        }
+        save.mutate();
+      }} className="flex flex-col gap-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-        <div className="flex-1 space-y-2">
-          <Label htmlFor="new-password">Nouveau mot de passe <span className="text-dust-500">({PASSWORD_MIN} caractères minimum)</span></Label>
-          <PasswordInput id="new-password" autoComplete="new-password" required minLength={PASSWORD_MIN} value={password} onChange={(e) => setPassword(e.target.value)} />
+        <div className="flex-1">
+          <NewPasswordField ref={passwordRef} id="new-password" label="Nouveau mot de passe" value={password} onChange={setPassword} showError={pwError} />
         </div>
-        {nonce === null && <Button type="submit" disabled={save.isPending || password.length < PASSWORD_MIN}>Enregistrer</Button>}
+        {nonce === null && <Button type="submit" className="sm:mb-[30px]" disabled={save.isPending}>Enregistrer</Button>}
       </div>
       {nonce !== null && (
         <div className="flex flex-col gap-3">

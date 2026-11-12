@@ -17,13 +17,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PasswordInput } from '@/components/ui/password-input';
 import { CodeInput } from './CodeInput';
+import { NewPasswordField } from './NewPasswordField';
+import { PASSWORD_MIN, passwordTooShort } from '@/lib/password';
 import { supabase } from '@/lib/supabase';
 import { errorMessage } from '@/lib/errors';
 
 /** Délai entre deux envois de code (Supabase Auth refuse plus d'un e-mail par minute et par adresse). */
 const RESEND_DELAY = 60;
-/** Longueur minimale imposée par Supabase Auth (GOTRUE_PASSWORD_MIN_LENGTH). */
-export const PASSWORD_MIN = 10;
 
 export type SignInStep = 'email' | 'code' | 'name';
 type Mode = 'login' | 'signup';
@@ -59,6 +59,9 @@ export function SignInForm({ signup = false, switchable = false, initialEmail = 
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  /** Envoi tenté avec un mot de passe trop court : l'indication sous le champ passe en erreur. */
+  const [pwError, setPwError] = useState(false);
+  const passwordRef = useRef<HTMLInputElement>(null);
   const [wait, setWait] = useState(0);
   const lastTried = useRef('');
   /** Le code attendu confirme une inscription avec mot de passe (renvoi : `resend`, pas `signInWithOtp`). */
@@ -172,6 +175,10 @@ export function SignInForm({ signup = false, switchable = false, initialEmail = 
 
   const saveName = async (e: FormEvent) => {
     e.preventDefault();
+    if (passwordTooShort(newPassword, true)) {
+      setPwError(true);
+      return passwordRef.current?.focus();
+    }
     const displayName = name.trim();
     setBusy(true);
     setError(null);
@@ -191,7 +198,7 @@ export function SignInForm({ signup = false, switchable = false, initialEmail = 
       <Link to="/confidentialite" className="underline">politique de confidentialité</Link>.
     </p>
   );
-  const switchMode = (m: Mode) => { setMode(m); setMethod('password'); setError(null); };
+  const switchMode = (m: Mode) => { setMode(m); setMethod('password'); setError(null); setPwError(false); };
 
   if (step === 'name') {
     return (
@@ -201,13 +208,18 @@ export function SignInForm({ signup = false, switchable = false, initialEmail = 
           <Label htmlFor="auth-name">Ton prénom</Label>
           <Input id="auth-name" autoComplete="given-name" required minLength={2} maxLength={60} autoFocus value={name} onChange={(e) => setName(e.target.value)} />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="auth-new-password">Choisis un mot de passe <span className="font-normal text-dust-400">(facultatif)</span></Label>
-          <PasswordInput id="auth-new-password" autoComplete="new-password" minLength={PASSWORD_MIN} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
-          <p className="m-0 text-[14px] text-dust-400">{PASSWORD_MIN} caractères minimum. Sans mot de passe, tu te connecteras avec un code reçu par e-mail.</p>
-        </div>
+        <NewPasswordField
+          ref={passwordRef}
+          id="auth-new-password"
+          label={<>Choisis un mot de passe <span className="font-normal text-dust-400">(facultatif)</span></>}
+          optional
+          value={newPassword}
+          onChange={setNewPassword}
+          showError={pwError}
+          note="Sans mot de passe, tu te connecteras avec un code reçu par e-mail."
+        />
         {alert}
-        <Button type="submit" size="lg" className="w-full" disabled={busy || name.trim().length < 2 || (newPassword.length > 0 && newPassword.length < PASSWORD_MIN)}>
+        <Button type="submit" size="lg" className="w-full" disabled={busy}>
           {busy ? 'Enregistrement…' : 'Continuer'}
         </Button>
       </form>
@@ -284,30 +296,35 @@ export function SignInForm({ signup = false, switchable = false, initialEmail = 
   }
 
   return (
-    <form onSubmit={(e) => { e.preventDefault(); if (mode === 'signup') register(); else logIn(); }} className="flex flex-col gap-5">
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (mode === 'login') return logIn();
+        if (passwordTooShort(password)) {
+          setPwError(true);
+          return passwordRef.current?.focus();
+        }
+        register();
+      }}
+      className="flex flex-col gap-5"
+    >
       {mode === 'signup' && nameField}
       {emailField}
-      <div className="space-y-2">
-        <div className="flex items-baseline justify-between gap-3">
-          <Label htmlFor="auth-password">{mode === 'signup' ? 'Choisis un mot de passe' : 'Ton mot de passe'}</Label>
-          {mode === 'login' && (
+      {mode === 'signup' ? (
+        <NewPasswordField ref={passwordRef} id="auth-password" label="Choisis un mot de passe" value={password} onChange={setPassword} showError={pwError} />
+      ) : (
+        <div className="space-y-2">
+          <div className="flex items-baseline justify-between gap-3">
+            <Label htmlFor="auth-password">Ton mot de passe</Label>
             <button type="button" className="text-[14px] font-bold text-dust-300 hover:text-cream" onClick={() => { setMethod('code'); setError(null); }}>
               Mot de passe oublié ?
             </button>
-          )}
+          </div>
+          <PasswordInput id="auth-password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
         </div>
-        <PasswordInput
-          id="auth-password"
-          autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-          required
-          minLength={mode === 'signup' ? PASSWORD_MIN : undefined}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        {mode === 'signup' && <p className="m-0 text-[14px] text-dust-400">{PASSWORD_MIN} caractères minimum.</p>}
-      </div>
+      )}
       {alert}
-      <Button type="submit" size="lg" className="w-full" disabled={busy || (mode === 'signup' && (password.length < PASSWORD_MIN || name.trim().length < 2))}>
+      <Button type="submit" size="lg" className="w-full" disabled={busy}>
         {busy ? (mode === 'signup' ? 'Création…' : 'Connexion…') : mode === 'signup' ? 'Créer mon compte' : 'Se connecter'}
       </Button>
       <Button type="button" variant="secondary" size="lg" className="w-full" onClick={() => { setMethod('code'); setError(null); }}>
