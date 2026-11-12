@@ -22,7 +22,7 @@ export function LiveDot({ className }: { className?: string }) {
 
 /** Grand titre de section (h2), Bricolage Grotesque 800. */
 export function SectionTitle({ children, className }: { children: ReactNode; className?: string }) {
-  return <h2 className={cn('tt-display m-0 text-[clamp(36px,4.6vw,64px)]', className)}>{children}</h2>;
+  return <h2 className={cn('tt-display m-0 text-[clamp(2.1176rem,3.77vw,3.7647rem)]', className)}>{children}</h2>;
 }
 
 /**
@@ -37,11 +37,11 @@ export function PageHero({ kicker, title, children, aside, className }: {
 }) {
   return (
     <section className={cn('relative', className)}>
-      <div className="mx-auto flex max-w-[1440px] flex-col gap-6 px-5 pb-10 pt-12 md:flex-row md:items-end md:justify-between md:pb-12 md:pt-16">
+      <div className="mx-auto flex max-w-[1200px] flex-col gap-6 px-5 pb-10 pt-12 md:flex-row md:items-end md:justify-between md:pb-12 md:pt-16">
         <div className="flex min-w-0 flex-col gap-4">
           {kicker && <Kicker className="text-dust-400">{kicker}</Kicker>}
-          <h1 className="tt-display m-0 break-words text-[clamp(40px,6vw,88px)] text-cream">{title}</h1>
-          {children && <div className="max-w-[620px] text-[19px] leading-relaxed text-dust-100">{children}</div>}
+          <h1 className="tt-display m-0 break-words text-[clamp(2.3529rem,4.92vw,5.1765rem)] text-cream">{title}</h1>
+          {children && <div className="max-w-[620px] text-[1.1176rem] leading-relaxed text-dust-100">{children}</div>}
         </div>
         {aside && <div className="flex shrink-0 flex-col gap-3 md:items-end">{aside}</div>}
       </div>
@@ -51,5 +51,5 @@ export function PageHero({ kicker, title, children, aside, className }: {
 
 /** Conteneur standard des pages (largeur max + gouttières). */
 export function Container({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('mx-auto w-full max-w-[1440px] px-5', className)}>{children}</div>;
+  return <div className={cn('mx-auto w-full max-w-[1200px] px-5', className)}>{children}</div>;
 }

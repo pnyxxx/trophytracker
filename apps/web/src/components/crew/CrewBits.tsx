@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils';
 export function LiveBadge({ lastFixAt, className }: { lastFixAt: string | null; className?: string }) {
   if (!isLive(lastFixAt)) return null;
   return (
-    <span className={cn('inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-live', className)}>
+    <span className={cn('inline-flex items-center gap-2 font-mono text-[0.6471rem] font-bold uppercase tracking-[0.14em] text-live', className)}>
       <LiveDot />
       En direct
     </span>
@@ -26,7 +26,7 @@ export function LiveBadge({ lastFixAt, className }: { lastFixAt: string | null; 
 export function CrewAvatar({ name, path, className }: { name: string; path: string | null; className?: string }) {
   const url = thumbUrl(path, 256);
   return (
-    <div className={cn('flex shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-ink-700 font-display font-extrabold text-primary', className ?? 'h-[52px] w-[52px] text-xl')}>
+    <div className={cn('flex shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-ink-700 font-display font-extrabold text-primary', className ?? 'h-[3.0588rem] w-[3.0588rem] text-xl')}>
       {url ? <img src={url} alt={`Logo de ${name}`} className="h-full w-full bg-white object-cover" loading="lazy" /> : initials(name)}
     </div>
   );
@@ -99,18 +99,18 @@ export function CrewCard({ crew }: { crew: CrewSummary }) {
       className="group grid grid-cols-[auto_1fr_auto] items-center gap-4 rounded-[20px] border-[1.5px] border-ink-700 bg-ink-800 px-4 py-3.5 text-cream transition duration-200 hover:border-dust-600 hover:text-cream"
     >
       <CrewAvatar name={crew.name} path={crew.avatar_path} />
-      <div className="flex min-w-0 flex-col gap-[3px]">
+      <div className="flex min-w-0 flex-col gap-[0.1765rem]">
         <div className="flex min-w-0 items-center gap-2">
           {crew.car_number && (
-            <span className="shrink-0 rounded-full bg-signal px-1.5 py-0.5 font-mono text-[11px] font-bold text-white">#{crew.car_number}</span>
+            <span className="shrink-0 rounded-full bg-signal px-1.5 py-0.5 font-mono text-[0.6471rem] font-bold text-white">#{crew.car_number}</span>
           )}
-          <h3 className="tt-display m-0 truncate text-[22px] leading-tight">{crew.name}</h3>
+          <h3 className="tt-display m-0 truncate text-[1.2941rem] leading-tight">{crew.name}</h3>
         </div>
-        {place && <p className="m-0 truncate text-[13px] text-dust-400">{place}</p>}
+        {place && <p className="m-0 truncate text-[0.7647rem] text-dust-400">{place}</p>}
       </div>
       <div className="flex flex-col items-end gap-1 text-right">
         <span className="whitespace-nowrap font-mono text-sm font-semibold">{formatKm(crew.total_distance_m / 1000)}</span>
-        <span className={cn('whitespace-nowrap font-mono text-[12px]', live ? 'text-live-text' : 'text-dust-400')}>
+        <span className={cn('whitespace-nowrap font-mono text-[0.7059rem]', live ? 'text-live-text' : 'text-dust-400')}>
           {live ? '● en direct' : crew.last_fix_at ? `vu ${formatRelative(crew.last_fix_at)}` : 'pas encore parti'}
         </span>
       </div>

@@ -138,7 +138,7 @@ export const Photo360Viewer = ({ imageUrl, title, description, onClose }: Photo3
     <div
       ref={containerRef}
       className={`relative bg-gradient-to-br from-ink-900 via-ink-800 to-ink-900 overflow-hidden ${
-        isFullscreen ? 'fixed inset-0 z-50 rounded-none' : 'w-full h-[500px] md:h-[600px]'
+        isFullscreen ? 'fixed inset-0 z-50 rounded-none' : 'w-full h-[29.4118rem] md:h-[35.2941rem]'
       }`}
     >
       {/* Header Controls */}

@@ -93,7 +93,7 @@ export default function InvitationPage() {
           showError={pwError}
           note="Sans mot de passe, tu te connecteras avec un code reçu par e-mail."
         />
-        {error && <p role="alert" className="m-0 text-[15px] text-signal-text">{error}</p>}
+        {error && <p role="alert" className="m-0 text-[0.8824rem] text-signal-text">{error}</p>}
         <Button type="submit" size="lg" className="w-full" disabled={busy}>{busy ? 'Activation…' : 'Rejoindre le road trip'}</Button>
       </form>
     </AuthLayout>

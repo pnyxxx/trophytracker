@@ -139,17 +139,17 @@ export function StoryRecorder({ crewId, day, dayLabel, days, onDay, writing, onW
     <section aria-label="Raconte ta journée" className="relative flex flex-col gap-5 overflow-hidden rounded-[28px] bg-ink-800 p-5 sm:p-7">
       <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-signal/20 blur-3xl" aria-hidden="true" />
       <div className="relative flex flex-wrap items-center justify-between gap-3">
-        <span className="flex items-center gap-2 font-mono text-[13px] text-dust-300"><Sparkles className="h-4 w-4 text-signal-text" />carnet de bord · avec l’IA</span>
+        <span className="flex items-center gap-2 font-mono text-[0.7647rem] text-dust-300"><Sparkles className="h-4 w-4 text-signal-text" />carnet de bord · avec l’IA</span>
         {days.length > 1 && (
           <select aria-label="Jour à raconter" value={day} onChange={(e) => { stop(); onDay(e.target.value); }}
-            className="min-h-11 rounded-full border-2 border-ink-600 bg-ink px-4 text-[15px] text-cream">
+            className="min-h-11 rounded-full border-2 border-ink-600 bg-ink px-4 text-[0.8824rem] text-cream">
             {days.map((d) => <option key={d.day} value={d.day}>{d.label}</option>)}
           </select>
         )}
       </div>
       <div className="relative flex flex-col gap-2">
-        <h2 className="tt-display m-0 text-[clamp(34px,6vw,54px)] leading-[1.02] text-cream">Raconte ta <span className="text-signal">journée.</span></h2>
-        <p className="m-0 max-w-[620px] text-[17px] leading-relaxed text-dust-200">
+        <h2 className="tt-display m-0 text-[clamp(2rem,4.92vw,3.1765rem)] leading-[1.02] text-cream">Raconte ta <span className="text-signal">journée.</span></h2>
+        <p className="m-0 max-w-[620px] text-[1rem] leading-relaxed text-dust-200">
           Appuie sur le micro et raconte, comme à un ami au téléphone : les galères, les rencontres, les fous rires.
           L’IA en fait une belle page de carnet pour tes proches. Tu n’as plus qu’à relire.
         </p>
@@ -160,17 +160,17 @@ export function StoryRecorder({ crewId, day, dayLabel, days, onDay, writing, onW
           <>
             <button type="button" onClick={recording ? stop : start} disabled={writing} aria-pressed={recording}
               aria-label={recording ? 'Mettre la dictée en pause' : 'Commencer à raconter'}
-              className={cn('relative flex h-[120px] w-[120px] items-center justify-center rounded-full text-white shadow-[0_18px_40px_rgba(225,38,44,.35)] transition-transform active:scale-95 disabled:opacity-50',
+              className={cn('relative flex h-[7.0588rem] w-[7.0588rem] items-center justify-center rounded-full text-white shadow-[0_18px_40px_rgba(225,38,44,.35)] transition-transform active:scale-95 disabled:opacity-50',
                 recording ? 'bg-signal' : 'bg-signal hover:bg-signal-hover')}>
               {recording && <span className="pointer-events-none absolute inset-0 animate-ping rounded-full bg-signal/40" aria-hidden="true" />}
               {recording ? <Pause className="relative h-12 w-12" /> : <Mic className="relative h-12 w-12" />}
             </button>
-            <span className="font-mono text-[14px] text-dust-300" aria-live="polite">
+            <span className="font-mono text-[0.8235rem] text-dust-300" aria-live="polite">
               {recording ? `je t’écoute · ${mmss(seconds)} · appuie pour faire une pause` : text.trim() ? 'appuie pour continuer ton récit' : 'appuie et parle'}
             </span>
           </>
         ) : (
-          <p className="m-0 rounded-2xl bg-ink px-4 py-3 text-[15px] text-dust-200">
+          <p className="m-0 rounded-2xl bg-ink px-4 py-3 text-[0.8824rem] text-dust-200">
             Ton navigateur ne sait pas dicter : appuie sur le <b className="text-cream">micro du clavier</b> de ton téléphone, ou écris simplement ton récit.
           </p>
         )}
@@ -178,18 +178,18 @@ export function StoryRecorder({ crewId, day, dayLabel, days, onDay, writing, onW
 
       {!text.trim() && !recording && (
         <ul className="relative m-0 flex list-none flex-wrap justify-center gap-2 p-0" aria-label="Idées pour raconter">
-          {PROMPTS.map((p) => <li key={p} className="rounded-full bg-ink px-3.5 py-2 text-[14px] text-dust-300">{p}</li>)}
+          {PROMPTS.map((p) => <li key={p} className="rounded-full bg-ink px-3.5 py-2 text-[0.8235rem] text-dust-300">{p}</li>)}
         </ul>
       )}
 
       <div className="relative flex flex-col gap-2">
-        <label htmlFor="story-text" className="font-mono text-[13px] text-dust-400">ton récit · {dayLabel.toLowerCase()}{words ? ` · ${words} mots` : ''}</label>
+        <label htmlFor="story-text" className="font-mono text-[0.7647rem] text-dust-400">ton récit · {dayLabel.toLowerCase()}{words ? ` · ${words} mots` : ''}</label>
         <textarea id="story-text" value={text} onChange={(e) => setText(e.target.value)} maxLength={12000}
           placeholder="Ce matin, on a quitté le camping vers 9 h…"
-          className={cn(textareaClass, 'min-h-[150px] text-[17px] leading-relaxed')} />
-        {interim && <p className="m-0 text-[16px] italic text-dust-400" aria-live="polite">{interim}…</p>}
+          className={cn(textareaClass, 'min-h-[8.8235rem] text-[1rem] leading-relaxed')} />
+        {interim && <p className="m-0 text-[0.9412rem] italic text-dust-400" aria-live="polite">{interim}…</p>}
       </div>
-      {error && <p role="alert" className="relative m-0 text-[15px] text-signal-text">{error}</p>}
+      {error && <p role="alert" className="relative m-0 text-[0.8824rem] text-signal-text">{error}</p>}
 
       <div className="relative flex flex-wrap items-center gap-3">
         <Button size="lg" disabled={writing || words < 5} onClick={() => { stop(); onWrite(text.trim()); }}>
@@ -199,7 +199,7 @@ export function StoryRecorder({ crewId, day, dayLabel, days, onDay, writing, onW
           <Button variant="ghost" onClick={() => { if (confirm('Effacer ce récit ?')) { stop(); setText(''); } }}>Effacer</Button>
         )}
       </div>
-      <p className="relative m-0 text-[13px] leading-relaxed text-dust-500">
+      <p className="relative m-0 text-[0.7647rem] leading-relaxed text-dust-500">
         La dictée est faite par ton navigateur (Google ou Apple). Ton récit n’est envoyé à l’IA que quand tu appuies sur « Écrire ma page »,
         et rien n’est publié sans que tu le relises.
       </p>

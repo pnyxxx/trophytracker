@@ -78,7 +78,7 @@ export function MembersTab({ crew }: { crew: Crew }) {
             <li key={m.user_id ?? m.display_name} className="flex flex-wrap items-center gap-3 py-3">
               <div className="flex-1">
                 <p className="font-display text-xl font-extrabold leading-tight text-cream">{m.display_name}{m.user_id === user?.id && <span className="text-dust-500"> (toi)</span>}</p>
-                <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-dust-400">{m.role === 'owner' ? 'Propriétaire' : 'Membre'}</p>
+                <p className="font-mono text-[0.6471rem] uppercase tracking-[0.1em] text-dust-400">{m.role === 'owner' ? 'Propriétaire' : 'Membre'}</p>
               </div>
               {isOwner && m.user_id && m.user_id !== user?.id && (
                 <Button size="sm" variant="ghost" onClick={() => setRole.mutate({ userId: m.user_id!, role: m.role === 'owner' ? 'member' : 'owner' })}>

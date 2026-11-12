@@ -210,14 +210,14 @@ export function TripMap({ crew, points, stages, sponsors, photos = [], overlay, 
             type="button"
             aria-pressed={view === v.id}
             onClick={() => setView(v.id)}
-            className={cn('flex min-h-9 items-center rounded-full px-3.5 text-[15px] font-bold', view === v.id ? 'bg-signal text-white' : 'text-dust-100 hover:text-white')}
+            className={cn('flex min-h-9 items-center rounded-full px-3.5 text-[0.8824rem] font-bold', view === v.id ? 'bg-signal text-white' : 'text-dust-100 hover:text-white')}
           >
             {v.label}
           </button>
         ))}
       </div>
 
-      <div className="absolute right-3 top-[120px] flex flex-col gap-2">
+      <div className="absolute right-3 top-[7.0588rem] flex flex-col gap-2">
         {car && (
           <button
             type="button"
@@ -242,7 +242,7 @@ export function TripMap({ crew, points, stages, sponsors, photos = [], overlay, 
 
       <div className="pointer-events-none absolute inset-x-3 bottom-3 flex flex-wrap items-end justify-between gap-2.5">
         {car ? overlay : (
-          <div className="rounded-[20px] bg-cream px-4 py-3 text-[15px] font-bold text-ink shadow-[0_14px_30px_rgba(0,0,0,.35)]">
+          <div className="rounded-[20px] bg-cream px-4 py-3 text-[0.8824rem] font-bold text-ink shadow-[0_14px_30px_rgba(0,0,0,.35)]">
             Pas encore de position : le suivi démarre le jour du départ.
           </div>
         )}

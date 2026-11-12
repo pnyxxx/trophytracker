@@ -13,7 +13,7 @@ export function PageShell({ children, header = 'sticky', headerActions }: {
   headerActions?: ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen flex-col bg-ink">
+    <div className="tt-dunes flex min-h-screen flex-col">
       <SiteHeader variant={header} actions={headerActions} />
       <main id="contenu" className="flex-1">
         {children}

@@ -49,7 +49,7 @@ export const currentPriceCents = (now = Date.now()) => (isLaunchPrice(now) ? PRI
 
 /** « 15 € », « 19,50 € ». */
 export const euros = (cents: number) =>
-  `${(cents / 100).toLocaleString('fr-FR', { minimumFractionDigits: cents % 100 ? 2 : 0 })} €`;
+  `${(cents / 100).toLocaleString('fr-FR', { minimumFractionDigits: cents % 100 ? 2 : 0 })}\u00A0€`;
 
 /** Phrase de tarif réutilisée sur le site. */
 export function priceSentence(now = Date.now()) {

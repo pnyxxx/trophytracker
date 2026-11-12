@@ -252,7 +252,7 @@ export default function TripReplay({ name, slug, points, stages, onClose, initia
         <input
           type="range" min={0} max={1000} value={Math.round(progress * 1000)} disabled={recording}
           onChange={(e) => { progressRef.current = Number(e.target.value) / 1000; setProgress(progressRef.current); }}
-          className="min-w-[160px] flex-1 accent-[#DB4740]" aria-label="Avancement"
+          className="min-w-[9.4118rem] flex-1 accent-[#DB4740]" aria-label="Avancement"
         />
         <div className="flex gap-1" role="group" aria-label="Vitesse">
           {SPEEDS.map((s, i) => (

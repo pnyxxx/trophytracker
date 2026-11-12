@@ -17,7 +17,7 @@ export function LogoMark({ className, tone = 'dark' }: { className?: string; ton
 /** Nom de la marque en capitales condensées (Big Shoulders Display), « Tracker » toujours en rouge. */
 export function Wordmark({ className, plain = false }: { className?: string; plain?: boolean }) {
   return (
-    <span className={cn('font-logo text-[26px] font-black uppercase leading-[0.85] tracking-[0.01em]', className)}>
+    <span className={cn('font-logo text-[1.5294rem] font-black uppercase leading-[0.85] tracking-[0.01em]', className)}>
       Trophy<span className={plain ? undefined : 'text-signal'}>Tracker</span>
     </span>
   );

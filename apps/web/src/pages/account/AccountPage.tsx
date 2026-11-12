@@ -75,21 +75,21 @@ export default function AccountPage() {
   return (
     <PageShell>
       <Seo title="Mon compte" noindex />
-      <div className="mx-auto flex max-w-[1180px] flex-col gap-6 px-5 pb-16 pt-10">
+      <div className="mx-auto flex max-w-[1120px] flex-col gap-6 px-5 pb-16 pt-10">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex flex-col gap-2">
-            <span className="font-mono text-[14px] text-dust-400">mon compte · {user?.email}</span>
-            <h1 className="tt-display m-0 text-[clamp(40px,6vw,80px)] leading-none text-cream">Salut {profile?.display_name ?? ''}</h1>
+            <span className="font-mono text-[0.8235rem] text-dust-400">mon compte · {user?.email}</span>
+            <h1 className="tt-display m-0 text-[clamp(2.3529rem,4.92vw,4.7059rem)] leading-none text-cream">Salut {profile?.display_name ?? ''}</h1>
           </div>
           <Button asChild size="lg"><Link to="/creer"><Plus />{myCrews?.length ? 'Nouveau road trip' : 'Créer mon road trip'}</Link></Button>
         </div>
 
         <section className="flex flex-col gap-3" aria-label="Mes road trips">
-          <h2 className="tt-display m-0 text-[32px] text-cream">Mes road trips</h2>
+          <h2 className="tt-display m-0 text-[1.8824rem] text-cream">Mes road trips</h2>
           {loadingMine ? <Spinner /> : !myCrews?.length ? (
             <div className="flex flex-col items-start gap-3 rounded-[28px] border-[1.5px] border-dashed border-ink-600 p-6">
-              <span className="tt-display text-[26px] text-cream">Tu pars bientôt ?</span>
-              <span className="max-w-[560px] text-[16px] text-dust-300">
+              <span className="tt-display text-[1.5294rem] text-cream">Tu pars bientôt ?</span>
+              <span className="max-w-[560px] text-[0.9412rem] text-dust-300">
                 Crée la page de ton road trip en 5 minutes : position en direct, trace, photos et sponsors, sur un lien privé.
                 {hasAccess ? ' Ton accès est déjà réglé.' : ''}
               </span>
@@ -101,17 +101,17 @@ export default function AccountPage() {
                 const cover = mediaUrl(crew.cover_path);
                 const live = isLive(crew.last_fix_at);
                 return (
-                  <Link key={crew.id} to={`/mon-compte/road-trips/${crew.slug}`} className="group flex min-h-[148px] overflow-hidden rounded-[28px] border-[1.5px] border-ink-700 bg-ink-800 text-cream hover:border-dust-600 hover:text-cream">
+                  <Link key={crew.id} to={`/mon-compte/road-trips/${crew.slug}`} className="group flex min-h-[8.7059rem] overflow-hidden rounded-[28px] border-[1.5px] border-ink-700 bg-ink-800 text-cream hover:border-dust-600 hover:text-cream">
                     <div className="relative w-28 flex-none bg-ink-700 sm:w-36">
                       {cover && <img src={cover} alt="" className="h-full w-full object-cover" loading="lazy" />}
                     </div>
                     <div className="flex min-w-0 flex-1 flex-col gap-1.5 p-4">
-                      <span className={cn('font-mono text-[13px]', live ? 'text-live-text' : 'text-signal-text')}>{live ? '● en direct' : tripStatus(crew)}</span>
-                      <span className="tt-display text-[24px] leading-tight">{crew.name}</span>
-                      <span className="text-[14px] text-dust-400">
+                      <span className={cn('font-mono text-[0.7647rem]', live ? 'text-live-text' : 'text-signal-text')}>{live ? '● en direct' : tripStatus(crew)}</span>
+                      <span className="tt-display text-[1.4118rem] leading-tight">{crew.name}</span>
+                      <span className="text-[0.8235rem] text-dust-400">
                         {role === 'owner' ? 'capitaine' : 'compagnon de route'} · {formatKm(crew.total_distance_m / 1000)} · {!crew.is_public ? 'voyageurs seulement' : crew.is_listed ? 'public' : 'privé, par lien'}
                       </span>
-                      <span className="mt-auto text-[15px] font-bold text-signal-text group-hover:text-cream">Ouvrir mon espace →</span>
+                      <span className="mt-auto text-[0.8824rem] font-bold text-signal-text group-hover:text-cream">Ouvrir mon espace →</span>
                     </div>
                   </Link>
                 );

@@ -47,7 +47,7 @@ const longDate = (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateString
 const daysBetween = (iso: string) => Math.round((new Date(`${iso}T00:00:00`).getTime() - new Date(new Date().toDateString()).getTime()) / 864e5);
 
 function Pill({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <span className={cn('flex items-center gap-2 rounded-full px-[13px] py-[7px] font-mono text-[14px]', className)}>{children}</span>;
+  return <span className={cn('flex items-center gap-2 rounded-full px-[0.7647rem] py-[0.4118rem] font-mono text-[0.8235rem]', className)}>{children}</span>;
 }
 
 export default function CrewPage() {
@@ -104,8 +104,8 @@ export default function CrewPage() {
           <Link to={`/mon-compte/road-trips/${crew.slug}`}><Settings />Gérer</Link>
         </Button>
       )}
-      <FollowButton quiet crewId={crew.id} slug={crew.slug} className="min-h-11 px-[18px] text-[16px]" />
-      <CrewShareButton crew={crew} variant="default" className="min-h-11 px-[18px] text-[16px]" />
+      <FollowButton quiet crewId={crew.id} slug={crew.slug} className="min-h-11 px-[1.0588rem] text-[0.9412rem]" />
+      <CrewShareButton crew={crew} variant="default" className="min-h-11 px-[1.0588rem] text-[0.9412rem]" />
     </>
   );
 
@@ -119,7 +119,7 @@ export default function CrewPage() {
       />
 
       {/* ── En-tête ──────────────────────────────────────────────────────── */}
-      <section className="mx-auto max-w-[1440px] px-5 pb-5 pt-7">
+      <section className="mx-auto max-w-[1200px] px-5 pb-5 pt-7">
         <div className={cn('relative flex flex-col gap-3.5', cover && 'overflow-hidden rounded-[28px] px-5 pb-6 pt-[clamp(140px,22vw,300px)] sm:px-7 sm:pb-7')}>
           {/* Image de couverture choisie par les voyageurs, cadrée comme dans « Gérer ». */}
           {cover && (
@@ -154,11 +154,11 @@ export default function CrewPage() {
                 <CrewAvatar name={crew.name} path={crew.avatar_path} className="h-16 w-16 rounded-[18px] border-2 border-cream/20 text-2xl sm:h-24 sm:w-24 sm:text-4xl" />
               )}
               <div className="flex min-w-0 flex-col gap-2">
-                <h1 className="tt-display m-0 break-words text-[clamp(44px,6vw,92px)] leading-[0.95] text-cream">
+                <h1 className="tt-display m-0 break-words text-[clamp(2.5882rem,4.92vw,5.4118rem)] leading-[0.95] text-cream">
                   {titleTo ? <>{titleFrom} → <span className="text-signal">{titleTo}</span></> : crew.name}
                 </h1>
                 {(route || crew.tagline || crew.school) && (
-                  <p className="m-0 max-w-[720px] text-[19px] leading-snug text-dust-200">{[route, crew.tagline, crew.school].filter(Boolean).join(' · ')}</p>
+                  <p className="m-0 max-w-[720px] text-[1.1176rem] leading-snug text-dust-200">{[route, crew.tagline, crew.school].filter(Boolean).join(' · ')}</p>
                 )}
               </div>
             </div>
@@ -171,7 +171,7 @@ export default function CrewPage() {
                     </span>
                   ))}
                 </div>
-                <span className="text-[16px] text-dust-300">
+                <span className="text-[0.9412rem] text-dust-300">
                   {joinNames(names)}{startDate && !notStarted ? ` · depuis le ${longDate(startDate)}` : ''}
                 </span>
               </div>
@@ -188,12 +188,12 @@ export default function CrewPage() {
 
       {/* ── Pas de réseau, c'est normal ──────────────────────────────────── */}
       {offline && (
-        <section className="mx-auto max-w-[1440px] px-5 pb-4">
-          <div role="status" className="flex items-start gap-4 rounded-[24px] bg-cream px-[22px] py-5 text-ink">
+        <section className="mx-auto max-w-[1200px] px-5 pb-4">
+          <div role="status" className="flex items-start gap-4 rounded-[24px] bg-cream px-[1.2941rem] py-5 text-ink">
             <span className="h-11 w-11 flex-none rounded-full border-[2.5px] border-dashed border-ink" aria-hidden="true" />
             <div className="flex flex-col gap-1.5">
-              <span className="text-[20px] font-bold">Pas de réseau, c’est normal.</span>
-              <span className="text-[17px] leading-normal text-dust-800">
+              <span className="text-[1.1765rem] font-bold">Pas de réseau, c’est normal.</span>
+              <span className="text-[1rem] leading-normal text-dust-800">
                 Les voyageurs traversent sans doute une zone sans couverture, ou le téléphone est éteint pour la nuit. Il garde la trace en
                 mémoire et l’enverra dès qu’il capte. Dernière position{place ? ` : près de ${place}` : ''}, {formatRelative(crew.last_fix_at)}.
                 En cas de doute, contacte directement les voyageurs.
@@ -204,34 +204,34 @@ export default function CrewPage() {
       )}
 
       {/* ── Carte + tableau de bord ──────────────────────────────────────── */}
-      <section id="carte" className="mx-auto grid max-w-[1440px] scroll-mt-20 gap-4 px-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(340px,1fr)]">
-        <Suspense fallback={<div className="h-[62vh] animate-pulse rounded-[28px] bg-ink-800 lg:h-[640px]" />}>
+      <section id="carte" className="mx-auto grid max-w-[1200px] scroll-mt-20 gap-4 px-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(340px,1fr)]">
+        <Suspense fallback={<div className="h-[62vh] animate-pulse rounded-[28px] bg-ink-800 lg:h-[37.6471rem]" />}>
           <TripMap
             crew={crew}
             points={points}
             stages={stages}
             sponsors={sponsors}
             photos={photos}
-            className="h-[62vh] min-h-[420px] lg:h-[640px]"
+            className="h-[62vh] min-h-[24.7059rem] lg:h-[37.6471rem]"
             overlay={<PlaceCard crew={crew} place={place} day={day} />}
           />
         </Suspense>
         <TripDashboard crew={crew} stats={stats} telemetry={telemetry} profile={profile} day={day} total={total} place={place} />
       </section>
       {!offline && !live && !notStarted && (
-        <p className="mx-auto mb-0 mt-3 max-w-[1440px] px-5 text-[15px] text-dust-400">
+        <p className="mx-auto mb-0 mt-3 max-w-[1200px] px-5 text-[0.8824rem] text-dust-400">
           Pas de nouvelle position ? Souvent, il n’y a simplement pas de réseau : la trace se complète dès que le téléphone capte.
         </p>
       )}
 
       {/* ── Revivre en 3D ────────────────────────────────────────────────── */}
       {points.length >= 20 && (
-        <section className="mx-auto max-w-[1440px] px-5 pt-4">
-          <div className="flex flex-wrap items-center justify-between gap-4 rounded-[28px] border-[1.5px] border-signal/35 bg-[linear-gradient(100deg,#2A1416_0%,#1F2026_60%)] px-6 py-[22px]">
+        <section className="mx-auto max-w-[1200px] px-5 pt-4">
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-[28px] border-[1.5px] border-signal/35 bg-[linear-gradient(100deg,#2A1416_0%,#1F2026_60%)] px-6 py-[1.2941rem]">
             <div className="flex max-w-[560px] flex-col gap-1.5">
-              <span className="font-mono text-[13px] text-signal-text">revivre en 3D</span>
-              <span className="tt-display text-[30px] leading-[1.05] text-cream">Rejoue tout le voyage en survol satellite.</span>
-              <span className="text-[16px] text-dust-300">Exportable en vidéo, en paysage, en story ou en carré, avec la trace et les étapes.</span>
+              <span className="font-mono text-[0.7647rem] text-signal-text">revivre en 3D</span>
+              <span className="tt-display text-[1.7647rem] leading-[1.05] text-cream">Rejoue tout le voyage en survol satellite.</span>
+              <span className="text-[0.9412rem] text-dust-300">Exportable en vidéo, en paysage, en story ou en carré, avec la trace et les étapes.</span>
             </div>
             <div className="flex flex-wrap gap-2.5">
               <Button onClick={() => setReplay('wide')}><Clapperboard />Lancer le replay</Button>
@@ -241,8 +241,8 @@ export default function CrewPage() {
               <div className="grid flex-[1_1_100%] grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-2">
                 {FORMATS.map((f) => (
                   <button key={f.id} type="button" onClick={() => setReplay(f.id)} className="flex flex-col gap-1 rounded-[18px] bg-ink-700 px-4 py-3.5 text-left text-cream hover:bg-cream hover:text-ink">
-                    <span className="text-[16px] font-bold">{f.title}</span>
-                    <span className="font-mono text-[13px] opacity-80">{f.text}</span>
+                    <span className="text-[0.9412rem] font-bold">{f.title}</span>
+                    <span className="font-mono text-[0.7647rem] opacity-80">{f.text}</span>
                   </button>
                 ))}
               </div>
@@ -258,7 +258,7 @@ export default function CrewPage() {
 
       {/* ── Carnet de route + photos ─────────────────────────────────────── */}
       {(stages.length > 0 || published.length > 0 || crew.story || photos.length > 0) && (
-        <section className="mx-auto grid max-w-[1440px] grid-cols-[repeat(auto-fit,minmax(min(100%,420px),1fr))] items-start gap-8 px-5 pt-9">
+        <section className="mx-auto grid max-w-[1200px] grid-cols-[repeat(auto-fit,minmax(min(100%,420px),1fr))] items-start gap-8 px-5 pt-9">
           {(stages.length > 0 || published.length > 0 || crew.story) && (
             <div id="carnet" className="scroll-mt-24">
               <CrewLogbook stages={stages} photos={photos} journal={published} story={crew.story} points={points} startDate={startDate} />
@@ -274,15 +274,15 @@ export default function CrewPage() {
 
       {/* ── Relief jour par jour ─────────────────────────────────────────── */}
       {profile && (
-        <section id="relief" className="mx-auto max-w-[1440px] scroll-mt-24 px-5 pt-9">
+        <section id="relief" className="mx-auto max-w-[1200px] scroll-mt-24 px-5 pt-9">
           <details className="group rounded-[28px] bg-cream p-5 text-ink sm:p-7">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
-              <span className="tt-display text-[28px]">Le relief, jour par jour</span>
-              <span className="font-mono text-[14px] text-dust-700 group-open:hidden">ouvrir +</span>
-              <span className="hidden font-mono text-[14px] text-dust-700 group-open:inline">fermer −</span>
+              <span className="tt-display text-[1.6471rem]">Le relief, jour par jour</span>
+              <span className="font-mono text-[0.8235rem] text-dust-700 group-open:hidden">ouvrir +</span>
+              <span className="hidden font-mono text-[0.8235rem] text-dust-700 group-open:inline">fermer −</span>
             </summary>
             <div className="mt-5">
-              <Suspense fallback={<div className="h-[260px] animate-pulse rounded-2xl bg-sand" />}>
+              <Suspense fallback={<div className="h-[15.2941rem] animate-pulse rounded-2xl bg-sand" />}>
                 <CrewElevation profile={profile} />
               </Suspense>
             </div>
@@ -291,7 +291,7 @@ export default function CrewPage() {
       )}
 
       {/* ── Soutenir ─────────────────────────────────────────────────────── */}
-      <div className="mx-auto max-w-[1440px] px-5 pb-[72px] pt-9">
+      <div className="mx-auto max-w-[1200px] px-5 pb-[4.2353rem] pt-9">
         <TripSupport
           fundraiserUrl={crew.fundraiser_url}
           sponsors={sponsors}

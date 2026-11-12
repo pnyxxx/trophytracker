@@ -21,9 +21,9 @@ export function CrewGallery({ photos }: { photos: Photo[] }) {
   return (
     <>
       <div className="flex items-baseline justify-between gap-3">
-        <h2 className="tt-display m-0 text-[36px] text-cream">Photos</h2>
+        <h2 className="tt-display m-0 text-[2.1176rem] text-cream">Photos</h2>
         {photos.length > PREVIEW && (
-          <button type="button" onClick={() => setAll((v) => !v)} className="font-mono text-[14px] text-signal-text hover:text-cream">
+          <button type="button" onClick={() => setAll((v) => !v)} className="font-mono text-[0.8235rem] text-signal-text hover:text-cream">
             {all ? 'voir moins' : `voir les ${photos.length}`}
           </button>
         )}
@@ -48,7 +48,7 @@ export function CrewGallery({ photos }: { photos: Photo[] }) {
               className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
             />
             {p.kind === 'panorama' && (
-              <span className="pointer-events-none absolute bottom-2.5 left-2.5 rounded-full bg-signal px-[11px] py-1 font-mono text-[12px] text-white">
+              <span className="pointer-events-none absolute bottom-2.5 left-2.5 rounded-full bg-signal px-[0.6471rem] py-1 font-mono text-[0.7059rem] text-white">
                 {i === 0 ? '360° · glisser pour explorer' : '360°'}
               </span>
             )}
@@ -73,7 +73,7 @@ export function CrewGallery({ photos }: { photos: Photo[] }) {
           <div className="flex items-start justify-between gap-4 border-b border-cream/[0.12] pb-4 text-cream">
             <div>
               <p className="tt-display m-0 text-3xl md:text-4xl">{current.title}</p>
-              <p className="mt-2 flex flex-wrap gap-4 font-mono text-[13px] text-signal-text">
+              <p className="mt-2 flex flex-wrap gap-4 font-mono text-[0.7647rem] text-signal-text">
                 {current.location && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{current.location}</span>}
                 {current.taken_label && <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{current.taken_label}</span>}
               </p>

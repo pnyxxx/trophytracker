@@ -26,10 +26,10 @@ export function PlaceCard({ crew, place, day }: { crew: Crew; place: string | nu
   const live = isLive(crew.last_fix_at);
   return (
     <div className="flex items-center gap-3 rounded-[20px] bg-cream py-2.5 pl-2.5 pr-4 text-ink shadow-[0_14px_30px_rgba(0,0,0,.35)]">
-      <span className="flex h-11 w-11 flex-none items-center justify-center rounded-[14px] bg-signal font-mono text-[14px] text-white">{day ? `J${day}` : '●'}</span>
+      <span className="flex h-11 w-11 flex-none items-center justify-center rounded-[14px] bg-signal font-mono text-[0.8235rem] text-white">{day ? `J${day}` : '●'}</span>
       <div className="flex min-w-0 flex-col gap-0.5">
-        <span className="truncate text-[17px] font-bold">{place ? `Près de ${place}` : 'Dernière position'}{live ? '' : ` · ${formatRelative(crew.last_fix_at)}`}</span>
-        <span className="font-mono text-[13px] text-dust-700">
+        <span className="truncate text-[1rem] font-bold">{place ? `Près de ${place}` : 'Dernière position'}{live ? '' : ` · ${formatRelative(crew.last_fix_at)}`}</span>
+        <span className="font-mono text-[0.7647rem] text-dust-700">
           {coordLabel(crew.last_lat, crew.last_lon)}{live && crew.last_speed_kmh != null ? ` · ${Math.round(crew.last_speed_kmh)} km/h` : ''}
         </span>
       </div>
@@ -40,9 +40,9 @@ export function PlaceCard({ crew, place, day }: { crew: Crew; place: string | nu
 function Tile({ label, value, unit }: { label: string; value: string; unit?: string }) {
   return (
     <div className="flex flex-col gap-1 rounded-[20px] bg-ink-800 px-4 py-3.5">
-      <dt className="font-mono text-[12px] uppercase tracking-[0.1em] text-dust-400">{label}</dt>
-      <dd className="m-0 whitespace-nowrap font-mono text-[26px] text-cream">
-        {value}{unit && <span className="text-[14px] text-dust-400"> {unit}</span>}
+      <dt className="font-mono text-[0.7059rem] uppercase tracking-[0.1em] text-dust-400">{label}</dt>
+      <dd className="m-0 whitespace-nowrap font-mono text-[1.5294rem] text-cream">
+        {value}{unit && <span className="text-[0.8235rem] text-dust-400"> {unit}</span>}
       </dd>
     </div>
   );
@@ -63,10 +63,10 @@ function MiniProfile({ profile, from, to }: { profile: AltPoint[]; from: string;
   return (
     <div className="flex flex-col gap-2.5 rounded-[20px] bg-ink-800 p-4">
       <div className="flex items-baseline justify-between">
-        <span className="text-[17px] font-bold">Profil d’altitude</span>
-        <span className="font-mono text-[13px] text-dust-400">max {formatNumber(climb.max)} m</span>
+        <span className="text-[1rem] font-bold">Profil d’altitude</span>
+        <span className="font-mono text-[0.7647rem] text-dust-400">max {formatNumber(climb.max)} m</span>
       </div>
-      <div className="relative h-[110px]">
+      <div className="relative h-[6.4706rem]">
         <svg viewBox="0 0 300 110" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" role="img"
           aria-label={`Profil d’altitude : point le plus haut à ${formatNumber(climb.max)} mètres, dénivelé positif de ${formatNumber(climb.up)} mètres`}>
           <path d={`${d} L300,110 L0,110 Z`} fill="rgba(225,38,44,.2)" />
@@ -74,7 +74,7 @@ function MiniProfile({ profile, from, to }: { profile: AltPoint[]; from: string;
           <circle cx={x(last.km)} cy={y(last.alt)} r="5" fill="#E1262C" stroke="#fff" strokeWidth="2" />
         </svg>
       </div>
-      <div className="flex justify-between font-mono text-[12px] text-dust-400"><span>{from}</span><span>{to}</span></div>
+      <div className="flex justify-between font-mono text-[0.7059rem] text-dust-400"><span>{from}</span><span>{to}</span></div>
     </div>
   );
 }
@@ -119,7 +119,7 @@ export function TripDashboard({ crew, stats, telemetry: t, profile, day, total, 
         {tiles.map((x) => <Tile key={x.label} {...x} />)}
       </dl>
       {extras.length > 0 && (
-        <p className={cn('m-0 px-1 font-mono text-[12px] text-dust-400', t?.battery != null && t.battery < 20 && 'text-signal-text')}>
+        <p className={cn('m-0 px-1 font-mono text-[0.7059rem] text-dust-400', t?.battery != null && t.battery < 20 && 'text-signal-text')}>
           {extras.join(' · ')}{t?.battery != null && t.battery < 20 ? ' · batterie faible, le suivi peut s’interrompre' : ''}
         </p>
       )}

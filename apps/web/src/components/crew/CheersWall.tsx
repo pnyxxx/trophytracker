@@ -54,8 +54,8 @@ export function CheersWall({ crewId, canEdit, isDemo }: { crewId: string; canEdi
 
   return (
     <div className="flex flex-col gap-3.5 rounded-[28px] bg-ink-800 p-6">
-      <span className="font-mono text-[13px] text-dust-400">mur d’encouragements{cheers.length ? ` · ${cheers.length}` : ''}</span>
-      <span className="tt-display text-[26px] leading-[1.1] text-cream">Laisse un mot aux voyageurs, ils le liront au bivouac.</span>
+      <span className="font-mono text-[0.7647rem] text-dust-400">mur d’encouragements{cheers.length ? ` · ${cheers.length}` : ''}</span>
+      <span className="tt-display text-[1.5294rem] leading-[1.1] text-cream">Laisse un mot aux voyageurs, ils le liront au bivouac.</span>
       {!isDemo && (
         <form onSubmit={(e: FormEvent) => { e.preventDefault(); post.mutate(); }} className="flex flex-col gap-2">
           <Input aria-label="Ton prénom" placeholder="Ton prénom" maxLength={40} required value={name} onChange={(e) => setName(e.target.value)} />
@@ -66,12 +66,12 @@ export function CheersWall({ crewId, canEdit, isDemo }: { crewId: string; canEdi
         </form>
       )}
       {cheers.length > 0 ? (
-        <ul className="m-0 flex max-h-[360px] list-none flex-col gap-2 overflow-y-auto p-0">
+        <ul className="m-0 flex max-h-[21.1765rem] list-none flex-col gap-2 overflow-y-auto p-0">
           {cheers.map((c) => (
             <li key={c.id} className="flex gap-3 rounded-2xl bg-ink px-4 py-3">
               <span className="flex min-w-0 flex-1 flex-col gap-1">
-                <span className="text-[16px] leading-snug text-cream [overflow-wrap:anywhere]">{c.message}</span>
-                <span className="font-mono text-[12px] text-dust-400">{c.author_name} · {formatRelative(c.created_at)}</span>
+                <span className="text-[0.9412rem] leading-snug text-cream [overflow-wrap:anywhere]">{c.message}</span>
+                <span className="font-mono text-[0.7059rem] text-dust-400">{c.author_name} · {formatRelative(c.created_at)}</span>
               </span>
               {canEdit && (
                 <button type="button" onClick={() => { if (confirm('Retirer ce message du mur ?')) remove.mutate(c.id); }} aria-label={`Retirer le message de ${c.author_name}`}
@@ -83,7 +83,7 @@ export function CheersWall({ crewId, canEdit, isDemo }: { crewId: string; canEdi
           ))}
         </ul>
       ) : (
-        <p className="m-0 text-[15px] text-dust-400">{isDemo ? 'Sur un vrai road trip, les proches laissent leurs mots ici.' : 'Sois le premier à leur souhaiter bonne route !'}</p>
+        <p className="m-0 text-[0.8824rem] text-dust-400">{isDemo ? 'Sur un vrai road trip, les proches laissent leurs mots ici.' : 'Sois le premier à leur souhaiter bonne route !'}</p>
       )}
     </div>
   );

@@ -106,15 +106,15 @@ export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl
               className={cn('flex flex-col gap-0.5 rounded-2xl border-2 px-4 py-3 text-left transition-colors',
                 format === f.id ? 'border-signal bg-signal/10' : 'border-ink-600 hover:border-dust-600')}
             >
-              <span className="text-[17px] font-bold text-cream">{f.label}</span>
-              <span className="text-[14px] text-dust-300">{f.hint}</span>
+              <span className="text-[1rem] font-bold text-cream">{f.label}</span>
+              <span className="text-[0.8235rem] text-dust-300">{f.hint}</span>
             </button>
           ))}
         </div>
 
-        {showUrl && <p className="m-0 break-all font-mono text-[13px] text-dust-400">Le QR code ouvre : {pageUrl}</p>}
+        {showUrl && <p className="m-0 break-all font-mono text-[0.7647rem] text-dust-400">Le QR code ouvre : {pageUrl}</p>}
         {!crew.is_public && (
-          <p className="m-0 rounded-2xl border border-gold/40 bg-gold/10 px-3 py-2 text-[14px] text-gold-text">
+          <p className="m-0 rounded-2xl border border-gold/40 bg-gold/10 px-3 py-2 text-[0.8235rem] text-gold-text">
             Ta page est réservée aux voyageurs : le QR code ne marchera que pour toi et tes compagnons de route. Rends-la « privée, par lien » dans les réglages avant de l’imprimer.
           </p>
         )}
@@ -131,7 +131,7 @@ export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl
             </Button>
           )}
         </div>
-        <p className="m-0 text-[13px] text-dust-500">
+        <p className="m-0 text-[0.7647rem] text-dust-500">
           Astuce impression : pour un autocollant extérieur, choisis un vinyle mat laminé ; à 12 cm, le QR se scanne à plus d’un mètre.
         </p>
       </div>

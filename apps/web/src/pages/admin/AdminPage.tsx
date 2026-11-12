@@ -53,7 +53,7 @@ function useTrips() {
 
 function StatusPill({ s }: { s: Status }) {
   return (
-    <span className={cn('inline-flex items-center gap-2 whitespace-nowrap rounded-full px-3 py-1 font-mono text-[13px]', STATUS[s].cls)}>
+    <span className={cn('inline-flex items-center gap-2 whitespace-nowrap rounded-full px-3 py-1 font-mono text-[0.7647rem]', STATUS[s].cls)}>
       <span className={cn('h-2 w-2 rounded-full', STATUS[s].dot)} />{STATUS[s].label}
     </span>
   );
@@ -63,7 +63,7 @@ function Card({ title, aside, children, className }: { title: string; aside?: Re
   return (
     <section className={cn('flex flex-col gap-3.5 rounded-[24px] bg-ink-800 p-5', className)}>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="tt-display m-0 text-[22px] text-cream">{title}</h2>
+        <h2 className="tt-display m-0 text-[1.2941rem] text-cream">{title}</h2>
         {aside}
       </div>
       {children}
@@ -76,8 +76,8 @@ function TripsTable({ trips, filter }: { trips: TripRow[]; filter: Status | 'all
   if (!rows.length) return <p className="m-0 text-dust-400">Aucun road trip dans cette catégorie.</p>;
   return (
     <div className="-mx-1 overflow-x-auto">
-      <table className="w-full min-w-[640px] border-collapse text-left text-[15px]">
-        <thead className="font-mono text-[12px] uppercase tracking-[0.1em] text-dust-400">
+      <table className="w-full min-w-[37.6471rem] border-collapse text-left text-[0.8824rem]">
+        <thead className="font-mono text-[0.7059rem] uppercase tracking-[0.1em] text-dust-400">
           <tr><th className="px-1 py-2 font-normal">Road trip</th><th className="font-normal">Statut</th><th className="font-normal">Véhicule</th><th className="font-normal">Dernier point</th><th className="text-right font-normal">Km</th></tr>
         </thead>
         <tbody>
@@ -86,12 +86,12 @@ function TripsTable({ trips, filter }: { trips: TripRow[]; filter: Status | 'all
               <td className="px-1 py-3">
                 <Link to={`/road-trip/${t.slug}`} className="flex flex-col text-cream hover:text-cream">
                   <span className="font-bold hover:underline">{t.name}{t.is_demo ? ' · exemple' : ''}</span>
-                  <span className="text-[14px] text-dust-400">{t.owner_name ?? '—'}{t.owner_email ? ` · ${t.owner_email}` : ''}</span>
+                  <span className="text-[0.8235rem] text-dust-400">{t.owner_name ?? '—'}{t.owner_email ? ` · ${t.owner_email}` : ''}</span>
                 </Link>
               </td>
               <td><StatusPill s={statusOf(t)} /></td>
               <td className="font-mono text-dust-200">1{t.has_device_key || t.traccar_device_id ? '' : ' · sans GPS'}</td>
-              <td className="font-mono text-[14px] text-dust-300">{t.last_fix_at ? formatRelative(t.last_fix_at) : t.starts_on ? `départ ${formatDate(t.starts_on)}` : '—'}</td>
+              <td className="font-mono text-[0.8235rem] text-dust-300">{t.last_fix_at ? formatRelative(t.last_fix_at) : t.starts_on ? `départ ${formatDate(t.starts_on)}` : '—'}</td>
               <td className="text-right font-mono text-dust-100">{formatNumber(t.total_distance_m / 1000)}</td>
             </tr>
           ))}
@@ -126,10 +126,10 @@ function Overview() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-1.5">
-          <span className="font-mono text-[14px] text-dust-400">{new Date().toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}</span>
-          <h1 className="tt-display m-0 text-[clamp(36px,4.5vw,60px)] leading-none text-cream">Vue d’ensemble</h1>
+          <span className="font-mono text-[0.8235rem] text-dust-400">{new Date().toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}</span>
+          <h1 className="tt-display m-0 text-[clamp(2.1176rem,3.69vw,3.5294rem)] leading-none text-cream">Vue d’ensemble</h1>
         </div>
-        <span className={cn('inline-flex items-center gap-2 rounded-full px-3.5 py-2 font-mono text-[14px]', gpsOk ? 'bg-live/[0.16] text-live-text' : 'bg-gold/[0.16] text-gold-text')}>
+        <span className={cn('inline-flex items-center gap-2 rounded-full px-3.5 py-2 font-mono text-[0.8235rem]', gpsOk ? 'bg-live/[0.16] text-live-text' : 'bg-gold/[0.16] text-gold-text')}>
           <span className={cn('h-2 w-2 rounded-full', gpsOk ? 'bg-live' : 'bg-gold')} />
           {d?.last_position_at ? `réception GPS · dernier point ${formatRelative(d.last_position_at)}` : 'aucun point GPS reçu'}
         </span>
@@ -138,9 +138,9 @@ function Overview() {
       <dl className="m-0 grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-5">
         {kpis.map((k) => (
           <div key={k.l} className="flex flex-col gap-1 rounded-[20px] bg-ink-800 px-4 py-3.5">
-            <dt className="font-mono text-[12px] uppercase tracking-[0.1em] text-dust-400">{k.l}</dt>
-            <dd className="m-0 font-mono text-[30px] text-cream">{k.v}</dd>
-            <span className="text-[13px] text-dust-400">{k.dsc}</span>
+            <dt className="font-mono text-[0.7059rem] uppercase tracking-[0.1em] text-dust-400">{k.l}</dt>
+            <dd className="m-0 font-mono text-[1.7647rem] text-cream">{k.v}</dd>
+            <span className="text-[0.7647rem] text-dust-400">{k.dsc}</span>
           </div>
         ))}
       </dl>
@@ -152,7 +152,7 @@ function Overview() {
             <div className="flex max-w-full gap-1 overflow-x-auto rounded-full bg-ink p-1" role="group" aria-label="Filtrer">
               {([['all', 'Tous'], ['live', 'En direct'], ['off', 'Hors réseau'], ['prep', 'Préparation'], ['done', 'Terminés']] as const).map(([k, label]) => (
                 <button key={k} type="button" aria-pressed={filter === k} onClick={() => setFilter(k)}
-                  className={cn('min-h-9 flex-none whitespace-nowrap rounded-full px-3 text-[14px] font-bold', filter === k ? 'bg-cream text-ink' : 'text-dust-200 hover:text-white')}>{label}</button>
+                  className={cn('min-h-9 flex-none whitespace-nowrap rounded-full px-3 text-[0.8235rem] font-bold', filter === k ? 'bg-cream text-ink' : 'text-dust-200 hover:text-white')}>{label}</button>
               ))}
             </div>
           }
@@ -162,31 +162,31 @@ function Overview() {
 
         <div className="flex flex-col gap-4">
           <Card title="Points GPS reçus · 24 h">
-            <div className="flex h-[110px] items-end gap-[3px]" role="img" aria-label={`Points reçus par heure sur 24 heures, au plus ${max} en une heure`}>
+            <div className="flex h-[6.4706rem] items-end gap-[0.1765rem]" role="img" aria-label={`Points reçus par heure sur 24 heures, au plus ${max} en une heure`}>
               {(d?.hourly ?? Array(24).fill(0)).map((n, i) => (
                 <span key={i} className={cn('flex-1 rounded-t-[3px]', i === 23 ? 'bg-signal' : 'bg-signal/45')} style={{ height: `${Math.max(3, (n / max) * 100)}%` }} title={`${n} points`} />
               ))}
             </div>
-            <div className="flex justify-between font-mono text-[12px] text-dust-400"><span>il y a 24 h</span><span>maintenant</span></div>
+            <div className="flex justify-between font-mono text-[0.7059rem] text-dust-400"><span>il y a 24 h</span><span>maintenant</span></div>
           </Card>
           <Card title="À traiter">
-            {!d?.todo.length ? <p className="m-0 text-[15px] text-dust-400">Rien à signaler.</p> : (
+            {!d?.todo.length ? <p className="m-0 text-[0.8824rem] text-dust-400">Rien à signaler.</p> : (
               <ul className="m-0 flex list-none flex-col gap-2 p-0">
                 {d.todo.slice(0, 8).map((t, i) => (
                   <li key={i} className="flex items-center gap-3 rounded-2xl bg-ink px-3.5 py-3">
                     <span className={cn('h-2.5 w-2.5 flex-none rounded-full', t.level === '1' ? 'bg-signal' : t.level === '2' ? 'bg-gold' : 'bg-dust-400')} />
                     <span className="flex min-w-0 flex-1 flex-col">
                       <span className="truncate font-bold text-cream">{t.name}</span>
-                      <span className="text-[14px] text-dust-400">{t.text}</span>
+                      <span className="text-[0.8235rem] text-dust-400">{t.text}</span>
                     </span>
-                    {t.slug && <Link to={`/road-trip/${t.slug}`} className="whitespace-nowrap text-[14px] font-bold text-signal-text hover:text-cream">Voir</Link>}
+                    {t.slug && <Link to={`/road-trip/${t.slug}`} className="whitespace-nowrap text-[0.8235rem] font-bold text-signal-text hover:text-cream">Voir</Link>}
                   </li>
                 ))}
               </ul>
             )}
           </Card>
           <Card title="Services">
-            <dl className="m-0 flex flex-col gap-2 text-[15px]">
+            <dl className="m-0 flex flex-col gap-2 text-[0.8824rem]">
               {[
                 ['Base de données', d ? 'opérationnelle' : '…', !!d],
                 ['Réception GPS', d?.last_position_at ? `dernier point ${formatRelative(d.last_position_at)}` : 'aucun point', gpsOk],
@@ -195,7 +195,7 @@ function Overview() {
               ].map(([n, v, ok]) => (
                 <div key={String(n)} className="flex items-center justify-between gap-3 rounded-2xl bg-ink px-3.5 py-2.5">
                   <dt className="text-dust-200">{n}</dt>
-                  <dd className={cn('m-0 text-right font-mono text-[13px]', ok ? 'text-live-text' : 'text-gold-text')}>{v}</dd>
+                  <dd className={cn('m-0 text-right font-mono text-[0.7647rem]', ok ? 'text-live-text' : 'text-gold-text')}>{v}</dd>
                 </div>
               ))}
             </dl>
@@ -222,20 +222,20 @@ function CrewsAdmin() {
   return (
     <Panel title={`Road trips (${data.length})`} description="Associe un road trip à un appareil du serveur Traccar (identifiant, id numérique ou nom) s'il voyage avec un boîtier GPS.">
       <div className="-mx-1 overflow-x-auto">
-        <table className="w-full min-w-[720px] text-left text-[15px]">
-          <thead className="font-mono text-[12px] uppercase tracking-[0.1em] text-dust-400">
-            <tr><th className="px-1 py-2 font-normal">Road trip</th><th className="font-normal">Statut</th><th className="font-normal">Abonnés</th><th className="font-normal">Téléphone</th><th className="min-w-[260px] font-normal">Appareil Traccar</th></tr>
+        <table className="w-full min-w-[42.3529rem] text-left text-[0.8824rem]">
+          <thead className="font-mono text-[0.7059rem] uppercase tracking-[0.1em] text-dust-400">
+            <tr><th className="px-1 py-2 font-normal">Road trip</th><th className="font-normal">Statut</th><th className="font-normal">Abonnés</th><th className="font-normal">Téléphone</th><th className="min-w-[15.2941rem] font-normal">Appareil Traccar</th></tr>
           </thead>
           <tbody>
             {data.map((c) => (
               <tr key={c.id} className="border-t-[1.5px] border-ink-700">
                 <td className="px-1 py-3 pr-4">
                   <Link to={`/road-trip/${c.slug}`} className="font-bold text-cream hover:underline">{c.name}</Link>
-                  <p className="m-0 text-[13px] text-dust-500">{c.owner_email ?? '—'} · {!c.is_public ? 'voyageurs seulement' : c.is_listed ? 'public' : 'par lien'}</p>
+                  <p className="m-0 text-[0.7647rem] text-dust-500">{c.owner_email ?? '—'} · {!c.is_public ? 'voyageurs seulement' : c.is_listed ? 'public' : 'par lien'}</p>
                 </td>
                 <td className="pr-4"><StatusPill s={statusOf(c)} /></td>
                 <td className="pr-4 font-mono text-dust-200">{c.followers_count}</td>
-                <td className="pr-4 font-mono text-[13px] text-dust-300">{c.has_device_key ? 'relié' : '—'}</td>
+                <td className="pr-4 font-mono text-[0.7647rem] text-dust-300">{c.has_device_key ? 'relié' : '—'}</td>
                 <td>
                   <form className="flex gap-2" onSubmit={(e: FormEvent) => { e.preventDefault(); setDevice.mutate({ crewId: c.id, device: devices[c.id] ?? c.traccar_device_id ?? '' }); }}>
                     <Input className="min-h-11" placeholder="Aucun" value={devices[c.id] ?? c.traccar_device_id ?? ''} onChange={(e) => setDevices({ ...devices, [c.id]: e.target.value })} aria-label={`Appareil Traccar de ${c.name}`} />
@@ -270,7 +270,7 @@ function PurchasesAdmin() {
         {isLoading ? <Spinner /> : !data.length ? <p className="m-0 text-dust-300">Aucun achat pour l’instant.</p> : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="font-mono text-[11px] uppercase tracking-[0.14em] text-dust-400">
+              <thead className="font-mono text-[0.6471rem] uppercase tracking-[0.14em] text-dust-400">
                 <tr><th className="py-2">Date</th><th>Compte</th><th>Montant</th><th>Statut</th><th>Road trip</th></tr>
               </thead>
               <tbody className="divide-y divide-cream/10">
@@ -343,7 +343,7 @@ function AccessCodesAdmin() {
   const grant = useMutation({
     mutationFn: async () => unwrap(await supabase.rpc('admin_grant_crew_access', { p_email: email.trim() })),
     onSuccess: () => {
-      toast.success('Accès offert : la personne peut créer son road trip (« Créer mon trip »)');
+      toast.success('Accès offert : la personne peut créer son road trip (« Créer mon road trip »)');
       setEmail('');
       refresh();
     },
@@ -358,7 +358,7 @@ function AccessCodesAdmin() {
     <div className="space-y-6">
       <Panel
         title="Générer un code"
-        description={<>La personne le saisit à l’étape « Accès » du parcours <strong className="text-cream">Créer mon trip</strong> et crée son road trip sans payer.</>}
+        description={<>La personne le saisit à l’étape « Accès » du parcours <strong className="text-cream">Créer mon road trip</strong> et crée son road trip sans payer.</>}
       >
         <form className="grid gap-4 md:grid-cols-[minmax(0,1fr)_140px_180px_auto] md:items-end" onSubmit={(e: FormEvent) => { e.preventDefault(); create.mutate(); }}>
           <Field id="code-note" label="Pour qui ? (note)">
@@ -376,7 +376,7 @@ function AccessCodesAdmin() {
           <div className="mt-5 flex flex-wrap items-center gap-4 border-l-[3px] border-live bg-live/[0.06] p-4">
             <span className="font-mono text-2xl font-bold tracking-[0.08em] text-cream">{created}</span>
             <Button size="sm" variant="secondary" onClick={() => copy(created)}><Copy />Copier</Button>
-            <span className="text-xs text-dust-300">À envoyer à la personne : elle le saisit à l’étape « Accès » de « Créer mon trip ».</span>
+            <span className="text-xs text-dust-300">À envoyer à la personne : elle le saisit à l’étape « Accès » de « Créer mon road trip ».</span>
           </div>
         )}
       </Panel>
@@ -385,7 +385,7 @@ function AccessCodesAdmin() {
         {isLoading ? <Spinner /> : !data.length ? <p className="m-0 text-dust-300">Aucun code pour l’instant.</p> : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="font-mono text-[11px] uppercase tracking-[0.14em] text-dust-400">
+              <thead className="font-mono text-[0.6471rem] uppercase tracking-[0.14em] text-dust-400">
                 <tr><th className="py-2">Code</th><th>Note</th><th>Utilisé</th><th>Jusqu’au</th><th>État</th><th /></tr>
               </thead>
               <tbody className="divide-y divide-cream/10">
@@ -458,7 +458,7 @@ function UsersAdmin() {
           {data.map((u) => (
             <li key={u.id} className="flex flex-wrap items-center gap-3 py-3">
               <div className="min-w-0 flex-1">
-                <p className="m-0 font-bold text-cream">{u.display_name} {u.role === 'admin' && <span className="ml-1 rounded-full bg-signal px-2 py-0.5 font-mono text-[11px] text-white">admin</span>}</p>
+                <p className="m-0 font-bold text-cream">{u.display_name} {u.role === 'admin' && <span className="ml-1 rounded-full bg-signal px-2 py-0.5 font-mono text-[0.6471rem] text-white">admin</span>}</p>
                 <p className="truncate text-xs text-dust-400">{u.email} · inscrit {formatRelative(u.created_at)} · vu {formatRelative(u.last_sign_in_at)}</p>
               </div>
               {u.id !== user?.id && (
@@ -493,24 +493,24 @@ export default function AdminPage() {
   const go = (s: AdminSection) => { setParams(s === 'vue' ? {} : { section: s }, { replace: true }); window.scrollTo(0, 0); };
   const nav = (mobile: boolean) => SECTIONS.map((x) => (
     <button key={x.id} type="button" onClick={() => go(x.id)} aria-current={section === x.id ? 'page' : undefined}
-      className={cn('font-bold', mobile ? 'min-h-11 flex-none whitespace-nowrap rounded-full px-4 text-[15px]' : 'min-h-[44px] rounded-[14px] px-3 text-left text-[16px]',
+      className={cn('font-bold', mobile ? 'min-h-11 flex-none whitespace-nowrap rounded-full px-4 text-[0.8824rem]' : 'min-h-[2.5882rem] rounded-[14px] px-3 text-left text-[0.9412rem]',
         section === x.id ? 'bg-signal text-white' : mobile ? 'bg-ink-800 text-dust-100' : 'text-dust-100 hover:bg-ink-800 hover:text-white')}>
       {x.label}
     </button>
   ));
 
   return (
-    <div className="min-h-screen bg-ink text-cream lg:grid lg:grid-cols-[230px_minmax(0,1fr)]">
+    <div className="tt-dunes min-h-screen text-cream lg:grid lg:grid-cols-[230px_minmax(0,1fr)]">
       <Seo title="Administration" noindex />
-      <aside className="sticky top-0 hidden h-screen flex-col gap-5 border-r-[1.5px] border-ink-700 bg-ink-900 px-3.5 py-5 lg:flex">
-        <Link to="/" aria-label="trophytracker, accueil" className="flex items-center gap-[9px] px-2 text-cream hover:text-cream"><LogoMark /><Wordmark /></Link>
-        <span className="px-3 font-mono text-[13px] text-signal-text">admin</span>
+      <aside className="sticky top-0 hidden h-screen flex-col gap-5 border-r-[1.5px] border-cream/[0.08] bg-ink-900/70 px-3.5 py-5 backdrop-blur-xl lg:flex">
+        <Link to="/" aria-label="trophytracker, accueil" className="flex items-center gap-[0.5294rem] px-2 text-cream hover:text-cream"><LogoMark /><Wordmark /></Link>
+        <span className="px-3 font-mono text-[0.7647rem] text-signal-text">admin</span>
         <nav aria-label="Administration" className="flex flex-col gap-1">{nav(false)}</nav>
-        <p className="mt-auto px-3 text-[13px] leading-relaxed text-dust-500">Opérations avancées : Supabase Studio (docs/ADMINISTRATION.md).</p>
-        <Link to="/mon-compte" className="px-3 text-[14px] font-bold text-dust-300 hover:text-white">← Mon compte</Link>
+        <p className="mt-auto px-3 text-[0.7647rem] leading-relaxed text-dust-500">Opérations avancées : Supabase Studio (docs/ADMINISTRATION.md).</p>
+        <Link to="/mon-compte" className="px-3 text-[0.8235rem] font-bold text-dust-300 hover:text-white">← Mon compte</Link>
       </aside>
       <div className="sticky top-0 z-[900] flex flex-col gap-2.5 border-b-[1.5px] border-ink-700 bg-ink/[0.94] px-4 py-3 backdrop-blur-[14px] lg:hidden">
-        <div className="flex items-center gap-2.5"><Link to="/" aria-label="trophytracker, accueil"><LogoMark /></Link><span className="font-mono text-[13px] text-signal-text">admin</span></div>
+        <div className="flex items-center gap-2.5"><Link to="/" aria-label="trophytracker, accueil"><LogoMark /></Link><span className="font-mono text-[0.7647rem] text-signal-text">admin</span></div>
         <nav aria-label="Administration" className="-mx-4 flex gap-1.5 overflow-x-auto px-4">{nav(true)}</nav>
       </div>
       <main id="contenu" className="min-w-0 px-4 py-6 lg:px-9 lg:py-8">

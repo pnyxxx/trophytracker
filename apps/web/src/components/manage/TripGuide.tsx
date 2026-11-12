@@ -39,7 +39,7 @@ export function ProgressRing({ value, size = 72 }: { value: number; size?: numbe
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#2B2C33" strokeWidth="8" />
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#E1262C" strokeWidth="8" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - value)} className="transition-[stroke-dashoffset] duration-700" />
       </svg>
-      <span className="absolute inset-0 flex items-center justify-center font-mono text-[16px] text-cream">{Math.round(value * 100)} %</span>
+      <span className="absolute inset-0 flex items-center justify-center font-mono text-[0.9412rem] text-cream">{Math.round(value * 100)} %</span>
     </div>
   );
 }
@@ -61,7 +61,7 @@ function TripBasics({ crew }: { crew: Crew }) {
     onError: toastError,
   });
   return (
-    <form onSubmit={(e: FormEvent) => { e.preventDefault(); save.mutate(); }} className="flex flex-col gap-4 rounded-[28px] bg-ink-800 p-5 sm:p-[22px]">
+    <form onSubmit={(e: FormEvent) => { e.preventDefault(); save.mutate(); }} className="flex flex-col gap-4 rounded-[28px] bg-ink-800 p-5 sm:p-[1.2941rem]">
       <Field id="g-name" label="Nom du road trip"><Input id="g-name" required minLength={2} maxLength={80} value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></Field>
       <Field id="g-tagline" label="Une phrase d’accroche" hint="Facultatif, affichée sous le nom."><Input id="g-tagline" maxLength={140} value={f.tagline} onChange={(e) => setF({ ...f, tagline: e.target.value })} /></Field>
       <div className="grid grid-cols-2 gap-2.5">
@@ -78,7 +78,7 @@ function TripBasics({ crew }: { crew: Crew }) {
           <button key={v.id} type="button" role="radio" aria-checked={v.on} onClick={() => setF({ ...f, ...v.set })}
             className={cn('flex flex-col rounded-2xl border-2 px-4 py-3 text-left', v.on ? 'border-signal bg-signal/10' : 'border-ink-600 bg-ink hover:border-dust-600')}>
             <span className="font-bold text-cream">{v.title}</span>
-            <span className="text-[15px] text-dust-400">{v.text}</span>
+            <span className="text-[0.8824rem] text-dust-400">{v.text}</span>
           </button>
         ))}
       </div>
@@ -97,7 +97,7 @@ function FundraiserForm({ crew }: { crew: Crew }) {
     onError: toastError,
   });
   return (
-    <form onSubmit={(e: FormEvent) => { e.preventDefault(); save.mutate(); }} className="flex flex-col gap-3 rounded-[28px] bg-ink-800 p-5 sm:p-[22px]">
+    <form onSubmit={(e: FormEvent) => { e.preventDefault(); save.mutate(); }} className="flex flex-col gap-3 rounded-[28px] bg-ink-800 p-5 sm:p-[1.2941rem]">
       <Field id="g-fund" label="Lien de la cagnotte" hint="Un bouton « Participer » mène vers ta cagnotte (aucun montant n’est affiché sur la page).">
         <Input id="g-fund" inputMode="url" maxLength={300} placeholder="https://www.helloasso.com/…" value={url} onChange={(e) => setUrl(e.target.value)} />
       </Field>
@@ -131,19 +131,19 @@ function InviteRelatives({ crew }: { crew: Crew }) {
     onError: toastError,
   });
   return (
-    <div className="flex flex-col gap-3.5 rounded-[28px] bg-ink-800 p-5 sm:p-[22px]">
-      <h3 className="tt-display m-0 text-[24px] text-cream">Inviter des proches par e-mail</h3>
-      <p className="m-0 text-[15px] leading-relaxed text-dust-300">
+    <div className="flex flex-col gap-3.5 rounded-[28px] bg-ink-800 p-5 sm:p-[1.2941rem]">
+      <h3 className="tt-display m-0 text-[1.4118rem] text-cream">Inviter des proches par e-mail</h3>
+      <p className="m-0 text-[0.8824rem] leading-relaxed text-dust-300">
         Ils reçoivent le lien, puis un e-mail « C’est parti » quand tu appuies sur « Je pars », et un résumé chaque soir de route.
         Pas de compte à créer ; un clic suffit pour se désinscrire.
       </p>
       {!crew.is_public ? (
-        <p className="m-0 text-[15px] text-gold-text">Ta page est réservée aux voyageurs : rends-la « privée, par lien » dans les réglages pour inviter des proches.</p>
+        <p className="m-0 text-[0.8824rem] text-gold-text">Ta page est réservée aux voyageurs : rends-la « privée, par lien » dans les réglages pour inviter des proches.</p>
       ) : (
         <form onSubmit={(e: FormEvent) => { e.preventDefault(); invite.mutate(); }} className="flex flex-col gap-2.5">
-          <label htmlFor="relatives" className="text-[16px] font-bold">Leurs adresses e-mail</label>
+          <label htmlFor="relatives" className="text-[0.9412rem] font-bold">Leurs adresses e-mail</label>
           <textarea id="relatives" rows={3} value={text} onChange={(e) => setText(e.target.value)} placeholder="mamie@exemple.fr, papa@exemple.fr"
-            className="min-h-[96px] w-full rounded-2xl border-2 border-ink-600 bg-ink px-4 py-3 text-[17px] text-cream placeholder:text-dust-600 hover:border-dust-600 focus-visible:border-cream focus-visible:outline-none" />
+            className="min-h-[5.6471rem] w-full rounded-2xl border-2 border-ink-600 bg-ink px-4 py-3 text-[1rem] text-cream placeholder:text-dust-600 hover:border-dust-600 focus-visible:border-cream focus-visible:outline-none" />
           <Button type="submit" className="self-start" disabled={!emails.length || invite.isPending}>
             {invite.isPending ? 'Envoi…' : `Envoyer ${emails.length > 1 ? `${emails.length} invitations` : 'l’invitation'}`}
           </Button>
@@ -153,9 +153,9 @@ function InviteRelatives({ crew }: { crew: Crew }) {
         <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
           {subscribers.map((x) => (
             <li key={x.id} className="flex items-center justify-between gap-3 rounded-2xl bg-ink px-3.5 py-2.5">
-              <span className="min-w-0 truncate text-[15px] text-cream">{x.email}</span>
+              <span className="min-w-0 truncate text-[0.8824rem] text-cream">{x.email}</span>
               <span className="flex items-center gap-2">
-                <span className={cn('font-mono text-[12px]', x.unsubscribed_at ? 'text-dust-500' : 'text-live-text')}>{x.unsubscribed_at ? 'désinscrit' : 'invité'}</span>
+                <span className={cn('font-mono text-[0.7059rem]', x.unsubscribed_at ? 'text-dust-500' : 'text-live-text')}>{x.unsubscribed_at ? 'désinscrit' : 'invité'}</span>
                 <Button size="sm" variant="ghost" aria-label={`Retirer ${x.email}`} onClick={() => remove.mutate(x.id)}>Retirer</Button>
               </span>
             </li>
@@ -183,18 +183,18 @@ export function SharePanel({ crew }: { crew: Crew }) {
   const mail = `mailto:?subject=${encodeURIComponent(`Suivez « ${crew.name} » en direct`)}&body=${encodeURIComponent(`Bonjour !\n\nVous pourrez suivre notre road trip en direct sur cette page : ${url}\n\nPas besoin de compte ni d’application : il suffit d’ouvrir le lien.`)}`;
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-3.5 rounded-[28px] bg-cream p-5 text-ink sm:p-[22px]">
-        <span className="text-[18px] font-bold">Ton lien privé</span>
-        <span className="break-all font-mono text-[14px]">{url.replace(/^https?:\/\//, '')}</span>
+      <div className="flex flex-col gap-3.5 rounded-[28px] bg-cream p-5 text-ink sm:p-[1.2941rem]">
+        <span className="text-[1.0588rem] font-bold">Ton lien privé</span>
+        <span className="break-all font-mono text-[0.8235rem]">{url.replace(/^https?:\/\//, '')}</span>
         <div className="flex flex-wrap gap-2">
           <Button onClick={copy}><Copy />{copied ? 'Lien copié ✓' : 'Copier le lien'}</Button>
           <Button asChild variant="outline" className="border-ink text-ink hover:bg-ink/10 hover:text-ink"><a href={mail} onClick={() => markShared(crew.id)}>E-mail aux proches</a></Button>
         </div>
-        <span className="text-[15px] text-dust-800">Personne n’a besoin de compte pour suivre le voyage.</span>
+        <span className="text-[0.8824rem] text-dust-800">Personne n’a besoin de compte pour suivre le voyage.</span>
       </div>
       <InviteRelatives crew={crew} />
-      <div className="rounded-[28px] bg-ink-800 p-5 sm:p-[22px]">
-        <h3 className="tt-display m-0 mb-4 text-[24px] text-cream">Autocollant et story</h3>
+      <div className="rounded-[28px] bg-ink-800 p-5 sm:p-[1.2941rem]">
+        <h3 className="tt-display m-0 mb-4 text-[1.4118rem] text-cream">Autocollant et story</h3>
         <CrewQrPanel crew={crew} showUrl={false} />
       </div>
     </div>
@@ -215,17 +215,17 @@ function GoButton({ crew, fairPlayOk, onNeedGps }: { crew: Crew; fairPlayOk: boo
   if (crew.tracking_enabled) {
     return (
       <div className="flex flex-col gap-3 rounded-[28px] bg-live/[0.14] p-6 text-live-text">
-        <span className="font-mono text-[13px]">c’est parti</span>
-        <span className="tt-display text-[30px] leading-none text-cream">Le suivi est lancé. Bonne route !</span>
+        <span className="font-mono text-[0.7647rem]">c’est parti</span>
+        <span className="tt-display text-[1.7647rem] leading-none text-cream">Le suivi est lancé. Bonne route !</span>
         <Button asChild variant="secondary" className="self-start"><Link to={`/road-trip/${crew.slug}`}>Voir ma page en direct</Link></Button>
       </div>
     );
   }
   return (
     <div className="flex flex-col gap-3 rounded-[28px] bg-signal p-6 text-white">
-      <span className="font-mono text-[13px]">jour J</span>
-      <span className="tt-display text-[34px] leading-none">Quand tout est coché, appuie sur « Je pars ».</span>
-      <span className="text-[17px] leading-normal">Le suivi démarre : ta position apparaît en direct sur la page, et tes proches reçoivent un e-mail « C’est parti ». Tu peux l’arrêter à tout moment.</span>
+      <span className="font-mono text-[0.7647rem]">jour J</span>
+      <span className="tt-display text-[2rem] leading-none">Quand tout est coché, appuie sur « Je pars ».</span>
+      <span className="text-[1rem] leading-normal">Le suivi démarre : ta position apparaît en direct sur la page, et tes proches reçoivent un e-mail « C’est parti ». Tu peux l’arrêter à tout moment.</span>
       {fairPlayOk ? (
         <Button variant="secondary" size="lg" className="mt-1.5 self-start" disabled={go.isPending} onClick={() => go.mutate()}>{go.isPending ? 'Lancement…' : 'Je pars →'}</Button>
       ) : (
@@ -245,9 +245,9 @@ export function TripGuide({ crew, step, onStep }: { crew: Crew; step: GuideStepI
     vehicule: (
       <div className="flex flex-col gap-3 rounded-[24px] bg-ink-800 p-5">
         <span className="h-10 w-10 rounded-full border-[3px] border-ink bg-signal shadow-[0_0_0_2px_#E1262C]" aria-hidden="true" />
-        <span className="tt-display text-[24px] text-cream">Le véhicule</span>
-        <span className="text-[15px] text-dust-400">{crew.last_fix_at ? 'Le téléphone du véhicule envoie sa position.' : 'Aucune position reçue pour l’instant.'}</span>
-        <span className={cn('font-mono text-[13px]', crew.last_fix_at ? 'text-live-text' : 'text-gold-text')}>{crew.last_fix_at ? '● signal reçu' : '○ téléphone à relier dans « Suivi GPS »'}</span>
+        <span className="tt-display text-[1.4118rem] text-cream">Le véhicule</span>
+        <span className="text-[0.8824rem] text-dust-400">{crew.last_fix_at ? 'Le téléphone du véhicule envoie sa position.' : 'Aucune position reçue pour l’instant.'}</span>
+        <span className={cn('font-mono text-[0.7647rem]', crew.last_fix_at ? 'text-live-text' : 'text-gold-text')}>{crew.last_fix_at ? '● signal reçu' : '○ téléphone à relier dans « Suivi GPS »'}</span>
         <Button variant="outline" size="sm" className="self-start" onClick={() => onStep('gps')}>Relier le téléphone</Button>
       </div>
     ),
@@ -264,14 +264,14 @@ export function TripGuide({ crew, step, onStep }: { crew: Crew; step: GuideStepI
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-5">
         <div className="flex flex-col gap-2">
-          <span className="font-mono text-[14px] text-dust-400">guide · 8 étapes</span>
-          <h1 className="tt-display m-0 text-[clamp(36px,5vw,72px)] leading-[1.05] text-cream">Prêt au <span className="text-signal">départ</span></h1>
+          <span className="font-mono text-[0.8235rem] text-dust-400">guide · 8 étapes</span>
+          <h1 className="tt-display m-0 text-[clamp(2.1176rem,4.1vw,4.2353rem)] leading-[1.05] text-cream">Prêt au <span className="text-signal">départ</span></h1>
         </div>
         <div className="flex items-center gap-4 rounded-[24px] bg-ink-800 py-3.5 pl-3.5 pr-5">
           <ProgressRing value={g.total ? g.done / g.total : 0} />
           <div className="flex flex-col gap-0.5">
-            <span className="text-[17px] font-bold">{g.stepsDone === 0 ? 'Aucune étape terminée' : `${g.stepsDone} étape${g.stepsDone > 1 ? 's' : ''} sur 8 terminée${g.stepsDone > 1 ? 's' : ''}`}</span>
-            <span className="text-[15px] text-dust-400">{g.total - g.done ? `Encore ${g.total - g.done} point${g.total - g.done > 1 ? 's' : ''} avant le départ` : 'Tout est prêt !'}</span>
+            <span className="text-[1rem] font-bold">{g.stepsDone === 0 ? 'Aucune étape terminée' : `${g.stepsDone} étape${g.stepsDone > 1 ? 's' : ''} sur 8 terminée${g.stepsDone > 1 ? 's' : ''}`}</span>
+            <span className="text-[0.8824rem] text-dust-400">{g.total - g.done ? `Encore ${g.total - g.done} point${g.total - g.done > 1 ? 's' : ''} avant le départ` : 'Tout est prêt !'}</span>
           </div>
         </div>
       </div>
@@ -282,9 +282,9 @@ export function TripGuide({ crew, step, onStep }: { crew: Crew; step: GuideStepI
           const sel = i === idx;
           return (
             <button key={s.id} role="tab" type="button" aria-selected={sel} onClick={() => onStep(s.id)}
-              className={cn('flex min-h-12 flex-none items-center gap-2.5 whitespace-nowrap rounded-full border-[1.5px] px-4 text-[15px] font-bold',
+              className={cn('flex min-h-12 flex-none items-center gap-2.5 whitespace-nowrap rounded-full border-[1.5px] px-4 text-[0.8824rem] font-bold',
                 sel ? 'border-cream bg-cream text-ink' : 'border-ink-700 bg-ink-800 text-dust-100 hover:border-dust-600')}>
-              <span className={cn('flex h-6 w-6 items-center justify-center rounded-full font-mono text-[12px]',
+              <span className={cn('flex h-6 w-6 items-center justify-center rounded-full font-mono text-[0.7059rem]',
                 complete ? 'bg-live text-ink' : sel ? 'bg-ink text-cream' : 'bg-ink-700 text-dust-300')}>
                 {complete ? '✓' : i + 1}
               </span>
@@ -295,10 +295,10 @@ export function TripGuide({ crew, step, onStep }: { crew: Crew; step: GuideStepI
       </div>
 
       <section role="tabpanel" aria-label={cur.title} className={cn('grid items-start gap-4', !wide && 'lg:grid-cols-2')}>
-        <div className="flex flex-col gap-4 rounded-[28px] bg-ink-800 p-5 sm:p-[26px]">
-          <span className="font-mono text-[13px] text-signal-text">étape {idx + 1} / 8</span>
-          <h2 className="tt-display m-0 text-[38px] leading-none text-cream">{cur.title}</h2>
-          <p className="m-0 text-[18px] leading-[1.55] text-dust-100">{cur.intro}</p>
+        <div className="flex flex-col gap-4 rounded-[28px] bg-ink-800 p-5 sm:p-[1.5294rem]">
+          <span className="font-mono text-[0.7647rem] text-signal-text">étape {idx + 1} / 8</span>
+          <h2 className="tt-display m-0 text-[2.2353rem] leading-none text-cream">{cur.title}</h2>
+          <p className="m-0 text-[1.0588rem] leading-[1.55] text-dust-100">{cur.intro}</p>
           <ul className="m-0 flex list-none flex-col gap-2 p-0">
             {cur.items.map((it) => {
               const body = (
@@ -307,8 +307,8 @@ export function TripGuide({ crew, step, onStep }: { crew: Crew; step: GuideStepI
                     {it.done && <Check className="h-4 w-4" />}
                   </span>
                   <span className="flex flex-col gap-0.5">
-                    <span className={cn('text-[17px] font-bold', it.done && 'line-through decoration-cream/40')}>{it.t}</span>
-                    {it.d && <span className="text-[15px] text-dust-400">{it.d}</span>}
+                    <span className={cn('text-[1rem] font-bold', it.done && 'line-through decoration-cream/40')}>{it.t}</span>
+                    {it.d && <span className="text-[0.8824rem] text-dust-400">{it.d}</span>}
                   </span>
                 </>
               );

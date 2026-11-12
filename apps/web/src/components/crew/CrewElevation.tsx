@@ -83,7 +83,7 @@ export function CrewElevation({ profile }: { profile: AltPoint[] }) {
 
   return (
     <figure className="m-0 border-2 border-coal bg-cream">
-      <figcaption className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b-2 border-coal bg-coal px-4 py-2.5 font-mono text-[11px] uppercase tracking-[0.16em] text-sand md:px-5">
+      <figcaption className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b-2 border-coal bg-coal px-4 py-2.5 font-mono text-[0.6471rem] uppercase tracking-[0.16em] text-sand md:px-5">
         <span>Profil d’élévation</span>
         <span className="text-dust-300">{day == null ? 'Toute la trace' : dayLabel(day)}</span>
       </figcaption>
@@ -98,7 +98,7 @@ export function CrewElevation({ profile }: { profile: AltPoint[] }) {
               aria-pressed={day === d}
               onClick={() => { setDay(d); setHover(null); }}
               className={cn(
-                'shrink-0 rounded-full border px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.08em] transition-colors',
+                'shrink-0 rounded-full border px-2.5 py-1 font-mono text-[0.6471rem] uppercase tracking-[0.08em] transition-colors',
                 day === d ? 'border-coal bg-coal text-cream' : 'border-coal/25 text-dust-700 hover:border-coal hover:text-coal',
               )}
             >
@@ -117,7 +117,7 @@ export function CrewElevation({ profile }: { profile: AltPoint[] }) {
           { k: 'Point culminant', v: `▲ ${formatNumber(stats.max)}`, u: 'm' },
         ].map((s) => (
           <div key={s.k} className="flex flex-col gap-1 bg-cream px-4 py-3 md:px-5">
-            <dt className="font-mono text-[10px] uppercase tracking-[0.14em] text-dust-700">{s.k}</dt>
+            <dt className="font-mono text-[0.5882rem] uppercase tracking-[0.14em] text-dust-700">{s.k}</dt>
             <dd className="m-0 font-display text-2xl font-extrabold leading-none text-coal md:text-3xl">
               {s.v}<span className="ml-1 font-mono text-xs font-normal text-dust-700">{s.u}</span>
             </dd>
@@ -143,28 +143,28 @@ export function CrewElevation({ profile }: { profile: AltPoint[] }) {
           {[0, yMax / 2, yMax].map((t) => (
             <g key={t}>
               <line x1={PAD.left} x2={w - PAD.right} y1={y(t)} y2={y(t)} stroke="#1A1612" strokeOpacity={t ? 0.1 : 0.35} strokeWidth={1} />
-              <text x={PAD.left - 6} y={y(t) + 3.5} textAnchor="end" className="fill-dust-700 font-mono text-[10px]">{formatNumber(t)}</text>
+              <text x={PAD.left - 6} y={y(t) + 3.5} textAnchor="end" className="fill-dust-700 font-mono text-[0.5882rem]">{formatNumber(t)}</text>
             </g>
           ))}
-          <text x={PAD.left - 6} y={PAD.top - 9} textAnchor="end" className="fill-dust-600 font-mono text-[9px]">m</text>
+          <text x={PAD.left - 6} y={PAD.top - 9} textAnchor="end" className="fill-dust-600 font-mono text-[0.5294rem]">m</text>
 
           <path d={area} fill={FILL} fillOpacity={0.22} />
           <path d={line} fill="none" stroke={LINE} strokeWidth={2} strokeLinejoin="round" />
 
           {stats.max > 0 && (
-            <text x={peakX} y={y(stats.max) - 7} textAnchor="middle" className="fill-coal font-mono text-[10px] font-bold">
+            <text x={peakX} y={y(stats.max) - 7} textAnchor="middle" className="fill-coal font-mono text-[0.5882rem] font-bold">
               ▲ {formatNumber(stats.max)} m
             </text>
           )}
 
-          <text x={PAD.left} y={H - 6} className="fill-dust-700 font-mono text-[10px]">0 km</text>
-          <text x={w - PAD.right} y={H - 6} textAnchor="end" className="fill-dust-700 font-mono text-[10px]">{formatNumber(b - a)} km</text>
+          <text x={PAD.left} y={H - 6} className="fill-dust-700 font-mono text-[0.5882rem]">0 km</text>
+          <text x={w - PAD.right} y={H - 6} textAnchor="end" className="fill-dust-700 font-mono text-[0.5882rem]">{formatNumber(b - a)} km</text>
 
           {/* Dernière position */}
           {car && (
             <g>
               <circle cx={x(car.km)} cy={y(car.alt)} r={5.5} fill="#DB4740" stroke="#F4ECDF" strokeWidth={2} />
-              <text x={x(car.km) - 9} y={y(car.alt) + 3.5} textAnchor="end" className="fill-primary font-mono text-[10px] font-bold uppercase">Ici</text>
+              <text x={x(car.km) - 9} y={y(car.alt) + 3.5} textAnchor="end" className="fill-primary font-mono text-[0.5882rem] font-bold uppercase">Ici</text>
             </g>
           )}
 
@@ -177,7 +177,7 @@ export function CrewElevation({ profile }: { profile: AltPoint[] }) {
         </svg>
         {hovered && (
           <div
-            className="pointer-events-none absolute top-1 -translate-x-1/2 whitespace-nowrap rounded-full bg-coal px-2 py-1 font-mono text-[11px] text-cream shadow"
+            className="pointer-events-none absolute top-1 -translate-x-1/2 whitespace-nowrap rounded-full bg-coal px-2 py-1 font-mono text-[0.6471rem] text-cream shadow"
             style={{ left: Math.max(70, Math.min(w - 70, x(hovered.km))) }}
             aria-live="polite"
           >
@@ -201,7 +201,7 @@ export function CrewElevation({ profile }: { profile: AltPoint[] }) {
         </table>
       </div>
 
-      <p className="m-0 border-t border-coal/15 px-4 py-2 font-mono text-[10px] text-dust-600 md:px-5">
+      <p className="m-0 border-t border-coal/15 px-4 py-2 font-mono text-[0.5882rem] text-dust-600 md:px-5">
         Altitude mesurée par le GPS du téléphone du road trip (lissée) : quelques mètres de marge.
       </p>
     </figure>

@@ -60,8 +60,8 @@ function Overview({ crew, onGo }: { crew: Crew; onGo: (s: Section, step?: GuideS
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-2">
-          <span className="font-mono text-[14px] text-dust-400">tableau de bord · {tripStatus(crew)}</span>
-          <h1 className="tt-display m-0 break-words text-[clamp(36px,5vw,64px)] leading-[1.02] text-cream">{crew.name}</h1>
+          <span className="font-mono text-[0.8235rem] text-dust-400">tableau de bord · {tripStatus(crew)}</span>
+          <h1 className="tt-display m-0 break-words text-[clamp(2.1176rem,4.1vw,3.7647rem)] leading-[1.02] text-cream">{crew.name}</h1>
         </div>
         <div className="flex flex-wrap gap-2">
           <CrewShareButton crew={crew} />
@@ -71,11 +71,11 @@ function Overview({ crew, onGo }: { crew: Crew; onGo: (s: Section, step?: GuideS
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div className={`flex flex-col gap-3 rounded-[28px] p-6 ${crew.tracking_enabled ? 'bg-ink-800' : 'bg-signal text-white'}`}>
-          <span className="font-mono text-[13px] opacity-90">suivi GPS</span>
+          <span className="font-mono text-[0.7647rem] opacity-90">suivi GPS</span>
           {crew.tracking_enabled ? (
             <>
-              <span className="tt-display text-[30px] leading-none text-cream">{live ? 'En direct.' : 'Suivi lancé.'}</span>
-              <span className="text-[16px] text-dust-300">
+              <span className="tt-display text-[1.7647rem] leading-none text-cream">{live ? 'En direct.' : 'Suivi lancé.'}</span>
+              <span className="text-[0.9412rem] text-dust-300">
                 {crew.last_fix_at ? `Dernière position ${formatRelative(crew.last_fix_at)}.` : 'Aucune position reçue pour l’instant.'}
                 {!live && crew.last_fix_at ? ' Sans réseau, c’est normal : le téléphone enverra tout dès qu’il capte.' : ''}
               </span>
@@ -86,8 +86,8 @@ function Overview({ crew, onGo }: { crew: Crew; onGo: (s: Section, step?: GuideS
             </>
           ) : (
             <>
-              <span className="tt-display text-[30px] leading-none">Pas encore parti.</span>
-              <span className="text-[16px]">Le jour J, appuie sur « Je pars » à la fin du guide : ta position apparaîtra en direct.</span>
+              <span className="tt-display text-[1.7647rem] leading-none">Pas encore parti.</span>
+              <span className="text-[0.9412rem]">Le jour J, appuie sur « Je pars » à la fin du guide : ta position apparaîtra en direct.</span>
               <Button variant="secondary" size="sm" className="self-start" onClick={() => onGo('guide', 'checklist')}>Aller à « Je pars »</Button>
             </>
           )}
@@ -95,9 +95,9 @@ function Overview({ crew, onGo }: { crew: Crew; onGo: (s: Section, step?: GuideS
         <button type="button" onClick={() => onGo('guide', next?.id)} className="flex items-center gap-4 rounded-[28px] bg-ink-800 p-6 text-left hover:bg-ink-700">
           <ProgressRing value={g.total ? g.done / g.total : 0} />
           <span className="flex flex-col gap-1">
-            <span className="text-[19px] font-bold text-cream">Prêt au départ</span>
-            <span className="text-[15px] text-dust-300">{next ? `Prochaine étape : ${next.label.toLowerCase()}` : 'Tout est prêt, bonne route !'}</span>
-            <span className="text-[15px] font-bold text-signal-text">Continuer le guide →</span>
+            <span className="text-[1.1176rem] font-bold text-cream">Prêt au départ</span>
+            <span className="text-[0.8824rem] text-dust-300">{next ? `Prochaine étape : ${next.label.toLowerCase()}` : 'Tout est prêt, bonne route !'}</span>
+            <span className="text-[0.8824rem] font-bold text-signal-text">Continuer le guide →</span>
           </span>
         </button>
       </div>
@@ -105,22 +105,22 @@ function Overview({ crew, onGo }: { crew: Crew; onGo: (s: Section, step?: GuideS
       <button type="button" onClick={() => onGo('carnet')}
         className="relative flex flex-wrap items-center gap-5 overflow-hidden rounded-[28px] bg-ink-800 p-6 text-left ring-signal hover:bg-ink-700 focus-visible:ring-2">
         <span className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-signal/20 blur-3xl" aria-hidden="true" />
-        <span className="relative flex h-[72px] w-[72px] flex-none items-center justify-center rounded-full bg-signal text-white shadow-[0_14px_30px_rgba(225,38,44,.35)]">
+        <span className="relative flex h-[4.2353rem] w-[4.2353rem] flex-none items-center justify-center rounded-full bg-signal text-white shadow-[0_14px_30px_rgba(225,38,44,.35)]">
           <Mic className="h-9 w-9" />
         </span>
-        <span className="relative flex min-w-[220px] flex-1 flex-col gap-1">
-          <span className="font-mono text-[13px] text-dust-400">carnet de bord · avec l’IA</span>
-          <span className="tt-display text-[30px] leading-none text-cream">Ce soir, raconte ta journée.</span>
-          <span className="text-[16px] text-dust-300">2 minutes au micro, comme à un ami : l’IA en fait une belle page pour tes proches.</span>
+        <span className="relative flex min-w-[12.9412rem] flex-1 flex-col gap-1">
+          <span className="font-mono text-[0.7647rem] text-dust-400">carnet de bord · avec l’IA</span>
+          <span className="tt-display text-[1.7647rem] leading-none text-cream">Ce soir, raconte ta journée.</span>
+          <span className="text-[0.9412rem] text-dust-300">2 minutes au micro, comme à un ami : l’IA en fait une belle page pour tes proches.</span>
         </span>
-        <span className="relative text-[16px] font-bold text-signal-text">Raconter →</span>
+        <span className="relative text-[0.9412rem] font-bold text-signal-text">Raconter →</span>
       </button>
 
       <dl className="m-0 grid grid-cols-2 gap-2 md:grid-cols-4">
         {tiles.map((t) => (
           <div key={t.l} className="flex flex-col gap-1 rounded-[20px] bg-ink-800 px-4 py-3.5">
-            <dt className="font-mono text-[12px] uppercase tracking-[0.1em] text-dust-400">{t.l}</dt>
-            <dd className="m-0 font-mono text-[26px] text-cream">{t.v}{t.u && <span className="text-[14px] text-dust-400"> {t.u}</span>}</dd>
+            <dt className="font-mono text-[0.7059rem] uppercase tracking-[0.1em] text-dust-400">{t.l}</dt>
+            <dd className="m-0 font-mono text-[1.5294rem] text-cream">{t.v}{t.u && <span className="text-[0.8235rem] text-dust-400"> {t.u}</span>}</dd>
           </div>
         ))}
       </dl>
@@ -128,18 +128,18 @@ function Overview({ crew, onGo }: { crew: Crew; onGo: (s: Section, step?: GuideS
       <section className="flex flex-col gap-4 rounded-[28px] bg-ink-800 p-6" aria-label="Visibilité pour les sponsors">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div className="flex flex-col gap-1">
-            <span className="font-mono text-[13px] text-dust-400">visibilité · pour tes sponsors</span>
-            <span className="tt-display text-[28px] leading-none text-cream">{formatNumber(vis?.totalViews ?? 0)} visite{(vis?.totalViews ?? 0) > 1 ? 's' : ''} de ta page</span>
-            <span className="text-[15px] text-dust-300">
+            <span className="font-mono text-[0.7647rem] text-dust-400">visibilité · pour tes sponsors</span>
+            <span className="tt-display text-[1.6471rem] leading-none text-cream">{formatNumber(vis?.totalViews ?? 0)} visite{(vis?.totalViews ?? 0) > 1 ? 's' : ''} de ta page</span>
+            <span className="text-[0.8824rem] text-dust-300">
               {formatNumber(crew.followers_count + (vis?.invited ?? 0))} proches abonnés · {formatNumber(vis?.cheers ?? 0)} encouragement{(vis?.cheers ?? 0) > 1 ? 's' : ''}
             </span>
           </div>
           <Button asChild variant="secondary"><Link to={`/mon-compte/road-trips/${crew.slug}/rapport`}>Rapport pour les sponsors (PDF)</Link></Button>
         </div>
-        <div className="flex h-[70px] items-end gap-[3px]" role="img" aria-label="Visites par jour sur les 30 derniers jours">
+        <div className="flex h-[4.1176rem] items-end gap-[0.1765rem]" role="img" aria-label="Visites par jour sur les 30 derniers jours">
           {days.map((d) => <span key={d.day} className="flex-1 rounded-t-[3px] bg-signal" style={{ height: `${Math.max(3, (d.views / maxDay) * 100)}%`, opacity: d.views ? 1 : 0.25 }} title={`${d.day} : ${d.views}`} />)}
         </div>
-        <span className="text-[13px] text-dust-500">Visites anonymes des 30 derniers jours (une par navigateur et par jour, sans toi ni tes compagnons de route).</span>
+        <span className="text-[0.7647rem] text-dust-500">Visites anonymes des 30 derniers jours (une par navigateur et par jour, sans toi ni tes compagnons de route).</span>
       </section>
     </div>
   );
@@ -173,26 +173,26 @@ export default function ManageCrewPage() {
       {section === 'guide' && <TripGuide crew={crew} step={step} onStep={(st) => go('guide', st)} />}
       {section === 'carnet' && (
         <div className="flex flex-col gap-6">
-          <h1 className="tt-display m-0 text-[clamp(36px,5vw,64px)] leading-[1.02] text-cream">Carnet de route</h1>
+          <h1 className="tt-display m-0 text-[clamp(2.1176rem,4.1vw,3.7647rem)] leading-[1.02] text-cream">Carnet de route</h1>
           <StagesTab crew={crew} />
           <JournalTab crew={crew} />
         </div>
       )}
       {section === 'photos' && (
         <div className="flex flex-col gap-6">
-          <h1 className="tt-display m-0 text-[clamp(36px,5vw,64px)] leading-[1.02] text-cream">Photos</h1>
+          <h1 className="tt-display m-0 text-[clamp(2.1176rem,4.1vw,3.7647rem)] leading-[1.02] text-cream">Photos</h1>
           <PhotosTab crew={crew} />
         </div>
       )}
       {section === 'partage' && (
         <div className="flex flex-col gap-6">
-          <h1 className="tt-display m-0 text-[clamp(36px,5vw,64px)] leading-[1.02] text-cream">Partage</h1>
+          <h1 className="tt-display m-0 text-[clamp(2.1176rem,4.1vw,3.7647rem)] leading-[1.02] text-cream">Partage</h1>
           <SharePanel crew={crew} />
         </div>
       )}
       {section === 'reglages' && (
         <div className="flex flex-col gap-6">
-          <h1 className="tt-display m-0 text-[clamp(36px,5vw,64px)] leading-[1.02] text-cream">Réglages</h1>
+          <h1 className="tt-display m-0 text-[clamp(2.1176rem,4.1vw,3.7647rem)] leading-[1.02] text-cream">Réglages</h1>
           <InfoTab crew={crew} />
           {isOwner && <DangerTab crew={crew} />}
         </div>

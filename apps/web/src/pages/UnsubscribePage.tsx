@@ -36,11 +36,11 @@ export default function UnsubscribePage() {
       <section className="mx-auto flex max-w-[720px] flex-col items-start gap-5 px-5 py-20">
         {state.status === 'loading' ? <Spinner /> : (
           <>
-            <span className="font-mono text-[14px] text-dust-400">e-mails du voyage</span>
-            <h1 className="tt-display m-0 text-[clamp(40px,6vw,72px)] leading-none text-cream">
+            <span className="font-mono text-[0.8235rem] text-dust-400">e-mails du voyage</span>
+            <h1 className="tt-display m-0 text-[clamp(2.3529rem,4.92vw,4.2353rem)] leading-none text-cream">
               {state.status === 'ok' ? 'C’est noté.' : state.status === 'unknown' ? 'Lien déjà utilisé.' : 'Oups.'}
             </h1>
-            <p className="m-0 text-[19px] leading-relaxed text-dust-200">
+            <p className="m-0 text-[1.1176rem] leading-relaxed text-dust-200">
               {state.status === 'ok'
                 ? `Tu ne recevras plus d’e-mail de « ${state.name ?? 'ce road trip'} ». Le lien du voyage marche toujours, si tu veux le suivre de temps en temps.`
                 : state.status === 'unknown'

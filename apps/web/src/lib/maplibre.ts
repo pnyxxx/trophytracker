@@ -3,7 +3,7 @@
  * et styles de carte partagés (fond OpenFreeMap, imagerie satellite en relief).
  */
 import * as maplibregl from 'maplibre-gl';
-import type { StyleSpecification } from 'maplibre-gl';
+import type { FilterSpecification, StyleSpecification } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 // Le « worker » MapLibre (décodage des tuiles en arrière-plan) est empaqueté à part par Vite.
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
@@ -64,6 +64,63 @@ export function satelliteStyle(imagery: Imagery = 'esri'): StyleSpecification {
     layers: [
       { id: 'bg', type: 'background', paint: { 'background-color': '#1A1510' } },
       { id: 'sat', type: 'raster', source: 'sat', paint: { 'raster-contrast': 0.06, 'raster-fade-duration': 0 } },
+    ],
+  };
+}
+
+/**
+ * Thème « sable de nuit » de l'accueil : fond vectoriel OpenFreeMap (gratuit, sans clé) redessiné aux couleurs du
+ * site, avec le relief ombré en tons sable (sans 3D) : sombre, chaud, et la trace rouge ressort.
+ * Pensé pour une carte fixe : peu de tuiles, chargées une seule fois.
+ */
+export function baliseStyle(): StyleSpecification {
+  const omt = 'omt';
+  const roads = (classes: string[]) => ['match', ['get', 'class'], classes, true, false] as unknown as FilterSpecification;
+  return {
+    version: 8,
+    glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
+    sources: {
+      [omt]: { type: 'vector', url: 'https://tiles.openfreemap.org/planet' },
+      dem: {
+        type: 'raster-dem',
+        tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+        encoding: 'terrarium',
+        tileSize: 256,
+        maxzoom: 11,
+        attribution: 'Relief : Mapzen / AWS Terrain Tiles',
+      },
+    },
+    layers: [
+      { id: 'bg', type: 'background', paint: { 'background-color': '#1C1611' } },
+      { id: 'wood', type: 'fill', source: omt, 'source-layer': 'landcover', filter: ['==', ['get', 'class'], 'wood'], paint: { 'fill-color': '#1F1A13', 'fill-opacity': 0.7 } },
+      { id: 'ice', type: 'fill', source: omt, 'source-layer': 'landcover', filter: ['==', ['get', 'class'], 'ice'], paint: { 'fill-color': '#3A342C', 'fill-opacity': 0.55 } },
+      {
+        id: 'relief', type: 'hillshade', source: 'dem',
+        paint: {
+          'hillshade-exaggeration': 0.6,
+          'hillshade-shadow-color': '#0B0806',
+          'hillshade-highlight-color': '#7A5C3A',
+          'hillshade-accent-color': '#2E2218',
+          'hillshade-illumination-direction': 315,
+        },
+      },
+      { id: 'water', type: 'fill', source: omt, 'source-layer': 'water', paint: { 'fill-color': '#0E171D' } },
+      { id: 'river', type: 'line', source: omt, 'source-layer': 'waterway', minzoom: 8, paint: { 'line-color': '#18252E', 'line-width': 1 } },
+      { id: 'border', type: 'line', source: omt, 'source-layer': 'boundary', filter: ['all', ['==', ['get', 'admin_level'], 2], ['!=', ['get', 'maritime'], 1]], paint: { 'line-color': '#F5F1EA', 'line-opacity': 0.28, 'line-width': 1.2, 'line-dasharray': [3, 3] } },
+      { id: 'road-minor', type: 'line', source: omt, 'source-layer': 'transportation', minzoom: 9, filter: roads(['secondary', 'tertiary']), paint: { 'line-color': '#3A2E22', 'line-width': ['interpolate', ['linear'], ['zoom'], 9, 0.5, 13, 1.6] } },
+      { id: 'road-major', type: 'line', source: omt, 'source-layer': 'transportation', filter: roads(['motorway', 'trunk', 'primary']), paint: { 'line-color': '#5A4632', 'line-width': ['interpolate', ['linear'], ['zoom'], 6, 0.6, 12, 2.2] } },
+      {
+        id: 'places', type: 'symbol', source: omt, 'source-layer': 'place',
+        filter: ['match', ['get', 'class'], ['city', 'town'], true, false],
+        layout: {
+          'text-field': ['coalesce', ['get', 'name:fr'], ['get', 'name']],
+          'text-font': ['Noto Sans Regular'],
+          'text-size': ['match', ['get', 'class'], 'city', 12, 10.5],
+          'text-transform': 'uppercase',
+          'text-letter-spacing': 0.12,
+        },
+        paint: { 'text-color': '#CDBBA0', 'text-opacity': 0.75, 'text-halo-color': '#1C1611', 'text-halo-width': 1.4 },
+      },
     ],
   };
 }

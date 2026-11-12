@@ -303,7 +303,7 @@ export function PhotosTab({ crew }: { crew: Crew }) {
                 <div key={d.key} className="flex gap-4 border border-cream/[0.12] bg-black/20 p-3">
                   <div className="relative h-24 w-24 shrink-0 overflow-hidden bg-ink-800 sm:h-28 sm:w-36">
                     <img src={d.preview} alt="" className="h-full w-full object-cover" />
-                    {d.panorama && <span className="absolute right-1 top-1 bg-primary px-1.5 py-0.5 font-mono text-[10px] font-bold text-white">360°</span>}
+                    {d.panorama && <span className="absolute right-1 top-1 bg-primary px-1.5 py-0.5 font-mono text-[0.5882rem] font-bold text-white">360°</span>}
                   </div>
                   <div className="min-w-0 flex-1 space-y-2">
                     <div className="flex items-start gap-2">

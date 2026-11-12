@@ -7,12 +7,12 @@ const link = 'text-dust-500 hover:text-white';
 /** Pied de page sobre : logo, liens utiles et légaux, année. */
 export function SiteFooter() {
   return (
-    <footer className="border-t-[1.5px] border-cream/[0.08] text-[14px] text-dust-500">
-      <div className="mx-auto flex max-w-[1400px] flex-col gap-5 px-5 py-9 md:flex-row md:flex-wrap md:items-center md:justify-between">
+    <footer className="border-t-[1.5px] border-cream/[0.08] text-[0.8235rem] text-dust-500">
+      <div className="mx-auto flex max-w-[1120px] flex-col gap-5 px-5 py-9 md:flex-row md:flex-wrap md:items-center md:justify-between">
         <Link to="/" aria-label="trophytracker, accueil" className="text-cream hover:text-cream">
-          <Wordmark className="text-[18px]" />
+          <Wordmark className="text-[1.0588rem]" />
         </Link>
-        <nav className="flex flex-wrap gap-x-[22px] gap-y-2.5" aria-label="Liens du site">
+        <nav className="flex flex-wrap gap-x-[1.2941rem] gap-y-2.5" aria-label="Liens du site">
           <Link to="/#comment" className={link}>Comment ça marche</Link>
           <Link to="/confidentialite" className={link}>Confidentialité</Link>
           <a href={CONTACT_HREF} className={link}>Contact</a>

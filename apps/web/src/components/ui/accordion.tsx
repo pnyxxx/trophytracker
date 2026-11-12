@@ -26,13 +26,13 @@ const AccordionTrigger = React.forwardRef<
     <AccordionPrimitive.Trigger
       ref={ref}
       className={cn(
-        "group flex flex-1 items-center justify-between gap-5 py-6 text-left text-[19px] font-semibold text-cream transition-colors hover:text-primary",
+        "group flex flex-1 items-center justify-between gap-5 py-6 text-left text-[1.1176rem] font-semibold text-cream transition-colors hover:text-primary",
         className
       )}
       {...props}
     >
       {children}
-      <span aria-hidden="true" className="flex-none font-mono text-[22px] text-primary">
+      <span aria-hidden="true" className="flex-none font-mono text-[1.2941rem] text-primary">
         <span className="group-data-[state=open]:hidden">+</span>
         <span className="hidden group-data-[state=open]:inline">−</span>
       </span>

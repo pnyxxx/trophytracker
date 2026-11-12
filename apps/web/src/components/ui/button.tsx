@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 
 // Boutons « Balise » : pilules, texte en gras, zone tactile de 48 px minimum.
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-sans font-bold transition-colors focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-[3px] focus-visible:outline-cream disabled:pointer-events-none disabled:bg-ink-700 disabled:text-dust-500 disabled:border-transparent [&_svg]:pointer-events-none [&_svg]:size-[18px] [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-sans font-bold transition-colors focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-[3px] focus-visible:outline-cream disabled:pointer-events-none disabled:bg-ink-700 disabled:text-dust-500 disabled:border-transparent [&_svg]:pointer-events-none [&_svg]:size-[1.0588rem] [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -18,9 +18,9 @@ const buttonVariants = cva(
         link: "text-signal-text underline underline-offset-[3px] hover:text-cream",
       },
       size: {
-        default: "min-h-12 px-[22px] text-[17px]",
-        sm: "min-h-11 px-4 text-[15px]",
-        lg: "min-h-14 px-7 text-[18px]",
+        default: "min-h-12 px-[1.2941rem] text-[1rem]",
+        sm: "min-h-11 px-4 text-[0.8824rem]",
+        lg: "min-h-14 px-7 text-[1.0588rem]",
         icon: "h-12 w-12",
       },
     },

@@ -145,7 +145,7 @@ export function InfoTab({ crew }: { crew: Crew }) {
               className={`flex flex-col gap-1.5 rounded-2xl border-2 p-4 text-left transition ${form.visibility === v.value ? 'border-signal bg-signal/10' : 'border-ink-600 hover:border-dust-600'}`}
             >
               <span className="font-bold text-cream">{v.title}</span>
-              <span className="text-[15px] text-dust-300">{v.text}</span>
+              <span className="text-[0.8824rem] text-dust-300">{v.text}</span>
             </button>
           ))}
         </div>

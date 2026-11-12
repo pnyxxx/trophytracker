@@ -52,8 +52,20 @@
     overflow-x: hidden;
   }
 
+  /* Taille de base : tout le site (textes, marges, boutons) est en rem et suit cette valeur.
+     Plus compacte qu'au départ (17 px) : à 100 % le site paraissait trop gros, surtout sur ordinateur portable. */
   html {
-    font-size: 17px;
+    font-size: 15px;
+  }
+  @media (min-width: 1024px) {
+    html {
+      font-size: 14px;
+    }
+  }
+  @media (min-width: 1800px) {
+    html {
+      font-size: 15px;
+    }
   }
 
   body {
@@ -108,7 +120,49 @@
   }
 }
 
-/* ─── Cartes MapLibre (accueil) ──────────────────────────────────────────── */
+/* ─── Fond commun du site : dunes en courbes de niveau sur un dégradé chaud de crépuscule ───
+   Posé sur un calque fixe (pas `background-attachment: fixed`, mal géré par l'iPhone) : il reste en place
+   pendant qu'on fait défiler. Voile sombre par-dessus pour que les textes restent bien lisibles. */
+.tt-dunes {
+  position: relative;
+  isolation: isolate;
+  background-color: #121316;
+}
+.tt-dunes::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(18, 19, 22, 0.25) 0%, rgba(18, 19, 22, 0.7) 60%, rgba(18, 19, 22, 0.88) 100%),
+    url('/accueil/dunes.svg') center / cover no-repeat,
+    radial-gradient(90% 65% at 88% 0%, #4a2a15 0%, #24180f 45%, #121316 100%);
+}
+/* Surface « verre » : cartes et panneaux posés sur le fond de dunes */
+.tt-glass {
+  background-color: rgba(31, 32, 38, 0.72);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+}
+
+/* ─── Accueil : la trace se dessine, les étapes apparaissent (components/landing) ─ */
+.tt-trace-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: tt-draw 2.4s cubic-bezier(0.45, 0, 0.2, 1) 0.3s forwards;
+}
+@keyframes tt-draw { to { stroke-dashoffset: 0; } }
+.tt-pop {
+  opacity: 0;
+  animation: tt-pop 0.45s ease-out 1.4s forwards;
+}
+@keyframes tt-pop { to { opacity: 1; } }
+/* Pastilles qui défilent (« Pour tous les road trips ») */
+.tt-marquee { animation: marquee 38s linear infinite; }
+.tt-marquee:hover { animation-play-state: paused; }
+
+/* ─── Cartes MapLibre ────────────────────────────────────────────────────── */
 .maplibregl-ctrl-attrib {
   font-size: 10px;
 }

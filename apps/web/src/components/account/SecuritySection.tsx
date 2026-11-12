@@ -91,7 +91,7 @@ function PasswordForm() {
         <div className="flex-1">
           <NewPasswordField ref={passwordRef} id="new-password" label="Nouveau mot de passe" value={password} onChange={setPassword} showError={pwError} />
         </div>
-        {nonce === null && <Button type="submit" className="sm:mb-[30px]" disabled={save.isPending}>Enregistrer</Button>}
+        {nonce === null && <Button type="submit" className="sm:mb-[1.7647rem]" disabled={save.isPending}>Enregistrer</Button>}
       </div>
       {nonce !== null && (
         <div className="flex flex-col gap-3">

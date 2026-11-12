@@ -23,7 +23,8 @@ export const NewPasswordField = forwardRef<HTMLInputElement, {
   showError?: boolean;
   /** Phrase ajoutée sous l'indication quand le champ est vide (ex. « Sans mot de passe, … »). */
   note?: ReactNode;
-}>(({ id, label, value, onChange, optional = false, showError = false, note }, ref) => {
+  autoFocus?: boolean;
+}>(({ id, label, value, onChange, optional = false, showError = false, note, autoFocus }, ref) => {
   const len = value.length;
   const missing = PASSWORD_MIN - len;
   const invalid = showError && passwordTooShort(value, optional);
@@ -51,13 +52,14 @@ export const NewPasswordField = forwardRef<HTMLInputElement, {
         ref={ref}
         id={id}
         autoComplete="new-password"
+        autoFocus={autoFocus}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         aria-invalid={invalid || undefined}
         aria-describedby={hintId}
         className={cn(invalid && 'border-signal focus-visible:border-signal')}
       />
-      <p id={hintId} aria-live="polite" className={cn('m-0 flex items-center gap-1.5 text-[14px]', tone)}>{hint}</p>
+      <p id={hintId} aria-live="polite" className={cn('m-0 flex items-center gap-1.5 text-[0.8235rem]', tone)}>{hint}</p>
     </div>
   );
 });

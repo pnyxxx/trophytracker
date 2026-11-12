@@ -243,11 +243,11 @@ export function CoverPicker({ crew }: { crew: Crew }) {
             <FocusFrame src={url} label="Cadrage de la couverture sur ordinateur" className="aspect-[2/1] w-full" {...frameProps} />
             {busy && <Sending />}
           </div>
-          <figcaption className="text-[11px] uppercase tracking-[0.12em] text-dust-500">Ordinateur</figcaption>
+          <figcaption className="text-[0.6471rem] uppercase tracking-[0.12em] text-dust-500">Ordinateur</figcaption>
         </figure>
         <figure className="m-0 w-16 shrink-0 space-y-1 sm:w-20">
           <FocusFrame src={url} label="Cadrage de la couverture sur téléphone" className="aspect-[3/5] w-full" {...frameProps} />
-          <figcaption className="text-[11px] uppercase tracking-[0.12em] text-dust-500">Téléphone</figcaption>
+          <figcaption className="text-[0.6471rem] uppercase tracking-[0.12em] text-dust-500">Téléphone</figcaption>
         </figure>
       </div>
       <p className="flex items-center gap-1.5 text-xs text-dust-400">

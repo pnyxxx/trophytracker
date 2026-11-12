@@ -92,10 +92,14 @@ export interface CitySpot {
   region: string | null;
 }
 
-/** Première ville trouvée pour ce nom (null si rien, ou si la recherche est indisponible). */
+/**
+ * Première ville trouvée pour ce nom (null si rien, ou si la recherche est indisponible).
+ * Abandonne au bout de 5 s : Photon est un service gratuit qui peut ne pas répondre, et la création d'un road
+ * trip ne doit jamais rester bloquée à l'attendre.
+ */
 export async function findCity(name: string): Promise<CitySpot | null> {
   try {
-    const [p] = await searchPlaces(name);
+    const [p] = await searchPlaces(name, AbortSignal.timeout(5000));
     return p ? { lat: p.lat, lon: p.lon, region: p.region } : null;
   } catch {
     return null;

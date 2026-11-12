@@ -73,7 +73,7 @@ export function CrewLogbook({ stages, photos, journal = [], story, points, start
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="tt-display m-0 text-[36px] text-cream">Carnet de route</h2>
+        <h2 className="tt-display m-0 text-[2.1176rem] text-cream">Carnet de route</h2>
         {tabs.length > 1 && (
           <div role="tablist" aria-label="Carnet de route" className="flex gap-1 rounded-full bg-ink-800 p-1">
             {tabs.map(([id, label]) => (
@@ -83,7 +83,7 @@ export function CrewLogbook({ stages, photos, journal = [], story, points, start
                 type="button"
                 aria-selected={tab === id}
                 onClick={() => setTab(id)}
-                className={cn('flex min-h-10 items-center rounded-full px-4 text-[15px] font-bold', tab === id ? 'bg-cream text-ink' : 'text-dust-100 hover:text-white')}
+                className={cn('flex min-h-10 items-center rounded-full px-4 text-[0.8824rem] font-bold', tab === id ? 'bg-cream text-ink' : 'text-dust-100 hover:text-white')}
               >
                 {label}
               </button>
@@ -104,13 +104,13 @@ export function CrewLogbook({ stages, photos, journal = [], story, points, start
               duration && duration >= 600 ? formatDuration(duration) : null].filter(Boolean).join(' · ');
             return (
               <li key={w.id} className="grid grid-cols-[52px_1fr_auto] items-center gap-3.5 border-t-[1.5px] border-ink-700 py-3.5">
-                <span className={cn('flex h-11 items-center justify-center rounded-[14px] font-mono text-[14px]', i === 0 ? 'bg-signal text-white' : 'bg-ink-700 text-dust-100')}>
+                <span className={cn('flex h-11 items-center justify-center rounded-[14px] font-mono text-[0.8235rem]', i === 0 ? 'bg-signal text-white' : 'bg-ink-700 text-dust-100')}>
                   {day && day >= 1 ? `J${day}` : style.emoji}
                 </span>
                 <div className="flex min-w-0 flex-col gap-0.5">
-                  <span className="text-[18px] font-bold text-cream">{w.name}</span>
-                  <span className="text-[15px] text-dust-400">{sub}</span>
-                  {w.note && <p className="mb-0 mt-1.5 whitespace-pre-line text-[15px] leading-relaxed text-dust-200">{w.note}</p>}
+                  <span className="text-[1.0588rem] font-bold text-cream">{w.name}</span>
+                  <span className="text-[0.8824rem] text-dust-400">{sub}</span>
+                  {w.note && <p className="mb-0 mt-1.5 whitespace-pre-line text-[0.8824rem] leading-relaxed text-dust-200">{w.note}</p>}
                   {pics.length > 0 && (
                     <div className="mt-2 flex gap-2 overflow-x-auto">
                       {pics.map((p) => (
@@ -121,7 +121,7 @@ export function CrewLogbook({ stages, photos, journal = [], story, points, start
                     </div>
                   )}
                 </div>
-                <span className="self-start whitespace-nowrap pt-2.5 font-mono text-[14px] text-dust-300">{km != null ? `km ${formatNumber(km)}` : ''}</span>
+                <span className="self-start whitespace-nowrap pt-2.5 font-mono text-[0.8235rem] text-dust-300">{km != null ? `km ${formatNumber(km)}` : ''}</span>
               </li>
             );
           })}
@@ -134,9 +134,9 @@ export function CrewLogbook({ stages, photos, journal = [], story, points, start
             const day = startDate ? dayOfTrip(startDate, new Date(`${j.day}T12:00:00`)) : null;
             return (
               <article key={j.id} className="flex flex-col gap-2.5 rounded-[24px] bg-ink-800 p-5">
-                <span className="font-mono text-[13px] text-signal-text">{day && day >= 1 ? `J${day} · ` : ''}{longDay(j.day)}</span>
-                <h3 className="tt-display m-0 text-[24px] text-cream">{j.title}</h3>
-                <p className="m-0 whitespace-pre-line text-[17px] leading-relaxed text-dust-100">{j.body}</p>
+                <span className="font-mono text-[0.7647rem] text-signal-text">{day && day >= 1 ? `J${day} · ` : ''}{longDay(j.day)}</span>
+                <h3 className="tt-display m-0 text-[1.4118rem] text-cream">{j.title}</h3>
+                <p className="m-0 whitespace-pre-line text-[1rem] leading-relaxed text-dust-100">{j.body}</p>
               </article>
             );
           })}
@@ -144,7 +144,7 @@ export function CrewLogbook({ stages, photos, journal = [], story, points, start
       )}
 
       {tab === 'histoire' && story && (
-        <div className="whitespace-pre-line rounded-[24px] bg-ink-800 p-5 text-[17px] leading-relaxed text-dust-100">{story}</div>
+        <div className="whitespace-pre-line rounded-[24px] bg-ink-800 p-5 text-[1rem] leading-relaxed text-dust-100">{story}</div>
       )}
     </div>
   );

@@ -73,7 +73,7 @@ function Editor({ crew, draft, onClose }: { crew: Crew; draft: Draft; onClose: (
         <form onSubmit={(e: FormEvent) => { e.preventDefault(); save.mutate(true); }} className="space-y-4">
           <Field id="j-title" label="Titre"><Input id="j-title" required maxLength={120} value={title} onChange={(e) => setTitle(e.target.value)} /></Field>
           <Field id="j-body" label="Texte">
-            <textarea id="j-body" required maxLength={4000} className={`${textareaClass} min-h-[240px]`} value={body} onChange={(e) => setBody(e.target.value)} />
+            <textarea id="j-body" required maxLength={4000} className={`${textareaClass} min-h-[14.1176rem]`} value={body} onChange={(e) => setBody(e.target.value)} />
           </Field>
           <div className="flex flex-wrap gap-2">
             <Button type="submit" disabled={save.isPending}><Eye />Publier</Button>
@@ -157,7 +157,7 @@ export function JournalTab({ crew }: { crew: Crew }) {
               return (
                 <li key={day} className="flex flex-wrap items-center gap-3 border border-cream/[0.12] p-3">
                   <div className="min-w-0 flex-1">
-                    <p className="m-0 font-mono text-[11px] uppercase tracking-[0.14em] text-ochre">{dayLabel(day)}</p>
+                    <p className="m-0 font-mono text-[0.6471rem] uppercase tracking-[0.14em] text-ochre">{dayLabel(day)}</p>
                     {entry ? (
                       <p className="m-0 font-semibold text-cream">
                         {entry.title}

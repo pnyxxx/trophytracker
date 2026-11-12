@@ -105,7 +105,7 @@ function Value({ children, copy, label, tone = 'plain' }: { children: ReactNode;
   return (
     <span
       className={cn(
-        'inline-flex max-w-full items-center gap-1 rounded-full border px-2.5 py-1.5 font-mono text-[13px]',
+        'inline-flex max-w-full items-center gap-1 rounded-full border px-2.5 py-1.5 font-mono text-[0.7647rem]',
         tone === 'secret' && 'border-primary/60 bg-primary/10 text-cream',
         tone === 'plain' && 'border-cream/15 bg-black/30 text-cream',
         tone === 'on' && 'border-live/40 bg-live/10 font-bold text-live',
@@ -123,10 +123,10 @@ function SettingRow({ name, fr, value, why, must }: { name: string; fr: string; 
   return (
     <li className="grid gap-x-6 gap-y-2 border-b border-cream/[0.08] py-4 last:border-b-0 md:grid-cols-[220px_minmax(0,1fr)]">
       <div>
-        <p className="m-0 font-mono text-[13px] font-bold text-cream">{name}</p>
+        <p className="m-0 font-mono text-[0.7647rem] font-bold text-cream">{name}</p>
         <p className="m-0 mt-0.5 text-xs text-dust-400">{fr}</p>
         {must && (
-          <span className="mt-1.5 inline-block rounded-full bg-primary px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.1em] text-white">
+          <span className="mt-1.5 inline-block rounded-full bg-primary px-1.5 py-0.5 font-mono text-[0.5882rem] font-bold uppercase tracking-[0.1em] text-white">
             À changer
           </span>
         )}
@@ -143,9 +143,9 @@ function SettingRow({ name, fr, value, why, must }: { name: string; fr: string; 
 function Step({ n, title, id, children }: { n: string; title: string; id?: string; children: ReactNode }) {
   return (
     <section id={id} className="scroll-mt-24 grid gap-5 border border-cream/[0.14] bg-ink-800 p-6 md:grid-cols-[88px_minmax(0,1fr)] md:p-8">
-      <span className="font-display text-[64px] font-extrabold leading-[0.85] text-primary md:text-[80px]">{n}</span>
+      <span className="font-display text-[3.7647rem] font-extrabold leading-[0.85] text-primary md:text-[4.7059rem]">{n}</span>
       <div className="min-w-0">
-        <h2 className="m-0 mb-4 font-display text-[32px] font-extrabold leading-none text-cream md:text-[38px]">{title}</h2>
+        <h2 className="m-0 mb-4 font-display text-[1.8824rem] font-extrabold leading-none text-cream md:text-[2.2353rem]">{title}</h2>
         {children}
       </div>
     </section>
@@ -256,7 +256,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
             <p className={cn('tt-kicker m-0 flex items-center gap-2', enabled ? 'text-live' : 'text-ochre')}>
               {enabled ? <><LiveDot className="h-2 w-2" />Suivi lancé</> : <><FlaskConical className="h-3.5 w-3.5" />Mode essai</>}
             </p>
-            <h2 className="m-0 mt-2 font-display text-[32px] font-extrabold leading-none text-cream md:text-[38px]">
+            <h2 className="m-0 mt-2 font-display text-[1.8824rem] font-extrabold leading-none text-cream md:text-[2.2353rem]">
               {enabled ? 'Ta trace s’enregistre' : 'Suivi arrêté'}
             </h2>
             <p className="mb-0 mt-3 text-sm leading-relaxed text-dust-200">
@@ -343,7 +343,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
             </p>
           </div>
         </div>
-        <p className="mb-0 mt-3 font-mono text-[11px] uppercase tracking-[0.12em] text-dust-500">Actualisé automatiquement toutes les 5 secondes</p>
+        <p className="mb-0 mt-3 font-mono text-[0.6471rem] uppercase tracking-[0.12em] text-dust-500">Actualisé automatiquement toutes les 5 secondes</p>
       </Panel>
 
       {/* ── 01 Installer ───────────────────────────────────────────────── */}
@@ -636,7 +636,7 @@ export function GpsTab({ crew }: { crew: Crew }) {
 
         {/* Où la dernière position a été reçue */}
         <div className="mt-4 border border-cream/[0.14]">
-          <div className="relative h-[320px] bg-[#E8E2D8]">
+          <div className="relative h-[18.8235rem] bg-[#E8E2D8]">
             {lastLat != null && lastLon != null ? (
               <Suspense fallback={null}>
                 <GpsCheckMap lat={lastLat} lon={lastLon} live={live} />
@@ -650,9 +650,9 @@ export function GpsTab({ crew }: { crew: Crew }) {
             )}
           </div>
           {lastLat != null && lastLon != null && (
-            <div className="flex flex-wrap justify-between gap-x-6 gap-y-1 border-t border-cream/[0.14] bg-ink px-4 py-2.5 font-mono text-[11px] uppercase tracking-[0.12em] text-dust-300">
+            <div className="flex flex-wrap justify-between gap-x-6 gap-y-1 border-t border-cream/[0.14] bg-ink px-4 py-2.5 font-mono text-[0.6471rem] uppercase tracking-[0.12em] text-dust-300">
               <span className="flex items-center gap-2">
-                <span className="h-[7px] w-[7px] rounded-full bg-primary shadow-[0_0_10px_#DB4740]" />
+                <span className="h-[0.4118rem] w-[0.4118rem] rounded-full bg-primary shadow-[0_0_10px_#DB4740]" />
                 {Math.abs(lastLat).toFixed(5)}°{lastLat >= 0 ? 'N' : 'S'} · {Math.abs(lastLon).toFixed(5)}°{lastLon < 0 ? 'O' : 'E'}
               </span>
               <span>

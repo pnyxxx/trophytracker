@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PasswordInput } from '@/components/ui/password-input';
 import { CodeInput } from './CodeInput';
+import { StepNav } from '@/components/common/StepNav';
 import { NewPasswordField } from './NewPasswordField';
 import { PASSWORD_MIN, passwordTooShort } from '@/lib/password';
 import { supabase } from '@/lib/supabase';
@@ -25,13 +26,19 @@ import { errorMessage } from '@/lib/errors';
 /** Délai entre deux envois de code (Supabase Auth refuse plus d'un e-mail par minute et par adresse). */
 const RESEND_DELAY = 60;
 
-export type SignInStep = 'email' | 'code' | 'name';
+/**
+ * Écran affiché : 'email' (formulaire de connexion ou d'inscription complet), 'code', 'name' (prénom manquant),
+ * et en inscription pas à pas (`stepwise`) : 'su-name' → 'su-email' → 'su-password' → 'code'.
+ */
+export type SignInStep = 'email' | 'code' | 'name' | 'su-name' | 'su-email' | 'su-password';
 type Mode = 'login' | 'signup';
 type Method = 'password' | 'code';
 
-export function SignInForm({ signup = false, switchable = false, initialEmail = '', onHold, onDone, onStepChange, emailFooter }: {
+export function SignInForm({ signup = false, stepwise = false, switchable = false, initialEmail = '', onHold, onDone, onStepChange, emailFooter }: {
   /** Commencer par l'inscription (prénom, e-mail, mot de passe). */
   signup?: boolean;
+  /** Inscription en écrans séparés, une question par écran (parcours /creer, pensé pour le téléphone). */
+  stepwise?: boolean;
   /** Lien « Déjà un compte ? / Pas encore de compte ? » dans le formulaire (sinon c'est à la page de l'afficher). */
   switchable?: boolean;
   initialEmail?: string;
@@ -50,8 +57,9 @@ export function SignInForm({ signup = false, switchable = false, initialEmail = 
   const queryClient = useQueryClient();
   const [mode, setMode] = useState<Mode>(signup ? 'signup' : 'login');
   const [method, setMethod] = useState<Method>('password');
-  const [step, setStepState] = useState<SignInStep>('email');
-  const setStep = (s: SignInStep) => { setStepState(s); onStepChange?.(s, s === 'email' ? '' : email.trim()); };
+  const [step, setStep] = useState<SignInStep>('email');
+  /** Inscription pas à pas : 0 prénom, 1 e-mail, 2 mot de passe. */
+  const [sub, setSub] = useState(0);
   const [name, setName] = useState('');
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState('');
@@ -66,6 +74,15 @@ export function SignInForm({ signup = false, switchable = false, initialEmail = 
   const lastTried = useRef('');
   /** Le code attendu confirme une inscription avec mot de passe (renvoi : `resend`, pas `signInWithOtp`). */
   const [codeFor, setCodeFor] = useState<'signup' | 'otp'>('otp');
+
+  // L'écran affiché, pour les titres et la barre d'avancement de la page.
+  const pas = stepwise && mode === 'signup' && method === 'password' && step === 'email';
+  const shown: SignInStep = pas ? (['su-name', 'su-email', 'su-password'] as const)[sub]! : step;
+  useEffect(() => {
+    onStepChange?.(shown, shown === 'email' || shown === 'su-name' ? '' : email.trim());
+    // Seulement quand l'écran change (pas à chaque lettre tapée).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shown]);
 
   useEffect(() => {
     if (wait <= 0) return;
@@ -191,19 +208,19 @@ export function SignInForm({ signup = false, switchable = false, initialEmail = 
     onDone?.();
   };
 
-  const alert = error && <p role="alert" className="m-0 text-[15px] text-signal-text">{error}</p>;
+  const alert = error && <p role="alert" className="m-0 text-[0.8824rem] text-signal-text">{error}</p>;
   const legal = (
-    <p className="m-0 text-[14px] leading-relaxed text-dust-400">
+    <p className="m-0 text-[0.8235rem] leading-relaxed text-dust-400">
       En continuant, tu acceptes les <Link to="/conditions-utilisation" className="underline">conditions d’utilisation</Link> et la{' '}
       <Link to="/confidentialite" className="underline">politique de confidentialité</Link>.
     </p>
   );
-  const switchMode = (m: Mode) => { setMode(m); setMethod('password'); setError(null); setPwError(false); };
+  const switchMode = (m: Mode) => { setMode(m); setMethod('password'); setError(null); setPwError(false); setSub(0); };
 
   if (step === 'name') {
     return (
       <form onSubmit={saveName} className="flex flex-col gap-5">
-        <p className="m-0 text-[17px] leading-relaxed text-dust-100">Bienvenue ! Comment t’appelles-tu ? C’est le nom que verront tes proches.</p>
+        <p className="m-0 text-[1rem] leading-relaxed text-dust-100">Bienvenue ! Comment t’appelles-tu ? C’est le nom que verront tes proches.</p>
         <div className="space-y-2">
           <Label htmlFor="auth-name">Ton prénom</Label>
           <Input id="auth-name" autoComplete="given-name" required minLength={2} maxLength={60} autoFocus value={name} onChange={(e) => setName(e.target.value)} />
@@ -229,7 +246,7 @@ export function SignInForm({ signup = false, switchable = false, initialEmail = 
   if (step === 'code') {
     return (
       <form onSubmit={(e) => { e.preventDefault(); lastTried.current = ''; verify(code); }} className="flex flex-col gap-5">
-        <p className="m-0 text-[17px] leading-relaxed text-dust-100">
+        <p className="m-0 text-[1rem] leading-relaxed text-dust-100">
           {codeFor === 'signup' ? 'Pour confirmer ton adresse, saisis le code' : 'Code'} à 6 chiffres envoyé à <b className="break-all text-cream">{email.trim()}</b>. Il expire dans 10 minutes.
         </p>
         <CodeInput
@@ -240,15 +257,15 @@ export function SignInForm({ signup = false, switchable = false, initialEmail = 
         />
         {alert}
         <Button type="submit" size="lg" className="w-full" disabled={busy || code.length !== 6}>{busy ? 'Vérification…' : 'Valider'}</Button>
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-[15px]">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-[0.8824rem]">
           <Button type="button" variant="link" className="min-h-11 px-0 disabled:bg-transparent disabled:no-underline" disabled={busy || wait > 0} onClick={sendCode}>
             {wait > 0 ? `Renvoyer le code (${wait} s)` : 'Renvoyer le code'}
           </Button>
-          <Button type="button" variant="link" className="min-h-11 px-0 text-dust-300" onClick={() => { setStep('email'); setError(null); }}>
+          <Button type="button" variant="link" className="min-h-11 px-0 text-dust-300" onClick={() => { setStep('email'); setSub(1); setError(null); }}>
             Changer d’adresse
           </Button>
         </div>
-        <p className="m-0 text-[14px] leading-relaxed text-dust-400">Rien reçu ? Regarde dans les spams, l’e-mail vient de trophytracker.</p>
+        <p className="m-0 text-[0.8235rem] leading-relaxed text-dust-400">Rien reçu ? Regarde dans les spams, l’e-mail vient de trophytracker.</p>
       </form>
     );
   }
@@ -266,7 +283,7 @@ export function SignInForm({ signup = false, switchable = false, initialEmail = 
     </div>
   );
   const switchLink = switchable && (
-    <p className="m-0 text-[15px] text-dust-300">
+    <p className="m-0 text-[0.8824rem] text-dust-300">
       {mode === 'signup' ? 'Déjà un compte ? ' : 'Pas encore de compte ? '}
       <button type="button" className="min-h-11 font-bold text-signal-text hover:text-cream" onClick={() => switchMode(mode === 'signup' ? 'login' : 'signup')}>
         {mode === 'signup' ? 'Se connecter' : 'Créer un compte'}
@@ -282,7 +299,7 @@ export function SignInForm({ signup = false, switchable = false, initialEmail = 
         {emailField}
         {alert}
         <Button type="submit" size="lg" className="w-full" disabled={busy}>{busy ? 'Envoi…' : 'Recevoir mon code'}</Button>
-        <p className="m-0 text-[15px] leading-relaxed text-dust-300">
+        <p className="m-0 text-[0.8824rem] leading-relaxed text-dust-300">
           On t’envoie un code à 6 chiffres : pas besoin de mot de passe.{' '}
           <button type="button" className="font-bold text-signal-text hover:text-cream" onClick={() => { setMethod('password'); setError(null); }}>
             {mode === 'signup' ? 'Choisir plutôt un mot de passe' : 'Utiliser mon mot de passe'}
@@ -291,6 +308,58 @@ export function SignInForm({ signup = false, switchable = false, initialEmail = 
         {legal}
         {switchLink}
         {emailFooter}
+      </form>
+    );
+  }
+
+  // Inscription pas à pas : prénom, puis e-mail, puis mot de passe (le titre de chaque écran est dans la page).
+  if (pas) {
+    const back = sub > 0 ? () => { setSub(sub - 1); setError(null); } : undefined;
+    return (
+      <form
+        noValidate
+        onSubmit={(e) => {
+          e.preventDefault();
+          setError(null);
+          if (sub === 0 && name.trim().length < 2) return setError('Indique ton prénom (2 lettres minimum).');
+          if (sub === 1 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return setError('Cette adresse e-mail ne semble pas complète.');
+          if (sub < 2) return setSub(sub + 1);
+          if (passwordTooShort(password)) {
+            setPwError(true);
+            return passwordRef.current?.focus();
+          }
+          register();
+        }}
+        className="flex flex-col gap-5"
+      >
+        {sub === 0 && (
+          <div className="space-y-2">
+            <Label htmlFor="auth-name" className="sr-only">Ton prénom</Label>
+            <Input id="auth-name" autoComplete="given-name" enterKeyHint="next" placeholder="Ton prénom" required minLength={2} maxLength={60} autoFocus value={name} onChange={(e) => setName(e.target.value)} />
+            <p className="m-0 text-[0.8235rem] text-dust-400">C’est le nom que verront tes proches.</p>
+          </div>
+        )}
+        {sub === 1 && (
+          <div className="space-y-2">
+            <Label htmlFor="auth-email" className="sr-only">Ton e-mail</Label>
+            <Input id="auth-email" type="email" inputMode="email" autoComplete="email" enterKeyHint="next" placeholder="ton@e-mail.fr" required autoFocus value={email} onChange={(e) => setEmail(e.target.value)} />
+            <p className="m-0 text-[0.8235rem] text-dust-400">Pour retrouver ton road trip depuis n’importe quel appareil.</p>
+          </div>
+        )}
+        {sub === 2 && (
+          <NewPasswordField ref={passwordRef} id="auth-password" autoFocus label={<span className="sr-only">Choisis un mot de passe</span>} value={password} onChange={setPassword} showError={pwError} />
+        )}
+        {alert}
+        <StepNav label={sub < 2 ? 'Continuer →' : busy ? 'Création…' : 'Créer mon compte'} onBack={back} busy={busy} />
+        {sub === 2 && (
+          <>
+            <button type="button" disabled={busy} className="self-start text-left text-[0.9412rem] font-bold text-dust-200 underline underline-offset-4 hover:text-cream" onClick={() => void sendCode()}>
+              Je préfère recevoir un code par e-mail à chaque connexion
+            </button>
+            {legal}
+          </>
+        )}
+        {sub === 0 && switchLink}
       </form>
     );
   }
@@ -316,7 +385,7 @@ export function SignInForm({ signup = false, switchable = false, initialEmail = 
         <div className="space-y-2">
           <div className="flex items-baseline justify-between gap-3">
             <Label htmlFor="auth-password">Ton mot de passe</Label>
-            <button type="button" className="text-[14px] font-bold text-dust-300 hover:text-cream" onClick={() => { setMethod('code'); setError(null); }}>
+            <button type="button" className="text-[0.8235rem] font-bold text-dust-300 hover:text-cream" onClick={() => { setMethod('code'); setError(null); }}>
               Mot de passe oublié ?
             </button>
           </div>

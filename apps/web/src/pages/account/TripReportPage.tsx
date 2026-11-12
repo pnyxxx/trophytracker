@@ -26,8 +26,8 @@ const MAP_H = 620;
 function Stat({ label, value, unit }: { label: string; value: string; unit?: string }) {
   return (
     <div className="flex flex-col gap-1 rounded-2xl bg-white px-4 py-3">
-      <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-dust-700">{label}</span>
-      <span className="font-mono text-[26px] leading-none text-ink">{value}{unit && <span className="text-[14px] text-dust-700"> {unit}</span>}</span>
+      <span className="font-mono text-[0.6471rem] uppercase tracking-[0.08em] text-dust-700">{label}</span>
+      <span className="font-mono text-[1.5294rem] leading-none text-ink">{value}{unit && <span className="text-[0.8235rem] text-dust-700"> {unit}</span>}</span>
     </div>
   );
 }
@@ -86,13 +86,13 @@ export default function TripReportPage() {
       <article className="mx-auto flex max-w-[860px] flex-col gap-6 rounded-[24px] bg-cream p-8 text-ink shadow-[0_20px_50px_rgba(0,0,0,.12)] print:max-w-none print:rounded-none print:p-0 print:shadow-none">
         <header className="flex items-start justify-between gap-6">
           <div className="flex flex-col gap-2">
-            <span className="font-mono text-[13px] text-signal-light">rapport de voyage{range ? ` · ${range}` : ''}</span>
-            <h1 className="tt-display m-0 text-[44px] leading-none">{crew.name}</h1>
-            {(crew.city || crew.destination) && <p className="m-0 text-[18px] text-dust-800">{[crew.city, crew.destination].filter(Boolean).join(' → ')}</p>}
+            <span className="font-mono text-[0.7647rem] text-signal-light">rapport de voyage{range ? ` · ${range}` : ''}</span>
+            <h1 className="tt-display m-0 text-[2.5882rem] leading-none">{crew.name}</h1>
+            {(crew.city || crew.destination) && <p className="m-0 text-[1.0588rem] text-dust-800">{[crew.city, crew.destination].filter(Boolean).join(' → ')}</p>}
           </div>
           <span className="flex items-center gap-2 whitespace-nowrap">
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-signal"><span className="h-2.5 w-2.5 rounded-full bg-cream" /></span>
-            <span className="tt-display text-[20px]">trophy<span className="text-signal">tracker</span></span>
+            <span className="tt-display text-[1.1765rem]">trophy<span className="text-signal">tracker</span></span>
           </span>
         </header>
 
@@ -108,7 +108,7 @@ export default function TripReportPage() {
         )}
 
         <section className="flex flex-col gap-3">
-          <h2 className="tt-display m-0 text-[24px]">Le voyage</h2>
+          <h2 className="tt-display m-0 text-[1.4118rem]">Le voyage</h2>
           <div className="grid grid-cols-3 gap-2 max-sm:grid-cols-2">
             <Stat label="distance" value={formatNumber(stats?.total_distance_km ?? crew.total_distance_m / 1000)} unit="km" />
             <Stat label="jours sur la route" value={roadDays ? String(roadDays) : '—'} />
@@ -120,29 +120,29 @@ export default function TripReportPage() {
         </section>
 
         <section className="flex flex-col gap-3 break-inside-avoid">
-          <h2 className="tt-display m-0 text-[24px]">La visibilité</h2>
+          <h2 className="tt-display m-0 text-[1.4118rem]">La visibilité</h2>
           <div className="grid grid-cols-3 gap-2 max-sm:grid-cols-2">
             <Stat label="visites de la page" value={formatNumber(vis?.totalViews ?? 0)} />
             <Stat label="proches abonnés" value={formatNumber((stats?.followers_count ?? crew.followers_count) + (vis?.invited ?? 0))} />
             <Stat label="encouragements" value={formatNumber(vis?.cheers ?? 0)} />
           </div>
           <div className="flex flex-col gap-2 rounded-2xl bg-white p-4">
-            <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-dust-700">visites, 30 derniers jours</span>
-            <div className="flex h-[90px] items-end gap-[3px]" role="img" aria-label={`Visites par jour sur 30 jours, au plus ${maxDay} en un jour`}>
+            <span className="font-mono text-[0.6471rem] uppercase tracking-[0.08em] text-dust-700">visites, 30 derniers jours</span>
+            <div className="flex h-[5.2941rem] items-end gap-[0.1765rem]" role="img" aria-label={`Visites par jour sur 30 jours, au plus ${maxDay} en un jour`}>
               {days.map((d) => <span key={d.day} className="flex-1 rounded-t-[3px] bg-signal" style={{ height: `${Math.max(2, (d.views / maxDay) * 100)}%`, opacity: d.views ? 1 : 0.25 }} title={`${d.day} : ${d.views}`} />)}
             </div>
-            <span className="text-[12px] text-dust-700">Visites anonymes : une par navigateur et par jour, sans compter les voyageurs.</span>
+            <span className="text-[0.7059rem] text-dust-700">Visites anonymes : une par navigateur et par jour, sans compter les voyageurs.</span>
           </div>
         </section>
 
         {sponsors.length > 0 && (
           <section className="flex flex-col gap-3 break-inside-avoid">
-            <h2 className="tt-display m-0 text-[24px]">Merci à nos sponsors</h2>
+            <h2 className="tt-display m-0 text-[1.4118rem]">Merci à nos sponsors</h2>
             <div className="grid grid-cols-4 gap-2 max-sm:grid-cols-2">
               {sponsors.map((s) => {
                 const logo = mediaUrl(s.logo_path);
                 return (
-                  <div key={s.id} className="flex h-[78px] items-center justify-center rounded-2xl bg-white p-3">
+                  <div key={s.id} className="flex h-[4.5882rem] items-center justify-center rounded-2xl bg-white p-3">
                     {logo ? <img src={logo} alt={s.name} className="max-h-full max-w-full object-contain" /> : <span className="text-center font-bold">{s.name}</span>}
                   </div>
                 );
@@ -153,7 +153,7 @@ export default function TripReportPage() {
 
         {photos.length > 0 && (
           <section className="flex flex-col gap-3 break-inside-avoid">
-            <h2 className="tt-display m-0 text-[24px]">En images</h2>
+            <h2 className="tt-display m-0 text-[1.4118rem]">En images</h2>
             <div className="grid grid-cols-3 gap-2">
               {photos.slice(0, 6).map((p) => <img key={p.id} src={thumbUrl(p.storage_path, 480) ?? ''} alt={p.title} className="aspect-[4/3] w-full rounded-2xl object-cover" />)}
             </div>
@@ -162,11 +162,11 @@ export default function TripReportPage() {
 
         <footer className="flex items-center justify-between gap-6 border-t border-[#DDD6CA] pt-5 break-inside-avoid">
           <div className="flex flex-col gap-1">
-            <span className="text-[17px] font-bold">Revivre tout le voyage</span>
-            <span className="break-all font-mono text-[13px] text-dust-800">{url.replace(/^https?:\/\//, '')}</span>
-            <span className="text-[13px] text-dust-700">Carte, trace, photos et carnet de route, en ligne.</span>
+            <span className="text-[1rem] font-bold">Revivre tout le voyage</span>
+            <span className="break-all font-mono text-[0.7647rem] text-dust-800">{url.replace(/^https?:\/\//, '')}</span>
+            <span className="text-[0.7647rem] text-dust-700">Carte, trace, photos et carnet de route, en ligne.</span>
           </div>
-          <div className="h-[110px] w-[110px] flex-none [&_svg]:h-full [&_svg]:w-full" dangerouslySetInnerHTML={{ __html: qr }} />
+          <div className="h-[6.4706rem] w-[6.4706rem] flex-none [&_svg]:h-full [&_svg]:w-full" dangerouslySetInnerHTML={{ __html: qr }} />
         </footer>
       </article>
     </div>

@@ -52,7 +52,7 @@ export default function SalesTermsPage() {
 
       <h2>4. Commande</h2>
       <p>
-        La commande se passe à l’étape « Accès » du parcours « Créer mon trip », connecté à un compte trophytracker. Avant de payer, tu
+        La commande se passe à l’étape « Accès » du parcours « Créer mon road trip », connecté à un compte trophytracker. Avant de payer, tu
         acceptes ces conditions et demandes l’accès immédiat au service (article 7), puis tu es redirigé vers la page de paiement
         sécurisée. Le contrat est conclu dès que le paiement est accepté. Tu reçois une confirmation par e-mail, et ces conditions restent disponibles sur
         cette page. Les commandes sont archivées pendant 10 ans.
@@ -66,7 +66,7 @@ export default function SalesTermsPage() {
 
       <h2>6. Accès au service</h2>
       <p>
-        L’accès est disponible dès la confirmation du paiement : le parcours « Créer mon trip » crée alors la page de ton road trip. En
+        L’accès est disponible dès la confirmation du paiement : le parcours « Créer mon road trip » crée alors la page de ton road trip. En
         cas de problème, écris à <a href={CONTACT_HREF}>{EDITOR.email}</a>.
       </p>
 
