@@ -189,10 +189,16 @@ export function TripMap({ crew, points, stages, sponsors, photos = [], overlay, 
     extras.current = list;
   }, [crew.start_lat, crew.start_lon, crew.city, crew.start_region, crew.name, stages, sponsors, photos]);
 
-  // Cadrage initial : toute la trace (avec le départ et les étapes).
+  // Cadrage initial : sur la dernière position du voyageur (c'est ce que les proches viennent voir) ;
+  // sans position, toute la trace prévue (départ et étapes).
   useEffect(() => {
     const map = mapRef.current;
     if (!map || fitted.current) return;
+    if (car) {
+      fitted.current = true;
+      map.jumpTo({ center: car, zoom: 10.5 });
+      return;
+    }
     const all: LonLat[] = [...coords, ...stages.map((w) => [w.lon, w.lat] as LonLat)];
     if (crew.start_lon != null && crew.start_lat != null) all.push([crew.start_lon, crew.start_lat]);
     if (!all.length) return;
@@ -200,7 +206,7 @@ export function TripMap({ crew, points, stages, sponsors, photos = [], overlay, 
     if (all.length === 1) { map.jumpTo({ center: all[0]!, zoom: 11 }); return; }
     const b = all.reduce((acc, c) => acc.extend(c), new maplibregl.LngLatBounds(all[0]!, all[0]!));
     map.fitBounds(b, { padding: 50, maxZoom: 13, duration: 0 });
-  }, [coords, stages, crew.start_lon, crew.start_lat]);
+  }, [car, coords, stages, crew.start_lon, crew.start_lat]);
 
   return (
     <div ref={containerRef} className={cn('relative overflow-hidden rounded-[28px] border-[1.5px] border-ink-700 bg-[#E9E4DA]', className)}>

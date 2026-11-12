@@ -530,10 +530,28 @@ function UsersAdmin() {
       {isLoading ? <Spinner /> : (
         <ul className="divide-y divide-cream/10">
           {data.map((u) => (
-            <li key={u.id} className="flex flex-wrap items-center gap-3 py-3">
-              <div className="min-w-0 flex-1">
+            <li key={u.id} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 py-3">
+              <div className="min-w-0 flex-1 basis-full sm:basis-0">
                 <p className="m-0 font-bold text-cream">{u.display_name} {u.role === 'admin' && <span className="ml-1 rounded-full bg-signal px-2 py-0.5 font-mono text-[0.6471rem] text-white">admin</span>}</p>
                 <p className="truncate text-xs text-dust-400">{u.email} · inscrit {formatRelative(u.created_at)} · vu {formatRelative(u.last_sign_in_at)}</p>
+                {/* Road trips liés au compte : cliquables pour voir duquel il s'agit. */}
+                {(() => {
+                  const crews = (u.crews ?? []) as { slug: string; name: string; role: string; is_demo: boolean }[];
+                  return crews.length > 0 ? (
+                    <ul className="m-0 mt-1.5 flex list-none flex-wrap gap-1.5 p-0">
+                      {crews.map((c) => (
+                        <li key={c.slug}>
+                          <Link to={`/road-trip/${c.slug}`} target="_blank" className="inline-flex max-w-[16rem] items-center gap-1.5 rounded-full border-[1.5px] border-cream/15 px-2.5 py-1 text-[0.7647rem] text-dust-100 hover:border-cream hover:text-white">
+                            <span className="truncate">{c.name}</span>
+                            <span className="flex-none font-mono text-[0.6471rem] text-dust-400">{c.is_demo ? 'exemple' : c.role === 'owner' ? 'capitaine' : 'compagnon'}</span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="m-0 mt-1 font-mono text-[0.6471rem] text-dust-500">aucun road trip</p>
+                  );
+                })()}
               </div>
               {u.id !== user?.id && (
                 <Button size="sm" variant="ghost" onClick={() => {

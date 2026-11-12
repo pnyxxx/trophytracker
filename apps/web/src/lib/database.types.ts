@@ -893,6 +893,7 @@ export type Database = {
         Args: { p_search?: string }
         Returns: {
           created_at: string
+          crews: Json
           display_name: string
           email: string
           id: string
