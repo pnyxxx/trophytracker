@@ -49,8 +49,8 @@ const PHASES = [
 ];
 /** Conseil affiché sous l'aperçu (ordinateur), par écran. */
 const TIPS = [
-  'C’est le nom que verront tes proches.',
-  'Ton compte sert à retrouver ton road trip depuis n’importe quel appareil.',
+  'Ta page se construit ici, sous tes yeux, au fil de tes réponses.',
+  'Ton adresse ne sera jamais affichée sur ta page.',
   'Tu pourras aussi te connecter avec un code reçu par e-mail.',
   'Le code expire dans 10 minutes.',
   'Le type de voyage adapte les conseils de ton guide « Prêt au départ ».',
