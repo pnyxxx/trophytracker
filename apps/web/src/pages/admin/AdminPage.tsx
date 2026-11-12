@@ -500,7 +500,7 @@ export default function AdminPage() {
   ));
 
   return (
-    <div className="tt-fond tt-fond--collines min-h-screen text-cream lg:grid lg:grid-cols-[230px_minmax(0,1fr)]">
+    <div className="tt-fond tt-fond--uni min-h-screen text-cream lg:grid lg:grid-cols-[230px_minmax(0,1fr)]">
       <Seo title="Administration" noindex />
       <aside className="sticky top-0 hidden h-screen flex-col gap-5 border-r-[1.5px] border-cream/[0.08] bg-ink-900/70 px-3.5 py-5 backdrop-blur-xl lg:flex">
         <Link to="/" aria-label="trophytracker, accueil" className="flex items-center gap-[0.5294rem] px-2 text-cream hover:text-cream"><LogoMark /><Wordmark /></Link>

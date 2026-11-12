@@ -122,10 +122,12 @@
 
 /* ─── Fond commun du site : un relief en courbes de niveau sur un dégradé chaud de crépuscule ───
    Reliefs générés par scripts/build-reliefs.py (public/fonds) : un par type de page, même palette sable.
-     .tt-fond                 dunes (accueil, par défaut)
-     .tt-fond--montagnes      page d'un road trip, création
-     .tt-fond--canyon         espace voyageur
-     .tt-fond--collines       compte, connexion, pages d'information
+     .tt-fond                 dunes
+     .tt-fond--montagnes      création d'un road trip
+     .tt-fond--collines       connexion
+     .tt-fond--canyon         (disponible)
+     .tt-fond--uni            sans relief : pages chargées (road trip, espace voyageur, compte, légal, admin)
+   Le relief seulement là où il y a peu de contenu : derrière une page chargée, ça fait trop « empilé ».
    Posé sur un calque fixe (pas `background-attachment: fixed`, mal géré par l'iPhone) : il reste en place
    pendant qu'on fait défiler. Voile sombre par-dessus pour que les textes restent bien lisibles. */
 .tt-fond {
@@ -137,6 +139,9 @@
 .tt-fond--montagnes { --tt-relief: url('/fonds/montagnes.svg'); }
 .tt-fond--canyon { --tt-relief: url('/fonds/canyon.svg'); }
 .tt-fond--collines { --tt-relief: url('/fonds/collines.svg'); }
+/* Juste le dégradé chaud, sans courbes : pour les pages chargées (road trip, espace voyageur, compte…),
+   où un relief derrière tout le contenu ferait trop « empilé ». */
+.tt-fond--uni { --tt-relief: none; }
 .tt-fond::before {
   content: '';
   position: fixed;

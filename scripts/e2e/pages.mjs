@@ -18,8 +18,10 @@ for (const path of PAGES) {
   const page = await browser.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
-  await page.goto(SITE + path, { waitUntil: 'networkidle' }).catch((e) => errors.push(e.message));
-  await page.waitForTimeout(1000);
+  // « load » + délai, pas « networkidle » : une page en direct (positions, tuiles de carte) n'est jamais
+  // silencieuse sur le réseau. Les erreurs JavaScript et la page blanche restent détectées.
+  await page.goto(SITE + path, { waitUntil: 'load' }).catch((e) => errors.push(e.message));
+  await page.waitForTimeout(2500);
   const size = (await page.locator('#root').innerHTML().catch(() => '')).length;
   const ok = size > 500 && errors.length === 0;
   if (!ok) failed++;

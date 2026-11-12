@@ -107,7 +107,7 @@ export default function Landing() {
   const launch = isLaunchPrice();
 
   return (
-    <PageShell header="floating" relief="dunes">
+    <PageShell header="floating">
       {/* Le site lui-même (WebSite, Organization) est décrit dans le HTML statique de l'accueil : seo-plugin.ts. */}
       <Seo />
 

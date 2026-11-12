@@ -134,7 +134,7 @@ export default function CrewPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [!!crew]);
 
-  if (isLoading) return <PageShell relief="montagnes"><PageLoader /></PageShell>;
+  if (isLoading) return <PageShell><PageLoader /></PageShell>;
   if (!crew) return <NotFound />;
 
   const cover = mediaUrl(crew.cover_path);
@@ -184,7 +184,7 @@ export default function CrewPage() {
   );
 
   return (
-    <PageShell headerActions={headerActions} relief="montagnes">
+    <PageShell headerActions={headerActions}>
       <Seo
         title={crew.name}
         description={crew.tagline ?? `Suis le road trip ${crew.name} en direct.`}
