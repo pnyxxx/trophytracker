@@ -7,7 +7,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
 
-select plan(8);
+select plan(10);
 
 insert into auth.users (id, email, raw_user_meta_data, aud, role) values
   ('00000000-0000-0000-0000-0000000000c1', 'owner-fiche@test.local', '{}', 'authenticated', 'authenticated'),
@@ -47,6 +47,10 @@ select throws_ok($$ update public.sponsors set email = 'pas-un-email' where id =
   'l’e-mail est contrôlé');
 select throws_ok($$ update public.sponsors set phone = 'appelle-moi' where id = pg_temp.sponsor() $$, '23514', null,
   'le téléphone est contrôlé');
+select lives_ok($$ update public.sponsors set address = '12 rue de la Gare, 02100 Saint-Quentin, France' where id = pg_temp.sponsor() $$,
+  'un voyageur enregistre l’adresse complète du sponsor');
+select throws_ok($$ update public.sponsors set address = repeat('a', 201) where id = pg_temp.sponsor() $$, '23514', null,
+  'l’adresse fait 200 caractères au plus');
 reset role;
 select is((select jsonb_array_length(links) from public.sponsors where id = pg_temp.sponsor()), 3, 'les trois liens sont enregistrés');
 

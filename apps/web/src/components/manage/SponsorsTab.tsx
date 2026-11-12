@@ -16,9 +16,9 @@ import { LinkIcon } from '@/components/common/SocialIcons';
 import { Label } from '@/components/ui/label';
 import { LocationPicker, type Coords } from './LocationPicker';
 
-type Form = { name: string; description: string; phone: string; email: string; links: string[]; city: string; sort_order: string };
+type Form = { name: string; description: string; phone: string; email: string; links: string[]; address: string; city: string; sort_order: string };
 const toForm = (s?: Sponsor): Form => ({
-  name: s?.name ?? '', description: s?.description ?? '', phone: s?.phone ?? '', email: s?.email ?? '',
+  name: s?.name ?? '', description: s?.description ?? '', phone: s?.phone ?? '', email: s?.email ?? '', address: s?.address ?? '',
   links: s ? (sponsorLinks(s).length ? sponsorLinks(s) : ['']) : [''],
   city: s?.city ?? '', sort_order: s?.sort_order.toString() ?? '0',
 });
@@ -43,7 +43,7 @@ function SponsorDialog({ crew, sponsor, open, onClose }: { crew: Crew; sponsor?:
         logoPath = uploaded;
       }
       const row = {
-        name: form.name.trim(), city: orNull(form.city),
+        name: form.name.trim(), city: orNull(form.city), address: orNull(form.address),
         description: orNull(form.description), phone: orNull(form.phone), email: orNull(form.email), links,
         // Anciens champs, gardés pour la carte et les anciens affichages : premier site, premier compte de chaque réseau.
         website_url: first('site'), instagram_url: first('instagram'), facebook_url: first('facebook'),
@@ -117,10 +117,16 @@ function SponsorDialog({ crew, sponsor, open, onClose }: { crew: Crew; sponsor?:
               value={coords}
               onChange={(c, place) => {
                 setCoords(c);
-                // La ville affichée se remplit toute seule (et reste modifiable).
-                if (place?.city) setForm((f) => ({ ...f, city: place.city! }));
+                // L'adresse complète et la ville se remplissent toutes seules (et restent modifiables).
+                if (place) {
+                  const address = [place.title, place.subtitle].filter(Boolean).join(', ');
+                  setForm((f) => ({ ...f, address: address.slice(0, 200), city: place.city ?? f.city }));
+                }
               }}
             />
+          </Field>
+          <Field id="s-address" label="Adresse complète" hint="Affichée sur sa fiche ; remplie automatiquement à partir du lieu choisi.">
+            <Input id="s-address" maxLength={200} placeholder="12 rue de la Gare, 02100 Saint-Quentin" value={form.address} onChange={set('address')} />
           </Field>
           <Field id="s-city" label="Ville affichée" hint="Remplie automatiquement à partir de l’adresse.">
             <Input id="s-city" maxLength={80} value={form.city} onChange={set('city')} />

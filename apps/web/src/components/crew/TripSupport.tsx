@@ -47,8 +47,18 @@ function SponsorSheet({ sponsor: s, onClose }: { sponsor: Sponsor; onClose: () =
           {s.email && (
             <li><a href={`mailto:${s.email}`} className={row}><Mail className="h-5 w-5 flex-none text-signal-text" /><span className="min-w-0 truncate font-bold">{s.email}</span></a></li>
           )}
-          {s.city && (
-            <li className={row.replace(' hover:bg-ink-700 hover:text-cream', '')}><MapPin className="h-5 w-5 flex-none text-signal-text" /><span>{s.city}</span></li>
+          {(s.address || s.city) && (
+            // L'adresse complète (sinon la ville), qui s'ouvre dans l'appli de cartes du téléphone.
+            <li>
+              <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.address || (s.lat != null && s.lon != null ? `${s.lat},${s.lon}` : s.city!))}`}
+                target="_blank" rel="noopener noreferrer" className={row}>
+                <MapPin className="h-5 w-5 flex-none text-signal-text" />
+                <span className="flex min-w-0 flex-col">
+                  <span className="font-bold leading-snug">{s.address || s.city}</span>
+                  <span className="text-[0.8235rem] text-dust-400">ouvrir dans les cartes</span>
+                </span>
+              </a>
+            </li>
           )}
         </ul>
       </DialogContent>
@@ -96,9 +106,10 @@ export function TripSupport({ fundraiserUrl, sponsors, contactEmail, wall }: {
               return (
                 <li key={s.id} className="relative">
                   <button type="button" onClick={() => setOpen(s)} title={`${s.name} : voir sa fiche`}
-                    className="group relative flex h-[5.2rem] w-full items-center justify-center rounded-2xl bg-cream pb-4 text-ink hover:bg-white">
+                    className="group relative flex aspect-square w-full items-center justify-center rounded-2xl bg-cream pb-6 text-ink hover:bg-white">
+                    {/* Carte carrée, comme la plupart des logos. */}
                     {logo
-                      ? <img src={logo} alt={s.name} loading="lazy" className="max-h-11 max-w-[80%] object-contain" />
+                      ? <img src={logo} alt={s.name} loading="lazy" className="max-h-[62%] max-w-[78%] object-contain" />
                       : <span className="px-2 text-center text-[1rem] font-bold">{s.name}</span>}
                     {/* Invitation discrète à ouvrir la fiche (coordonnées, réseaux, sites). */}
                     <span className="absolute bottom-1.5 right-2.5 font-mono text-[0.6471rem] text-dust-700 group-hover:text-signal-light">voir plus ›</span>
