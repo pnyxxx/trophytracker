@@ -12,7 +12,7 @@ const ExampleMap = lazy(() => import('./ExampleMap'));
 
 function Tile({ title, text, children, className }: { title: string; text: string; children?: ReactNode; className?: string }) {
   return (
-    <li className={cn('flex flex-col gap-4 overflow-hidden rounded-[24px] border-[1.5px] border-cream/[0.08] bg-[#1D1E23] p-6', className)}>
+    <li className={cn('tt-glass flex w-[84%] flex-none snap-center flex-col gap-4 overflow-hidden rounded-[24px] border-[1.5px] border-cream/[0.08] p-6 sm:w-auto', className)}>
       {children && <div className="flex flex-1 items-center" aria-hidden="true">{children}</div>}
       <div className="flex flex-col gap-1.5">
         <h3 className="m-0 text-[1.2353rem] font-extrabold leading-tight tracking-[-0.01em] text-cream">{title}</h3>
@@ -155,7 +155,8 @@ function Cheers() {
 
 export function FollowerFeatures() {
   return (
-    <ul className="m-0 grid list-none grid-cols-1 gap-3.5 p-0 sm:grid-cols-2 lg:grid-cols-3">
+    // Téléphone : un carrousel qu'on fait glisser (la carte suivante dépasse) ; plus grand : une mosaïque.
+    <ul className="-mx-5 m-0 flex list-none snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-3.5 sm:overflow-visible sm:p-0 lg:grid-cols-3">
       <Tile
         className="sm:col-span-2 lg:row-span-2"
         title="La carte en direct"
@@ -181,7 +182,7 @@ export function FollowerFeatures() {
       <Tile className="sm:col-span-2" title="Les encouragements" text="Un mur où ils te laissent leurs messages, à lire le soir au bivouac.">
         <Cheers />
       </Tile>
-      <li className="flex">
+      <li className="flex w-[84%] flex-none snap-center sm:w-auto">
         <Link
           to={EXAMPLE_PATH}
           className="group flex w-full flex-col justify-between gap-6 rounded-[24px] bg-cream p-6 text-coal hover:bg-white hover:text-coal"

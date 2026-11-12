@@ -11,7 +11,8 @@ const env = loadEnv();
 const SITE = env.SITE_URL.replace(/\/$/, '');
 const PAGES = ['/', '/road-trip/exemple', '/connexion', '/inscription', '/creer', '/confidentialite', '/conditions-vente', '/page-inexistante'];
 
-const browser = await chromium.launch();
+// CHROMIUM_PATH : utiliser un Chromium déjà installé (ex. /usr/bin/chromium-browser) plutôt que celui de Playwright.
+const browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
 let failed = 0;
 for (const path of PAGES) {
   const page = await browser.newPage();

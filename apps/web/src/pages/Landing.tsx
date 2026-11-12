@@ -179,7 +179,7 @@ export default function Landing() {
       </section>
 
       {/* ── Comment ça marche ────────────────────────────────────────────── */}
-      <section id="comment" className="mx-auto flex max-w-[1120px] scroll-mt-[5.1765rem] flex-col gap-11 px-5 py-20 lg:py-[6.4706rem]">
+      <section id="comment" className="mx-auto flex max-w-[1120px] scroll-mt-[5.1765rem] flex-col gap-8 px-5 py-14 lg:gap-11 lg:py-[6.4706rem]">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <h2 className={sectionTitle}>
             Prêt en 5 minutes.
@@ -188,9 +188,9 @@ export default function Landing() {
           </h2>
           <span className={kicker}>// comment ça marche</span>
         </div>
-        <ol className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(min(100%,300px),1fr))] gap-4 p-0">
+        <ol className="-mx-5 m-0 flex list-none snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:overflow-visible sm:p-0">
           {steps.map((s) => (
-            <li key={s.n} className="flex min-h-[15.2941rem] flex-col gap-4 rounded-[28px] bg-cream p-7 text-coal">
+            <li key={s.n} className="flex w-[84%] flex-none snap-center sm:w-auto min-h-[13rem] flex-col gap-4 rounded-[28px] bg-cream p-7 text-coal">
               <div className="flex items-center justify-between">
                 <span className="flex h-[3.0588rem] w-[3.0588rem] items-center justify-center rounded-full bg-coal text-[1.4118rem] font-extrabold text-cream">{s.n}</span>
                 <span className="rounded-full bg-coal/[0.12] px-2.5 py-1 font-mono text-[0.7059rem] font-medium">{s.t}</span>
@@ -204,7 +204,7 @@ export default function Landing() {
 
       {/* ── Ce que voient les proches ────────────────────────────────────── */}
       <section className="border-t-[1.5px] border-cream/[0.08]" aria-labelledby="proches">
-        <div className="mx-auto flex max-w-[1120px] flex-col gap-11 px-5 py-20 lg:py-[6.4706rem]">
+        <div className="mx-auto flex max-w-[1120px] flex-col gap-8 px-5 py-14 lg:gap-11 lg:py-[6.4706rem]">
           <div className="flex flex-wrap items-end justify-between gap-6">
             <h2 id="proches" className={sectionTitle}>
               Ils sont du voyage.
@@ -221,7 +221,7 @@ export default function Landing() {
 
       {/* ── Le carnet de bord raconté ────────────────────────────────────── */}
       <section className="border-t-[1.5px] border-cream/[0.08]" aria-labelledby="carnet-ia">
-        <div className="mx-auto grid max-w-[1120px] grid-cols-[repeat(auto-fit,minmax(min(100%,420px),1fr))] items-center gap-14 px-5 py-20 lg:py-[6.4706rem]">
+        <div className="mx-auto grid max-w-[1120px] grid-cols-[repeat(auto-fit,minmax(min(100%,420px),1fr))] items-center gap-14 px-5 py-14 lg:py-[6.4706rem]">
           <div className="flex flex-col gap-5">
             <span className="self-start rounded-full bg-signal px-3 py-1 font-mono text-[0.7059rem] font-medium text-white">carnet de route · IA</span>
             <h2 id="carnet-ia" className={sectionTitle}>
@@ -272,15 +272,15 @@ export default function Landing() {
 
       {/* ── Pour les voyageurs ───────────────────────────────────────────── */}
       <section className="border-t-[1.5px] border-cream/[0.08]" aria-labelledby="voyageurs">
-        <div className="mx-auto flex max-w-[1120px] flex-col gap-11 px-5 py-20 lg:py-[6.4706rem]">
+        <div className="mx-auto flex max-w-[1120px] flex-col gap-8 px-5 py-14 lg:gap-11 lg:py-[6.4706rem]">
           <h2 id="voyageurs" className={sectionTitle}>
             Et pour toi,
             <br />
             <span className="text-dust-500">un peu plus.</span>
           </h2>
-          <ul className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-3.5 p-0">
+          <ul className="-mx-5 m-0 flex list-none snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-3.5 sm:overflow-visible sm:p-0">
             {forYou.map(({ icon: Icon, title, text }) => (
-              <li key={title} className="flex flex-col gap-5 rounded-[24px] border-[1.5px] border-cream/[0.08] bg-[#1D1E23] p-6">
+              <li key={title} className="tt-glass flex w-[84%] flex-none snap-center flex-col gap-5 rounded-[24px] border-[1.5px] border-cream/[0.08] p-6 sm:w-auto">
                 <span className="flex h-12 w-12 items-center justify-center rounded-full bg-signal/15 text-signal-text">
                   <Icon className="h-6 w-6" aria-hidden="true" />
                 </span>
@@ -296,7 +296,7 @@ export default function Landing() {
 
       {/* ── Confidentialité ──────────────────────────────────────────────── */}
       <section className="border-t-[1.5px] border-cream/[0.08]" aria-labelledby="vie-privee">
-        <div className="mx-auto grid max-w-[1120px] grid-cols-[repeat(auto-fit,minmax(min(100%,420px),1fr))] items-center gap-14 px-5 py-20 lg:py-[6.4706rem]">
+        <div className="mx-auto grid max-w-[1120px] grid-cols-[repeat(auto-fit,minmax(min(100%,420px),1fr))] items-center gap-14 px-5 py-14 lg:py-[6.4706rem]">
           <div className="flex flex-col gap-8">
             <h2 id="vie-privee" className={sectionTitle}>
               Ton voyage,
@@ -321,7 +321,7 @@ export default function Landing() {
 
       {/* ── Questions ────────────────────────────────────────────────────── */}
       <section className="border-t-[1.5px] border-cream/[0.08]" aria-labelledby="faq">
-        <div className="mx-auto grid max-w-[1120px] grid-cols-[repeat(auto-fit,minmax(min(100%,380px),1fr))] items-start gap-14 px-5 py-20 lg:py-[6.4706rem]">
+        <div className="mx-auto grid max-w-[1120px] grid-cols-[repeat(auto-fit,minmax(min(100%,380px),1fr))] items-start gap-14 px-5 py-14 lg:py-[6.4706rem]">
           <div className="flex flex-col gap-4">
             <span className={kicker}>// avant de partir</span>
             <h2 id="faq" className={sectionTitle}>Questions fréquentes</h2>
