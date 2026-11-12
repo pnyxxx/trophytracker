@@ -1,4 +1,4 @@
-/** Galerie du road trip : photos classiques et panoramas 360° interactifs. */
+/** Galerie du road trip (onglet « Photos ») : toutes les photos classiques et panoramas 360° interactifs. */
 import { lazy, Suspense, useState } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, MapPin, X } from 'lucide-react';
 import type { Photo } from '@/lib/supabase';
@@ -8,28 +8,16 @@ import { cn } from '@/lib/utils';
 
 const Photo360Viewer = lazy(() => import('@/components/Photo360Viewer').then((m) => ({ default: m.Photo360Viewer })));
 
-/** Mosaïque : la première photo en grand, 6 au plus avant « voir les N ». */
-const PREVIEW = 6;
-
 export function CrewGallery({ photos }: { photos: Photo[] }) {
   const [index, setIndex] = useState<number | null>(null);
-  const [all, setAll] = useState(false);
   const current = index != null ? photos[index] : null;
   const go = (delta: number) => setIndex((i) => (i == null ? i : (i + delta + photos.length) % photos.length));
-  const shown = all ? photos : photos.slice(0, PREVIEW);
 
   return (
     <>
-      <div className="flex items-baseline justify-between gap-3">
-        <h2 className="tt-display m-0 text-[2.1176rem] text-cream">Photos</h2>
-        {photos.length > PREVIEW && (
-          <button type="button" onClick={() => setAll((v) => !v)} className="font-mono text-[0.8235rem] text-signal-text hover:text-cream">
-            {all ? 'voir moins' : `voir les ${photos.length}`}
-          </button>
-        )}
-      </div>
-      <div className="grid auto-rows-[120px] grid-cols-3 gap-2 sm:auto-rows-[140px]">
-        {shown.map((p, i) => (
+      {/* Toutes les photos d'un coup (on est déjà dans l'onglet « Photos ») : la première en grand. */}
+      <div className="grid auto-rows-[120px] grid-cols-3 gap-2 sm:auto-rows-[140px] lg:grid-cols-4">
+        {photos.map((p, i) => (
           <button
             key={p.id}
             type="button"
@@ -37,7 +25,6 @@ export function CrewGallery({ photos }: { photos: Photo[] }) {
             className={cn(
               'group relative overflow-hidden rounded-[22px] bg-ink-800 text-left focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-cream',
               i === 0 && 'col-span-2 row-span-2',
-              i === 4 && !all && 'col-span-2',
             )}
             aria-label={`Voir la photo ${p.title}`}
           >
