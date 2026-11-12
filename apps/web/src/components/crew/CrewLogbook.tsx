@@ -133,7 +133,7 @@ export function CrewLogbook({ stages, photos, journal = [], story, points, start
           {entries.map((j) => {
             const day = startDate ? dayOfTrip(startDate, new Date(`${j.day}T12:00:00`)) : null;
             return (
-              <article key={j.id} className="flex flex-col gap-2.5 rounded-[24px] bg-ink-800 p-5">
+              <article key={j.id} className="flex flex-col gap-2.5 rounded-[24px] tt-glass border-[1.5px] border-cream/[0.08] p-5">
                 <span className="font-mono text-[0.7647rem] text-signal-text">{day && day >= 1 ? `J${day} · ` : ''}{longDay(j.day)}</span>
                 <h3 className="tt-display m-0 text-[1.4118rem] text-cream">{j.title}</h3>
                 <p className="m-0 whitespace-pre-line text-[1rem] leading-relaxed text-dust-100">{j.body}</p>
@@ -144,7 +144,7 @@ export function CrewLogbook({ stages, photos, journal = [], story, points, start
       )}
 
       {tab === 'histoire' && story && (
-        <div className="whitespace-pre-line rounded-[24px] bg-ink-800 p-5 text-[1rem] leading-relaxed text-dust-100">{story}</div>
+        <div className="whitespace-pre-line rounded-[24px] tt-glass border-[1.5px] border-cream/[0.08] p-5 text-[1rem] leading-relaxed text-dust-100">{story}</div>
       )}
     </div>
   );

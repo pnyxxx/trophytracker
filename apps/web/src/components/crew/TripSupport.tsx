@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 
 function Card({ label, children, dashed = false }: { label: ReactNode; children: ReactNode; dashed?: boolean }) {
   return (
-    <div className={`flex flex-col gap-3.5 rounded-[28px] bg-ink-800 p-6 ${dashed ? 'border-[1.5px] border-dashed border-ink-600' : ''}`}>
+    <div className={`flex flex-col gap-3.5 rounded-[28px] tt-glass border-[1.5px] border-cream/[0.08] p-6 ${dashed ? 'border-[1.5px] border-dashed border-ink-600' : ''}`}>
       <span className="font-mono text-[0.7647rem] text-dust-400">{label}</span>
       {children}
     </div>

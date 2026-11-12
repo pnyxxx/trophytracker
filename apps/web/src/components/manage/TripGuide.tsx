@@ -61,7 +61,7 @@ function TripBasics({ crew }: { crew: Crew }) {
     onError: toastError,
   });
   return (
-    <form onSubmit={(e: FormEvent) => { e.preventDefault(); save.mutate(); }} className="flex flex-col gap-4 rounded-[28px] bg-ink-800 p-5 sm:p-[1.2941rem]">
+    <form onSubmit={(e: FormEvent) => { e.preventDefault(); save.mutate(); }} className="flex flex-col gap-4 rounded-[28px] tt-glass border-[1.5px] border-cream/[0.08] p-5 sm:p-[1.2941rem]">
       <Field id="g-name" label="Nom du road trip"><Input id="g-name" required minLength={2} maxLength={80} value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></Field>
       <Field id="g-tagline" label="Une phrase d’accroche" hint="Facultatif, affichée sous le nom."><Input id="g-tagline" maxLength={140} value={f.tagline} onChange={(e) => setF({ ...f, tagline: e.target.value })} /></Field>
       <div className="grid grid-cols-2 gap-2.5">
@@ -97,7 +97,7 @@ function FundraiserForm({ crew }: { crew: Crew }) {
     onError: toastError,
   });
   return (
-    <form onSubmit={(e: FormEvent) => { e.preventDefault(); save.mutate(); }} className="flex flex-col gap-3 rounded-[28px] bg-ink-800 p-5 sm:p-[1.2941rem]">
+    <form onSubmit={(e: FormEvent) => { e.preventDefault(); save.mutate(); }} className="flex flex-col gap-3 rounded-[28px] tt-glass border-[1.5px] border-cream/[0.08] p-5 sm:p-[1.2941rem]">
       <Field id="g-fund" label="Lien de la cagnotte" hint="Un bouton « Participer » mène vers ta cagnotte (aucun montant n’est affiché sur la page).">
         <Input id="g-fund" inputMode="url" maxLength={300} placeholder="https://www.helloasso.com/…" value={url} onChange={(e) => setUrl(e.target.value)} />
       </Field>
@@ -131,7 +131,7 @@ function InviteRelatives({ crew }: { crew: Crew }) {
     onError: toastError,
   });
   return (
-    <div className="flex flex-col gap-3.5 rounded-[28px] bg-ink-800 p-5 sm:p-[1.2941rem]">
+    <div className="flex flex-col gap-3.5 rounded-[28px] tt-glass border-[1.5px] border-cream/[0.08] p-5 sm:p-[1.2941rem]">
       <h3 className="tt-display m-0 text-[1.4118rem] text-cream">Inviter des proches par e-mail</h3>
       <p className="m-0 text-[0.8824rem] leading-relaxed text-dust-300">
         Ils reçoivent le lien, puis un e-mail « C’est parti » quand tu appuies sur « Je pars », et un résumé chaque soir de route.
@@ -193,7 +193,7 @@ export function SharePanel({ crew }: { crew: Crew }) {
         <span className="text-[0.8824rem] text-dust-800">Personne n’a besoin de compte pour suivre le voyage.</span>
       </div>
       <InviteRelatives crew={crew} />
-      <div className="rounded-[28px] bg-ink-800 p-5 sm:p-[1.2941rem]">
+      <div className="rounded-[28px] tt-glass border-[1.5px] border-cream/[0.08] p-5 sm:p-[1.2941rem]">
         <h3 className="tt-display m-0 mb-4 text-[1.4118rem] text-cream">Autocollant et story</h3>
         <CrewQrPanel crew={crew} showUrl={false} />
       </div>
@@ -243,7 +243,7 @@ export function TripGuide({ crew, step, onStep }: { crew: Crew; step: GuideStepI
     voyage: <TripBasics crew={crew} />,
     equipage: <MembersTab crew={crew} />,
     vehicule: (
-      <div className="flex flex-col gap-3 rounded-[24px] bg-ink-800 p-5">
+      <div className="flex flex-col gap-3 rounded-[24px] tt-glass border-[1.5px] border-cream/[0.08] p-5">
         <span className="h-10 w-10 rounded-full border-[3px] border-ink bg-signal shadow-[0_0_0_2px_#E1262C]" aria-hidden="true" />
         <span className="tt-display text-[1.4118rem] text-cream">Le véhicule</span>
         <span className="text-[0.8824rem] text-dust-400">{crew.last_fix_at ? 'Le téléphone du véhicule envoie sa position.' : 'Aucune position reçue pour l’instant.'}</span>
@@ -267,11 +267,11 @@ export function TripGuide({ crew, step, onStep }: { crew: Crew; step: GuideStepI
           <span className="font-mono text-[0.8235rem] text-dust-400">guide · 8 étapes</span>
           <h1 className="tt-display m-0 text-[clamp(2.1176rem,4.1vw,4.2353rem)] leading-[1.05] text-cream">Prêt au <span className="text-signal">départ</span></h1>
         </div>
-        <div className="flex items-center gap-4 rounded-[24px] bg-ink-800 py-3.5 pl-3.5 pr-5">
+        <div className="tt-glass flex items-center gap-4 rounded-[24px] border-[1.5px] border-cream/[0.08] py-3.5 pl-3.5 pr-5">
           <ProgressRing value={g.total ? g.done / g.total : 0} />
           <div className="flex flex-col gap-0.5">
-            <span className="text-[1rem] font-bold">{g.stepsDone === 0 ? 'Aucune étape terminée' : `${g.stepsDone} étape${g.stepsDone > 1 ? 's' : ''} sur 8 terminée${g.stepsDone > 1 ? 's' : ''}`}</span>
-            <span className="text-[0.8824rem] text-dust-400">{g.total - g.done ? `Encore ${g.total - g.done} point${g.total - g.done > 1 ? 's' : ''} avant le départ` : 'Tout est prêt !'}</span>
+            <span className="text-[1rem] font-bold">{g.done} point{g.done > 1 ? 's' : ''} sur {g.total} réglé{g.done > 1 ? 's' : ''}</span>
+            <span className="text-[0.8824rem] text-dust-400">{g.total - g.done ? `${g.stepsDone} étape${g.stepsDone > 1 ? 's' : ''} sur 8 terminée${g.stepsDone > 1 ? 's' : ''}` : 'Tout est prêt, bonne route !'}</span>
           </div>
         </div>
       </div>
@@ -295,7 +295,7 @@ export function TripGuide({ crew, step, onStep }: { crew: Crew; step: GuideStepI
       </div>
 
       <section role="tabpanel" aria-label={cur.title} className={cn('grid items-start gap-4', !wide && 'lg:grid-cols-2')}>
-        <div className="flex flex-col gap-4 rounded-[28px] bg-ink-800 p-5 sm:p-[1.5294rem]">
+        <div className="flex flex-col gap-4 rounded-[28px] tt-glass border-[1.5px] border-cream/[0.08] p-5 sm:p-[1.5294rem]">
           <span className="font-mono text-[0.7647rem] text-signal-text">étape {idx + 1} / 8</span>
           <h2 className="tt-display m-0 text-[2.2353rem] leading-none text-cream">{cur.title}</h2>
           <p className="m-0 text-[1.0588rem] leading-[1.55] text-dust-100">{cur.intro}</p>

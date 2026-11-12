@@ -101,9 +101,11 @@ export default function AccountPage() {
                 const cover = mediaUrl(crew.cover_path);
                 const live = isLive(crew.last_fix_at);
                 return (
-                  <Link key={crew.id} to={`/mon-compte/road-trips/${crew.slug}`} className="group flex min-h-[8.7059rem] overflow-hidden rounded-[28px] border-[1.5px] border-ink-700 bg-ink-800 text-cream hover:border-dust-600 hover:text-cream">
-                    <div className="relative w-28 flex-none bg-ink-700 sm:w-36">
-                      {cover && <img src={cover} alt="" className="h-full w-full object-cover" loading="lazy" />}
+                  <Link key={crew.id} to={`/mon-compte/road-trips/${crew.slug}`} className="group flex min-h-[8.7059rem] overflow-hidden rounded-[28px] border-[1.5px] border-cream/[0.08] tt-glass text-cream hover:border-dust-600 hover:text-cream">
+                    <div className="relative w-28 flex-none bg-[radial-gradient(120%_100%_at_80%_0%,#4A2A15,#17130F)] sm:w-36">
+                      {cover
+                        ? <img src={cover} alt="" className="h-full w-full object-cover" loading="lazy" />
+                        : <div className="h-full w-full bg-[url('/fonds/montagnes.svg')] bg-cover bg-center" aria-hidden="true" />}
                     </div>
                     <div className="flex min-w-0 flex-1 flex-col gap-1.5 p-4">
                       <span className={cn('font-mono text-[0.7647rem]', live ? 'text-live-text' : 'text-signal-text')}>{live ? '● en direct' : tripStatus(crew)}</span>

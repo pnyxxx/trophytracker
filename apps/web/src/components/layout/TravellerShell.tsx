@@ -1,16 +1,19 @@
 /**
  * Gabarit de l'espace voyageur (/mon-compte/road-trips/:slug) : barre latérale sur ordinateur (logo, road trip
- * en cours et ses autres road trips, navigation, voyageur connecté), barre d'onglets défilante sur téléphone.
+ * en cours et ses autres road trips, navigation, voyageur connecté) ; sur téléphone, une barre du haut compacte et
+ * une barre d'onglets EN BAS de l'écran, avec des icônes, comme dans une appli (à portée de pouce).
  */
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { ExternalLink, Plus } from 'lucide-react';
+import { BookOpen, ExternalLink, Flag, Images, LayoutDashboard, Plus, Settings, Share2, type LucideIcon } from 'lucide-react';
 import { LogoMark, Wordmark } from '@/components/common/Logo';
 import { useAuth } from '@/hooks/auth';
 import { useMyCrews } from '@/hooks/queries';
 import type { Crew } from '@/lib/supabase';
 import { SECTIONS, tripStatus, type Section } from '@/lib/traveller';
 import { cn } from '@/lib/utils';
+
+const ICONS: Record<Section, LucideIcon> = { tableau: LayoutDashboard, guide: Flag, carnet: BookOpen, photos: Images, partage: Share2, reglages: Settings };
 
 export function TravellerShell({ crew, section, badges, onSection, children }: {
   crew: Crew;
@@ -25,22 +28,25 @@ export function TravellerShell({ crew, section, badges, onSection, children }: {
   const others = mine.filter((m) => m.crew.id !== crew.id);
   const name = profile?.display_name ?? '';
 
-  const nav = (mobile: boolean) => SECTIONS.map((s) => (
-    <button
-      key={s.id}
-      type="button"
-      onClick={() => onSection(s.id)}
-      aria-current={section === s.id ? 'page' : undefined}
-      className={cn(
-        'flex items-center justify-between gap-2.5 rounded-[14px] font-bold',
-        mobile ? 'min-h-11 flex-none whitespace-nowrap rounded-full px-4 text-[0.8824rem]' : 'min-h-[2.7059rem] px-3 text-left text-[0.9412rem]',
-        section === s.id ? 'bg-signal text-white' : mobile ? 'bg-ink-800 text-dust-100' : 'text-dust-100 hover:bg-ink-800 hover:text-white',
-      )}
-    >
-      {s.label}
-      {badges[s.id] && <span className="font-mono text-[0.7059rem] font-normal opacity-85">{badges[s.id]}</span>}
-    </button>
-  ));
+  const nav = SECTIONS.map((s) => {
+    const Icon = ICONS[s.id];
+    return (
+      <button
+        key={s.id}
+        type="button"
+        onClick={() => onSection(s.id)}
+        aria-current={section === s.id ? 'page' : undefined}
+        className={cn(
+          'flex min-h-[2.7rem] items-center gap-2.5 rounded-[14px] px-3 text-left text-[0.9412rem] font-bold',
+          section === s.id ? 'bg-signal text-white' : 'text-dust-100 hover:bg-cream/[0.06] hover:text-white',
+        )}
+      >
+        <Icon className="h-[18px] w-[18px] flex-none opacity-90" aria-hidden="true" />
+        <span className="flex-1">{s.label}</span>
+        {badges[s.id] && <span className="font-mono text-[0.7059rem] font-normal opacity-85">{badges[s.id]}</span>}
+      </button>
+    );
+  });
 
   return (
     <div className="tt-fond tt-fond--canyon min-h-screen text-cream lg:grid lg:grid-cols-[260px_minmax(0,1fr)]">
@@ -53,7 +59,7 @@ export function TravellerShell({ crew, section, badges, onSection, children }: {
           <span className="font-mono text-[0.7647rem] text-signal-text">{tripStatus(crew)}</span>
           <Link to={`/road-trip/${crew.slug}`} className="mt-1.5 inline-flex items-center gap-1.5 text-[0.8235rem] font-bold text-dust-200 hover:text-white">Voir ma page <ExternalLink className="h-3.5 w-3.5" /></Link>
         </div>
-        <nav aria-label="Espace voyageur" className="flex flex-col gap-1">{nav(false)}</nav>
+        <nav aria-label="Espace voyageur" className="flex flex-col gap-1">{nav}</nav>
         {others.length > 0 && (
           <div className="flex flex-col gap-1">
             <span className="px-3 font-mono text-[0.7059rem] text-dust-500">mes autres road trips</span>
@@ -73,7 +79,7 @@ export function TravellerShell({ crew, section, badges, onSection, children }: {
       </aside>
 
       {/* Barre du haut (téléphone) */}
-      <div className="sticky top-0 z-[900] flex flex-col gap-2.5 border-b-[1.5px] border-ink-700 bg-ink/[0.94] px-4 py-3 backdrop-blur-[14px] lg:hidden">
+      <div className="sticky top-0 z-[900] flex flex-col gap-2.5 border-b-[1.5px] border-cream/[0.08] bg-ink/[0.86] px-4 py-2.5 backdrop-blur-[14px] lg:hidden">
         <div className="flex items-center gap-3">
           <Link to="/" aria-label="trophytracker, accueil"><LogoMark /></Link>
           <div className="flex min-w-0 flex-1 flex-col">
@@ -83,10 +89,36 @@ export function TravellerShell({ crew, section, badges, onSection, children }: {
           <Link to={`/road-trip/${crew.slug}`} className="flex min-h-11 items-center gap-1.5 rounded-full border-[1.5px] border-cream/40 px-3.5 text-[0.8235rem] font-bold text-cream hover:text-cream">Ma page <ExternalLink className="h-3.5 w-3.5" /></Link>
           <Link to="/mon-compte" aria-label="Mon compte" className="flex h-10 w-10 items-center justify-center rounded-full bg-signal font-bold text-white hover:text-white">{(name[0] ?? '?').toUpperCase()}</Link>
         </div>
-        <nav aria-label="Espace voyageur" className="-mx-4 flex gap-1.5 overflow-x-auto px-4">{nav(true)}</nav>
       </div>
 
-      <main id="contenu" className="min-w-0 max-w-[1120px] px-4 py-6 lg:px-12 lg:py-10">{children}</main>
+      <main id="contenu" className="min-w-0 max-w-[1120px] px-4 pb-28 pt-5 lg:px-12 lg:py-10">{children}</main>
+
+      {/* Onglets en bas de l'écran (téléphone) */}
+      <nav
+        aria-label="Espace voyageur"
+        className="fixed inset-x-0 bottom-0 z-[900] grid grid-cols-6 border-t-[1.5px] border-cream/[0.08] bg-ink/[0.9] px-1 pb-[max(6px,env(safe-area-inset-bottom))] pt-1.5 backdrop-blur-[16px] lg:hidden"
+      >
+        {SECTIONS.map((s) => {
+          const Icon = ICONS[s.id];
+          const active = section === s.id;
+          return (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => onSection(s.id)}
+              aria-current={active ? 'page' : undefined}
+              aria-label={s.label}
+              className={cn('relative flex min-h-[3.3rem] flex-col items-center justify-center gap-1 rounded-[14px] text-[0.6471rem] font-bold', active ? 'text-cream' : 'text-dust-400')}
+            >
+              <span className={cn('flex h-8 w-12 items-center justify-center rounded-full transition-colors', active && 'bg-signal text-white')}>
+                <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
+              </span>
+              {s.short}
+              {badges[s.id] && !active && <span className="absolute right-1.5 top-0.5 rounded-full bg-ink-700 px-1.5 font-mono text-[0.6rem] font-normal text-dust-200">{badges[s.id]}</span>}
+            </button>
+          );
+        })}
+      </nav>
     </div>
   );
 }

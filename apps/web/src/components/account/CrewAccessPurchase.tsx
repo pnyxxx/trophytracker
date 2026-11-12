@@ -115,7 +115,7 @@ export function CrewAccessPurchase({ returnTo, compact = false }: { returnTo?: '
     </ul>
   );
   return (
-    <div className={cn('flex flex-col gap-5', compact ? 'gap-4' : 'rounded-[28px] border-[1.5px] border-ink-700 bg-ink-800 p-5 sm:p-7')}>
+    <div className={cn('flex flex-col gap-5', compact ? 'gap-4' : 'rounded-[28px] border-[1.5px] border-cream/[0.08] tt-glass p-5 sm:p-7')}>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-1.5">
           {!compact && <span className="font-mono text-[0.7647rem] text-signal-text">accès road trip · paiement unique</span>}

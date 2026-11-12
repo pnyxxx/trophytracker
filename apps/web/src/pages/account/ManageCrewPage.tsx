@@ -70,7 +70,7 @@ function Overview({ crew, onGo }: { crew: Crew; onGo: (s: Section, step?: GuideS
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className={`flex flex-col gap-3 rounded-[28px] p-6 ${crew.tracking_enabled ? 'bg-ink-800' : 'bg-signal text-white'}`}>
+        <div className={`flex flex-col gap-3 rounded-[28px] p-6 ${crew.tracking_enabled ? 'tt-glass border-[1.5px] border-cream/[0.08]' : 'bg-signal text-white'}`}>
           <span className="font-mono text-[0.7647rem] opacity-90">suivi GPS</span>
           {crew.tracking_enabled ? (
             <>
@@ -92,7 +92,7 @@ function Overview({ crew, onGo }: { crew: Crew; onGo: (s: Section, step?: GuideS
             </>
           )}
         </div>
-        <button type="button" onClick={() => onGo('guide', next?.id)} className="flex items-center gap-4 rounded-[28px] bg-ink-800 p-6 text-left hover:bg-ink-700">
+        <button type="button" onClick={() => onGo('guide', next?.id)} className="flex items-center gap-4 rounded-[28px] tt-glass border-[1.5px] border-cream/[0.08] p-6 text-left hover:bg-ink-700/80">
           <ProgressRing value={g.total ? g.done / g.total : 0} />
           <span className="flex flex-col gap-1">
             <span className="text-[1.1176rem] font-bold text-cream">Prêt au départ</span>
@@ -103,7 +103,7 @@ function Overview({ crew, onGo }: { crew: Crew; onGo: (s: Section, step?: GuideS
       </div>
 
       <button type="button" onClick={() => onGo('carnet')}
-        className="relative flex flex-wrap items-center gap-5 overflow-hidden rounded-[28px] bg-ink-800 p-6 text-left ring-signal hover:bg-ink-700 focus-visible:ring-2">
+        className="relative flex flex-wrap items-center gap-5 overflow-hidden rounded-[28px] tt-glass border-[1.5px] border-cream/[0.08] p-6 text-left ring-signal hover:bg-ink-700/80 focus-visible:ring-2">
         <span className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-signal/20 blur-3xl" aria-hidden="true" />
         <span className="relative flex h-[4.2353rem] w-[4.2353rem] flex-none items-center justify-center rounded-full bg-signal text-white shadow-[0_14px_30px_rgba(225,38,44,.35)]">
           <Mic className="h-9 w-9" />
@@ -118,14 +118,14 @@ function Overview({ crew, onGo }: { crew: Crew; onGo: (s: Section, step?: GuideS
 
       <dl className="m-0 grid grid-cols-2 gap-2 md:grid-cols-4">
         {tiles.map((t) => (
-          <div key={t.l} className="flex flex-col gap-1 rounded-[20px] bg-ink-800 px-4 py-3.5">
+          <div key={t.l} className="flex flex-col gap-1 rounded-[20px] tt-glass border-[1.5px] border-cream/[0.08] px-4 py-3.5">
             <dt className="font-mono text-[0.7059rem] uppercase tracking-[0.1em] text-dust-400">{t.l}</dt>
             <dd className="m-0 font-mono text-[1.5294rem] text-cream">{t.v}{t.u && <span className="text-[0.8235rem] text-dust-400"> {t.u}</span>}</dd>
           </div>
         ))}
       </dl>
 
-      <section className="flex flex-col gap-4 rounded-[28px] bg-ink-800 p-6" aria-label="Visibilité pour les sponsors">
+      <section className="flex flex-col gap-4 rounded-[28px] tt-glass border-[1.5px] border-cream/[0.08] p-6" aria-label="Visibilité pour les sponsors">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div className="flex flex-col gap-1">
             <span className="font-mono text-[0.7647rem] text-dust-400">visibilité · pour tes sponsors</span>

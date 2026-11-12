@@ -53,7 +53,7 @@ export function CheersWall({ crewId, canEdit, isDemo }: { crewId: string; canEdi
   });
 
   return (
-    <div className="flex flex-col gap-3.5 rounded-[28px] bg-ink-800 p-6">
+    <div className="flex flex-col gap-3.5 rounded-[28px] tt-glass border-[1.5px] border-cream/[0.08] p-6">
       <span className="font-mono text-[0.7647rem] text-dust-400">mur d’encouragements{cheers.length ? ` · ${cheers.length}` : ''}</span>
       <span className="tt-display text-[1.5294rem] leading-[1.1] text-cream">Laisse un mot aux voyageurs, ils le liront au bivouac.</span>
       {!isDemo && (

@@ -77,14 +77,14 @@ export function InfoTab({ crew }: { crew: Crew }) {
 
   return (
     <form onSubmit={(e: FormEvent) => { e.preventDefault(); save.mutate(); }} className="space-y-6">
-      <Panel title="Images" description="Le logo apparaît sur la carte et dans tes road trips ; la couverture en fond du haut de ta page.">
+      <Panel collapsible title="Images" description="Le logo apparaît sur la carte et dans tes road trips ; la couverture en fond du haut de ta page.">
         <div className="flex flex-col gap-4 sm:flex-row">
           <AvatarPicker crew={crew} />
           <CoverPicker crew={crew} />
         </div>
       </Panel>
 
-      <Panel title="Présentation">
+      <Panel collapsible defaultOpen title="Présentation">
         <div className="grid gap-4 md:grid-cols-2">
           <Field id="name" label="Nom du road trip"><Input id="name" required minLength={2} maxLength={80} value={form.name} onChange={set('name')} /></Field>
           <Field id="car" label="Numéro de course" hint="Facultatif : ton numéro si tu participes à un rallye."><Input id="car" maxLength={10} value={form.car_number} onChange={set('car_number')} /></Field>
@@ -112,14 +112,14 @@ export function InfoTab({ crew }: { crew: Crew }) {
         </div>
       </Panel>
 
-      <Panel title="Dates" description="Le jour du départ, le suivi GPS se lance tout seul si tu as oublié de le faire. Les photos sont datées « Jour 3 », « Jour 4 »…">
+      <Panel collapsible title="Dates" description="Le jour du départ, le suivi GPS se lance tout seul si tu as oublié de le faire. Les photos sont datées « Jour 3 », « Jour 4 »…">
         <div className="grid gap-4 md:grid-cols-2">
           <Field id="starts" label="Départ"><Input id="starts" type="date" value={form.starts_on} onChange={set('starts_on')} /></Field>
           <Field id="ends" label="Retour" hint="Facultatif."><Input id="ends" type="date" min={form.starts_on || undefined} value={form.ends_on} onChange={set('ends_on')} /></Field>
         </div>
       </Panel>
 
-      <Panel title="Contact & réseaux" description="Instagram et Facebook s’affichent en boutons bien visibles en haut de ta page ; l’e-mail, en bas, dans « Un message pour les voyageurs ? ».">
+      <Panel collapsible title="Contact & réseaux" description="Instagram et Facebook s’affichent en boutons bien visibles en haut de ta page ; l’e-mail, en bas, dans « Un message pour les voyageurs ? ».">
         <div className="grid gap-4 md:grid-cols-3">
           <Field id="email" label="Email de contact"><Input id="email" type="email" value={form.contact_email} onChange={set('contact_email')} /></Field>
           <Field id="insta" label="Instagram"><Input id="insta" inputMode="url" placeholder="@ton-compte ou lien" value={form.instagram_url} onChange={set('instagram_url')} /></Field>
@@ -127,13 +127,13 @@ export function InfoTab({ crew }: { crew: Crew }) {
         </div>
       </Panel>
 
-      <Panel title="Cagnotte" description="Le lien de ta cagnotte en ligne (Leetchi, HelloAsso, Lydia…) : un bouton « Participer » s’affiche sur ta page.">
+      <Panel collapsible title="Cagnotte" description="Le lien de ta cagnotte en ligne (Leetchi, HelloAsso, Lydia…) : un bouton « Participer » s’affiche sur ta page.">
         <Field id="fundraiser" label="Lien de la cagnotte">
           <Input id="fundraiser" inputMode="url" maxLength={300} placeholder="https://www.leetchi.com/…" value={form.fundraiser_url} onChange={set('fundraiser_url')} />
         </Field>
       </Panel>
 
-      <Panel title="Visibilité" description="Qui peut voir la page et la position GPS. Tu peux changer d’avis à tout moment.">
+      <Panel collapsible title="Visibilité" description="Qui peut voir la page et la position GPS. Tu peux changer d’avis à tout moment.">
         <div role="radiogroup" aria-label="Visibilité" className="grid gap-3 md:grid-cols-3">
           {VISIBILITY.map((v) => (
             <button
@@ -151,7 +151,7 @@ export function InfoTab({ crew }: { crew: Crew }) {
         </div>
       </Panel>
 
-      <div className="sticky bottom-4 flex justify-end">
+      <div className="sticky bottom-[5.6rem] z-10 flex justify-end lg:bottom-4">
         <Button type="submit" size="lg" disabled={save.isPending} className="shadow-xl">
           {save.isPending ? 'Enregistrement…' : 'Enregistrer les modifications'}
         </Button>

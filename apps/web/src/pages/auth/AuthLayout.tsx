@@ -31,7 +31,7 @@ export function AuthLayout({ title, subtitle, children, footer }: {
           <Link to="/" className="mb-8 flex items-center justify-center gap-[0.5294rem] text-cream hover:text-cream lg:hidden" aria-label="trophytracker, accueil">
             <LogoMark /> <Wordmark />
           </Link>
-          <div className="rounded-[28px] border-[1.5px] border-ink-700 bg-ink-800 p-5 shadow-[0_24px_60px_rgba(0,0,0,.45)] sm:p-8 md:p-10">
+          <div className="rounded-[28px] border-[1.5px] border-cream/[0.08] tt-glass p-5 shadow-[0_24px_60px_rgba(0,0,0,.45)] sm:p-8 md:p-10">
             <h1 className="tt-display m-0 text-[clamp(2rem,7.38vw,3.0588rem)] text-cream [overflow-wrap:anywhere]">{title}</h1>
             {subtitle && <p className="mb-0 mt-3 text-[1rem] leading-relaxed text-dust-200">{subtitle}</p>}
             <div className="mt-7">{children}</div>

@@ -2,13 +2,13 @@
 import type { Crew } from './supabase';
 
 export type Section = 'tableau' | 'guide' | 'carnet' | 'photos' | 'partage' | 'reglages';
-export const SECTIONS: { id: Section; label: string }[] = [
-  { id: 'tableau', label: 'Tableau de bord' },
-  { id: 'guide', label: 'Prêt au départ' },
-  { id: 'carnet', label: 'Carnet de route' },
-  { id: 'photos', label: 'Photos' },
-  { id: 'partage', label: 'Partage' },
-  { id: 'reglages', label: 'Réglages' },
+export const SECTIONS: { id: Section; label: string; short: string }[] = [
+  { id: 'tableau', label: 'Tableau de bord', short: 'Accueil' },
+  { id: 'guide', label: 'Prêt au départ', short: 'Départ' },
+  { id: 'carnet', label: 'Carnet de route', short: 'Carnet' },
+  { id: 'photos', label: 'Photos', short: 'Photos' },
+  { id: 'partage', label: 'Partage', short: 'Partage' },
+  { id: 'reglages', label: 'Réglages', short: 'Réglages' },
 ];
 
 const daysUntil = (iso: string) => Math.round((new Date(`${iso}T00:00:00`).getTime() - new Date(new Date().toDateString()).getTime()) / 864e5);
