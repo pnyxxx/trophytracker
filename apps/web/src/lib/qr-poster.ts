@@ -27,6 +27,14 @@ export interface PosterCrew {
   /** Trace [lat, lon, …] pour la story ; sinon la position de départ. */
   track?: readonly (readonly number[])[];
   start?: { lat: number; lon: number } | null;
+  /** Story : photo de couverture du road trip (fond), cadrée comme sur sa page (en %). */
+  coverUrl?: string | null;
+  coverFocus?: { x: number; y: number };
+  /** Story : accroche, prénoms des voyageurs, nombre de photos, nombre de jours prévus. */
+  tagline?: string | null;
+  travellers?: string[];
+  photos?: number;
+  totalDays?: number | null;
 }
 
 const C = { night: '#15161A', cream: '#F5F1EA', red: '#E1262C', white: '#FFFFFF', dust: '#C9C5BD', muted: '#5C5850' };
@@ -34,6 +42,7 @@ const DISPLAY = '"Bricolage Grotesque Variable", "Bricolage Grotesque", sans-ser
 /** Nom de la marque (logo « la trace dessine la 4L »). */
 const LOGO_FONT = '"Big Shoulders Display", Impact, sans-serif';
 const MONO = '"DM Mono", ui-monospace, monospace';
+const SANS = '"Atkinson Hyperlegible", system-ui, sans-serif';
 
 export const POSTER_SIZE: Record<PosterFormat, [number, number]> = { sticker: [1440, 1440], story: [1080, 1920], round: [960, 960] };
 
@@ -235,9 +244,249 @@ async function drawStoryBackground(ctx: CanvasRenderingContext2D, c: PosterCrew,
   ctx.stroke();
 }
 
+/** Découpe un texte en lignes de `maxWidth` au plus (les mots en trop finissent par « … »). */
+function wrapLines(ctx: CanvasRenderingContext2D, text: string, maxWidth: number, maxLines: number) {
+  const words = text.split(/\s+/).filter(Boolean);
+  const lines: string[] = [];
+  let cur = '';
+  for (const word of words) {
+    const next = cur ? `${cur} ${word}` : word;
+    if (ctx.measureText(next).width <= maxWidth || !cur) cur = next;
+    else {
+      lines.push(cur);
+      cur = word;
+    }
+  }
+  if (cur) lines.push(cur);
+  if (lines.length > maxLines) {
+    const kept = lines.slice(0, maxLines);
+    let last = `${kept[maxLines - 1]}…`;
+    while (ctx.measureText(last).width > maxWidth && last.length > 2) last = `${last.slice(0, -2)}…`;
+    kept[maxLines - 1] = last;
+    return kept;
+  }
+  return lines;
+}
+
+/** « Léa, Sam & Noé » */
+const joinNames = (names: string[]) => (names.length <= 1 ? names.join('') : `${names.slice(0, -1).join(', ')} & ${names.at(-1)}`);
+
+/** Photo posée en « cover » (comme object-fit) avec son point de cadrage, dans le rectangle donné. */
+function drawCover(ctx: CanvasRenderingContext2D, img: HTMLImageElement, x: number, y: number, w: number, h: number, focus = { x: 50, y: 50 }) {
+  const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight);
+  const dw = img.naturalWidth * scale;
+  const dh = img.naturalHeight * scale;
+  ctx.drawImage(img, x - (dw - w) * (focus.x / 100), y - (dh - h) * (focus.y / 100), dw, dh);
+}
+
+/** Petite carte de la trace (vue satellite, trace rouge, balise), en vignette arrondie. */
+async function drawMiniMap(ctx: CanvasRenderingContext2D, c: PosterCrew, x: number, y: number, size: number) {
+  const pts = (c.track ?? []).map((p) => ({ lat: p[0]!, lon: p[1]! })).filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lon));
+  const anchor = pts.length ? pts : c.start ? [c.start] : [];
+  if (!anchor.length) return false;
+  const step = Math.max(1, Math.floor(pts.length / 800));
+  const kept = pts.filter((_, i) => i % step === 0 || i === pts.length - 1);
+  const frame = fitFrame(anchor, size, size, 0.78, 0.78);
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,.45)';
+  ctx.shadowBlur = 40;
+  ctx.shadowOffsetY = 16;
+  ctx.fillStyle = C.cream;
+  ctx.beginPath();
+  ctx.roundRect(x - 10, y - 10, size + 20, size + 20, 52);
+  ctx.fill();
+  ctx.restore();
+  ctx.save();
+  ctx.beginPath();
+  ctx.roundRect(x, y, size, size, 42);
+  ctx.clip();
+  ctx.fillStyle = C.night;
+  ctx.fillRect(x, y, size, size);
+  try {
+    const url = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=${frame.bbox.map((n) => n.toFixed(5)).join(',')}`
+      + `&bboxSR=4326&imageSR=3857&size=${size},${size}&format=jpg&f=image`;
+    ctx.drawImage(await loadImage(url, true), x, y, size, size);
+    ctx.fillStyle = 'rgba(0,0,0,.18)';
+    ctx.fillRect(x, y, size, size);
+  } catch {
+    /* imagerie indisponible : fond nuit */
+  }
+  if (kept.length > 1) {
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    for (const [color, width] of [[C.night, 14], [C.red, 8]] as const) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.beginPath();
+      kept.forEach((p, i) => { const [px, py] = frame.toPx(p.lat, p.lon); if (i) ctx.lineTo(x + px, y + py); else ctx.moveTo(x + px, y + py); });
+      ctx.stroke();
+    }
+  }
+  const last = kept.at(-1) ?? anchor[0]!;
+  const [bx, by] = frame.toPx(last.lat, last.lon);
+  ctx.fillStyle = 'rgba(225,38,44,.35)';
+  ctx.beginPath();
+  ctx.arc(x + bx, y + by, 34, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = C.red;
+  ctx.strokeStyle = C.white;
+  ctx.lineWidth = 6;
+  ctx.beginPath();
+  ctx.arc(x + bx, y + by, 18, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+  return true;
+}
+
+/** Pastille de verre (chiffre + légende), pour la rangée de chiffres de la story. */
+function statChip(ctx: CanvasRenderingContext2D, value: string, label: string, x: number, y: number, w: number) {
+  const h = 132;
+  ctx.fillStyle = 'rgba(21,22,26,.62)';
+  ctx.strokeStyle = 'rgba(245,241,234,.18)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, h, 34);
+  ctx.fill();
+  ctx.stroke();
+  ctx.textAlign = 'left';
+  ctx.fillStyle = C.cream;
+  fitFont(ctx, value, (px) => `500 ${px}px ${MONO}`, w - 52, 50, 30);
+  ctx.fillText(value, x + 26, y + 66);
+  ctx.font = `400 24px ${MONO}`;
+  ctx.fillStyle = C.dust;
+  ctx.fillText(label.toUpperCase(), x + 26, y + 106);
+}
+
+/**
+ * Story 1080 × 1920 : la photo de couverture du road trip en fond (sinon la vue satellite de la trace), le logo et
+ * « en direct » en haut, la petite carte de la trace, puis les voyageurs, le titre, l'accroche, trois chiffres et
+ * la carte crème du QR code « Suivez-nous en direct ».
+ */
+async function drawStory(ctx: CanvasRenderingContext2D, crew: PosterCrew, w: number, h: number, titleA: string, titleB: string | null) {
+  // 1. Fond : la couverture, sinon la vue satellite de la trace (la petite carte serait alors en double).
+  let cover = false;
+  if (crew.coverUrl) {
+    try {
+      const img = await loadImage(crew.coverUrl, true);
+      ctx.fillStyle = C.night;
+      ctx.fillRect(0, 0, w, h);
+      drawCover(ctx, img, 0, 0, w, h, crew.coverFocus);
+      cover = true;
+    } catch {
+      /* couverture illisible : vue satellite */
+    }
+  }
+  if (!cover) await drawStoryBackground(ctx, crew, w, h);
+  const shade = ctx.createLinearGradient(0, 0, 0, h);
+  shade.addColorStop(0, 'rgba(21,22,26,.78)');
+  shade.addColorStop(0.16, 'rgba(21,22,26,.15)');
+  shade.addColorStop(0.42, 'rgba(21,22,26,.05)');
+  shade.addColorStop(0.6, 'rgba(21,22,26,.7)');
+  shade.addColorStop(1, 'rgba(21,22,26,.97)');
+  ctx.fillStyle = shade;
+  ctx.fillRect(0, 0, w, h);
+
+  // 2. En haut : la marque et « en direct ».
+  await drawBrand(ctx, 70, 150, 46);
+  const label = crew.live ? (crew.day ? `jour ${crew.day} · en direct` : 'en direct') : crew.starts_on ? `départ le ${shortDate(crew.starts_on, { day: 'numeric', month: 'long' })}` : 'carnet de route';
+  pill(ctx, label, w - 70, 98, 32, 'right');
+
+  // 3. La petite carte de la trace, posée sur la photo (inclinée comme une carte postale).
+  if (cover) {
+    const size = 380;
+    ctx.save();
+    ctx.translate(w - 70 - size / 2, 300 + size / 2);
+    ctx.rotate((3 * Math.PI) / 180);
+    await drawMiniMap(ctx, crew, -size / 2, -size / 2, size);
+    ctx.restore();
+  }
+
+  // 4. Les voyageurs, le titre, l'accroche.
+  let y = 1060;
+  ctx.textAlign = 'left';
+  if (crew.travellers?.length) {
+    ctx.font = `500 30px ${MONO}`;
+    ctx.fillStyle = '#F2C27A';
+    ctx.fillText(joinNames(crew.travellers).toUpperCase(), 70, y);
+    y += 30;
+  }
+  const full = `${titleA}${titleB ?? ''}`;
+  const oneLine = fitFont(ctx, full, (p) => `800 ${p}px ${DISPLAY}`, w - 140, 132, 40);
+  if (oneLine >= 92 || !titleB) {
+    // Sur une ligne (ou le nom découpé en deux lignes au plus).
+    const px = titleB ? oneLine : Math.max(oneLine, 96);
+    ctx.font = `800 ${px}px ${DISPLAY}`;
+    ctx.letterSpacing = `${-px * 0.045}px`;
+    const lines = titleB ? [full] : wrapLines(ctx, full, w - 140, 2);
+    for (const line of lines) {
+      y += px * 0.98;
+      ctx.fillStyle = C.cream;
+      if (titleB && line === full) {
+        ctx.fillText(titleA, 70, y);
+        ctx.fillStyle = C.red;
+        ctx.fillText(titleB, 70 + ctx.measureText(titleA).width, y);
+      } else ctx.fillText(line, 70, y);
+    }
+  } else {
+    // « Saint-Quentin → » sur une ligne, la destination en rouge sur la suivante.
+    const px = Math.min(fitFont(ctx, titleA.trim(), (p) => `800 ${p}px ${DISPLAY}`, w - 140, 124, 56), fitFont(ctx, titleB, (p) => `800 ${p}px ${DISPLAY}`, w - 140, 124, 56));
+    ctx.font = `800 ${px}px ${DISPLAY}`;
+    ctx.letterSpacing = `${-px * 0.045}px`;
+    y += px * 0.98;
+    ctx.fillStyle = C.cream;
+    ctx.fillText(titleA.trim(), 70, y);
+    y += px * 0.98;
+    ctx.fillStyle = C.red;
+    ctx.fillText(titleB, 70, y);
+  }
+  ctx.letterSpacing = '0px';
+  if (crew.tagline) {
+    ctx.font = `400 38px ${SANS}`;
+    ctx.fillStyle = '#E4DFD6';
+    for (const line of wrapLines(ctx, crew.tagline, w - 140, 2)) {
+      y += 52;
+      ctx.fillText(line, 70, y);
+    }
+  }
+
+  // 5. Trois chiffres.
+  const until = crew.starts_on ? Math.round((new Date(`${crew.starts_on}T00:00:00`).getTime() - new Date(new Date().toDateString()).getTime()) / 864e5) : null;
+  const stats: [string, string][] = [
+    crew.distanceKm && crew.distanceKm >= 1 ? [`${Math.round(crew.distanceKm).toLocaleString('fr-FR')} km`, 'parcourus'] : until != null && until > 0 ? [`J-${until}`, 'avant le départ'] : ['0 km', 'parcourus'],
+    crew.day ? [crew.totalDays ? `${crew.day}/${crew.totalDays}` : `jour ${crew.day}`, 'jour du voyage']
+      : dateRange(crew.starts_on, crew.ends_on) ? [dateRange(crew.starts_on, crew.ends_on), 'dates']
+        : [String(Math.max(1, crew.travellers?.length ?? 1)), (crew.travellers?.length ?? 1) > 1 ? 'voyageurs' : 'voyageur'],
+    [String(crew.photos ?? 0), crew.photos === 1 ? 'photo' : 'photos'],
+  ];
+  const sy = h - 70 - 270 - 40 - 132;
+  const gap = 20;
+  const cw = (w - 140 - gap * 2) / 3;
+  stats.forEach(([v, l], i) => statChip(ctx, v, l, 70 + i * (cw + gap), sy, cw));
+
+  // 6. Carte crème en bas : QR + « Suivez-nous en direct ».
+  const cy = h - 70 - 270;
+  ctx.fillStyle = C.cream;
+  ctx.beginPath();
+  ctx.roundRect(70, cy, w - 140, 270, 52);
+  ctx.fill();
+  await drawQr(ctx, crew.url, 96, cy + 26, 218);
+  ctx.textAlign = 'left';
+  ctx.font = `800 60px ${DISPLAY}`;
+  ctx.letterSpacing = '-2px';
+  ctx.fillStyle = C.night;
+  ctx.fillText('Suivez-nous', 352, cy + 104);
+  ctx.fillStyle = C.red;
+  ctx.fillText('en direct', 352, cy + 166);
+  ctx.letterSpacing = '0px';
+  ctx.font = `400 28px ${MONO}`;
+  ctx.fillStyle = C.muted;
+  ctx.fillText(`${new URL(crew.url).host} · scanne-moi`, 352, cy + 222);
+}
+
 /** Dessine le visuel et renvoie le canvas. */
 export async function drawPoster(format: PosterFormat, crew: PosterCrew): Promise<HTMLCanvasElement> {
-  await Promise.all([document.fonts.load(`800 100px ${DISPLAY}`), document.fonts.load(`900 100px ${LOGO_FONT}`), document.fonts.load(`500 40px ${MONO}`), document.fonts.load(`400 40px ${MONO}`)]);
+  await Promise.all([document.fonts.load(`800 100px ${DISPLAY}`), document.fonts.load(`900 100px ${LOGO_FONT}`), document.fonts.load(`500 40px ${MONO}`), document.fonts.load(`400 40px ${MONO}`), document.fonts.load(`400 40px ${SANS}`)]);
   const [w, h] = POSTER_SIZE[format];
   const canvas = document.createElement('canvas');
   canvas.width = w;
@@ -301,52 +550,7 @@ export async function drawPoster(format: PosterFormat, crew: PosterCrew): Promis
     ctx.fillText('Suivez-nous !', r, 720);
     ctx.letterSpacing = '0px';
   } else {
-    await drawStoryBackground(ctx, crew, w, h);
-    const top = ctx.createLinearGradient(0, 0, 0, h);
-    top.addColorStop(0, 'rgba(21,22,26,.88)');
-    top.addColorStop(0.3, 'rgba(21,22,26,0)');
-    top.addColorStop(0.55, 'rgba(21,22,26,0)');
-    top.addColorStop(1, 'rgba(21,22,26,.94)');
-    ctx.fillStyle = top;
-    ctx.fillRect(0, 0, w, h);
-
-    const label = crew.live ? (crew.day ? `jour ${crew.day} · en direct` : 'en direct') : crew.starts_on ? `départ le ${shortDate(crew.starts_on, { day: 'numeric', month: 'long' })}` : 'carnet de route';
-    pill(ctx, label, 70, 84, 36);
-    ctx.textAlign = 'left';
-    const full = `${titleA}${titleB ?? ''}`;
-    const px = fitFont(ctx, full, (p) => `800 ${p}px ${DISPLAY}`, w - 140, 124, 64);
-    ctx.font = `800 ${px}px ${DISPLAY}`;
-    ctx.letterSpacing = `${-px * 0.045}px`;
-    ctx.fillStyle = C.cream;
-    ctx.fillText(titleA, 70, 270);
-    if (titleB) {
-      ctx.fillStyle = C.red;
-      ctx.fillText(titleB, 70 + ctx.measureText(titleA).width, 270);
-    }
-    ctx.letterSpacing = '0px';
-    const facts = [crew.distanceKm ? `${Math.round(crew.distanceKm).toLocaleString('fr-FR')} km` : null, dateRange(crew.starts_on, crew.ends_on) || null].filter(Boolean).join(' · ');
-    if (facts) {
-      ctx.font = `400 38px ${MONO}`;
-      ctx.fillStyle = '#E4DFD6';
-      ctx.fillText(facts, 70, 340);
-    }
-    // Carte crème en bas : QR + « Suivez-nous en direct ».
-    const cy = h - 70 - 300;
-    ctx.fillStyle = C.cream;
-    ctx.beginPath();
-    ctx.roundRect(70, cy, w - 140, 300, 52);
-    ctx.fill();
-    await drawQr(ctx, crew.url, 100, cy + 30, 240);
-    ctx.textAlign = 'left';
-    ctx.font = `800 54px ${DISPLAY}`;
-    ctx.letterSpacing = '-1.6px';
-    ctx.fillStyle = C.night;
-    ctx.fillText('Suivez-nous', 380, cy + 130);
-    ctx.fillText('en direct', 380, cy + 190);
-    ctx.letterSpacing = '0px';
-    ctx.font = `400 28px ${MONO}`;
-    ctx.fillStyle = C.muted;
-    ctx.fillText(new URL(crew.url).host, 380, cy + 244);
+    await drawStory(ctx, crew, w, h, titleA, titleB);
   }
   return canvas;
 }

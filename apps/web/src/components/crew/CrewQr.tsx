@@ -2,7 +2,7 @@
  * Visuels QR code du road trip (autocollant, story, rond) : aperçu, téléchargement PNG et partage.
  * Proposés sur la page publique (fenêtre « Partager ») et dans l'espace voyageur (« Partage »).
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Copy, Download, Send, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -13,16 +13,19 @@ import { isLive } from '@/lib/format';
 import { dayOfTrip } from '@/lib/days';
 import { canvasToBlob, drawPoster, POSTER_SIZE, type PosterFormat } from '@/lib/qr-poster';
 import { markShared } from '@/lib/share';
+import { mediaUrl } from '@/lib/media';
+import { useCrewMembers, usePhotos } from '@/hooks/queries';
 import { cn } from '@/lib/utils';
 
 const FORMATS: { id: PosterFormat; label: string; hint: string }[] = [
   { id: 'sticker', label: 'Autocollant véhicule', hint: 'Carré 12 × 12 cm (1440 px) : à coller sur la vitre arrière ou la carrosserie.' },
-  { id: 'story', label: 'Story', hint: '1080 × 1920 sur la vue satellite de ta trace : Instagram, WhatsApp, Facebook.' },
+  { id: 'story', label: 'Story', hint: '1080 × 1920 sur ta photo de couverture, avec la carte de ta trace : Instagram, WhatsApp, Facebook.' },
   { id: 'round', label: 'Autocollant rond', hint: 'Rond de 8 cm (960 px) : pour une gourde, un casque, une valise.' },
 ];
 const FILE: Record<PosterFormat, string> = { sticker: 'autocollant', story: 'story', round: 'rond' };
 
-type CrewForQr = Pick<Crew, 'id' | 'slug' | 'name' | 'is_public' | 'city' | 'destination' | 'starts_on' | 'ends_on' | 'last_fix_at' | 'total_distance_m' | 'start_lat' | 'start_lon'>;
+type CrewForQr = Pick<Crew, 'id' | 'slug' | 'name' | 'is_public' | 'city' | 'destination' | 'starts_on' | 'ends_on' | 'last_fix_at' | 'total_distance_m' | 'start_lat' | 'start_lon'
+  | 'cover_path' | 'cover_focus_x' | 'cover_focus_y' | 'tagline'>;
 
 export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl?: boolean }) {
   const [format, setFormat] = useState<PosterFormat>('sticker');
@@ -38,6 +41,13 @@ export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl
     queryFn: async () => ((await supabase.rpc('get_track', { p_crew: crew.id })).data ?? []) as unknown as number[][],
   });
   const ready = format !== 'story' || isFetched;
+  // La story reprend la couverture de la page, les prénoms des voyageurs et le nombre de photos.
+  const { data: members = [] } = useCrewMembers(format === 'story' ? crew.id : undefined);
+  const { data: photos = [] } = usePhotos(format === 'story' ? crew.id : undefined);
+  const travellers = useMemo(() => members.map((m) => m.display_name).filter(Boolean) as string[], [members]);
+  const totalDays = crew.starts_on && crew.ends_on
+    ? Math.round((new Date(`${crew.ends_on}T12:00:00`).getTime() - new Date(`${crew.starts_on}T12:00:00`).getTime()) / 864e5) + 1
+    : null;
   const live = isLive(crew.last_fix_at);
   const day = crew.starts_on ? dayOfTrip(crew.starts_on, new Date()) : null;
 
@@ -51,6 +61,8 @@ export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl
       name: crew.name, url: pageUrl, city: crew.city, destination: crew.destination, starts_on: crew.starts_on, ends_on: crew.ends_on,
       live, day: day && day >= 1 ? day : null, distanceKm: crew.total_distance_m / 1000, track: track ?? [],
       start: crew.start_lat != null && crew.start_lon != null ? { lat: crew.start_lat, lon: crew.start_lon } : null,
+      coverUrl: mediaUrl(crew.cover_path), coverFocus: { x: crew.cover_focus_x, y: crew.cover_focus_y },
+      tagline: crew.tagline, travellers, photos: photos.length, totalDays,
     })
       .then(canvasToBlob)
       .then((blob) => {
@@ -63,7 +75,8 @@ export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl
       alive = false;
       if (url) URL.revokeObjectURL(url);
     };
-  }, [ready, format, track, crew.name, crew.city, crew.destination, crew.starts_on, crew.ends_on, crew.total_distance_m, crew.start_lat, crew.start_lon, live, day, pageUrl]);
+  }, [ready, format, track, crew.name, crew.city, crew.destination, crew.starts_on, crew.ends_on, crew.total_distance_m, crew.start_lat, crew.start_lon,
+    crew.cover_path, crew.cover_focus_x, crew.cover_focus_y, crew.tagline, travellers, photos.length, totalDays, live, day, pageUrl]);
 
   const file = image ? new File([image.blob], fileName, { type: 'image/png' }) : null;
   const canShareFile = !!file && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] });
