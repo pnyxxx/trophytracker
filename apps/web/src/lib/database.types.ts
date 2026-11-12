@@ -697,7 +697,9 @@ export type Database = {
           city: string | null
           created_at: string
           crew_id: string
+          facebook_url: string | null
           id: string
+          instagram_url: string | null
           lat: number | null
           logo_path: string | null
           lon: number | null
@@ -710,7 +712,9 @@ export type Database = {
           city?: string | null
           created_at?: string
           crew_id: string
+          facebook_url?: string | null
           id?: string
+          instagram_url?: string | null
           lat?: number | null
           logo_path?: string | null
           lon?: number | null
@@ -723,7 +727,9 @@ export type Database = {
           city?: string | null
           created_at?: string
           crew_id?: string
+          facebook_url?: string | null
           id?: string
+          instagram_url?: string | null
           lat?: number | null
           logo_path?: string | null
           lon?: number | null

@@ -11,11 +11,13 @@ import { toastError } from '@/lib/errors';
 import { mediaUrl, removeCrewImages, uploadCrewImage } from '@/lib/media';
 import { Spinner } from '@/components/common/Spinner';
 import { Field, orNull, Panel } from './shared';
+import { socialUrl } from '@/lib/social';
 import { LocationPicker, type Coords } from './LocationPicker';
 
-type Form = { name: string; website_url: string; city: string; sort_order: string };
+type Form = { name: string; website_url: string; instagram_url: string; facebook_url: string; city: string; sort_order: string };
 const toForm = (s?: Sponsor): Form => ({
-  name: s?.name ?? '', website_url: s?.website_url ?? '', city: s?.city ?? '', sort_order: s?.sort_order.toString() ?? '0',
+  name: s?.name ?? '', website_url: s?.website_url ?? '', instagram_url: s?.instagram_url ?? '', facebook_url: s?.facebook_url ?? '',
+  city: s?.city ?? '', sort_order: s?.sort_order.toString() ?? '0',
 });
 
 /** « monsite.fr » → « https://monsite.fr » : personne ne tape le https://. */
@@ -43,6 +45,8 @@ function SponsorDialog({ crew, sponsor, open, onClose }: { crew: Crew; sponsor?:
       }
       const row = {
         name: form.name.trim(), website_url: orNull(website), city: orNull(form.city),
+        // « @boulangerie.martin » ou un lien : on enregistre toujours l'adresse complète du compte.
+        instagram_url: socialUrl('instagram', form.instagram_url), facebook_url: socialUrl('facebook', form.facebook_url),
         lat: coords?.lat ?? null, lon: coords?.lon ?? null, sort_order: Number(form.sort_order) || 0, logo_path: logoPath,
       };
       const { error } = sponsor
@@ -71,7 +75,13 @@ function SponsorDialog({ crew, sponsor, open, onClose }: { crew: Crew; sponsor?:
           <Field id="s-logo" label="Logo" hint={sponsor?.logo_path ? 'Laisse vide pour garder le logo actuel.' : 'PNG avec fond transparent idéalement.'}>
             <Input id="s-logo" type="file" accept="image/*" onChange={(e) => setLogo(e.target.files?.[0] ?? null)} />
           </Field>
-          <Field id="s-web" label="Site web"><Input id="s-web" inputMode="url" placeholder="monsponsor.fr" value={form.website_url} onChange={set('website_url')} /></Field>
+          <Field id="s-web" label="Site web" hint="Facultatif : beaucoup de sponsors n’ont que leurs réseaux sociaux.">
+            <Input id="s-web" inputMode="url" placeholder="monsponsor.fr" value={form.website_url} onChange={set('website_url')} />
+          </Field>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field id="s-insta" label="Instagram"><Input id="s-insta" inputMode="url" placeholder="@son-compte ou lien" value={form.instagram_url} onChange={set('instagram_url')} /></Field>
+            <Field id="s-fb" label="Facebook"><Input id="s-fb" inputMode="url" placeholder="Lien de sa page" value={form.facebook_url} onChange={set('facebook_url')} /></Field>
+          </div>
           <Field id="s-place" label="Adresse" hint="Pour placer le sponsor sur ta carte. Facultatif.">
             <LocationPicker
               id="s-place"

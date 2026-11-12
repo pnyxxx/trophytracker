@@ -3,7 +3,8 @@
  * comme une appli plutôt qu'une longue liste :
  *   1. l'identité du voyage, en compact (couverture, titre, statut, voyageurs) ;
  *   2. la carte en grand, avec les chiffres clés collés dessous (téléphone) ou le tableau de bord à côté (ordinateur) ;
- *   3. des onglets : En direct (téléphone) · Carnet · Photos · Revivre (replay 3D, relief) · Soutenir.
+ *   3. des onglets : En direct (téléphone) · Photos · Carnet · Revivre (replay 3D, relief) · Soutenir ; ouvert par
+ *      défaut sur les photos, ou sur « Soutenir » s'il n'y en a pas.
  * Les liens « #carnet » et « #photos » (e-mails du soir, bulles de la carte) ouvrent le bon onglet.
  */
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
@@ -109,12 +110,14 @@ export default function CrewPage() {
   const canReplay = points.length >= 20;
   const tabs = ([
     !wide && { id: 'direct', label: 'En direct' },
-    { id: 'carnet', label: 'Carnet', count: published.length || undefined },
     photos.length > 0 && { id: 'photos', label: 'Photos', count: photos.length },
+    { id: 'carnet', label: 'Carnet', count: published.length || undefined },
     (canReplay || profile) && { id: 'revivre', label: 'Revivre' },
     { id: 'soutenir', label: 'Soutenir' },
   ].filter(Boolean) as { id: Tab; label: string; count?: number }[]);
-  const current: Tab = tab && tabs.some((t) => t.id === tab) ? tab : tabs[0]!.id;
+  // Onglet ouvert par défaut : les photos (ce que les proches regardent d'abord), sinon « Soutenir ».
+  const fallback: Tab = photos.length > 0 ? 'photos' : 'soutenir';
+  const current: Tab = tab && tabs.some((t) => t.id === tab) ? tab : fallback;
 
   /** Ouvre un onglet ; si la barre d'onglets est collée en haut, on remonte au début du contenu. */
   const open = (t: Tab, scroll = false) => {
@@ -322,14 +325,12 @@ export default function CrewPage() {
           )}
 
           {current === 'carnet' && (
-            <div id="carnet" className={cn(wide && photos.length > 0 && 'grid grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] items-start gap-8')}>
+            <div id="carnet" className="max-w-[48rem]">
               {hasLogbook ? (
                 <CrewLogbook stages={stages} photos={photos} journal={published} story={crew.story} points={points} startDate={startDate} />
               ) : (
                 <p className="tt-glass m-0 rounded-[20px] px-5 py-6 text-dust-300">Le carnet de route se remplira au fil du voyage : étapes, nuits, coups de cœur et pages du journal.</p>
               )}
-              {/* Sur ordinateur, les photos à côté du carnet : on voit tout d'un coup d'œil. */}
-              {wide && photos.length > 0 && <div className="sticky top-[8rem]"><CrewGallery photos={photos} /></div>}
             </div>
           )}
 

@@ -1,8 +1,8 @@
 /**
- * Guide « Prêt au départ » de l'espace voyageur : 8 étapes (voyage, équipage, véhicule, itinéraire, suivi GPS,
- * partage, sponsors & cagnotte, check-list), avec un anneau de progression.
+ * Guide « Prêt au départ » de l'espace voyageur : 6 étapes (voyage, itinéraire, suivi GPS, partage,
+ * sponsors & cagnotte, départ), avec un anneau de progression. Une étape commencée est en jaune, finie en vert.
  * Les cases se cochent toutes seules d'après les données du road trip ; celles qui ne se voient pas dans les
- * données (batterie externe, support fixé…) se cochent à la main et sont gardées sur cet appareil.
+ * données (localisation « toujours », plein fait…) se cochent à la main et sont gardées sur cet appareil.
  * À droite de chaque étape : l'outil qui permet de la faire (formulaires et onglets existants).
  * La dernière étape se termine par « Je pars », qui lance le suivi GPS.
  */
@@ -22,7 +22,7 @@ import { webUrl } from '@/lib/social';
 import { cn } from '@/lib/utils';
 import { CrewQrPanel } from '@/components/crew/CrewQr';
 import { CoverPicker } from './CrewImages';
-import { MembersTab } from './MembersTab';
+import { RoutePresets } from './RoutePresets';
 import { StagesTab } from './StagesTab';
 import { GpsTab } from './GpsTab';
 import { SponsorsTab } from './SponsorsTab';
@@ -241,52 +241,43 @@ export function TripGuide({ crew, step, onStep }: { crew: Crew; step: GuideStepI
   const cur = g.steps[idx]!;
   const tools: Record<GuideStepId, ReactNode> = {
     voyage: <TripBasics crew={crew} />,
-    equipage: <MembersTab crew={crew} />,
-    vehicule: (
-      <div className="flex flex-col gap-3 rounded-[24px] tt-glass border-[1.5px] border-cream/[0.08] p-5">
-        <span className="h-10 w-10 rounded-full border-[3px] border-ink bg-signal shadow-[0_0_0_2px_#E1262C]" aria-hidden="true" />
-        <span className="tt-display text-[1.4118rem] text-cream">Le véhicule</span>
-        <span className="text-[0.8824rem] text-dust-400">{crew.last_fix_at ? 'Le téléphone du véhicule envoie sa position.' : 'Aucune position reçue pour l’instant.'}</span>
-        <span className={cn('font-mono text-[0.7647rem]', crew.last_fix_at ? 'text-live-text' : 'text-gold-text')}>{crew.last_fix_at ? '● signal reçu' : '○ téléphone à relier dans « Suivi GPS »'}</span>
-        <Button variant="outline" size="sm" className="self-start" onClick={() => onStep('gps')}>Relier le téléphone</Button>
-      </div>
-    ),
-    itineraire: <StagesTab crew={crew} />,
+    itineraire: <div className="flex flex-col gap-4"><RoutePresets crew={crew} /><StagesTab crew={crew} /></div>,
     gps: <GpsTab crew={crew} />,
     partage: <SharePanel crew={crew} />,
     sponsors: <div className="flex flex-col gap-4"><FundraiserForm crew={crew} /><SponsorsTab crew={crew} /></div>,
     checklist: <GoButton crew={crew} fairPlayOk={g.fairPlayOk} onNeedGps={() => onStep('gps')} />,
   };
   // Les outils larges (GPS, étapes) prennent toute la largeur sous la carte de l'étape.
-  const wide = cur.id === 'gps' || cur.id === 'itineraire' || cur.id === 'sponsors' || cur.id === 'equipage';
+  const wide = cur.id === 'gps' || cur.id === 'itineraire' || cur.id === 'sponsors';
+  const n = g.steps.length;
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-5">
         <div className="flex flex-col gap-2">
-          <span className="font-mono text-[0.8235rem] text-dust-400">guide · 8 étapes</span>
+          <span className="font-mono text-[0.8235rem] text-dust-400">guide · {n} étapes</span>
           <h1 className="tt-display m-0 text-[clamp(2.1176rem,4.1vw,4.2353rem)] leading-[1.05] text-cream">Prêt au <span className="text-signal">départ</span></h1>
         </div>
         <div className="tt-glass flex items-center gap-4 rounded-[24px] border-[1.5px] border-cream/[0.08] py-3.5 pl-3.5 pr-5">
           <ProgressRing value={g.total ? g.done / g.total : 0} />
           <div className="flex flex-col gap-0.5">
             <span className="text-[1rem] font-bold">{g.done} point{g.done > 1 ? 's' : ''} sur {g.total} réglé{g.done > 1 ? 's' : ''}</span>
-            <span className="text-[0.8824rem] text-dust-400">{g.total - g.done ? `${g.stepsDone} étape${g.stepsDone > 1 ? 's' : ''} sur 8 terminée${g.stepsDone > 1 ? 's' : ''}` : 'Tout est prêt, bonne route !'}</span>
+            <span className="text-[0.8824rem] text-dust-400">{g.total - g.done ? `${g.stepsDone} étape${g.stepsDone > 1 ? 's' : ''} sur ${n} terminée${g.stepsDone > 1 ? 's' : ''}` : 'Tout est prêt, bonne route !'}</span>
           </div>
         </div>
       </div>
 
       <div role="tablist" aria-label="Étapes du guide" className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1">
         {g.steps.map((s, i) => {
-          const complete = s.items.every((x) => x.done);
           const sel = i === idx;
           return (
             <button key={s.id} role="tab" type="button" aria-selected={sel} onClick={() => onStep(s.id)}
-              className={cn('flex min-h-12 flex-none items-center gap-2.5 whitespace-nowrap rounded-full border-[1.5px] px-4 text-[0.8824rem] font-bold',
-                sel ? 'border-cream bg-cream text-ink' : 'border-ink-700 bg-ink-800 text-dust-100 hover:border-dust-600')}>
-              <span className={cn('flex h-6 w-6 items-center justify-center rounded-full font-mono text-[0.7059rem]',
-                complete ? 'bg-live text-ink' : sel ? 'bg-ink text-cream' : 'bg-ink-700 text-dust-300')}>
-                {complete ? '✓' : i + 1}
+              aria-label={`${s.label} : ${s.state === 'done' ? 'fait' : s.state === 'partial' ? `commencé, ${s.count} sur ${s.items.length}` : 'à faire'}`}
+              className={cn('flex min-h-11 flex-none items-center gap-2 whitespace-nowrap rounded-full border-[1.5px] py-1 pl-1.5 pr-3.5 text-[0.8824rem] font-bold',
+                sel ? 'border-cream bg-cream text-ink' : 'border-cream/[0.08] bg-ink-800/80 text-dust-100 hover:border-dust-600')}>
+              <span className={cn('flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 font-mono text-[0.7059rem]',
+                s.state === 'done' ? 'bg-live text-ink' : s.state === 'partial' ? 'bg-gold text-ink' : sel ? 'bg-ink text-cream' : 'bg-ink-700 text-dust-300')}>
+                {s.state === 'done' ? '✓' : s.state === 'partial' ? `${s.count}/${s.items.length}` : i + 1}
               </span>
               {s.label}
             </button>
@@ -296,7 +287,11 @@ export function TripGuide({ crew, step, onStep }: { crew: Crew; step: GuideStepI
 
       <section role="tabpanel" aria-label={cur.title} className={cn('grid items-start gap-4', !wide && 'lg:grid-cols-2')}>
         <div className="flex flex-col gap-4 rounded-[28px] tt-glass border-[1.5px] border-cream/[0.08] p-5 sm:p-[1.5294rem]">
-          <span className="font-mono text-[0.7647rem] text-signal-text">étape {idx + 1} / 8</span>
+          <span className="flex items-center gap-2 font-mono text-[0.7647rem]">
+            <span className="text-signal-text">étape {idx + 1} / {n}</span>
+            {cur.state === 'done' && <span className="rounded-full bg-live/15 px-2 py-0.5 text-live-text">faite ✓</span>}
+            {cur.state === 'partial' && <span className="rounded-full bg-gold/15 px-2 py-0.5 text-gold-text">presque : {cur.count} sur {cur.items.length}</span>}
+          </span>
           <h2 className="tt-display m-0 text-[2.2353rem] leading-none text-cream">{cur.title}</h2>
           <p className="m-0 text-[1.0588rem] leading-[1.55] text-dust-100">{cur.intro}</p>
           <ul className="m-0 flex list-none flex-col gap-2 p-0">
@@ -327,7 +322,7 @@ export function TripGuide({ crew, step, onStep }: { crew: Crew; step: GuideStepI
           </ul>
           <div className="mt-1.5 flex justify-between gap-2.5">
             <Button variant="outline" disabled={idx === 0} onClick={() => onStep(g.steps[idx - 1]!.id)}>← Précédent</Button>
-            {idx < 7 && <Button onClick={() => onStep(g.steps[idx + 1]!.id)}>Étape suivante →</Button>}
+            {idx < n - 1 && <Button onClick={() => onStep(g.steps[idx + 1]!.id)}>Étape suivante →</Button>}
           </div>
         </div>
         <div className="min-w-0">{tools[cur.id]}</div>

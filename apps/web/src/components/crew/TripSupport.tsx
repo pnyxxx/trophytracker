@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 import type { Sponsor } from '@/lib/supabase';
 import { mediaUrl } from '@/lib/media';
 import { Button } from '@/components/ui/button';
+import { FacebookIcon, InstagramIcon } from '@/components/common/SocialIcons';
 
 function Card({ label, children, dashed = false }: { label: ReactNode; children: ReactNode; dashed?: boolean }) {
   return (
@@ -37,18 +38,38 @@ export function TripSupport({ fundraiserUrl, sponsors, contactEmail, wall }: {
       )}
       {sponsors.length > 0 && (
         <Card label="ils soutiennent ce voyage">
-          <div className="grid grid-cols-2 gap-2">
+          <ul className="m-0 grid list-none grid-cols-2 gap-2 p-0">
             {sponsors.map((s) => {
               const logo = mediaUrl(s.logo_path);
               const inner = logo
                 ? <img src={logo} alt={s.name} loading="lazy" className="max-h-12 max-w-[80%] object-contain" />
                 : <span className="px-2 text-center text-[1rem] font-bold">{s.name}</span>;
+              // Le logo mène au site du sponsor, sinon à son Instagram, sinon à son Facebook.
+              const main = s.website_url ?? s.instagram_url ?? s.facebook_url;
               const cls = 'flex h-[4.2353rem] items-center justify-center rounded-2xl bg-cream text-ink hover:bg-white hover:text-ink';
-              return s.website_url
-                ? <a key={s.id} href={s.website_url} target="_blank" rel="noopener noreferrer sponsored" className={cls} title={s.name}>{inner}</a>
-                : <div key={s.id} className={cls} title={s.name}>{inner}</div>;
+              const social = [
+                s.instagram_url && { href: s.instagram_url, label: `Instagram de ${s.name}`, Icon: InstagramIcon },
+                s.facebook_url && { href: s.facebook_url, label: `Facebook de ${s.name}`, Icon: FacebookIcon },
+              ].filter(Boolean) as { href: string; label: string; Icon: typeof InstagramIcon }[];
+              return (
+                <li key={s.id} className="flex flex-col gap-1.5">
+                  {main
+                    ? <a href={main} target="_blank" rel="noopener noreferrer sponsored" className={cls} title={s.name}>{inner}</a>
+                    : <div className={cls} title={s.name}>{inner}</div>}
+                  {social.length > 0 && (
+                    <span className="flex justify-center gap-1">
+                      {social.map(({ href, label, Icon }) => (
+                        <a key={href} href={href} target="_blank" rel="noopener noreferrer sponsored" aria-label={label} title={label}
+                          className="flex h-9 w-9 items-center justify-center rounded-full text-dust-200 hover:bg-cream/10 hover:text-white">
+                          <Icon className="h-[18px] w-[18px]" />
+                        </a>
+                      ))}
+                    </span>
+                  )}
+                </li>
+              );
             })}
-          </div>
+          </ul>
         </Card>
       )}
       {wall ?? (

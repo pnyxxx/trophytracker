@@ -203,7 +203,7 @@ export function TripMap({ crew, points, stages, sponsors, photos = [], overlay, 
   }, [coords, stages, crew.start_lon, crew.start_lat]);
 
   return (
-    <div ref={containerRef} className={cn('relative overflow-hidden rounded-[28px] border-[1.5px] border-ink-700 bg-ink-800', className)}>
+    <div ref={containerRef} className={cn('relative overflow-hidden rounded-[28px] border-[1.5px] border-ink-700 bg-[#E9E4DA]', className)}>
       {/* MapLibre impose « position: relative » à son conteneur : on le met dans une boîte positionnée. */}
       <div className="absolute inset-0">
         <div ref={mapEl} className="h-full w-full" role="img" aria-label="Carte du road trip avec la trace parcourue et la position actuelle" />

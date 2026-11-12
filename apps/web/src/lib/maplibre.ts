@@ -69,13 +69,15 @@ export function satelliteStyle(imagery: Imagery = 'esri'): StyleSpecification {
 }
 
 /**
- * Thème « sable de nuit » de l'accueil : fond vectoriel OpenFreeMap (gratuit, sans clé) redessiné aux couleurs du
- * site, avec le relief ombré en tons sable (sans 3D) : sombre, chaud, et la trace rouge ressort.
+ * Thème « carnet de route » du site (accueil, page d'un road trip) : fond vectoriel OpenFreeMap (gratuit, sans clé)
+ * redessiné en CLAIR, aux couleurs du site : terres crème, eau bleu doux, relief ombré léger, routes blanches ;
+ * la trace rouge ressort nettement. (Une première version sombre et brune rendait le site trop sombre.)
  * Pensé pour une carte fixe : peu de tuiles, chargées une seule fois.
  */
 export function baliseStyle(): StyleSpecification {
   const omt = 'omt';
   const roads = (classes: string[]) => ['match', ['get', 'class'], classes, true, false] as unknown as FilterSpecification;
+  const width = (z0: number, w0: number, z1: number, w1: number) => ['interpolate', ['linear'], ['zoom'], z0, w0, z1, w1] as unknown as number;
   return {
     version: 8,
     glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
@@ -91,28 +93,31 @@ export function baliseStyle(): StyleSpecification {
       },
     },
     layers: [
-      { id: 'bg', type: 'background', paint: { 'background-color': '#1C1611' } },
-      { id: 'wood', type: 'fill', source: omt, 'source-layer': 'landcover', filter: ['==', ['get', 'class'], 'wood'], paint: { 'fill-color': '#1F1A13', 'fill-opacity': 0.7 } },
-      { id: 'ice', type: 'fill', source: omt, 'source-layer': 'landcover', filter: ['==', ['get', 'class'], 'ice'], paint: { 'fill-color': '#3A342C', 'fill-opacity': 0.55 } },
+      { id: 'bg', type: 'background', paint: { 'background-color': '#F1EDE5' } },
+      { id: 'wood', type: 'fill', source: omt, 'source-layer': 'landcover', filter: ['==', ['get', 'class'], 'wood'], paint: { 'fill-color': '#E3E6D8', 'fill-opacity': 0.8 } },
+      { id: 'grass', type: 'fill', source: omt, 'source-layer': 'landcover', filter: ['match', ['get', 'class'], ['grass', 'farmland'], true, false] as unknown as FilterSpecification, paint: { 'fill-color': '#ECEBDF', 'fill-opacity': 0.6 } },
+      { id: 'sand', type: 'fill', source: omt, 'source-layer': 'landcover', filter: ['==', ['get', 'class'], 'sand'], paint: { 'fill-color': '#F3E6CC', 'fill-opacity': 0.9 } },
+      { id: 'ice', type: 'fill', source: omt, 'source-layer': 'landcover', filter: ['==', ['get', 'class'], 'ice'], paint: { 'fill-color': '#FAFAF7' } },
       {
         id: 'relief', type: 'hillshade', source: 'dem',
         paint: {
-          'hillshade-exaggeration': 0.6,
-          'hillshade-shadow-color': '#0B0806',
-          'hillshade-highlight-color': '#7A5C3A',
-          'hillshade-accent-color': '#2E2218',
+          'hillshade-exaggeration': 0.35,
+          'hillshade-shadow-color': '#8F8676',
+          'hillshade-highlight-color': '#FFFFFF',
+          'hillshade-accent-color': '#B8AE9C',
           'hillshade-illumination-direction': 315,
         },
       },
-      { id: 'town', type: 'fill', source: omt, 'source-layer': 'landuse', minzoom: 9, filter: ['match', ['get', 'class'], ['residential', 'suburb', 'neighbourhood', 'commercial', 'industrial'], true, false], paint: { 'fill-color': '#2A2119', 'fill-opacity': 0.55 } },
-      { id: 'water', type: 'fill', source: omt, 'source-layer': 'water', paint: { 'fill-color': '#0E171D' } },
-      { id: 'building', type: 'fill', source: omt, 'source-layer': 'building', minzoom: 14, paint: { 'fill-color': '#3A2E22', 'fill-opacity': 0.6 } },
-      { id: 'river', type: 'line', source: omt, 'source-layer': 'waterway', minzoom: 8, paint: { 'line-color': '#18252E', 'line-width': 1 } },
-      { id: 'border', type: 'line', source: omt, 'source-layer': 'boundary', filter: ['all', ['==', ['get', 'admin_level'], 2], ['!=', ['get', 'maritime'], 1]], paint: { 'line-color': '#F5F1EA', 'line-opacity': 0.28, 'line-width': 1.2, 'line-dasharray': [3, 3] } },
-      { id: 'track', type: 'line', source: omt, 'source-layer': 'transportation', minzoom: 12, filter: roads(['track', 'path']), paint: { 'line-color': '#4A3B2C', 'line-width': 1, 'line-dasharray': [2, 2] } },
-      { id: 'road-small', type: 'line', source: omt, 'source-layer': 'transportation', minzoom: 11, filter: roads(['minor', 'service']), paint: { 'line-color': '#3A2E22', 'line-width': ['interpolate', ['linear'], ['zoom'], 11, 0.5, 16, 4] } },
-      { id: 'road-minor', type: 'line', source: omt, 'source-layer': 'transportation', minzoom: 8, filter: roads(['secondary', 'tertiary']), paint: { 'line-color': '#4A3B2C', 'line-width': ['interpolate', ['linear'], ['zoom'], 8, 0.5, 16, 6] } },
-      { id: 'road-major', type: 'line', source: omt, 'source-layer': 'transportation', filter: roads(['motorway', 'trunk', 'primary']), paint: { 'line-color': '#6A5238', 'line-width': ['interpolate', ['linear'], ['zoom'], 6, 0.6, 16, 8] } },
+      { id: 'town', type: 'fill', source: omt, 'source-layer': 'landuse', minzoom: 9, filter: ['match', ['get', 'class'], ['residential', 'suburb', 'neighbourhood', 'commercial', 'industrial'], true, false], paint: { 'fill-color': '#E6E0D5', 'fill-opacity': 0.8 } },
+      { id: 'water', type: 'fill', source: omt, 'source-layer': 'water', paint: { 'fill-color': '#BCD5E2' } },
+      { id: 'river', type: 'line', source: omt, 'source-layer': 'waterway', minzoom: 8, paint: { 'line-color': '#A9C8D8', 'line-width': width(8, 0.6, 14, 2) } },
+      { id: 'building', type: 'fill', source: omt, 'source-layer': 'building', minzoom: 14, paint: { 'fill-color': '#DCD4C7', 'fill-outline-color': '#CFC6B6' } },
+      { id: 'border', type: 'line', source: omt, 'source-layer': 'boundary', filter: ['all', ['==', ['get', 'admin_level'], 2], ['!=', ['get', 'maritime'], 1]], paint: { 'line-color': '#7C766C', 'line-opacity': 0.55, 'line-width': 1.2, 'line-dasharray': [3, 2] } },
+      { id: 'track', type: 'line', source: omt, 'source-layer': 'transportation', minzoom: 12, filter: roads(['track', 'path']), paint: { 'line-color': '#B9AF9F', 'line-width': 1, 'line-dasharray': [2, 2] } },
+      { id: 'road-casing', type: 'line', source: omt, 'source-layer': 'transportation', minzoom: 9, filter: roads(['motorway', 'trunk', 'primary', 'secondary', 'tertiary']), layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#D3CABA', 'line-width': width(9, 1.6, 16, 10) } },
+      { id: 'road-small', type: 'line', source: omt, 'source-layer': 'transportation', minzoom: 11, filter: roads(['minor', 'service']), paint: { 'line-color': '#FFFFFF', 'line-width': width(11, 0.6, 16, 5) } },
+      { id: 'road-minor', type: 'line', source: omt, 'source-layer': 'transportation', minzoom: 8, filter: roads(['secondary', 'tertiary']), layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#FFFFFF', 'line-width': width(8, 0.6, 16, 7) } },
+      { id: 'road-major', type: 'line', source: omt, 'source-layer': 'transportation', filter: roads(['motorway', 'trunk', 'primary']), layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#F7DDB0', 'line-width': width(5, 0.5, 16, 8) } },
       {
         id: 'places', type: 'symbol', source: omt, 'source-layer': 'place',
         filter: ['any', ['match', ['get', 'class'], ['city', 'town'], true, false], ['all', ['>=', ['zoom'], 10], ['==', ['get', 'class'], 'village']], ['all', ['>=', ['zoom'], 13], ['==', ['get', 'class'], 'hamlet']]] as unknown as FilterSpecification,
@@ -123,7 +128,7 @@ export function baliseStyle(): StyleSpecification {
           'text-transform': 'uppercase',
           'text-letter-spacing': 0.12,
         },
-        paint: { 'text-color': '#CDBBA0', 'text-opacity': 0.75, 'text-halo-color': '#1C1611', 'text-halo-width': 1.4 },
+        paint: { 'text-color': '#4E4A43', 'text-halo-color': '#F7F4EE', 'text-halo-width': 1.6 },
       },
     ],
   };

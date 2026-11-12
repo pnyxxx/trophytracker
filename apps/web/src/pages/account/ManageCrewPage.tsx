@@ -13,7 +13,8 @@ import { Button } from '@/components/ui/button';
 import { TravellerShell } from '@/components/layout/TravellerShell';
 import { tripStatus, type Section } from '@/lib/traveller';
 import { ProgressRing, SharePanel, TripGuide } from '@/components/manage/TripGuide';
-import { useGuide, type GuideStepId } from '@/hooks/useGuide';
+import { GUIDE_STEPS, useGuide, type GuideStepId } from '@/hooks/useGuide';
+import { MembersTab } from '@/components/manage/MembersTab';
 import { InfoTab } from '@/components/manage/InfoTab';
 import { PhotosTab } from '@/components/manage/PhotosTab';
 import { DangerTab } from '@/components/manage/DangerTab';
@@ -26,11 +27,10 @@ import { toastError, unwrap } from '@/lib/errors';
 import { formatNumber, formatRelative, isLive } from '@/lib/format';
 import { lastDays, useVisibility } from '@/hooks/useTrip';
 
-const GUIDE_STEPS: GuideStepId[] = ['voyage', 'equipage', 'vehicule', 'itineraire', 'gps', 'partage', 'sponsors', 'checklist'];
 /** Anciennes adresses (onglets d'avant la refonte, liens des e-mails) → section et étape. */
 const LEGACY: Record<string, [Section, GuideStepId?]> = {
   infos: ['reglages'], suppression: ['reglages'], etapes: ['carnet'], journal: ['carnet'], qr: ['partage'],
-  gps: ['guide', 'gps'], sponsors: ['guide', 'sponsors'], membres: ['guide', 'equipage'],
+  gps: ['guide', 'gps'], sponsors: ['guide', 'sponsors'], membres: ['partage'],
 };
 
 function Overview({ crew, onGo }: { crew: Crew; onGo: (s: Section, step?: GuideStepId) => void }) {
@@ -188,6 +188,8 @@ export default function ManageCrewPage() {
         <div className="flex flex-col gap-6">
           <h1 className="tt-display m-0 text-[clamp(2.1176rem,4.1vw,3.7647rem)] leading-[1.02] text-cream">Partage</h1>
           <SharePanel crew={crew} />
+          {/* Les compagnons de route : facultatif, donc pas une étape du guide. */}
+          <MembersTab crew={crew} />
         </div>
       )}
       {section === 'reglages' && (
@@ -201,8 +203,8 @@ export default function ManageCrewPage() {
   );
 }
 
-/** Badge « 3/8 » du guide dans la navigation. */
+/** Badge « 3/6 » du guide dans la navigation. */
 function GuideCount({ crew }: { crew: Crew }) {
   const g = useGuide(crew);
-  return <>{g.stepsDone}/8</>;
+  return <>{g.stepsDone}/{g.steps.length}</>;
 }
