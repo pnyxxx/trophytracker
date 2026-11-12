@@ -160,6 +160,18 @@ export function dateRange(start?: string | null, end?: string | null) {
   return `${shortDate(start, { day: 'numeric', month: 'short' })}–${shortDate(end, { day: 'numeric', month: 'short' })}`;
 }
 
+/** « 18/02/2027 » : les dates des visuels, en chiffres (plus court). */
+export const numericDate = (iso: string) => {
+  const [y, m, d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+};
+/** Visuels : « 02/08 – 16/08/2026 », « 28/12/2026 – 05/01/2027 », « dès le 02/08/2026 ». */
+export function numericRange(start?: string | null, end?: string | null) {
+  if (!start) return '';
+  if (!end) return `dès le ${numericDate(start)}`;
+  return start.slice(0, 4) === end.slice(0, 4) ? `${numericDate(start).slice(0, 5)} – ${numericDate(end)}` : `${numericDate(start)} – ${numericDate(end)}`;
+}
+
 /** Titre « Départ → Destination » (ou le nom) : [début, partie en rouge]. */
 function titleParts(c: PosterCrew): [string, string | null] {
   if (c.name.includes('→')) {
@@ -339,6 +351,25 @@ async function drawMiniMap(ctx: CanvasRenderingContext2D, c: PosterCrew, x: numb
   return true;
 }
 
+/**
+ * Chiffres de la story, dans l'ordre : kilomètres parcourus (ou compte à rebours avant le départ), jour du voyage
+ * (ou date de départ), durée prévue, voyageurs. On garde les trois premiers qui ont un sens.
+ */
+export function storyStats(crew: Pick<PosterCrew, 'distanceKm' | 'starts_on' | 'ends_on' | 'day' | 'totalDays' | 'travellers'>, today = new Date()): [string, string][] {
+  const until = crew.starts_on
+    ? Math.round((new Date(`${crew.starts_on}T00:00:00`).getTime() - new Date(today.toDateString()).getTime()) / 864e5)
+    : null;
+  const out: [string, string][] = [];
+  if (crew.distanceKm && crew.distanceKm >= 1) out.push([`${Math.round(crew.distanceKm).toLocaleString('fr-FR')} km`, 'parcourus']);
+  else if (until != null && until > 0) out.push([`J-${until}`, 'avant le départ']);
+  if (crew.day) out.push([crew.totalDays ? `${crew.day}/${crew.totalDays}` : `jour ${crew.day}`, 'jour du voyage']);
+  else if (crew.starts_on) out.push([numericDate(crew.starts_on), 'départ']);
+  if (crew.totalDays && crew.totalDays > 1) out.push([`${crew.totalDays} jours`, 'de voyage']);
+  const n = crew.travellers?.length ?? 0;
+  if (n) out.push([String(n), n > 1 ? 'voyageurs' : 'voyageur']);
+  return out.slice(0, 3);
+}
+
 /** Pastille de verre (chiffre + légende), pour la rangée de chiffres de la story. */
 function statChip(ctx: CanvasRenderingContext2D, value: string, label: string, x: number, y: number, w: number) {
   const h = 132;
@@ -450,19 +481,14 @@ async function drawStory(ctx: CanvasRenderingContext2D, crew: PosterCrew, w: num
     }
   }
 
-  // 5. Trois chiffres.
-  const until = crew.starts_on ? Math.round((new Date(`${crew.starts_on}T00:00:00`).getTime() - new Date(new Date().toDateString()).getTime()) / 864e5) : null;
-  const stats: [string, string][] = [
-    crew.distanceKm && crew.distanceKm >= 1 ? [`${Math.round(crew.distanceKm).toLocaleString('fr-FR')} km`, 'parcourus'] : until != null && until > 0 ? [`J-${until}`, 'avant le départ'] : ['0 km', 'parcourus'],
-    crew.day ? [crew.totalDays ? `${crew.day}/${crew.totalDays}` : `jour ${crew.day}`, 'jour du voyage']
-      : dateRange(crew.starts_on, crew.ends_on) ? [dateRange(crew.starts_on, crew.ends_on), 'dates']
-        : [String(Math.max(1, crew.travellers?.length ?? 1)), (crew.travellers?.length ?? 1) > 1 ? 'voyageurs' : 'voyageur'],
-    [String(crew.photos ?? 0), crew.photos === 1 ? 'photo' : 'photos'],
-  ];
+  // 5. Jusqu'à trois chiffres, selon ce qu'on sait du voyage (jamais un « 0 » qui ne dit rien).
   const sy = h - 70 - 270 - 40 - 132;
-  const gap = 20;
-  const cw = (w - 140 - gap * 2) / 3;
-  stats.forEach(([v, l], i) => statChip(ctx, v, l, 70 + i * (cw + gap), sy, cw));
+  const stats = storyStats(crew);
+  if (stats.length) {
+    const gap = 20;
+    const cw = (w - 140 - gap * (stats.length - 1)) / stats.length;
+    stats.forEach(([v, l], i) => statChip(ctx, v, l, 70 + i * (cw + gap), sy, cw));
+  }
 
   // 6. Carte crème en bas : QR + « Suivez-nous en direct ».
   const cy = h - 70 - 270;
@@ -521,7 +547,7 @@ export async function drawPoster(format: PosterFormat, crew: PosterCrew): Promis
     ctx.letterSpacing = '0px';
     ctx.font = `400 42px ${MONO}`;
     ctx.fillStyle = C.dust;
-    const range = dateRange(crew.starts_on, crew.ends_on);
+    const range = numericRange(crew.starts_on, crew.ends_on);
     const rw = range ? ctx.measureText(range).width : 0;
     const name = `${titleA}${titleB ?? ''}`;
     fitFont(ctx, name, (px) => `400 ${px}px ${MONO}`, w - 240 - rw - 60, 42, 26);

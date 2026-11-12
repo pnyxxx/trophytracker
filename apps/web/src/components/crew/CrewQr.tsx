@@ -42,9 +42,10 @@ export function CrewQrPanel({ crew, showUrl = true }: { crew: CrewForQr; showUrl
   });
   const ready = format !== 'story' || isFetched;
   // La story reprend la couverture de la page, les prénoms des voyageurs et le nombre de photos.
-  const { data: members = [] } = useCrewMembers(format === 'story' ? crew.id : undefined);
+  // Pas de valeur par défaut « = [] » ici : un nouveau tableau à chaque affichage relancerait le dessin sans fin.
+  const { data: members } = useCrewMembers(format === 'story' ? crew.id : undefined);
   const { data: photos = [] } = usePhotos(format === 'story' ? crew.id : undefined);
-  const travellers = useMemo(() => members.map((m) => m.display_name).filter(Boolean) as string[], [members]);
+  const travellers = useMemo(() => (members ?? []).map((m) => m.display_name).filter(Boolean) as string[], [members]);
   const totalDays = crew.starts_on && crew.ends_on
     ? Math.round((new Date(`${crew.ends_on}T12:00:00`).getTime() - new Date(`${crew.starts_on}T12:00:00`).getTime()) / 864e5) + 1
     : null;
