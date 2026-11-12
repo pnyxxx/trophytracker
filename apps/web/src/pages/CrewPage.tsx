@@ -31,6 +31,7 @@ import { formatRelative, isLive } from '@/lib/format';
 import { localDate } from '@/lib/days';
 import { altitudeProfile } from '@/lib/elevation';
 import { mediaUrl } from '@/lib/media';
+import { photosPassed } from '@/lib/demo-reveal';
 import { cn } from '@/lib/utils';
 import NotFound from './NotFound';
 
@@ -73,13 +74,15 @@ export default function CrewPage() {
   const { slug } = useParams();
   const { data: crew, isLoading } = useCrew(slug);
   const { data: stats } = useCrewStats(crew?.id);
-  const { data: photos = [] } = usePhotos(crew?.id);
+  const { data: allPhotos = [] } = usePhotos(crew?.id);
   const { data: sponsors = [] } = useSponsors(crew?.id);
   const { data: stages = [] } = useStages(crew?.id);
   const { data: journal = [] } = useJournal(crew?.id);
   const { data: members = [] } = useCrewMembers(crew?.id);
   const { canEdit } = useMyRole(crew?.id);
   const { points } = useLiveTrack(crew);
+  // Road trip d'exemple : trace rejouée en boucle, vraies photos → seulement celles déjà « passées » (lib/demo-reveal).
+  const photos = useMemo(() => (crew?.is_demo ? photosPassed(allPhotos, points) : allPhotos), [crew?.is_demo, allPhotos, points]);
   const [replay, setReplay] = useState<ReplayFormat | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
   const wide = useWide();

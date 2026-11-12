@@ -3,9 +3,9 @@
  *   node scripts/seed-demo.mjs
  *
  * Crée le compte admin de test (demo@trophystracker.local, connexion par code lu dans Mailpit) et
- * installe le road trip d'exemple « Route des Grandes Alpes » (/road-trip/exemple, scripts/lib-demo-crew.mjs),
- * dont la trace est rejouée en boucle par le service tracker (apps/tracker/src/demo.ts).
- * Relancer le script remet l'exemple à neuf.
+ * installe le road trip d'exemple J4L Club (/road-trip/exemple, scripts/lib-demo-crew.mjs ; en local, un équipage
+ * de test), dont la trace est rejouée en boucle par le service tracker (apps/tracker/src/demo.ts).
+ * Relancer le script ne change rien de plus (idempotent).
  */
 import { createClient } from '@supabase/supabase-js';
 import { loadEnv } from './lib-env.mjs';

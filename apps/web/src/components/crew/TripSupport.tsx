@@ -1,12 +1,60 @@
 /**
  * « Soutenir » sur la page d'un road trip : le lien de la cagnotte (pas de montant affiché), les sponsors
  * et le mur d'encouragements (bientôt). N'affiche que ce que les voyageurs ont rempli.
+ * Un clic sur un sponsor ouvre sa fiche : présentation, adresse, téléphone, e-mail, et tous ses sites et réseaux.
  */
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
+import { Mail, MapPin, Phone } from 'lucide-react';
 import type { Sponsor } from '@/lib/supabase';
 import { mediaUrl } from '@/lib/media';
+import { linkInfo, sponsorLinks } from '@/lib/links';
 import { Button } from '@/components/ui/button';
-import { FacebookIcon, InstagramIcon } from '@/components/common/SocialIcons';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { LinkIcon } from '@/components/common/SocialIcons';
+
+/** Fiche d'un sponsor : tout ce que les voyageurs ont rempli, chaque lien avec son logo et son nom. */
+function SponsorSheet({ sponsor: s, onClose }: { sponsor: Sponsor; onClose: () => void }) {
+  const logo = mediaUrl(s.logo_path);
+  const links = sponsorLinks(s).map(linkInfo);
+  const row = 'flex min-h-12 items-center gap-3 rounded-2xl bg-ink px-3.5 py-2.5 text-cream hover:bg-ink-700 hover:text-cream';
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-h-[90dvh] overflow-y-auto">
+        <DialogHeader className="items-start text-left">
+          {logo && (
+            <div className="mb-2 flex h-24 w-full items-center justify-center rounded-2xl bg-cream p-3">
+              <img src={logo} alt="" className="max-h-full max-w-[80%] object-contain" />
+            </div>
+          )}
+          <DialogTitle>{s.name}</DialogTitle>
+          <DialogDescription>{s.description || 'Sponsor de ce voyage.'}</DialogDescription>
+        </DialogHeader>
+        <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
+          {links.map((l) => (
+            <li key={l.url}>
+              <a href={l.url} target="_blank" rel="noopener noreferrer sponsored" className={row}>
+                <LinkIcon kind={l.kind} className="h-5 w-5 flex-none text-signal-text" />
+                <span className="flex min-w-0 flex-col">
+                  <span className="font-bold">{l.name}</span>
+                  {l.account && <span className="truncate text-[0.8235rem] text-dust-400">{l.account}</span>}
+                </span>
+              </a>
+            </li>
+          ))}
+          {s.phone && (
+            <li><a href={`tel:${s.phone.replace(/[^0-9+]/g, '')}`} className={row}><Phone className="h-5 w-5 flex-none text-signal-text" /><span className="font-bold">{s.phone}</span></a></li>
+          )}
+          {s.email && (
+            <li><a href={`mailto:${s.email}`} className={row}><Mail className="h-5 w-5 flex-none text-signal-text" /><span className="min-w-0 truncate font-bold">{s.email}</span></a></li>
+          )}
+          {s.city && (
+            <li className={row.replace(' hover:bg-ink-700 hover:text-cream', '')}><MapPin className="h-5 w-5 flex-none text-signal-text" /><span>{s.city}</span></li>
+          )}
+        </ul>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 function Card({ label, children, dashed = false }: { label: ReactNode; children: ReactNode; dashed?: boolean }) {
   return (
@@ -24,8 +72,10 @@ export function TripSupport({ fundraiserUrl, sponsors, contactEmail, wall }: {
   /** Mur d'encouragements (phase F) ; sans lui, une carte « bientôt ». */
   wall?: ReactNode;
 }) {
+  const [open, setOpen] = useState<Sponsor | null>(null);
   return (
     <>
+    {open && <SponsorSheet sponsor={open} onClose={() => setOpen(null)} />}
     <section id="soutenir" className="grid scroll-mt-24 grid-cols-[repeat(auto-fit,minmax(min(100%,320px),1fr))] items-stretch gap-4">
       {fundraiserUrl && (
         <Card label="cagnotte">
@@ -41,27 +91,24 @@ export function TripSupport({ fundraiserUrl, sponsors, contactEmail, wall }: {
           <ul className="m-0 grid list-none grid-cols-2 gap-2 p-0">
             {sponsors.map((s) => {
               const logo = mediaUrl(s.logo_path);
-              const inner = logo
-                ? <img src={logo} alt={s.name} loading="lazy" className="max-h-12 max-w-[80%] object-contain" />
-                : <span className="px-2 text-center text-[1rem] font-bold">{s.name}</span>;
-              // Le logo mène au site du sponsor, sinon à son Instagram, sinon à son Facebook.
-              const main = s.website_url ?? s.instagram_url ?? s.facebook_url;
-              const cls = 'flex h-[4.2353rem] items-center justify-center rounded-2xl bg-cream text-ink hover:bg-white hover:text-ink';
-              const social = [
-                s.instagram_url && { href: s.instagram_url, label: `Instagram de ${s.name}`, Icon: InstagramIcon },
-                s.facebook_url && { href: s.facebook_url, label: `Facebook de ${s.name}`, Icon: FacebookIcon },
-              ].filter(Boolean) as { href: string; label: string; Icon: typeof InstagramIcon }[];
+              // Ses réseaux : petits logos dans le coin en bas à gauche de sa carte (à côté du bouton, pas dedans).
+              const social = sponsorLinks(s).map(linkInfo).filter((l) => l.kind !== 'site').slice(0, 3);
               return (
-                <li key={s.id} className="flex flex-col gap-1.5">
-                  {main
-                    ? <a href={main} target="_blank" rel="noopener noreferrer sponsored" className={cls} title={s.name}>{inner}</a>
-                    : <div className={cls} title={s.name}>{inner}</div>}
+                <li key={s.id} className="relative">
+                  <button type="button" onClick={() => setOpen(s)} title={`${s.name} : voir sa fiche`}
+                    className="group relative flex h-[5.2rem] w-full items-center justify-center rounded-2xl bg-cream pb-4 text-ink hover:bg-white">
+                    {logo
+                      ? <img src={logo} alt={s.name} loading="lazy" className="max-h-11 max-w-[80%] object-contain" />
+                      : <span className="px-2 text-center text-[1rem] font-bold">{s.name}</span>}
+                    {/* Invitation discrète à ouvrir la fiche (coordonnées, réseaux, sites). */}
+                    <span className="absolute bottom-1.5 right-2.5 font-mono text-[0.6471rem] text-dust-700 group-hover:text-signal-light">voir plus ›</span>
+                  </button>
                   {social.length > 0 && (
-                    <span className="flex justify-center gap-1">
-                      {social.map(({ href, label, Icon }) => (
-                        <a key={href} href={href} target="_blank" rel="noopener noreferrer sponsored" aria-label={label} title={label}
-                          className="flex h-9 w-9 items-center justify-center rounded-full text-dust-200 hover:bg-cream/10 hover:text-white">
-                          <Icon className="h-[18px] w-[18px]" />
+                    <span className="absolute bottom-1 left-1 flex gap-0.5">
+                      {social.map((l) => (
+                        <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer sponsored" aria-label={`${l.name} de ${s.name}`} title={`${l.name} de ${s.name}`}
+                          className="flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-ink shadow-[0_2px_6px_rgba(0,0,0,.18)] hover:bg-ink hover:text-white">
+                          <LinkIcon kind={l.kind} className="h-[15px] w-[15px]" />
                         </a>
                       ))}
                     </span>

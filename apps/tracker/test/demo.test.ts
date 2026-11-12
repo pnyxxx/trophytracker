@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { cycleStart, demoPosition, demoTimes, loadDemoRoute, startDemoDriver, type DemoRoute } from '../src/demo.js';
+import { cycleStart, demoHead, demoPosition, demoTimes, loadDemoRoute, startDemoDriver, type DemoRoute } from '../src/demo.js';
 import type { Db } from '../src/db.js';
 
 // 0 → 100 s : 1 km vers le nord (36 km/h) ; 100 → 160 s : pause ; puis encore 1 km en 100 s.
@@ -38,6 +38,25 @@ describe('démo : position rejouée', () => {
   });
 });
 
+describe('démo : partie déjà faite au début d’un tour', () => {
+  it('sans headS, rien n’est posé d’avance', () => {
+    expect(demoHead(ROUTE, 1_000_000)).toEqual([]);
+  });
+
+  it('pose le début du trajet dans le passé, la dernière position pile au début du tour', () => {
+    const head = demoHead({ ...ROUTE, headS: 100 }, 1_000_000);
+    expect(head[0]).toEqual({ s: 0, at: 900_000 });
+    expect(head[1]).toEqual({ s: 30, at: 930_000 });
+    expect(head.at(-1)).toEqual({ s: 100, at: 1_000_000 });
+  });
+
+  it('le vrai trajet de démo commence par une partie déjà faite', () => {
+    const route = loadDemoRoute();
+    expect(route.headS).toBeGreaterThan(3600);
+    expect(route.points.at(-1)![3]).toBeCloseTo((route.headS ?? 0) + route.cycleS, -1);
+  });
+});
+
 describe('démo : tours et rattrapage', () => {
   it('les tours s’enchaînent depuis la date de départ', () => {
     const epoch = Date.parse(ROUTE.epoch);
@@ -62,23 +81,24 @@ describe('démo : trajet généré', () => {
   const route = loadDemoRoute();
   const near = (p: number[], lon: number, lat: number) => Math.abs(p[0]! - lon) < 0.05 && Math.abs(p[1]! - lat) < 0.05;
 
-  it('part de Thonon-les-Bains et arrive à Menton', () => {
-    expect(near(route.points[0]!, 6.4797, 46.3705)).toBe(true);
-    expect(near(route.points.at(-1)!, 7.4977, 43.7747)).toBe(true);
+  it('part de la fin de l’Espagne (Algésiras) et arrive à Marrakech', () => {
+    expect(near(route.points[0]!, -5.41098, 36.21315)).toBe(true);
+    expect(near(route.points.at(-1)!, -7.98231, 31.58108)).toBe(true);
   });
 
-  it('passe par les grands cols (altitude)', () => {
-    expect(Math.max(...route.points.map((p) => p[2]))).toBeGreaterThan(2600);
+  it('franchit le Haut Atlas (Tizi n’Tichka, plus de 2 000 m)', () => {
+    expect(Math.max(...route.points.map((p) => p[2]))).toBeGreaterThan(2000);
   });
 
-  it('avance dans le temps et tient dans un tour', () => {
+  it('avance dans le temps et tient dans un tour (partie déjà faite comprise)', () => {
     expect(route.points.every((p, i) => !i || p[3] >= route.points[i - 1]![3])).toBe(true);
-    expect(route.points.at(-1)![3]).toBeLessThanOrEqual(route.cycleS);
+    expect(route.points.at(-1)![3]).toBeLessThanOrEqual((route.headS ?? 0) + route.cycleS);
   });
 
-  it('ne roule jamais plus vite qu’un van en montagne (sauf erreur du trajet)', () => {
-    const fastest = Math.max(...Array.from({ length: Math.floor(route.cycleS / 60) }, (_, k) => demoPosition(route, k * 60).speedKmh ?? 0));
-    expect(fastest).toBeLessThanOrEqual(90);
+  it('ne roule jamais plus vite qu’une 4L (90 km/h, à la petite variation du compteur près)', () => {
+    const total = (route.headS ?? 0) + route.cycleS;
+    const fastest = Math.max(...Array.from({ length: Math.floor(total / 60) }, (_, k) => demoPosition(route, k * 60).speedKmh ?? 0));
+    expect(fastest).toBeLessThanOrEqual(90 * 1.05);
   });
 });
 

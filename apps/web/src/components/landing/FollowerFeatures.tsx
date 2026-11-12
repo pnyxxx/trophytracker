@@ -39,7 +39,7 @@ function MiniMap() {
       </div>
       <span className={cn(chip, 'pointer-events-none absolute left-3 top-3 text-cream')}>
         <span className="mr-2 inline-block h-2 w-2 rounded-full bg-live" />
-        Léa & Sam · il y a 4 s
+        J4L Club · il y a 4 s
       </span>
     </div>
   );

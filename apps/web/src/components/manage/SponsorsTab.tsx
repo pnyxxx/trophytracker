@@ -11,20 +11,18 @@ import { toastError } from '@/lib/errors';
 import { mediaUrl, removeCrewImages, uploadCrewImage } from '@/lib/media';
 import { Spinner } from '@/components/common/Spinner';
 import { Field, orNull, Panel } from './shared';
-import { socialUrl } from '@/lib/social';
+import { linkInfo, normalizeLink, sponsorLinks } from '@/lib/links';
+import { LinkIcon } from '@/components/common/SocialIcons';
+import { Label } from '@/components/ui/label';
 import { LocationPicker, type Coords } from './LocationPicker';
 
-type Form = { name: string; website_url: string; instagram_url: string; facebook_url: string; city: string; sort_order: string };
+type Form = { name: string; description: string; phone: string; email: string; links: string[]; city: string; sort_order: string };
 const toForm = (s?: Sponsor): Form => ({
-  name: s?.name ?? '', website_url: s?.website_url ?? '', instagram_url: s?.instagram_url ?? '', facebook_url: s?.facebook_url ?? '',
+  name: s?.name ?? '', description: s?.description ?? '', phone: s?.phone ?? '', email: s?.email ?? '',
+  links: s ? (sponsorLinks(s).length ? sponsorLinks(s) : ['']) : [''],
   city: s?.city ?? '', sort_order: s?.sort_order.toString() ?? '0',
 });
-
-/** « monsite.fr » → « https://monsite.fr » : personne ne tape le https://. */
-const normalizeUrl = (url: string) => {
-  const u = url.trim();
-  return !u || /^https?:\/\//i.test(u) ? u : `https://${u}`;
-};
+const MAX_LINKS = 8;
 
 function SponsorDialog({ crew, sponsor, open, onClose }: { crew: Crew; sponsor?: Sponsor; open: boolean; onClose: () => void }) {
   const queryClient = useQueryClient();
@@ -36,7 +34,8 @@ function SponsorDialog({ crew, sponsor, open, onClose }: { crew: Crew; sponsor?:
 
   const save = useMutation({
     mutationFn: async () => {
-      const website = normalizeUrl(form.website_url);
+      const links = form.links.map(normalizeLink).filter((x): x is string => !!x).slice(0, MAX_LINKS);
+      const first = (kind: string) => links.find((l) => linkInfo(l).kind === kind) ?? null;
       let logoPath = sponsor?.logo_path ?? null;
       let uploaded: string | null = null;
       if (logo) {
@@ -44,9 +43,10 @@ function SponsorDialog({ crew, sponsor, open, onClose }: { crew: Crew; sponsor?:
         logoPath = uploaded;
       }
       const row = {
-        name: form.name.trim(), website_url: orNull(website), city: orNull(form.city),
-        // « @boulangerie.martin » ou un lien : on enregistre toujours l'adresse complète du compte.
-        instagram_url: socialUrl('instagram', form.instagram_url), facebook_url: socialUrl('facebook', form.facebook_url),
+        name: form.name.trim(), city: orNull(form.city),
+        description: orNull(form.description), phone: orNull(form.phone), email: orNull(form.email), links,
+        // Anciens champs, gardés pour la carte et les anciens affichages : premier site, premier compte de chaque réseau.
+        website_url: first('site'), instagram_url: first('instagram'), facebook_url: first('facebook'),
         lat: coords?.lat ?? null, lon: coords?.lon ?? null, sort_order: Number(form.sort_order) || 0, logo_path: logoPath,
       };
       const { error } = sponsor
@@ -75,12 +75,41 @@ function SponsorDialog({ crew, sponsor, open, onClose }: { crew: Crew; sponsor?:
           <Field id="s-logo" label="Logo" hint={sponsor?.logo_path ? 'Laisse vide pour garder le logo actuel.' : 'PNG avec fond transparent idéalement.'}>
             <Input id="s-logo" type="file" accept="image/*" onChange={(e) => setLogo(e.target.files?.[0] ?? null)} />
           </Field>
-          <Field id="s-web" label="Site web" hint="Facultatif : beaucoup de sponsors n’ont que leurs réseaux sociaux.">
-            <Input id="s-web" inputMode="url" placeholder="monsponsor.fr" value={form.website_url} onChange={set('website_url')} />
+          <Field id="s-desc" label="Présentation" hint="Facultatif : une phrase, affichée sur sa fiche.">
+            <Input id="s-desc" maxLength={280} placeholder="Garage familial à Saint-Quentin depuis 1982" value={form.description} onChange={set('description')} />
           </Field>
+          <div className="space-y-2">
+            <Label>Sites et réseaux sociaux</Label>
+            {form.links.map((l, i) => {
+              const info = l.trim() ? linkInfo(normalizeLink(l) ?? l) : null;
+              return (
+                <div key={i} className="flex items-center gap-2">
+                  <span className="flex h-11 w-11 flex-none items-center justify-center rounded-xl bg-ink-700 text-dust-200" title={info?.name}>
+                    <LinkIcon kind={info?.kind ?? 'site'} className="h-[18px] w-[18px]" />
+                  </span>
+                  <Input
+                    aria-label={`Lien ${i + 1}`}
+                    inputMode="url"
+                    placeholder={i === 0 ? 'son-site.fr, @son-instagram, lien Facebook…' : 'Un autre site ou réseau'}
+                    value={l}
+                    onChange={(e) => setForm({ ...form, links: form.links.map((x, k) => (k === i ? e.target.value : x)) })}
+                  />
+                  {form.links.length > 1 && (
+                    <Button type="button" size="icon" variant="ghost" aria-label={`Retirer le lien ${i + 1}`} onClick={() => setForm({ ...form, links: form.links.filter((_, k) => k !== i) })}>
+                      <Trash2 />
+                    </Button>
+                  )}
+                </div>
+              );
+            })}
+            {form.links.length < MAX_LINKS && (
+              <Button type="button" variant="ghost" size="sm" onClick={() => setForm({ ...form, links: [...form.links, ''] })}><Plus />Ajouter un lien</Button>
+            )}
+            <p className="m-0 text-[0.8235rem] text-dust-400">Autant qu’il en faut : plusieurs sites, Instagram, Facebook, TikTok… On reconnaît le réseau tout seul.</p>
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field id="s-insta" label="Instagram"><Input id="s-insta" inputMode="url" placeholder="@son-compte ou lien" value={form.instagram_url} onChange={set('instagram_url')} /></Field>
-            <Field id="s-fb" label="Facebook"><Input id="s-fb" inputMode="url" placeholder="Lien de sa page" value={form.facebook_url} onChange={set('facebook_url')} /></Field>
+            <Field id="s-phone" label="Téléphone"><Input id="s-phone" type="tel" inputMode="tel" maxLength={30} value={form.phone} onChange={set('phone')} /></Field>
+            <Field id="s-email" label="E-mail"><Input id="s-email" type="email" inputMode="email" maxLength={200} value={form.email} onChange={set('email')} /></Field>
           </div>
           <Field id="s-place" label="Adresse" hint="Pour placer le sponsor sur ta carte. Facultatif.">
             <LocationPicker

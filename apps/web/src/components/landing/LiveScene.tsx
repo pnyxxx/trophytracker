@@ -28,9 +28,9 @@ export function LiveScene({ className }: { className?: string }) {
   const ago = 2 + (t % 7);
   const stats = [
     { l: 'distance', v: fmt(ROUTE.km), u: 'km' },
-    { l: 'vitesse', v: String(Math.round(41 + 5 * Math.sin(t / 3))), u: 'km/h' },
+    { l: 'vitesse', v: String(Math.round(72 + 6 * Math.sin(t / 3))), u: 'km/h' },
     { l: 'altitude', v: fmt(ROUTE.altitude), u: 'm' },
-    { l: 'météo', v: '9°', u: '' },
+    { l: 'météo', v: '24°', u: '' },
   ];
 
   return (
@@ -55,8 +55,8 @@ export function LiveScene({ className }: { className?: string }) {
 
         {/* Le road trip */}
         <div className="pointer-events-none absolute bottom-3.5 left-4 right-12 flex flex-col">
-          <span className="font-mono text-[0.6471rem] text-dust-300">Léa &amp; Sam · jour 3</span>
-          <span className="tt-display truncate text-[1.4118rem] leading-tight text-cream">Route des Grandes Alpes</span>
+          <span className="font-mono text-[0.6471rem] text-dust-300">Saint-Quentin → Marrakech · jour 4</span>
+          <span className="tt-display truncate text-[1.4118rem] leading-tight text-cream">J4L Club</span>
         </div>
       </div>
 

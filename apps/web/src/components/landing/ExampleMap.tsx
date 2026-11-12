@@ -1,9 +1,9 @@
 /**
- * Vraie carte du road trip d'exemple (« Route des Grandes Alpes ») pour l'accueil, au thème « sable de nuit »
+ * Vraie carte du road trip d'exemple (J4L Club, partie Maroc du raid) pour l'accueil, au thème « sable de nuit »
  * (baliseStyle, lib/maplibre.ts). Carte FIXE : pas de déplacement ni de 3D, les tuiles se chargent une fois et
  * la page reste fluide. Chargée à part (MapLibre est volumineux) : en attendant, le cadre montre les dunes.
  *
- *  - `overview` : tout le trajet parcouru, de Thonon jusqu'à la position actuelle ;
+ *  - `overview` : tout le trajet parcouru, d'Algésiras jusqu'à la position actuelle ;
  *  - `close`    : zoom sur les derniers kilomètres, autour de la balise.
  * Tracé : example-route.json (scripts/build-landing-route.mjs).
  */

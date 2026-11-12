@@ -1,9 +1,9 @@
 /**
- * Installe ou remet à neuf le road trip d'exemple « Route des Grandes Alpes » (en local comme sur le serveur) :
+ * Fait de J4L Club le road trip d'exemple (en local comme sur le serveur) :
  *   node scripts/demo-refresh.mjs
  *
- * Met de côté les anciennes démos (privées, rien n'est effacé), recrée l'exemple avec son contenu
- * (scripts/lib-demo-crew.mjs) ;
+ * Supprime l'ancien exemple « Route des Grandes Alpes » et les comptes fictifs de Léa et Sam, puis met J4L Club à
+ * l'adresse /road-trip/exemple, sans rien effacer de son contenu (scripts/lib-demo-crew.mjs) ;
  * le service tracker reprend sa trace depuis le début du tour en cours (apps/tracker/src/demo.ts) dans les
  * 15 secondes.
  */

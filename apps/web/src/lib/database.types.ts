@@ -697,13 +697,17 @@ export type Database = {
           city: string | null
           created_at: string
           crew_id: string
+          description: string | null
+          email: string | null
           facebook_url: string | null
           id: string
           instagram_url: string | null
           lat: number | null
+          links: Json
           logo_path: string | null
           lon: number | null
           name: string
+          phone: string | null
           sort_order: number
           updated_at: string
           website_url: string | null
@@ -712,13 +716,17 @@ export type Database = {
           city?: string | null
           created_at?: string
           crew_id: string
+          description?: string | null
+          email?: string | null
           facebook_url?: string | null
           id?: string
           instagram_url?: string | null
           lat?: number | null
+          links?: Json
           logo_path?: string | null
           lon?: number | null
           name: string
+          phone?: string | null
           sort_order?: number
           updated_at?: string
           website_url?: string | null
@@ -727,13 +735,17 @@ export type Database = {
           city?: string | null
           created_at?: string
           crew_id?: string
+          description?: string | null
+          email?: string | null
           facebook_url?: string | null
           id?: string
           instagram_url?: string | null
           lat?: number | null
+          links?: Json
           logo_path?: string | null
           lon?: number | null
           name?: string
+          phone?: string | null
           sort_order?: number
           updated_at?: string
           website_url?: string | null

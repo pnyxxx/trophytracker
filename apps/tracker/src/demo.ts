@@ -1,13 +1,16 @@
 /**
- * Road trip d'EXEMPLE (crews.is_demo, /road-trip/exemple) : sa page vit en permanence.
+ * Road trip d'EXEMPLE (crews.is_demo : J4L Club, /road-trip/exemple) : sa page vit en permanence.
  *
- * Le tracker lui fait rejouer en boucle un vrai trajet (la Route des Grandes Alpes, de Thonon-les-Bains
- * à Menton, construit par scripts/build-demo-route.mjs) comme si son téléphone envoyait sa position
- * toutes les 15 s : mêmes fonctions de réception que les vrais road trips, donc trace, compteurs,
- * temps réel et carte se comportent exactement comme pendant un vrai voyage.
+ * Le tracker lui fait rejouer en boucle la partie Maroc du raid (de la fin de l'Espagne à Marrakech, construite
+ * par scripts/build-demo-route.mjs) comme si son téléphone envoyait sa position toutes les 15 s : mêmes
+ * fonctions de réception que les vrais road trips, donc trace, compteurs, temps réel et carte se comportent
+ * exactement comme pendant un vrai voyage.
  *
- * Vitesses réelles (pas d'accéléré) ; seules les nuits sont raccourcies à quelques minutes. Les tours s'enchaînent depuis une date fixe (epoch) : en cas de redémarrage, le
- * tracker rattrape les positions manquées, et au début d'un tour il efface la trace du précédent.
+ * Le début du trajet (`headS` secondes : d'Algésiras au bivouac de Boulajoul) est posé d'un coup au début de
+ * chaque tour, avec des heures dans le passé : la page n'est jamais vide, même à l'instant où un tour recommence.
+ * La suite avance en temps réel. Vitesses réelles (pas d'accéléré) ; seules les nuits sont raccourcies à quelques
+ * minutes. Les tours s'enchaînent depuis une date fixe (epoch) : en cas de redémarrage, le tracker rattrape les
+ * positions manquées, et au début d'un tour il efface la trace du précédent.
  */
 import { readFileSync } from 'node:fs';
 import type { Db } from './db.js';
@@ -16,7 +19,9 @@ import type { IncomingPoint } from './points.js';
 export interface DemoRoute {
   /** Début du premier tour (ISO). */
   epoch: string;
-  /** Durée d'un tour (s). */
+  /** Début de la partie animée (s) : ce qui précède est « déjà fait » au début de chaque tour. */
+  headS?: number;
+  /** Durée d'un tour, c'est-à-dire de la partie animée (s). */
   cycleS: number;
   /** [lon, lat, altitude m, seconde du tour] ; deux points au même endroit = une pause. */
   points: [number, number, number, number][];
@@ -26,6 +31,8 @@ export interface DemoRoute {
 export const DEMO_STEP_S = 15;
 /** Rattrapage après une coupure : une position toutes les 30 s suffit. */
 const CATCH_UP_STEP_S = 30;
+/** Partie « déjà faite » posée au début d'un tour : une position toutes les 30 s. */
+const HEAD_STEP_S = 30;
 
 export function loadDemoRoute(file: URL = new URL('../demo/route.json', import.meta.url)): DemoRoute {
   return JSON.parse(readFileSync(file, 'utf8')) as DemoRoute;
@@ -78,6 +85,19 @@ export function demoPosition(route: DemoRoute, s: number): Omit<IncomingPoint, '
   };
 }
 
+/**
+ * Positions de la partie « déjà faite », posées au début d'un tour qui commence à `start` (ms) : secondes du
+ * trajet de 0 à headS, datées dans le passé pour que la dernière tombe pile à `start`.
+ */
+export function demoHead(route: DemoRoute, start: number): { s: number; at: number }[] {
+  const head = route.headS ?? 0;
+  if (head <= 0) return [];
+  const out: { s: number; at: number }[] = [];
+  for (let s = 0; s < head; s += HEAD_STEP_S) out.push({ s, at: start - (head - s) * 1000 });
+  out.push({ s: head, at: start });
+  return out;
+}
+
 /** Instants (ms) des positions à envoyer après `last` (exclu) jusqu'à `now` (inclus). */
 export function demoTimes(last: number | null, start: number, now: number): number[] {
   const times: number[] = [];
@@ -107,15 +127,22 @@ export function startDemoDriver(db: Db, route: DemoRoute, log: (msg: string) => 
       const start = cycleStart(route, now);
       if (sent && sent.crewId !== crew.id) sent = null;
       let last = Math.max(crew.last_fix_at?.getTime() ?? -Infinity, sent?.at ?? -Infinity);
+      const head = route.headS ?? 0;
       if (!Number.isFinite(last) || last < start) {
         await db.demoRestart();
-        log('démo : nouveau tour, départ de Thonon-les-Bains');
-        last = NaN;
+        // Le début du trajet, déjà fait : la page a tout de suite une trace (et ses premières photos).
+        const done = demoHead(route, start);
+        for (const { s, at } of done) {
+          await db.ingest(crew.id, { ...demoPosition(route, s), recordedAt: new Date(at), source: 'device' });
+        }
+        log(`démo : nouveau tour (${done.length} positions déjà faites), départ de Boulajoul`);
+        last = done.length ? start : NaN;
+        if (done.length) sent = { crewId: crew.id, at: start };
       }
       const times = demoTimes(Number.isNaN(last) ? null : last, start, now);
       if (times.length > 20) log(`démo : rattrapage de ${times.length} positions`);
       for (const t of times) {
-        await db.ingest(crew.id, { ...demoPosition(route, (t - start) / 1000), recordedAt: new Date(t), source: 'device' });
+        await db.ingest(crew.id, { ...demoPosition(route, head + (t - start) / 1000), recordedAt: new Date(t), source: 'device' });
         sent = { crewId: crew.id, at: t };
       }
     } catch (e) {

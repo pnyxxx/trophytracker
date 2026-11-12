@@ -1,6 +1,7 @@
 /**
- * Tracé du road trip d'exemple pour la carte de l'accueil : apps/tracker/demo/route.json (Thonon → Menton)
- * simplifié et coupé à la position affichée (approche du col d'Izoard), avec les étapes déjà passées.
+ * Tracé du road trip d'exemple (J4L Club, partie Maroc) pour la carte de l'accueil : apps/tracker/demo/route.json
+ * (Algésiras → Marrakech) simplifié et coupé à la position affichée (étape marathon, vers Tazzarine), avec les
+ * étapes déjà passées.
  * Résultat : apps/web/src/components/landing/example-route.json (quelques Ko).
  *
  *   node scripts/build-landing-route.mjs
@@ -10,8 +11,8 @@ import { readFileSync, writeFileSync } from 'node:fs';
 const root = new URL('..', import.meta.url);
 const { points } = JSON.parse(readFileSync(new URL('apps/tracker/demo/route.json', root), 'utf8'));
 
-/** Position affichée : peu avant le col d'Izoard, après Briançon. */
-const HERE = { lat: 44.835, lon: 6.712 };
+/** Position affichée : l'étape marathon, vers Tazzarine, après Merzouga et le désert. */
+const HERE = { lat: 30.779, lon: -5.565 };
 
 const rad = (d) => (d * Math.PI) / 180;
 const dist = (a, b) => {
@@ -55,16 +56,12 @@ const out = {
   here: path.at(-1),
   km: Math.round(km),
   altitude: Math.round(done.at(-1)[2]),
-  // Étapes déjà passées (scripts/lib-demo-crew.mjs) : `label` = étiquette affichée sur la carte.
+  // Étapes déjà passées : `label` = étiquette affichée sur la carte.
   stops: [
-    { kind: 'start', lon: 6.4797, lat: 46.3705 },
-    { kind: 'highlight', lon: 6.4704, lat: 45.9948 },
-    { kind: 'highlight', lon: 6.6964, lat: 45.6869 },
-    { kind: 'night', lon: 6.7695, lat: 45.6183, label: 'nuit · Bourg-Saint-Maurice' },
-    { kind: 'highlight', lon: 7.0306, lat: 45.417, label: 'col de l’Iseran · 2 764 m' },
-    { kind: 'night', lon: 6.4293, lat: 45.1655 },
-    { kind: 'highlight', lon: 6.4078, lat: 45.0641, label: 'col du Galibier · 2 642 m' },
-    { kind: 'stop', lon: 6.6436, lat: 44.8986 },
+    { kind: 'night', lon: -5.41098, lat: 36.21315 },
+    { kind: 'stop', lon: -5.50272, lat: 35.88752, label: 'traversée · Tanger Med' },
+    { kind: 'night', lon: -4.98768, lat: 32.88438, label: 'bivouac · Boulajoul' },
+    { kind: 'highlight', lon: -3.99763, lat: 31.21516, label: 'Merzouga · erg Chebbi' },
   ],
 };
 writeFileSync(new URL('apps/web/src/components/landing/example-route.json', root), `${JSON.stringify(out)}\n`);

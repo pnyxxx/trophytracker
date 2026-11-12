@@ -77,21 +77,24 @@ where slug = 'nom-equipage';
 
 ### L'équipage de démo roule en continu
 
-« Route des Grandes Alpes » (`/road-trip/exemple`) est **le road trip d'exemple** (colonne `crews.is_demo`, un seul
-possible) : sa page doit toujours vivre. Le service `tracker` lui fait rejouer **en boucle et en temps réel** un vrai
-trajet (Thonon-les-Bains → Colombière → Aravis → Roselend → Iseran → Galibier → Izoard → Bonette → Menton, 675 km),
-une position toutes les 15 s, par les mêmes fonctions que les vrais téléphones (`apps/tracker/src/demo.ts`) :
+**J4L Club** (`/road-trip/exemple`, depuis le 2026-11-12) est **le road trip d'exemple** (colonne `crews.is_demo`, un
+seul possible) : sa page doit toujours vivre. Le service `tracker` lui fait rejouer **en boucle et en temps réel** la
+partie Maroc du raid (Algésiras → traversée → Tanger Med → Boulajoul → Merzouga et le désert → étape marathon →
+Marrakech, 1 600 km), une position toutes les 15 s, par les mêmes fonctions que les vrais téléphones
+(`apps/tracker/src/demo.ts`) :
 
-- vraies routes et vraies vitesses d'un van en montagne (≤ 80 km/h), pause déjeuner ;
-- les nuits sont raccourcies à 20 min ; un tour dure 17 h, puis la trace est effacée et le van repart de Thonon ;
-- sa page affiche un badge « road trip d'exemple » ; ses voyageurs (Léa, Sam), étapes, photos (vues aériennes IGN),
-  sponsors (« Votre marque ici »), journal et encouragements sont fictifs ; on ne peut pas y laisser de message.
+- vraies routes et vitesses d'une 4L (≤ 90 km/h), pause déjeuner ; nuits raccourcies à 20 min ;
+- au début de chaque tour, le début du trajet (de la fin de l'Espagne au bivouac de Boulajoul) est posé d'un coup,
+  « déjà fait » : la page n'est jamais vide ; la suite (≈ 25 h) avance en temps réel jusqu'à Marrakech ;
+- ses photos sont les vraies photos de J4L Club : chacune n'apparaît qu'une fois la trace passée à moins de 3 km
+  de son endroit (`apps/web/src/lib/demo-reveal.ts`) ; on ne peut pas y laisser de message.
 
 Le trajet est généré une fois et commité : `node scripts/build-demo-route.mjs` (routes OSRM, altitude Open-Meteo)
-écrit `apps/tracker/demo/route.json` ; cols et horaires en tête du script. Le contenu est dans
-`scripts/lib-demo-crew.mjs` ; `node scripts/demo-refresh.mjs` (production comprise) met de côté les anciennes démos (J4L Club rendu privé,
-**rien n'est effacé**, ses photos restent) et
-recrée l'exemple à neuf ; le tracker rattrape alors tout le tour en cours dans les 15 secondes.
+écrit `apps/tracker/demo/route.json` ; étapes et horaires en tête du script. Le réglage est dans
+`scripts/lib-demo-crew.mjs` ; `node scripts/demo-refresh.mjs` (production comprise) supprime l'ancien exemple
+« Route des Grandes Alpes » et les comptes fictifs de Léa et Sam, puis met J4L Club à l'adresse `/road-trip/exemple`
+**sans rien effacer de son contenu** ; le tracker repart alors d'un nouveau tour dans les 15 secondes. Mettre le
+nouveau tracker en ligne AVANT de lancer ce script (sinon l'ancien rejoue un autre trajet sur J4L Club).
 Le tracker ne peut effacer **que** la trace de l'équipage marqué `is_demo` (fonctions `private.demo_crew` et
 `private.demo_restart`).
 

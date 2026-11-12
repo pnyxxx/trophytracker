@@ -1,49 +1,63 @@
 /**
- * Construit le trajet du road trip d'EXEMPLE (« Route des Grandes Alpes », /road-trip/exemple), rejoué en boucle par le
- * service tracker (apps/tracker/src/demo.ts) :
+ * Construit le trajet du road trip d'EXEMPLE (J4L Club, partie Maroc du raid), rejoué en boucle par le service
+ * tracker (apps/tracker/src/demo.ts) :
  *   node scripts/build-demo-route.mjs
  *
  * À relancer seulement pour changer le trajet ou l'horaire : le résultat est commité.
- *  - Routes : calculées par OSRM (router.project-osrm.org) en passant par les cols de la Route des Grandes Alpes.
+ *  - Routes : calculées par OSRM (router.project-osrm.org) en passant par les vraies étapes du raid et les
+ *    lieux des photos de l'équipage ; la traversée du détroit est tracée à la main (OSRM ne route pas les ferries).
  *  - Altitude : Open-Meteo (modèle Copernicus 90 m), pour le profil d'élévation.
- *  - Horaire : vraie durée de conduite (vitesse plafonnée à celle d'un van), pause déjeuner, nuits raccourcies.
+ *  - Horaire : vraie durée de conduite (vitesse plafonnée à celle d'une 4L), pause déjeuner, nuits raccourcies.
  *
- * Écrit apps/tracker/demo/route.json : points [lon, lat, altitude m, seconde du cycle] ; deux points au même
- * endroit = une pause.
+ * Le début du trajet (de la fin de l'Espagne au bivouac de Boulajoul) est « déjà fait » au début de chaque tour
+ * (headS) : la page n'est jamais vide, ses premières photos sont déjà là. La boucle animée part de Boulajoul.
+ *
+ * Écrit apps/tracker/demo/route.json : points [lon, lat, altitude m, seconde du trajet] ; deux points au même
+ * endroit = une pause ; `headS` = seconde où commence la partie animée ; `cycleS` = durée de la partie animée.
  */
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-// ─── Le voyage, jour par jour : Thonon-les-Bains → Menton par les grands cols ──────────────────
+// ─── Le voyage : du bivouac d'Algésiras à Marrakech (étapes du raid, lieux des photos de J4L Club) ─────────
 const P = {
-  thonon: [6.47970, 46.37050], morzine: [6.70890, 46.17950], cluses: [6.57970, 46.06060], colombiere: [6.47040, 45.99480],
-  laClusaz: [6.42390, 45.90450], aravis: [6.46300, 45.87460], flumet: [6.51540, 45.81870], beaufort: [6.57170, 45.71860],
-  roselend: [6.69640, 45.68690], bourgStMaurice: [6.76950, 45.61830],
-  valDIsere: [6.97970, 45.44850], iseran: [7.03060, 45.41700], bonneval: [7.04640, 45.37130], lanslebourg: [6.87800, 45.28600],
-  modane: [6.66500, 45.20030], stMichel: [6.46970, 45.21770], telegraphe: [6.44450, 45.20220], valloire: [6.42930, 45.16550],
-  galibier: [6.40780, 45.06410], lautaret: [6.40400, 45.03490], briancon: [6.64360, 44.89860], izoard: [6.73500, 44.82030],
-  guillestre: [6.64850, 44.65960], vars: [6.70320, 44.53890], barcelonnette: [6.65190, 44.38700],
-  bonette: [6.80760, 44.32140], stEtienneTinee: [6.92300, 44.25650], stSauveur: [7.10460, 44.08490], stMartinVesubie: [7.25570, 44.06870],
-  turini: [7.38970, 43.97750], sospel: [7.44780, 43.87700], menton: [7.49770, 43.77470],
+  algesiras: [-5.41098, 36.21315], portAlgesiras: [-5.43665, 36.12986],
+  portTangerMed: [-5.50272, 35.88752], fes: [-5.0078, 34.0331], ifrane: [-5.1106, 33.5228], azrou: [-5.2216, 33.4341],
+  boulajoul: [-4.98768, 32.88438], midelt: [-4.7457, 32.6852], errachidia: [-4.4244, 31.9314], erfoud: [-4.2286, 31.4326],
+  merzouga: [-3.99763, 31.21516], desert: [-3.937, 31.054], rissani: [-4.2678, 31.2794], alnif: [-5.166, 31.115],
+  tazzarineSud: [-5.423, 30.694], tazzarine: [-5.565, 30.779], nkob: [-5.667, 30.843], agdz: [-6.4489, 30.6948],
+  ouarzazate: [-6.9063, 30.9189], tichka: [-7.3806, 31.2871], marrakech: [-7.98231, 31.58108],
 };
 const via = (...names) => names.map((n) => P[n]);
+const SEA = [[-5.425, 36.1], [-5.42, 36.03], [-5.455, 35.94], [-5.49, 35.9]];
 
 const LEGS = [
-  { day: 1, parts: [{ road: via('thonon', 'morzine', 'cluses', 'colombiere', 'laClusaz', 'aravis', 'flumet', 'beaufort', 'roselend', 'bourgStMaurice') }] },
-  { day: 2, parts: [{ road: via('bourgStMaurice', 'valDIsere', 'iseran', 'bonneval', 'lanslebourg', 'modane', 'stMichel', 'telegraphe', 'valloire') }] },
-  { day: 3, parts: [{ road: via('valloire', 'galibier', 'lautaret', 'briancon', 'izoard', 'guillestre', 'vars', 'barcelonnette') }] },
-  { day: 4, parts: [{ road: via('barcelonnette', 'bonette', 'stEtienneTinee', 'stSauveur', 'stMartinVesubie', 'turini', 'sospel', 'menton') }] },
+  {
+    day: 1, lunch: false,
+    parts: [
+      { road: via('algesiras', 'portAlgesiras') },
+      { wait: 45 * 60 }, // embarquement
+      { sea: [P.portAlgesiras, ...SEA, P.portTangerMed], kmh: 32 },
+      { wait: 40 * 60 }, // débarquement et douane
+      { road: via('portTangerMed', 'fes', 'ifrane', 'azrou', 'boulajoul'), lunch: true },
+    ],
+  },
+  { day: 2, parts: [{ road: via('boulajoul', 'midelt', 'errachidia', 'erfoud', 'merzouga') }] },
+  { day: 3, parts: [{ road: via('merzouga', 'desert', 'merzouga') }] },
+  { day: 4, parts: [{ road: via('merzouga', 'rissani', 'alnif', 'tazzarineSud', 'tazzarine', 'nkob', 'agdz') }] },
+  { day: 5, parts: [{ road: via('agdz', 'ouarzazate', 'tichka', 'marrakech') }] },
 ];
+/** Le premier jour (jusqu'au bivouac de Boulajoul, nuit comprise) est « déjà fait » au début de chaque tour. */
+const HEAD_DAYS = 1;
 
 /** Durée RÉELLE des nuits (en vrai : une quinzaine d'heures). */
 const NIGHT_REAL = 20 * 60;
 const LUNCH = 30 * 60;
-/** Vitesse de croisière d'un van sur les routes de montagne. */
-const MAX_KMH = 80;
-/** Premier départ de la boucle : 2026-10-05 09:00 (Paris). Les cycles s'enchaînent depuis. */
-const EPOCH = '2026-10-05T07:00:00Z';
+/** Vitesse de croisière d'une 4L sur les routes marocaines. */
+const MAX_KMH = 90;
+/** Premier départ de la boucle : 2026-11-13 09:00 (Paris). Les cycles s'enchaînent depuis. */
+const EPOCH = '2026-11-13T08:00:00Z';
 
 // ─── Outils ─────────────────────────────────────────────────────────────────
 const toRad = (d) => (d * Math.PI) / 180;
@@ -146,8 +160,10 @@ function simplify(pts, tolM) {
 }
 
 // ─── Construction ───────────────────────────────────────────────────────────
-const nodes = []; // [lon, lat, seconde réelle du cycle]
+const nodes = []; // [lon, lat, seconde réelle du trajet]
 let real = 0;
+/** Seconde où commence la partie animée (après la nuit du dernier jour « déjà fait »). */
+let headS = 0;
 let totalKm = 0;
 const push = (lon, lat, t) => nodes.push([lon, lat, t]);
 
@@ -158,6 +174,7 @@ for (const [li, leg] of LEGS.entries()) {
     real += NIGHT_REAL;
     push(prev[0], prev[1], real);
   }
+  if (li === HEAD_DAYS) headS = real;
   const roads = [];
   for (const part of leg.parts) {
     const t0 = real;
@@ -165,6 +182,19 @@ for (const [li, leg] of LEGS.entries()) {
       const prev = nodes.at(-1);
       real += part.wait;
       push(prev[0], prev[1], real);
+    } else if (part.sea) {
+      // Traversée en ferry : en ligne droite d'un point de la mer à l'autre, à la vitesse du bateau.
+      process.stdout.write(`Jour ${leg.day} : traversée… `);
+      let seaKm = 0;
+      part.sea.forEach((pt, k) => {
+        if (k === 0) return;
+        const d = km(part.sea[k - 1], pt);
+        seaKm += d;
+        real += (d / part.kmh) * 3600;
+        push(pt[0], pt[1], real);
+      });
+      totalKm += seaKm;
+      console.log(`${seaKm.toFixed(0)} km`);
     } else {
       process.stdout.write(`Jour ${leg.day} : route de ${part.road.length} points… `);
       const r = await route(part.road);
@@ -188,11 +218,12 @@ for (const [li, leg] of LEGS.entries()) {
   }
 }
 
-// Arrivée à Menton : trois quarts d'heure au bord de la mer, puis le cycle recommence à Thonon.
+// Arrivée à Marrakech : trois quarts d'heure sur place, puis le tour recommence au départ de Boulajoul.
 const arrival = real;
 const FINAL_MIN = 45 * 60;
-const cycle = Math.ceil((arrival + FINAL_MIN) / 3600) * 3600;
-push(nodes.at(-1)[0], nodes.at(-1)[1], cycle);
+const end = Math.ceil((arrival + FINAL_MIN) / 3600) * 3600;
+push(nodes.at(-1)[0], nodes.at(-1)[1], end);
+const cycle = end - headS;
 
 // Points superflus retirés sur les routes (les pauses et les heures de passage sont gardées).
 const before = nodes.length;
@@ -247,7 +278,7 @@ const altitudes = slim.map((_, i) => {
 const out = slim.map(([lon, lat, t], i) => [+lon.toFixed(5), +lat.toFixed(5), Math.max(0, Math.round(altitudes[i])), Math.round(t * 10) / 10]);
 
 // ─── Écriture ───────────────────────────────────────────────────────────────
-const meta = { epoch: EPOCH, cycleS: cycle };
+const meta = { epoch: EPOCH, headS: Math.round(headS), cycleS: Math.round(cycle) };
 mkdirSync(new URL('../apps/tracker/demo/', import.meta.url), { recursive: true });
 writeFileSync(new URL('../apps/tracker/demo/route.json', import.meta.url), JSON.stringify({ ...meta, points: out }));
-console.log(`✅ ${Math.round(totalKm)} km, arrivée à Menton après ${(arrival / 3600).toFixed(1)} h, cycle de ${cycle / 3600} h.`);
+console.log(`✅ ${Math.round(totalKm)} km ; déjà fait : ${(headS / 3600).toFixed(1)} h ; boucle animée : ${(cycle / 3600).toFixed(1)} h jusqu'à Marrakech.`);
